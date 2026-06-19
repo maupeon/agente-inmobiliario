@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "app/api/chat/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/cron/market/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/market",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}
