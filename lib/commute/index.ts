@@ -25,6 +25,18 @@ const ORS_PROFILE: Partial<Record<CommuteMode, string>> = {
   coche: "driving-car",
 };
 
+/**
+ * Perfil ORS para DIBUJAR el trayecto en el mapa. El transporte público no
+ * existe en ORS, así que su ruta se aproxima por carretera (coche) para que el
+ * trayecto siga las calles y no salga en línea recta.
+ */
+const GEOMETRY_PROFILE: Record<CommuteMode, string> = {
+  a_pie: "foot-walking",
+  bici: "cycling-regular",
+  coche: "driving-car",
+  transporte: "driving-car",
+};
+
 /** Velocidades medias urbanas (km/h) para la estimación heurística. */
 const SPEED_KMH: Record<CommuteMode, number> = {
   a_pie: 4.8,
@@ -79,6 +91,49 @@ export async function geocodeAddress(
   }
 }
 
+/**
+ * Geocodificación inversa: coordenadas → etiqueta legible (barrio, ciudad).
+ * Usa Nominatim (sin clave). La usa el selector de mapa del onboarding.
+ */
+export async function reverseGeocode(
+  lat: number,
+  lon: number
+): Promise<{ label: string } | null> {
+  if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+  try {
+    const url =
+      "https://nominatim.openstreetmap.org/reverse" +
+      `?format=jsonv2&zoom=14&addressdetails=1&lat=${lat}&lon=${lon}`;
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "AgenteInmobiliario/1.0 (TFM; contacto via app)",
+        "Accept-Language": "es",
+      },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      display_name?: string;
+      address?: Record<string, string>;
+    };
+    const a = json.address ?? {};
+    const barrio =
+      a.neighbourhood || a.suburb || a.quarter || a.city_district || a.borough;
+    const ciudad =
+      a.city || a.town || a.village || a.municipality || a.county;
+    const label =
+      barrio && ciudad
+        ? `${barrio}, ${ciudad}`
+        : ciudad ||
+          barrio ||
+          json.display_name?.split(",").slice(0, 2).join(",").trim() ||
+          `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    return { label };
+  } catch {
+    return null;
+  }
+}
+
 export async function computeCommute(opts: {
   origen: GeoPoint & { direccion: string };
   destino: GeoPoint & { etiqueta: string };
@@ -94,22 +149,48 @@ export async function computeCommute(opts: {
   let proveedor: CommuteResult["proveedor"] = "estimacion";
 
   const legs: CommuteLeg[] = [];
+  const geomByMode = new Map<CommuteMode, Array<[number, number]>>();
   for (const modo of modos) {
     let leg: CommuteLeg | null = null;
     if (real && key && ORS_PROFILE[modo]) {
-      leg = await orsLeg(modo, origen, destino, key);
-      if (leg) proveedor = "openrouteservice";
+      const r = await orsLeg(modo, origen, destino, key);
+      if (r) {
+        leg = r.leg;
+        proveedor = "openrouteservice";
+        if (r.geometria) geomByMode.set(modo, r.geometria);
+      }
     }
     legs.push(leg ?? heuristicLeg(modo, distLinea));
   }
+
+  const recomendado = pickRecommended(legs, opts.preferido);
+
+  // Geometría del trayecto recomendado para pintarlo en el mapa.
+  let geometria = recomendado ? geomByMode.get(recomendado) : undefined;
+  // Si el modo recomendado no trae geometría (típico del transporte público),
+  // pedimos una ruta por carretera como aproximación para no pintar una recta.
+  if (!geometria && real && key && recomendado) {
+    const coords = await orsRouteGeometry(GEOMETRY_PROFILE[recomendado], origen, destino, key);
+    if (coords) geometria = coords;
+  }
+  const rutaGeo: CommuteResult["rutaGeo"] = {
+    geometria:
+      geometria ??
+      ([
+        [origen.lon, origen.lat],
+        [destino.lon, destino.lat],
+      ] as Array<[number, number]>),
+    aprox: !geometria,
+  };
 
   return {
     origen: { direccion: origen.direccion, lat: origen.lat, lon: origen.lon },
     destino: { etiqueta: destino.etiqueta, lat: destino.lat, lon: destino.lon },
     distanciaLineaKm: round1(distLinea),
     modos: legs,
-    recomendado: pickRecommended(legs, opts.preferido),
+    recomendado,
     proveedor,
+    rutaGeo,
     nota:
       proveedor === "estimacion"
         ? "Tiempos estimados a partir de la distancia (sin routing en vivo)."
@@ -117,16 +198,24 @@ export async function computeCommute(opts: {
   };
 }
 
-async function orsLeg(
-  modo: CommuteMode,
+interface OrsRoute {
+  duration: number;
+  distance: number;
+  coords: Array<[number, number]> | null;
+}
+
+/**
+ * Llama al endpoint `/geojson` de ORS, que devuelve la geometría de la ruta
+ * (LineString) además del resumen — base tanto del tiempo como del trazado.
+ */
+async function orsGeojson(
+  profile: string,
   origen: GeoPoint,
   destino: GeoPoint,
   key: string
-): Promise<CommuteLeg | null> {
-  const profile = ORS_PROFILE[modo];
-  if (!profile) return null;
+): Promise<OrsRoute | null> {
   try {
-    const res = await fetch(`${ORS_BASE}/${profile}`, {
+    const res = await fetch(`${ORS_BASE}/${profile}/geojson`, {
       method: "POST",
       headers: { Authorization: key, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -139,19 +228,55 @@ async function orsLeg(
     });
     if (!res.ok) return null;
     const json = (await res.json()) as {
-      routes?: Array<{ summary?: { distance?: number; duration?: number } }>;
+      features?: Array<{
+        properties?: { summary?: { distance?: number; duration?: number } };
+        geometry?: { coordinates?: Array<[number, number]> };
+      }>;
     };
-    const summary = json.routes?.[0]?.summary;
+    const feat = json.features?.[0];
+    const summary = feat?.properties?.summary;
     if (!summary?.duration) return null;
+    const coords = feat?.geometry?.coordinates ?? null;
     return {
-      modo,
-      minutos: Math.round(summary.duration / 60),
-      distanciaKm: round1((summary.distance ?? 0) / 1000),
-      disponible: true,
+      duration: summary.duration,
+      distance: summary.distance ?? 0,
+      coords: coords && coords.length > 1 ? coords : null,
     };
   } catch {
     return null;
   }
+}
+
+async function orsLeg(
+  modo: CommuteMode,
+  origen: GeoPoint,
+  destino: GeoPoint,
+  key: string
+): Promise<{ leg: CommuteLeg; geometria: Array<[number, number]> | null } | null> {
+  const profile = ORS_PROFILE[modo];
+  if (!profile) return null;
+  const r = await orsGeojson(profile, origen, destino, key);
+  if (!r) return null;
+  return {
+    leg: {
+      modo,
+      minutos: Math.round(r.duration / 60),
+      distanciaKm: round1(r.distance / 1000),
+      disponible: true,
+    },
+    geometria: r.coords,
+  };
+}
+
+/** Solo la geometría (para trayectos sin routing propio, p. ej. transporte). */
+async function orsRouteGeometry(
+  profile: string,
+  origen: GeoPoint,
+  destino: GeoPoint,
+  key: string
+): Promise<Array<[number, number]> | null> {
+  const r = await orsGeojson(profile, origen, destino, key);
+  return r?.coords ?? null;
 }
 
 function heuristicLeg(modo: CommuteMode, distLineaKm: number): CommuteLeg {

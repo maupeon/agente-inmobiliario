@@ -1,43 +1,70 @@
 /**
- * Datos sintéticos para `MOCK_IDEALISTA=true`. Siempre realistas:
- * precios y m² coherentes, fotos vía picsum.photos con seed determinístico
- * por propertyCode (no rotan entre renders).
+ * Datos sintéticos para `MOCK_IDEALISTA=true`. Realistas y variados:
+ *  - los resultados se reparten por los barrios reales de la ciudad consultada
+ *    (o se concentran en el barrio si la búsqueda es específica),
+ *  - el €/m² parte de la referencia de cada barrio con variación, así la
+ *    valoración "precio vs zona" sale distinta en cada piso,
+ *  - fotos vía picsum.photos con seed determinístico por propertyCode.
+ *
+ * Los barrios coinciden con `lib/neighborhood/fixtures.ts` y
+ * `lib/market/fixtures.ts` para que seguridad y referencia de alquiler casen.
  */
 import type { Property, PropertyDetail, SearchFilters } from "@/types";
 
-const SEEDS = [
-  { zona: "Chamberí", municipio: "Madrid", lat: 40.4319, lon: -3.7036 },
-  { zona: "Malasaña", municipio: "Madrid", lat: 40.4258, lon: -3.7036 },
-  { zona: "Salamanca", municipio: "Madrid", lat: 40.4279, lon: -3.6826 },
-  { zona: "Lavapiés", municipio: "Madrid", lat: 40.4097, lon: -3.7028 },
-  { zona: "Eixample", municipio: "Barcelona", lat: 41.3927, lon: 2.1649 },
-  { zona: "Gràcia", municipio: "Barcelona", lat: 41.4034, lon: 2.1576 },
-  { zona: "Ruzafa", municipio: "Valencia", lat: 39.4592, lon: -0.3736 },
-  { zona: "Triana", municipio: "Sevilla", lat: 37.3849, lon: -6.0048 },
+interface Seed {
+  zona: string;
+  municipio: string;
+  provincia: string;
+  lat: number;
+  lon: number;
+  /** €/m²/mes de referencia (alquiler). */
+  alquilerM2: number;
+  /** €/m² de referencia (compra). */
+  ventaM2: number;
+}
+
+const SEEDS: Seed[] = [
+  // ── Madrid ──
+  { zona: "Salamanca", municipio: "Madrid", provincia: "Madrid", lat: 40.4279, lon: -3.6826, alquilerM2: 21.5, ventaM2: 6500 },
+  { zona: "Chamberí", municipio: "Madrid", provincia: "Madrid", lat: 40.4319, lon: -3.7036, alquilerM2: 20.0, ventaM2: 5600 },
+  { zona: "Retiro", municipio: "Madrid", provincia: "Madrid", lat: 40.4150, lon: -3.6770, alquilerM2: 19.0, ventaM2: 5700 },
+  { zona: "Chamartín", municipio: "Madrid", provincia: "Madrid", lat: 40.4600, lon: -3.6770, alquilerM2: 18.5, ventaM2: 5300 },
+  { zona: "Malasaña", municipio: "Madrid", provincia: "Madrid", lat: 40.4258, lon: -3.7036, alquilerM2: 20.5, ventaM2: 5200 },
+  { zona: "Centro", municipio: "Madrid", provincia: "Madrid", lat: 40.4156, lon: -3.7038, alquilerM2: 21.0, ventaM2: 5400 },
+  { zona: "Lavapiés", municipio: "Madrid", provincia: "Madrid", lat: 40.4090, lon: -3.7006, alquilerM2: 18.0, ventaM2: 3900 },
+  { zona: "Tetuán", municipio: "Madrid", provincia: "Madrid", lat: 40.4600, lon: -3.6990, alquilerM2: 17.0, ventaM2: 3900 },
+  { zona: "Arganzuela", municipio: "Madrid", provincia: "Madrid", lat: 40.3960, lon: -3.6960, alquilerM2: 18.0, ventaM2: 4500 },
+  { zona: "Carabanchel", municipio: "Madrid", provincia: "Madrid", lat: 40.3840, lon: -3.7280, alquilerM2: 14.5, ventaM2: 3000 },
+  { zona: "Vallecas", municipio: "Madrid", provincia: "Madrid", lat: 40.3920, lon: -3.6660, alquilerM2: 13.5, ventaM2: 2700 },
+  // ── Barcelona ──
+  { zona: "Eixample", municipio: "Barcelona", provincia: "Barcelona", lat: 41.3888, lon: 2.1590, alquilerM2: 20.5, ventaM2: 5200 },
+  { zona: "Gràcia", municipio: "Barcelona", provincia: "Barcelona", lat: 41.4030, lon: 2.1560, alquilerM2: 19.5, ventaM2: 4700 },
+  { zona: "Ciutat Vella", municipio: "Barcelona", provincia: "Barcelona", lat: 41.3810, lon: 2.1770, alquilerM2: 21.0, ventaM2: 4600 },
+  { zona: "Sant Martí", municipio: "Barcelona", provincia: "Barcelona", lat: 41.4180, lon: 2.2000, alquilerM2: 19.0, ventaM2: 4600 },
+  { zona: "Sants", municipio: "Barcelona", provincia: "Barcelona", lat: 41.3750, lon: 2.1380, alquilerM2: 17.5, ventaM2: 3900 },
+  // ── Valencia ──
+  { zona: "Ruzafa", municipio: "Valencia", provincia: "Valencia", lat: 39.4590, lon: -0.3730, alquilerM2: 13.5, ventaM2: 2700 },
+  { zona: "El Carmen", municipio: "Valencia", provincia: "Valencia", lat: 39.4790, lon: -0.3790, alquilerM2: 13.0, ventaM2: 2500 },
+  // ── Sevilla ──
+  { zona: "Triana", municipio: "Sevilla", provincia: "Sevilla", lat: 37.3860, lon: -6.0060, alquilerM2: 11.5, ventaM2: 2400 },
+  { zona: "Nervión", municipio: "Sevilla", provincia: "Sevilla", lat: 37.3800, lon: -5.9760, alquilerM2: 11.0, ventaM2: 2500 },
 ];
 
-const STREET_PREFIXES = [
-  "Calle de",
-  "Calle de",
-  "Travesía de",
-  "Plaza de",
-  "Avenida de",
-];
-
+const STREET_PREFIXES = ["Calle de", "Calle de", "Travesía de", "Plaza de", "Avenida de"];
 const STREET_NAMES = [
-  "Fuencarral",
-  "Almagro",
-  "Alburquerque",
-  "Sagasta",
-  "Goya",
-  "Velázquez",
-  "Príncipe de Vergara",
-  "Trafalgar",
-  "Hortaleza",
-  "Ponzano",
-  "Bailén",
-  "San Bernardo",
+  "Fuencarral", "Almagro", "Alburquerque", "Sagasta", "Goya", "Velázquez",
+  "Príncipe de Vergara", "Trafalgar", "Hortaleza", "Ponzano", "Bailén", "San Bernardo",
 ];
+
+function norm(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+function slug(s: string): string {
+  return norm(s).replace(/\s+/g, "-");
+}
+function roundTo(n: number, step: number): number {
+  return Math.round(n / step) * step;
+}
 
 function pseudoRandom(seed: string) {
   let h = 2166136261;
@@ -62,72 +89,107 @@ function makePhotos(code: string, count: number) {
   return Array.from({ length: count }, (_, i) => `https://picsum.photos/seed/${code}-${i}/1280/860`);
 }
 
-function makeOne(filters: SearchFilters, idx: number): Property {
-  const code = `mock-${(filters.zona ?? "es").toLowerCase().replace(/\s+/g, "-")}-${idx}`;
+/**
+ * Elige los barrios para la búsqueda: si la zona nombra un barrio, se concentra
+ * ahí; si nombra una ciudad, reparte por todos sus barrios; si no, Madrid.
+ */
+function seedsForQuery(zona: string): Seed[] {
+  const q = norm(zona);
+  if (q) {
+    const barrio = SEEDS.filter((s) => q.includes(norm(s.zona)));
+    if (barrio.length) return barrio;
+    const ciudad = SEEDS.filter((s) => q.includes(norm(s.municipio)) || q.includes(norm(s.provincia)));
+    if (ciudad.length) return ciudad;
+  }
+  return SEEDS.filter((s) => s.municipio === "Madrid");
+}
+
+function makeFeatures(rng: () => number, hasLift: boolean, exterior: boolean): string[] {
+  const f: string[] = [];
+  if (hasLift) f.push("Ascensor");
+  if (exterior) f.push("Exterior");
+  if (rng() > 0.5) f.push(rng() > 0.5 ? "Terraza" : "Balcón");
+  if (rng() > 0.5) f.push("Aire acondicionado");
+  if (rng() > 0.55) f.push("Calefacción");
+  if (rng() > 0.6) f.push("Amueblado");
+  if (rng() > 0.7) f.push("Garaje");
+  if (rng() > 0.7) f.push("Trastero");
+  return f;
+}
+
+function makeOne(filters: SearchFilters, idx: number, seed: Seed): Property {
+  const code = `mock-${slug(seed.zona)}-${idx}`;
   const rng = pseudoRandom(code);
-
-  const matched = SEEDS.find((s) =>
-    filters.zona.toLowerCase().includes(s.zona.toLowerCase()) ||
-    filters.zona.toLowerCase().includes(s.municipio.toLowerCase())
-  );
-  const seed = matched ?? pickIndex(SEEDS, rng);
-
   const isRent = filters.operacion === "alquiler";
-  const baseSqm = 55 + Math.floor(rng() * 90);
-  const eurPerSqm = isRent
-    ? 14 + rng() * 18 // 14–32 €/m² mes
-    : 3200 + rng() * 4500; // 3200–7700 €/m² compra
 
-  let price = Math.round((baseSqm * eurPerSqm) / 50) * 50;
-  if (filters.precioMax) price = Math.min(price, filters.precioMax);
-  if (filters.precioMin) price = Math.max(price, filters.precioMin);
+  let size = 45 + Math.floor(rng() * 95); // 45-139 m²
+  if (filters.metrosMin) size = Math.max(size, filters.metrosMin);
 
-  const rooms = Math.max(filters.habitaciones ?? 1, Math.ceil(baseSqm / 38));
+  // €/m² del barrio con variación (±~20%): unos pisos por encima, otros por debajo.
+  const eurM2 = (isRent ? seed.alquilerM2 : seed.ventaM2) * (0.82 + rng() * 0.4);
+  const step = isRent ? 10 : 1000;
+  let price = roundTo(size * eurM2, step);
+
+  // Respeta el presupuesto sin aplanar todo al mismo número: si se pasa,
+  // ajusta el tamaño para caer en el 72-100% del máximo.
+  if (filters.precioMax && price > filters.precioMax) {
+    const target = filters.precioMax * (0.72 + rng() * 0.28);
+    size = Math.max(filters.metrosMin ?? 35, Math.round(target / eurM2));
+    price = roundTo(size * eurM2, step);
+  }
+  if (filters.precioMin && price < filters.precioMin) {
+    price = roundTo(filters.precioMin * (1 + rng() * 0.15), step);
+    size = Math.max(filters.metrosMin ?? 35, Math.round(price / eurM2));
+  }
+
+  const rooms = Math.max(filters.habitaciones ?? 1, Math.min(5, Math.ceil(size / 34)));
+  const hasLift = rng() > 0.3;
+  const exterior = rng() > 0.35;
   const street = `${pickIndex(STREET_PREFIXES, rng)} ${pickIndex(STREET_NAMES, rng)}, ${Math.ceil(rng() * 180)}`;
-  const floor = `${Math.ceil(rng() * 6)}º ${rng() > 0.5 ? "izq." : "dcha."}`;
+  const floor = `${Math.ceil(rng() * 7)}º ${rng() > 0.5 ? "izq." : "dcha."}`;
 
   return {
     propertyCode: code,
     title: `${filters.tipo === "casas" ? "Casa" : "Piso"} de ${rooms} hab. en ${seed.zona}`,
     price,
-    pricePerSqm: Math.round(price / baseSqm),
-    size: baseSqm,
+    pricePerSqm: Math.round(price / size),
+    size,
     rooms,
-    bathrooms: rng() > 0.4 ? 2 : 1,
+    bathrooms: rng() > 0.45 ? 2 : 1,
     address: street,
     district: seed.zona,
     municipality: seed.municipio,
-    province: seed.municipio === "Barcelona" ? "Barcelona" : seed.municipio === "Valencia" ? "Valencia" : seed.municipio === "Sevilla" ? "Sevilla" : "Madrid",
+    province: seed.provincia,
     propertyType: filters.tipo ?? "pisos",
     operation: isRent ? "rent" : "sale",
     thumbnail: `https://picsum.photos/seed/${code}-0/800/600`,
     url: `https://www.idealista.com/inmueble/${code}/`,
-    hasLift: rng() > 0.3,
-    exterior: rng() > 0.35,
+    features: makeFeatures(rng, hasLift, exterior),
+    hasLift,
+    exterior,
     floor,
-    latitude: seed.lat + (rng() - 0.5) * 0.01,
-    longitude: seed.lon + (rng() - 0.5) * 0.01,
+    latitude: seed.lat + (rng() - 0.5) * 0.008,
+    longitude: seed.lon + (rng() - 0.5) * 0.008,
   };
 }
 
 export function mockSearch(filters: SearchFilters, max = 6): Property[] {
-  return Array.from({ length: max }, (_, i) => makeOne(filters, i));
+  const pool = seedsForQuery(filters.zona ?? "");
+  return Array.from({ length: max }, (_, i) => makeOne(filters, i, pool[i % pool.length]));
 }
 
 export function mockDetail(propertyCode: string): PropertyDetail {
   const rng = pseudoRandom(propertyCode);
+  const slugPart = propertyCode.replace(/^mock-/, "").replace(/-\d+$/, "");
+  const seed = SEEDS.find((s) => slug(s.zona) === slugPart) ?? SEEDS[0];
   const base = makeOne(
-    { zona: "Madrid", operacion: "venta", tipo: "pisos" },
-    0
+    { zona: seed.zona, operacion: rng() > 0.5 ? "venta" : "alquiler", tipo: "pisos" },
+    0,
+    seed
   );
-  const features: string[] = [];
-  if (base.hasLift) features.push("Ascensor");
-  if (base.exterior) features.push("Exterior");
-  features.push(rng() > 0.5 ? "Terraza" : "Balcón");
-  if (rng() > 0.5) features.push("Calefacción individual");
-  if (rng() > 0.4) features.push("Aire acondicionado");
-  if (rng() > 0.6) features.push("Trastero");
-  if (rng() > 0.7) features.push("Plaza de garaje");
+
+  const features = base.features ? [...base.features] : [];
+  if (!features.includes("Calefacción") && rng() > 0.5) features.push("Calefacción individual");
 
   return {
     ...base,

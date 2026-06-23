@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Plus, X } from "@phosphor-icons/react";
+import Link from "next/link";
+import { MapTrifold, Plus, X } from "@phosphor-icons/react";
 import { Logo } from "./ui/Logo";
 import { FavoritesList } from "./FavoritesList";
 import { cn, timeAgo } from "@/lib/utils";
@@ -107,6 +108,23 @@ export function Sidebar({
           <span>&gt; Nueva sesión</span>
           <Plus size={11} weight="bold" />
         </button>
+
+        <Link
+          href="/dashboard"
+          onClick={onClose}
+          className="mt-2 flex items-center justify-between border border-ink px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink transition hover:bg-ink hover:text-paper active:translate-y-[1px]"
+        >
+          <span>&gt; Panel · Mapa</span>
+          <MapTrifold size={12} weight="bold" />
+        </Link>
+
+        <Link
+          href="/como-funciona"
+          onClick={onClose}
+          className="mt-2 flex items-center justify-between border border-ink/40 px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-700 transition hover:border-ink hover:text-ink active:translate-y-[1px]"
+        >
+          <span>&gt; Cómo funciona</span>
+        </Link>
 
         {/* Sección historial */}
         <BrutalistSection title="Historial" code="01">

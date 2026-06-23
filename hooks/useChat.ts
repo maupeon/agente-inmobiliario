@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useRef, useState } from "react";
+import { saveLastSearch } from "@/lib/last-search";
 import { uid } from "@/lib/utils";
 import type {
   CommuteResult,
@@ -106,6 +107,10 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
       setIsStreaming(true);
       setAgentState("thinking");
 
+      // Resultados de búsqueda de este turno, para persistirlos al cerrar el
+      // stream (los usa el panel/mapa como "última búsqueda").
+      const turnProperties: Property[] = [];
+
       const ctrl = new AbortController();
       abortRef.current = ctrl;
 
@@ -164,6 +169,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
         setAgentState("idle");
         setActiveTool(null);
         abortRef.current = null;
+        if (turnProperties.length) saveLastSearch(turnProperties);
       }
 
       function applyEvent(event: StreamEvent) {
@@ -223,6 +229,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
         }
         if (event.type === "properties") {
           const items = event.items as Property[];
+          turnProperties.push(...items);
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantId

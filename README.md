@@ -24,7 +24,13 @@ cp .env.example .env.local   # ya está creado vacío en el repo
 npm run dev
 ```
 
-`http://localhost:3000` — la home es la propia conversación. Si dejas
+`http://localhost:3000` — la home presenta el producto y lleva a `/dashboard`,
+la experiencia principal: tras el onboarding, la pestaña **"Para ti"** busca en
+Idealista con tu perfil y te enseña los **3-5 pisos que mejor encajan** sobre un
+mapa, coloreados por precio frente a la zona, con halo de seguridad del barrio y
+el trayecto desde tu trabajo a cada piso, cada uno con una explicación de por
+qué encaja. El chat sigue disponible como opción secundaria ("Pregúntale a la
+IA"). Si dejas
 `MOCK_IDEALISTA=true` (por defecto en `.env.local`) las búsquedas
 devuelven datos sintéticos coherentes generados en `lib/idealista/mock.ts`.
 
@@ -60,25 +66,32 @@ y un trigger que actualiza `updated_at` en cada update.
 ```
 app/
   api/chat/route.ts          # SSE streaming + rate limit + persistencia
+  api/enrich/route.ts        # enriquecimiento por lote para el panel/mapa
   api/conversations/route.ts # listar e ir a conversación concreta
   api/favorites/route.ts     # GET / POST / DELETE
+  api/geocode/route.ts api/cron/market/route.ts
+  chat/page.tsx dashboard/page.tsx
   layout.tsx page.tsx globals.css
 lib/
   agent/
     system-prompt.ts loop.ts tools.ts
-    tools/{buscar-propiedades, detalle-propiedad, calcular-hipoteca}.ts
-  idealista/
-    auth.ts search.ts property.ts mock.ts
-  supabase/
-    client.ts server.ts conversations.ts favorites.ts
+    tools/{buscar-propiedades, detalle-propiedad, calcular-hipoteca,
+           analizar-mercado, valorar-alquiler, calcular-trayecto, consultar-barrio}.ts
+  idealista/   auth.ts search.ts property.ts mock.ts
+  market/      ine.ts bde.ts rent.ts cache.ts fixtures.ts match-province.ts types.ts
+  commute/     index.ts places.ts        # routing ORS + geometría del trayecto
+  neighborhood/ report.ts fixtures.ts    # seguridad + calidad de vida
+  supabase/    client.ts server.ts conversations.ts favorites.ts
+  enrich.ts                  # valoración + trayecto + barrio por propiedad
+  dashboard-format.ts last-search.ts
   errors.ts rate-limit.ts analytics.ts utils.ts
 components/
-  ChatInterface.tsx Sidebar.tsx Composer.tsx
-  MessageBubble.tsx PropertyCard.tsx PropertyGrid.tsx
-  MortgageCard.tsx TypingIndicator.tsx EmptyState.tsx
-  FavoritesList.tsx ui/Logo.tsx
+  ChatInterface.tsx Sidebar.tsx Composer.tsx MessageBubble.tsx
+  Property/Mortgage/Market/Rent/Commute/Neighborhood Card.tsx
+  Dashboard.tsx MapPanel.tsx            # panel + mapa (maplibre, tiles CARTO)
+  EmptyState.tsx FavoritesList.tsx ui/Logo.tsx
 hooks/
-  useChat.ts useFavorites.ts
+  useChat.ts useFavorites.ts useProfile.ts
 types/index.ts
 supabase/schema.sql
 vercel.json

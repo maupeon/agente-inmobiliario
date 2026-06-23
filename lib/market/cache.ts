@@ -44,7 +44,7 @@ export async function getMarketData<K extends MarketDataKey>(
   key: K
 ): Promise<CachedMarketData<K>> {
   const supabase = getServerSupabase();
-  if (!supabase) return wrapFallback(key);
+  if (!supabase) return wrapLive(key);
 
   const { data, error } = await supabase
     .from("market_data")
@@ -54,9 +54,9 @@ export async function getMarketData<K extends MarketDataKey>(
 
   if (error) {
     console.warn(`[market/cache] read error for ${key}`, error.message);
-    return wrapFallback(key);
+    return wrapLive(key);
   }
-  if (!data) return wrapFallback(key);
+  if (!data) return wrapLive(key);
 
   return {
     key,
@@ -64,6 +64,48 @@ export async function getMarketData<K extends MarketDataKey>(
     updatedAt: data.updated_at as string,
     fromFallback: false,
   };
+}
+
+/**
+ * Sin fila en Supabase (o sin Supabase): intentamos el dato EN VIVO desde la
+ * fuente oficial y lo memoizamos en el proceso (TTL 6h) para no repetir
+ * descargas lentas. Así el panel muestra datos reales aunque no haya cron, y
+ * solo cae al fixture si la fuente falla. (`rent_reference` ya es fixture.)
+ */
+const LIVE_FETCHERS: { [K in MarketDataKey]: () => Promise<MarketDataPayload[K]> } = {
+  ine_price_by_province: fetchInePriceByProvince,
+  bde_mortgage_rates: fetchBdeMortgageRates,
+  ine_ipv_quarterly: fetchIneIpvQuarterly,
+  rent_reference: fetchRentReference,
+};
+
+const MEM_TTL_MS = 6 * 60 * 60 * 1000;
+const memCache = new Map<MarketDataKey, { at: number; data: unknown }>();
+
+async function wrapLive<K extends MarketDataKey>(key: K): Promise<CachedMarketData<K>> {
+  const cached = memCache.get(key);
+  if (cached && Date.now() - cached.at < MEM_TTL_MS) {
+    const data = cached.data as MarketDataPayload[K];
+    return {
+      key,
+      data,
+      updatedAt: new Date(cached.at).toISOString(),
+      fromFallback: data === FALLBACKS[key],
+    };
+  }
+  try {
+    const data = await LIVE_FETCHERS[key]();
+    memCache.set(key, { at: Date.now(), data });
+    const isFallback = data === FALLBACKS[key];
+    return {
+      key,
+      data,
+      updatedAt: isFallback ? null : new Date().toISOString(),
+      fromFallback: isFallback,
+    };
+  } catch {
+    return wrapFallback(key);
+  }
 }
 
 export interface RefreshSummary {

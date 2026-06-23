@@ -1,4 +1,5 @@
-import { FALLBACK_IPV, FALLBACK_PRICE_BY_PROVINCE } from "./fixtures";
+import { FALLBACK_IPV } from "./fixtures";
+import { fetchMitmaPriceByProvince } from "./mitma";
 import type { IneIpvQuarterly, InePriceByProvince, IpvQuarterPoint } from "./types";
 
 /**
@@ -48,14 +49,12 @@ export async function fetchIneIpvQuarterly(): Promise<IneIpvQuarterly> {
 }
 
 /**
- * Precio €/m² de vivienda libre por provincia. El INE no expone una tabla
- * directa con €/m², solo índices y valoraciones del Ministerio de Vivienda.
- * Mantenemos el fallback como fuente principal y queda preparado para sustituirlo
- * cuando integremos el dataset CSV del Mitma o de la Estadística Registral.
+ * Precio €/m² de vivienda libre por provincia. El INE NO publica €/m² (solo el
+ * IPV índice), así que la fuente oficial en euros es MITMA — Valor Tasado. Se
+ * descarga y parsea en `./mitma`; ante cualquier fallo cae al fixture.
  */
 export async function fetchInePriceByProvince(): Promise<InePriceByProvince> {
-  // TODO: cuando dispongamos del CSV del Ministerio de Vivienda, parsearlo aquí.
-  return FALLBACK_PRICE_BY_PROVINCE;
+  return fetchMitmaPriceByProvince();
 }
 
 interface IneSeriesPayload {

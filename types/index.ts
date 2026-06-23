@@ -35,6 +35,19 @@ export type Priority =
   | "transporte"
   | "tranquilidad";
 
+/** Con quién vivirá el usuario (contexto para afinar habitaciones y barrio). */
+export type Hogar = "solo" | "pareja" | "familia" | "compartido";
+
+/** Imprescindibles que el usuario marca (afinan el ranking cuando hay dato). */
+export type Imprescindible =
+  | "ascensor"
+  | "exterior"
+  | "terraza"
+  | "aire_acondicionado"
+  | "amueblado"
+  | "garaje"
+  | "trastero";
+
 /**
  * Perfil del inquilino capturado en el onboarding. Se guarda en localStorage
  * (no hay auth) y se envía al backend para personalizar el system prompt.
@@ -42,12 +55,23 @@ export type Priority =
 export interface UserProfile {
   name?: string;
   operacion: "alquiler" | "venta";
-  /** Zona o ciudad donde quiere vivir. */
+  /** Tipo de inmueble buscado. */
+  tipo?: "pisos" | "casas";
+  /** Zona o ciudad donde quiere vivir (texto resuelto desde el mapa). */
   zona?: string;
+  /** Coordenadas de la zona elegida en el mapa, para centrar y referenciar. */
+  zonaLat?: number;
+  zonaLon?: number;
   /** €/mes en alquiler, € totales en compra. */
   presupuestoMax?: number;
   habitaciones?: number;
-  /** Lugar de trabajo, para calcular el trayecto. */
+  /** Con quién vivirá. */
+  hogar?: Hogar;
+  /** Si tiene mascota (afecta a admite-mascotas). */
+  mascota?: boolean;
+  /** Imprescindibles marcados. */
+  imprescindibles?: Imprescindible[];
+  /** Lugar de trabajo (coordenadas elegidas en el mapa), para el trayecto. */
   trabajo?: {
     direccion: string;
     lat?: number;
@@ -198,6 +222,12 @@ export interface CommuteResult {
   recomendado: CommuteMode | null;
   /** "openrouteservice" si es routing real; "estimacion" si es heurística. */
   proveedor: "openrouteservice" | "estimacion";
+  /**
+   * Polilínea de la ruta del modo recomendado para dibujar el trayecto en el
+   * mapa, en orden GeoJSON `[lon, lat]`. `aprox: true` = línea recta de respaldo
+   * (sin geometría de routing real, p. ej. transporte público o sin ORS).
+   */
+  rutaGeo?: { geometria: Array<[number, number]>; aprox: boolean } | null;
   nota?: string;
 }
 
@@ -236,6 +266,52 @@ export interface NeighborhoodReport {
   fromFallback: boolean;
   /** `true` para datos curados/ilustrativos (no oficiales en vivo). */
   aproximado: boolean;
+}
+
+/**
+ * Valoración de precio de una propiedad concreta frente a la referencia de la
+ * zona. Resume tanto alquiler (€/m²/mes) como compra (€/m²). El panel la usa
+ * para colorear los pisos y mostrar "cuánto se desvía del precio de mercado"
+ * frente al precio que pide el anuncio (Idealista).
+ */
+export interface PropertyValuation {
+  operacion: "alquiler" | "venta";
+  /** €/m² del anuncio (mensual en alquiler, total en compra). */
+  eurM2: number;
+  /** €/m² de referencia para la zona/provincia, o null si no hay dato. */
+  referenciaEurM2: number | null;
+  /** + = más caro que la referencia; − = más barato. */
+  diferenciaPorcentual: number | null;
+  /** Lectura cualitativa ("en línea con la zona", "premium"…). */
+  etiqueta: string | null;
+  /** Banda normalizada para colorear el mapa. */
+  banda: "barato" | "ajustado" | "en_linea" | "caro" | "muy_caro" | null;
+  nivel: "barrio" | "provincia" | null;
+  referencia: string | null;
+  fromFallback: boolean;
+}
+
+/** Una propiedad con sus tres señales calculadas para el panel/mapa. */
+export interface PropertyEnrichment {
+  propertyCode: string;
+  valuation: PropertyValuation | null;
+  commute: CommuteResult | null;
+  neighborhood: NeighborhoodReport | null;
+}
+
+/**
+ * Una propiedad recomendada "para ti": la propiedad, sus señales, una
+ * puntuación 0-100 de encaje con el perfil y la explicación de por qué encaja.
+ */
+export interface PropertyRecommendation {
+  property: Property;
+  enrichment: PropertyEnrichment;
+  /** Encaje con el perfil, 0-100. */
+  score: number;
+  /** Frase legible: por qué este piso encaja contigo. */
+  rationale: string;
+  /** Etiquetas cortas para chips ("a 9′ del trabajo", "barrio seguro"…). */
+  highlights: string[];
 }
 
 /** Eventos del stream SSE que envía /api/chat al cliente. */

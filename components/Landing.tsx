@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "./ui/Logo";
+import { SiteNav } from "./SiteNav";
 
 const FEATURES = [
   {
@@ -58,13 +59,13 @@ const STEPS = [
   },
   {
     i: "02",
-    t: "Habla con el agente",
-    d: "En lenguaje natural. Busca, compara y razona como lo haría un buen asesor — no como un buscador.",
+    t: "Recibe tus 3-5 pisos",
+    d: "Sin formularios interminables: te enseño en el mapa los que mejor encajan contigo, ya analizados.",
   },
   {
     i: "03",
-    t: "Decide con tarjetas claras",
-    d: "Precio, barrio, trayecto e hipoteca presentados como un reportaje, no como una hoja de cálculo.",
+    t: "Decide con datos claros",
+    d: "Precio frente a la zona, seguridad del barrio y trayecto al trabajo — y el chat ahí si quieres preguntar.",
   },
 ];
 
@@ -76,19 +77,7 @@ export function Landing() {
 
   return (
     <div className="relative z-10">
-      {/* ─── Header ─── */}
-      <header className="sticky top-0 z-20 border-b border-hairline bg-paper/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[1100px] items-center justify-between px-5 py-3.5 sm:px-8">
-          <Logo variant="inline" className="text-[1.05rem]" />
-          <Link
-            href="/chat"
-            className="group inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm text-paper transition hover:bg-ink-700 active:scale-[0.98]"
-          >
-            Abrir el agente
-            <ArrowRight size={14} weight="bold" className="text-saffron-300 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
-      </header>
+      <SiteNav />
 
       <main className="mx-auto w-full max-w-[1100px] px-5 sm:px-8">
         {/* ─── Hero ─── */}
@@ -107,17 +96,17 @@ export function Landing() {
                 highlightClassName="font-display italic font-light text-saffron-700"
               />
               <p className="mt-7 max-w-[46ch] text-pretty text-xl leading-relaxed text-stone-600">
-                Encuentra piso hablando. Busco en Idealista, te digo si está
-                caro, cómo se vive en el barrio y cuánto tardas a tu trabajo —
-                todo en una conversación.
+                Cuéntame qué buscas y te enseño los pisos que mejor encajan
+                contigo, sobre el mapa: si están bien de precio, cómo se vive en
+                el barrio y cuánto tardas a tu trabajo.
               </p>
 
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <Link
-                  href="/chat"
+                  href="/dashboard"
                   className="group inline-flex items-center gap-2 rounded-lg bg-ink px-6 py-3.5 text-paper transition hover:bg-ink-700 active:scale-[0.98]"
                 >
-                  Abrir el agente
+                  Buscar mi piso
                   <ArrowRight size={16} weight="bold" className="text-saffron-300 transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <a
@@ -244,7 +233,7 @@ export function Landing() {
               quieres vivir.
             </p>
             <Link
-              href="/chat"
+              href="/dashboard"
               className="group mt-8 inline-flex items-center gap-2 rounded-lg bg-paper px-7 py-3.5 text-ink transition hover:bg-paper-200 active:scale-[0.98]"
             >
               Empezar ahora
