@@ -28,6 +28,10 @@ import {
   runConsultarBarrio,
   type ConsultarBarrioInput,
 } from "./tools/consultar-barrio";
+import {
+  runCompararAlquilerCompraTool,
+  type CompararAlquilerCompraInput,
+} from "./tools/comparar-alquiler-compra";
 import type {
   CommuteResult,
   MarketAnalysis,
@@ -206,6 +210,29 @@ export const TOOL_DEFINITIONS = [
       required: ["zona"],
     },
   },
+  {
+    name: "comparar_alquiler_compra",
+    description:
+      "Compara si conviene COMPRAR o ALQUILAR e invertir, maximizando el patrimonio neto a largo plazo (no solo el coste). Simula año a año con neutralidad presupuestaria, revalorización de la vivienda, rentabilidad de la cartera, impuestos (ITP/IVA, IBI, plusvalía, IRPF del ahorro, IRNR) y factores personales (movilidad, liquidez, estabilidad). Úsala cuando el usuario dude entre comprar o alquilar, pregunte qué le renta más, o cuando convenga el análisis patrimonial antes de recomendar una compra. Todos los parámetros son opcionales: usa valores por defecto de Madrid y pregunta por los que falten si son relevantes (precio, alquiler equivalente, ahorro, horizonte). Menciona que el desglose visual está en la pestaña «Comprar o alquilar».",
+    input_schema: {
+      type: "object",
+      properties: {
+        precioVivienda: { type: "number", description: "Precio de la vivienda a comprar, en euros. Por defecto 400000." },
+        alquilerMensual: { type: "number", description: "Alquiler mensual de una vivienda EQUIVALENTE, en euros. Por defecto 1250." },
+        capitalDisponible: { type: "number", description: "Ahorro disponible hoy, en euros. Por defecto 120000." },
+        horizonteAnios: { type: "number", description: "Años que el usuario se quedaría. El factor más decisivo. Por defecto 10." },
+        entradaPorcentaje: { type: "number", description: "Porcentaje de entrada. Por defecto 20." },
+        tipoInteres: { type: "number", description: "Tipo de interés fijo de la hipoteca en %. Por defecto 3." },
+        plazoHipotecaAnios: { type: "number", description: "Plazo de la hipoteca en años. Por defecto 30." },
+        rentabilidadInversionAnual: { type: "number", description: "Rentabilidad anual esperada de la cartera de inversión en %. Por defecto 7." },
+        revalorizacionViviendaAnual: { type: "number", description: "Revalorización anual de la vivienda en %. Por defecto 4." },
+        subidaAlquilerAnual: { type: "number", description: "Subida anual del alquiler en %. Por defecto 4." },
+        probMudanzaExtranjero: { type: "number", description: "Probabilidad de mudarse al extranjero: 0=baja, 1=media, 2=alta. Si es alta puede inclinar la recomendación hacia alquilar." },
+        liquidezNecesaria: { type: "number", description: "Colchón de liquidez que el usuario quiere mantener, en euros." },
+      },
+      required: [],
+    },
+  },
 ] as const;
 
 export type ToolName = (typeof TOOL_DEFINITIONS)[number]["name"];
@@ -266,6 +293,10 @@ export async function runTool(name: string, input: unknown): Promise<ToolRunResu
     case "consultar_barrio": {
       const data = await runConsultarBarrio(input as ConsultarBarrioInput);
       return { forModel: data, forClient: { kind: "neighborhood", data } };
+    }
+    case "comparar_alquiler_compra": {
+      const data = runCompararAlquilerCompraTool(input as CompararAlquilerCompraInput);
+      return { forModel: data };
     }
     default:
       throw new Error(`unknown tool: ${name}`);

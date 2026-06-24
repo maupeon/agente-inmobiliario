@@ -314,6 +314,193 @@ export interface PropertyRecommendation {
   highlights: string[];
 }
 
+/* ────────────────────────────────────────────────────────────────────────
+ * Calculadora "Comprar o alquilar" (gancho gratuito).
+ *
+ * Modelo financiero determinista, simulado AÑO A AÑO sobre un horizonte N,
+ * presupuestariamente neutral: ambos escenarios parten del MISMO capital y
+ * quien gasta menos en vivienda invierte la diferencia en una cartera que
+ * crece al mismo tipo. El patrimonio neto es LIQUIDABLE (equity inmobiliaria
+ * apalancada neta de costes/impuestos de venta + cartera neta del impuesto del
+ * ahorro), de modo que un euro en ladrillo y un euro en bolsa son comparables.
+ * Ver `lib/finance/rent-vs-buy.ts`.
+ * ──────────────────────────────────────────────────────────────────────── */
+
+/** Probabilidad / nivel en escala de 3 (0=baja, 1=media, 2=alta). */
+export type Nivel3 = 0 | 1 | 2;
+
+/**
+ * Entrada de la calculadora. Todos los campos son obligatorios en el tipo
+ * interno, pero `runCompararAlquilerCompra` acepta un `Partial` y rellena con
+ * los valores por defecto de Madrid (`RENT_VS_BUY_DEFAULTS`).
+ */
+export interface RentVsBuyInput {
+  // ── Comunes ──
+  /** Precio de la vivienda que te plantearías comprar (€). */
+  precioVivienda: number;
+  /** Alquiler mensual de una vivienda EQUIVALENTE a la de compra (€/mes). */
+  alquilerMensual: number;
+  /** Ahorro disponible hoy para esto (€). */
+  capitalDisponible: number;
+  /** Años que te quedarías (input más sensible del modelo). */
+  horizonteAnios: number;
+  /** Rentabilidad bruta anual de la cartera de inversión (%). Igual en ambos. */
+  rentabilidadInversionAnual: number;
+  /** Inflación general (IPC) para deflactar a € de hoy (%). */
+  inflacionAnual: number;
+  /** Si true, muestra el patrimonio en € de hoy (reales). */
+  mostrarEnReales: boolean;
+  /** Si true, grava la plusvalía latente de ambas carteras al final. */
+  liquidarCarteraAlFinal: boolean;
+
+  // ── Compra ──
+  /** % de entrada (banco financia el resto). */
+  entradaPorcentaje: number;
+  /** Tipo de interés (TIN fijo) en %. El motor admite 0%. */
+  tipoInteres: number;
+  /** Plazo de la hipoteca en años. */
+  plazoHipotecaAnios: number;
+  /** Obra nueva (IVA+AJD) vs segunda mano (ITP). */
+  esObraNueva: boolean;
+  /** Gastos de compra como % del precio (ITP/IVA + notaría + registro…). */
+  gastosCompraPorcentaje: number;
+  /** Gastos de venta como % del valor de venta (agencia + cancelación…). */
+  gastosVentaPorcentaje: number;
+  /** Plusvalía municipal (IIVTNU) estimada como % del valor de venta. */
+  plusvaliaMunicipalPorcentaje: number;
+  /** IBI anual (€). */
+  ibiAnual: number;
+  /** Comunidad (€/mes). */
+  comunidadMensual: number;
+  /** Seguro de hogar anual (€). */
+  seguroHogarAnual: number;
+  /** Mantenimiento como % del valor de la vivienda/año. */
+  mantenimientoPorcentaje: number;
+  /** Revalorización anual de la vivienda (%). Distinta de la cartera. */
+  revalorizacionViviendaAnual: number;
+  /** Inflación de los costes de tenencia (IBI/comunidad/seguro) en %. */
+  inflacionCostes: number;
+  /** Vivienda habitual: la ganancia de la venta puede estar exenta de IRPF
+   *  (asume reinversión en otra habitual o titular mayor de 65 años). */
+  viviendaHabitual: boolean;
+
+  // ── Alquiler ──
+  /** Subida anual del alquiler (%). */
+  subidaAlquilerAnual: number;
+  /** Seguro del inquilino anual (€). */
+  seguroInquilinoAnual: number;
+
+  // ── Personal / subjetivo ──
+  /** Probabilidad de mudarte al extranjero (0=baja, 1=media, 2=alta). */
+  probMudanzaExtranjero: Nivel3;
+  /** Años hasta la mudanza prevista (0 = sin mudanza). */
+  aniosHastaMudanza: number;
+  /** Al mudarte: 0=vender, 1=alquilar a distancia (IRNR). */
+  escenarioMudanza: 0 | 1;
+  /** Destino fuera de UE/EEE (ej. Suiza): IRNR 24% sin deducir gastos. */
+  paisDestinoFueraUE: boolean;
+  /** Colchón de liquidez que quieres mantener (€). */
+  liquidezNecesaria: number;
+  /** Estabilidad laboral (0=baja, 1=media, 2=alta). */
+  estabilidadLaboral: Nivel3;
+  /** Crecimiento salarial esperado (%) — el "+50% en 1-2 años" del boceto. */
+  crecimientoSalarialEsperado: number;
+  /** Ingreso anual neto (solo para avisos de esfuerzo; no entra en patrimonio). */
+  ingresoAnualNeto: number;
+}
+
+/** Una fila de la simulación (un año cerrado). Base de todas las gráficas. */
+export interface RentVsBuyYear {
+  anio: number;
+  /** Cuota anual pagada (interés + principal); 0 tras amortizar. */
+  cuotaAnual: number;
+  interesesAnio: number;
+  principalAnio: number;
+  /** Saldo vivo de la hipoteca al cierre del año. */
+  saldoVivo: number;
+  /** IBI + comunidad + seguro + mantenimiento del año. */
+  costesTenencia: number;
+  valorVivienda: number;
+  /** Valor − saldo − costes/impuestos de venta latentes. Puede ser negativo. */
+  equityInmo: number;
+  /** Cartera del comprador, neta del impuesto del ahorro. */
+  carteraCompra: number;
+  alquilerAnual: number;
+  /** Cartera del inquilino, neta del impuesto del ahorro. */
+  carteraAlquiler: number;
+  patrimonioCompra: number;
+  patrimonioAlquiler: number;
+  /** patrimonioCompra − patrimonioAlquiler (signo = quién gana ese año). */
+  diferencia: number;
+  aporteCompra: number;
+  aporteAlquiler: number;
+  /** IRNR pagado ese año si se alquila a distancia tras mudarse. */
+  irnrAnio: number;
+}
+
+export type RentVsBuyAvisoClave =
+  | "movilidad"
+  | "liquidez"
+  | "estabilidad"
+  | "salario"
+  | "esfuerzo"
+  | "horizonte_corto"
+  | "supuesto_agresivo"
+  | "entrada_insuficiente";
+
+/** Un aviso/factor subjetivo que matiza (sin alterar) el veredicto financiero. */
+export interface RentVsBuyAviso {
+  clave: RentVsBuyAvisoClave;
+  severidad: "info" | "warning" | "fuerte";
+  mensaje: string;
+  /** A qué escenario empuja: para colorear la anotación. */
+  sesgo: "pro_comprar" | "pro_alquilar" | "neutral";
+}
+
+/** Salida completa del motor. */
+export interface RentVsBuyResult {
+  /** Eco de los inputs efectivos (tras defaults + clamp) — trazabilidad. */
+  inputs: RentVsBuyInput;
+  /** N filas, una por año. */
+  serie: RentVsBuyYear[];
+  cuotaMensual: number;
+  /** Entrada + gastos de compra. */
+  desembolsoInicialCompra: number;
+  /** precio / (alquiler·12). Indicador contextual, no veredicto. */
+  priceToRent: number | null;
+  /** Año (fraccionario, interpolado) en que comprar alcanza a alquilar; null si nunca. */
+  breakEvenAnios: number | null;
+  patrimonioFinalCompra: number;
+  patrimonioFinalAlquiler: number;
+  /** € a favor de comprar (negativo = a favor de alquilar). */
+  ventajaCompra: number;
+  /** % sobre el mayor patrimonio. */
+  ventajaPorcentual: number;
+  veredicto: {
+    ganador: "comprar" | "alquilar";
+    banda: "empate" | "moderada" | "clara";
+    /** Frase determinista lista para la UI. */
+    resumen: string;
+    /** Si un factor subjetivo invierte la recomendación mostrada. */
+    overrideSubjetivo: "comprar" | "alquilar" | null;
+  };
+  /** true si las cifras están deflactadas a € de hoy. */
+  enReales: boolean;
+  avisos: RentVsBuyAviso[];
+  totales: {
+    interesesTotales: number;
+    tenenciaTotal: number;
+    rentaTotal: number;
+    principalTotal: number;
+    gastosCompra: number;
+    irnrAcumulado: number;
+  };
+  /** false si la entrada + gastos superan el capital disponible. */
+  feasible: boolean;
+  /** Precio máximo comprable con el capital actual (entrada% + gastos%). */
+  precioMaxFinanciable: number;
+}
+
 /** Eventos del stream SSE que envía /api/chat al cliente. */
 export type StreamEvent =
   | { type: "text"; text: string }
