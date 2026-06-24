@@ -2,33 +2,116 @@ import { IdealistaError } from "@/lib/errors";
 import type { Property, SearchFilters } from "@/types";
 import { getAccessToken } from "./auth";
 import { mockSearch } from "./mock";
+import { recordIdealistaRequest } from "./usage";
+import { lookupPlace } from "@/lib/commute/places";
+import { geocodeAddress } from "@/lib/commute";
 
 const BASE_URL = process.env.IDEALISTA_BASE_URL ?? "https://api.idealista.com/3.5/";
 
+/** Radio por defecto (m) alrededor del centro cuando no se especifica `radioMetros`. */
+const DEFAULT_RADIUS_M = 3500;
+
 /**
- * Mapea el filtro español que usa el agente al payload que espera Idealista.
- * Documentación: https://developers.idealista.com/access-request
+ * Traduce el `tipo` español al `propertyType` de Idealista (+ flags asociados).
+ * La doc v3.5 sólo acepta: homes, offices, premises, garages, bedrooms.
  */
-function mapFilters(filters: SearchFilters, maxItems: number) {
+function mapPropertyType(tipo?: SearchFilters["tipo"]): {
+  propertyType: string;
+  flags: Record<string, string>;
+} {
+  switch (tipo) {
+    case "casas":
+      // "casas" ≈ chalets en la taxonomía de Idealista.
+      return { propertyType: "homes", flags: { chalet: "true" } };
+    case "locales":
+      return { propertyType: "premises", flags: {} };
+    case "garajes":
+      return { propertyType: "garages", flags: {} };
+    case "pisos":
+    default:
+      return { propertyType: "homes", flags: {} };
+  }
+}
+
+/**
+ * Idealista filtra por `bedrooms` (multivaluado, separado por comas) donde "4"
+ * significa "4 o más". Para "mínimo N habitaciones" devolvemos la lista N..4:
+ *   2 → "2,3,4"   3 → "3,4"   4+ → "4"
+ */
+function bedroomsFilter(min?: number): string | null {
+  if (!min || min < 1) return null;
+  const capped = Math.min(Math.floor(min), 4);
+  const values: number[] = [];
+  for (let n = capped; n <= 4; n++) values.push(n);
+  return values.join(",");
+}
+
+/**
+ * Resuelve la `zona` (texto) a coordenadas: primero el gazetteer offline y, si
+ * falla, Nominatim. La API de búsqueda EXIGE `center`+`distance` o `locationId`,
+ * así que sin centro no hay búsqueda posible.
+ */
+async function resolveCenter(
+  zona: string
+): Promise<{ lat: number; lon: number } | null> {
+  const q = (zona ?? "").trim();
+  if (!q) return null;
+  const local = lookupPlace(q);
+  if (local) return { lat: local.lat, lon: local.lon };
+  const geo = await geocodeAddress(q);
+  if (geo) return { lat: geo.lat, lon: geo.lon };
+  return null;
+}
+
+/**
+ * Construye los parámetros del POST /search a partir de los filtros del agente.
+ * Async porque puede geocodificar la zona para obtener el centro.
+ */
+async function buildSearchParams(
+  filters: SearchFilters,
+  maxItems: number
+): Promise<URLSearchParams> {
   const params = new URLSearchParams();
   params.set("country", "es");
   params.set("operation", filters.operacion === "alquiler" ? "rent" : "sale");
-  params.set("propertyType", "homes");
+
+  const { propertyType, flags } = mapPropertyType(filters.tipo);
+  params.set("propertyType", propertyType);
+  for (const [k, v] of Object.entries(flags)) params.set(k, v);
+
   params.set("locale", "es");
-  params.set("maxItems", String(maxItems));
+  params.set("maxItems", String(Math.min(Math.max(1, maxItems), 50)));
   params.set("numPage", "1");
-  params.set("locationName", filters.zona);
+
+  // Ancla geográfica: locationId (si se conoce) o center+distance (geocodificado).
+  if (filters.locationId) {
+    params.set("locationId", filters.locationId);
+  } else {
+    const center = filters.centro ?? (await resolveCenter(filters.zona));
+    if (!center) {
+      throw new IdealistaError(
+        `no se pudo resolver la zona "${filters.zona}" a coordenadas`,
+        {
+          userMessage: `No he conseguido situar "${filters.zona}" en el mapa. Prueba con un barrio o una ciudad más concretos.`,
+        }
+      );
+    }
+    params.set("center", `${center.lat},${center.lon}`);
+    params.set("distance", String(filters.radioMetros ?? DEFAULT_RADIUS_M));
+  }
 
   if (filters.precioMin) params.set("minPrice", String(filters.precioMin));
   if (filters.precioMax) params.set("maxPrice", String(filters.precioMax));
   if (filters.metrosMin) params.set("minSize", String(filters.metrosMin));
   if (filters.metrosMax) params.set("maxSize", String(filters.metrosMax));
-  if (filters.habitaciones) params.set("minRooms", String(filters.habitaciones));
+
+  const bedrooms = bedroomsFilter(filters.habitaciones);
+  if (bedrooms) params.set("bedrooms", bedrooms);
 
   return params;
 }
 
-interface IdealistaSearchResponseElement {
+export interface IdealistaSearchResponseElement {
   propertyCode: string;
   thumbnail?: string;
   url?: string;
@@ -51,7 +134,10 @@ interface IdealistaSearchResponseElement {
   detailedType?: { typology?: string; subTypology?: string };
 }
 
-function normalizeProperty(raw: IdealistaSearchResponseElement, op: SearchFilters["operacion"]): Property {
+export function normalizeProperty(
+  raw: IdealistaSearchResponseElement,
+  op: SearchFilters["operacion"]
+): Property {
   const city = raw.municipality ?? raw.district ?? "";
   const district = raw.district ?? "";
   const rooms = raw.rooms ?? 0;
@@ -89,6 +175,11 @@ function normalizeProperty(raw: IdealistaSearchResponseElement, op: SearchFilter
   };
 }
 
+const SEARCH_HEADERS = (token: string) => ({
+  Authorization: `Bearer ${token}`,
+  "Content-Type": "application/x-www-form-urlencoded",
+});
+
 export async function searchProperties(
   filters: SearchFilters,
   maxItems = 6
@@ -98,18 +189,17 @@ export async function searchProperties(
   }
 
   const token = await getAccessToken();
-  const params = mapFilters(filters, maxItems);
+  const params = await buildSearchParams(filters, maxItems);
   const url = `${BASE_URL.replace(/\/$/, "")}/es/search`;
 
   const res = await fetch(url, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
+    headers: SEARCH_HEADERS(token),
     body: params.toString(),
     cache: "no-store",
   });
+  // La petición ya consumió cuota (haya ido bien o mal): contabilízala.
+  await recordIdealistaRequest("search");
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");

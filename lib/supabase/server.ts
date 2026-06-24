@@ -17,6 +17,12 @@ export function getServerSupabase(): SupabaseClient | null {
   }
   cached = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
+    global: {
+      // Next.js parchea `fetch` y cachea por defecto las respuestas (Data Cache),
+      // lo que devolvía conteos/lecturas obsoletas desde PostgREST. El cliente de
+      // servicio siempre quiere datos frescos → forzamos no-store en cada petición.
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+    },
   });
   return cached;
 }

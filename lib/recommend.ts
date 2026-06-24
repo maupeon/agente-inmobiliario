@@ -58,6 +58,12 @@ export async function recommend(input: RecommendInput): Promise<RecommendResult>
     tipo: input.tipo ?? profile?.tipo ?? "pisos",
     precioMax,
     habitaciones,
+    // Coordenadas exactas del punto elegido en el mapa del onboarding: evita
+    // geocodificar la zona y centra la búsqueda donde el usuario marcó.
+    centro:
+      profile?.zonaLat != null && profile?.zonaLon != null
+        ? { lat: profile.zonaLat, lon: profile.zonaLon }
+        : undefined,
   };
 
   const candidates = await searchProperties(filters, CANDIDATES);

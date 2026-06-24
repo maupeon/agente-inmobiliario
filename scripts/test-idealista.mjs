@@ -38,7 +38,39 @@ async function getToken() {
   return data.access_token;
 }
 
+// Gazetteer mínimo (coincide con lib/commute/places.ts); fallback a Nominatim.
+const PLACES = {
+  madrid: { lat: 40.4168, lon: -3.7038 },
+  "malasana madrid": { lat: 40.4258, lon: -3.7036 },
+  "chamberi madrid": { lat: 40.4319, lon: -3.7036 },
+  "salamanca madrid": { lat: 40.4279, lon: -3.6826 },
+  barcelona: { lat: 41.3851, lon: 2.1734 },
+  valencia: { lat: 39.4699, lon: -0.3763 },
+  sevilla: { lat: 37.3891, lon: -5.9845 },
+};
+
+function normalizePlace(s) {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[,.]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+async function resolveCenter(name) {
+  const norm = normalizePlace(name);
+  if (PLACES[norm]) return PLACES[norm];
+  for (const [key, point] of Object.entries(PLACES)) {
+    if (norm.includes(key) || key.includes(norm)) return point;
+  }
+  // Nominatim (sin clave) como en lib/commute/index.ts.
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=es&q=${encodeURIComponent(name)}`;
+  const res = await fetch(url, { headers: { "User-Agent": "AgenteInmobiliario/1.0 (TFM)", "Accept-Language": "es" } });
+  if (!res.ok) return null;
+  const arr = await res.json();
+  const hit = arr?.[0];
+  return hit ? { lat: Number(hit.lat), lon: Number(hit.lon) } : null;
+}
+
 async function search(token) {
+  const center = await resolveCenter(zona);
+  if (!center) throw new Error(`no pude geocodificar "${zona}"`);
   const params = new URLSearchParams({
     country: "es",
     operation: operacion === "alquiler" ? "rent" : "sale",
@@ -46,7 +78,9 @@ async function search(token) {
     locale: "es",
     maxItems: "5",
     numPage: "1",
-    locationName: zona,
+    // La API EXIGE center+distance o locationId (NO existe locationName).
+    center: `${center.lat},${center.lon}`,
+    distance: "3500",
   });
   const url = `${baseUrl.replace(/\/$/, "")}/es/search`;
   console.log(`→ POST ${url}`);

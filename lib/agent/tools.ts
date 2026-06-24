@@ -267,6 +267,16 @@ export async function runTool(name: string, input: unknown): Promise<ToolRunResu
     }
     case "detalle_propiedad": {
       const data = await runDetallePropiedad(input as DetallePropiedadInput);
+      if (!data) {
+        // La API real no da ficha ampliada: que Claude use los datos ya
+        // mostrados en la búsqueda y enlace al anuncio (sin gastar cuota).
+        return {
+          forModel: {
+            available: false,
+            note: "La API de Idealista no ofrece ficha ampliada (descripción/fotos extra). Usa los datos del anuncio ya mostrados en la búsqueda y remite al usuario al enlace de idealista.com para ver más.",
+          },
+        };
+      }
       const { property: _omit, photos: _photos, ...modelPayload } = data;
       void _omit;
       return {

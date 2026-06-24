@@ -147,6 +147,12 @@ export interface SearchFilters {
   metrosMin?: number;
   metrosMax?: number;
   habitaciones?: number;
+  /** Centro geográfico (lat/lon). Si se da, evita geocodificar `zona`. */
+  centro?: { lat: number; lon: number };
+  /** Radio de búsqueda en metros alrededor del centro (default ~3,5 km). */
+  radioMetros?: number;
+  /** Código de localización Idealista (alternativa a centro+distancia). */
+  locationId?: string;
 }
 
 export interface MarketAnalysis {

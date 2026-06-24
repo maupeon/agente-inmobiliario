@@ -10,7 +10,9 @@ export async function GET(req: NextRequest) {
   if (!code) return Response.json({ detail: null }, { status: 400 });
   try {
     const r = await runDetallePropiedad({ propertyCode: code });
-    return Response.json({ detail: r.property });
+    // En modo real no hay ficha ampliada (la API es solo búsqueda): el drawer
+    // pinta a partir del Property que ya tiene. Devolvemos null sin gastar cuota.
+    return Response.json({ detail: r?.property ?? null });
   } catch (err) {
     const friendly = handleError(err, { route: "/api/property" });
     return Response.json({ detail: null, error: friendly.userMessage }, { status: friendly.status });

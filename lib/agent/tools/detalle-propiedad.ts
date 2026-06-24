@@ -29,11 +29,13 @@ export interface DetallePropiedadResult {
 
 export async function runDetallePropiedad(
   input: DetallePropiedadInput
-): Promise<DetallePropiedadResult> {
+): Promise<DetallePropiedadResult | null> {
   if (!input?.propertyCode)
     throw new ValidationError("propertyCode es obligatorio");
 
   const detail = await getPropertyDetail(input.propertyCode);
+  // En modo real la API de Idealista no ofrece ficha ampliada → null.
+  if (!detail) return null;
 
   return {
     propertyCode: detail.propertyCode,
