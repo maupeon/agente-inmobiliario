@@ -51,9 +51,9 @@ export function PropertyGrid({
           "border-t border-hairline pt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-stone"
         )}
       >
-        {items.length} resultado{items.length === 1 ? "" : "s"} de Idealista
+        {items.length} resultado{items.length === 1 ? "" : "s"} para esta búsqueda
         <span className="mx-2 text-mist">·</span>
-        actualizado al instante
+        verifica la disponibilidad en el anuncio
       </p>
     </div>
   );

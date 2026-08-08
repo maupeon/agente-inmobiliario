@@ -1,15 +1,14 @@
-# Agente Inmobiliario — IA conversacional para el mercado español
+# HabitIA — encuentra piso para alquilar o comprar
 
-Aplicación web conversacional. El usuario habla en lenguaje natural con un agente
-construido sobre `claude-opus-4-6` que llama herramientas conectadas a Idealista
-para buscar propiedades, obtener detalle de un anuncio y calcular hipotecas.
-Las conversaciones se persisten en Supabase.
+Aplicación web conversacional. El usuario cuenta en lenguaje natural qué vivienda
+quiere alquilar o comprar y HabitIA usa herramientas conectadas a Idealista para
+buscar propiedades, mostrar el detalle de un anuncio y calcular hipotecas. Las
+conversaciones se persisten en Supabase.
 
-El nombre del producto es **Agente Inmobiliario**. Tipográficamente la **A** y la
-**I** se renderizan en serif italic + saffron (variante editorial Newsreader),
-mientras que el resto va en Geist sans → la doble lectura es "Agente
-Inmobiliario" + el sigil "A · I" → "IA". Ver `components/ui/Logo.tsx` con sus
-tres variantes (`stack`, `inline`, `mark`).
+El nombre del producto es **HabitIA** y debe escribirse siempre con `H` e `IA` en
+mayúsculas. El nombre une hogar e inteligencia artificial sin recurrir a siglas
+alternativas. Ver `components/ui/Logo.tsx` para sus variantes `stack`, `inline`
+y `mark`.
 
 ## Arquitectura
 
@@ -51,8 +50,9 @@ tres variantes (`stack`, `inline`, `mark`).
 
 ## Diseño
 
-Editorial-noir mediterráneo. Off-black tintado cálido (no `#000`), un único acento
-ámbar/saffron, tipografía editorial (Fraunces serif display + DM Sans body +
-DM Mono para precios). Layouts asimétricos tipo bento. Las propiedades se
-presentan como spreads de revista, no grid genérico de tarjetas iguales.
-Ver `app/globals.css` y `tailwind.config.ts` para tokens.
+HabitIA sigue un sistema cálido y sereno inspirado en las interfaces de Apple:
+jerarquía muy clara, controles de al menos 44 px, tipografía Geist, verde
+botánico como acento, superficies translúcidas con profundidad contenida y
+movimiento físico breve que respeta `prefers-reduced-motion`. La búsqueda debe
+ser accesible desde el primer viewport y la personalización es progresiva y
+opcional. Ver `app/globals.css` y `tailwind.config.ts` para los tokens.

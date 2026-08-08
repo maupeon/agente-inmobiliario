@@ -5,9 +5,9 @@ import { SiteNav } from "@/components/SiteNav";
 import { Logo } from "@/components/ui/Logo";
 
 export const metadata: Metadata = {
-  title: "Cómo funciona — Agente Inmobiliario",
+  title: "Cómo funciona",
   description:
-    "Cómo funciona el Agente Inmobiliario: del onboarding a las recomendaciones en el mapa, su arquitectura y de dónde salen los datos.",
+    "Descubre cómo HabitIA convierte tus preferencias en recomendaciones de vivienda sobre el mapa y de dónde salen sus datos.",
 };
 
 const STEPS = [

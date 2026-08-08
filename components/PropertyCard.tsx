@@ -30,14 +30,15 @@ export function PropertyCard({
   onToggleFavorite,
   index = 0,
 }: PropertyCardProps) {
+  const isRent = property.operation === "rent";
   const priceLabel = formatEUR(property.price);
   const sqmLabel = property.size ? `${formatNumber(property.size)} m²` : null;
+  const ppsmUnit = isRent ? "€/m²·mes" : "€/m²";
   const ppsmLabel = property.pricePerSqm
-    ? `${formatNumber(property.pricePerSqm)} €/m²`
+    ? `${formatNumber(property.pricePerSqm)} ${ppsmUnit}`
     : property.size
-    ? `${formatNumber(Math.round(property.price / property.size))} €/m²`
+    ? `${formatNumber(Math.round(property.price / property.size))} ${ppsmUnit}`
     : null;
-  const isRent = property.operation === "rent";
 
   if (variant === "feature") {
     return (
@@ -84,7 +85,10 @@ export function PropertyCard({
                   ? ` · ${property.municipality}`
                   : ""}
               </p>
-              <p className="mt-2 break-words font-display text-3xl font-medium leading-none text-ink tabular sm:text-4xl">
+              <h3 className="mt-2 text-balance font-display text-xl leading-tight text-ink sm:text-2xl">
+                {property.title}
+              </h3>
+              <p className="mt-3 break-words font-display text-3xl font-medium leading-none text-ink tabular sm:text-4xl">
                 {priceLabel}
                 {isRent && (
                   <span className="ml-1 align-baseline font-mono text-xs text-stone">
@@ -126,7 +130,7 @@ export function PropertyCard({
             {ppsmLabel && (
               <PropertyMetric
                 icon={<Sparkle size={13} weight="bold" />}
-                label="precio/m²"
+                label={isRent ? "precio/m²·mes" : "precio/m²"}
                 value={ppsmLabel}
                 accent
               />

@@ -2,7 +2,34 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Property } from "@/types";
 
-const LOCAL_KEY = "agente-inmobiliario.favorites.v1";
+const LOCAL_KEY = "habitia.favorites.v1";
+const LEGACY_LOCAL_KEY = "agente-inmobiliario.favorites.v1";
+const LOCAL_KEYS = [LOCAL_KEY, LEGACY_LOCAL_KEY] as const;
+
+function readLocalFavorites(): Property[] {
+  for (const key of LOCAL_KEYS) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) return parsed as Property[];
+    } catch {
+      // Si una entrada está corrupta, probamos la siguiente clave compatible.
+    }
+  }
+  return [];
+}
+
+function writeLocalFavorites(favorites: Property[]): void {
+  const raw = JSON.stringify(favorites);
+  for (const key of LOCAL_KEYS) {
+    try {
+      localStorage.setItem(key, raw);
+    } catch {
+      // Conservamos la capa optimista aunque solo una de las claves sea escribible.
+    }
+  }
+}
 
 interface UseFavoritesOpts {
   userId?: string;
@@ -21,10 +48,10 @@ export function useFavorites(opts: UseFavoritesOpts = {}) {
 
   // Carga inicial: localStorage primero (instantáneo), luego servidor (puede mergear).
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(LOCAL_KEY);
-      if (raw) setFavorites(JSON.parse(raw) as Property[]);
-    } catch {}
+    const local = readLocalFavorites();
+    if (local.length > 0) setFavorites(local);
+    // Migra y mantiene sincronizadas ambas claves sin perder datos existentes.
+    writeLocalFavorites(local);
     setLoaded(true);
 
     let cancelled = false;
@@ -53,9 +80,7 @@ export function useFavorites(opts: UseFavoritesOpts = {}) {
   // Persistir en localStorage tras cada cambio.
   useEffect(() => {
     if (!loaded) return;
-    try {
-      localStorage.setItem(LOCAL_KEY, JSON.stringify(favorites));
-    } catch {}
+    writeLocalFavorites(favorites);
   }, [favorites, loaded]);
 
   const isFavorite = useCallback(

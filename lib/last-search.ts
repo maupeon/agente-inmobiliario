@@ -5,33 +5,48 @@ import type { Property } from "@/types";
  * panel/mapa pueda pintarla aunque el usuario navegue fuera del chat. No hay
  * servidor de por medio: los resultados de búsqueda no se guardan en Supabase.
  */
-const KEY = "agente-inmobiliario:lastSearch:v1";
+const KEY = "habitia:lastSearch:v1";
+const LEGACY_KEY = "agente-inmobiliario:lastSearch:v1";
+const STORAGE_KEYS = [KEY, LEGACY_KEY] as const;
 
 export interface LastSearch {
   properties: Property[];
   savedAt: string | null;
 }
 
+function writeStoredSearch(search: LastSearch): void {
+  const raw = JSON.stringify(search);
+  for (const key of STORAGE_KEYS) {
+    try {
+      localStorage.setItem(key, raw);
+    } catch {
+      // La búsqueda sigue disponible si al menos una clave pudo persistirse.
+    }
+  }
+}
+
 export function saveLastSearch(properties: Property[]): void {
   if (typeof window === "undefined" || properties.length === 0) return;
-  try {
-    localStorage.setItem(
-      KEY,
-      JSON.stringify({ properties, savedAt: new Date().toISOString() })
-    );
-  } catch {
-    // localStorage lleno o no disponible: la búsqueda sigue viva en la sesión.
-  }
+  writeStoredSearch({ properties, savedAt: new Date().toISOString() });
 }
 
 export function readLastSearch(): LastSearch {
   if (typeof window === "undefined") return { properties: [], savedAt: null };
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return { properties: [], savedAt: null };
-    const parsed = JSON.parse(raw) as Partial<LastSearch>;
-    return { properties: parsed.properties ?? [], savedAt: parsed.savedAt ?? null };
-  } catch {
-    return { properties: [], savedAt: null };
+  for (const key of STORAGE_KEYS) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw) as Partial<LastSearch>;
+      const search = {
+        properties: Array.isArray(parsed.properties) ? parsed.properties : [],
+        savedAt: typeof parsed.savedAt === "string" ? parsed.savedAt : null,
+      };
+      // Migra y mantiene sincronizadas ambas claves sin romper sesiones anteriores.
+      writeStoredSearch(search);
+      return search;
+    } catch {
+      // Si una entrada está corrupta, probamos la siguiente clave compatible.
+    }
   }
+  return { properties: [], savedAt: null };
 }

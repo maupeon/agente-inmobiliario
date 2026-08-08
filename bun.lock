@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "agente-inmobiliario",
+      "name": "habitia",
       "dependencies": {
         "@anthropic-ai/sdk": "^0.95.1",
         "@phosphor-icons/react": "^2.1.10",

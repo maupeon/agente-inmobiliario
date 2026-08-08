@@ -1,255 +1,284 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Calculator,
-  ChartBar,
-  Leaf,
-  MagnifyingGlass,
-  Path,
-  Scales,
+  Buildings,
+  ChartLineDown,
+  ChatCircleText,
+  CheckCircle,
+  Clock,
+  Heart,
+  MapPin,
+  MapTrifold,
   ShieldCheck,
+  Sparkle,
 } from "@phosphor-icons/react/dist/ssr";
-import { Logo } from "./ui/Logo";
+import { HeroSearch } from "./HeroSearch";
 import { SiteNav } from "./SiteNav";
+import { Logo } from "./ui/Logo";
 
-const FEATURES = [
+const BENEFITS = [
   {
-    n: "01",
-    Icon: MagnifyingGlass,
-    t: "Búsqueda conversacional",
-    d: "Dilo en una frase — «2 hab. en Malasaña por 1.200 €/mes» — y busco en Idealista por ti. Sin filtros ni formularios.",
+    Icon: ChartLineDown,
+    title: "Sabrás si el precio encaja",
+    copy: "Comparamos el anuncio con la referencia disponible de la zona y te explicamos la diferencia sin jerga.",
+    detail: "Precio frente a la zona",
   },
   {
-    n: "02",
-    Icon: Scales,
-    t: "¿Caro o barato?",
-    d: "Comparo el €/m²/mes del anuncio con la referencia de la zona y te digo, sin rodeos, si la renta está bien de precio.",
+    Icon: MapTrifold,
+    title: "Entenderás el día a día",
+    copy: "Consulta el barrio, los servicios y el trayecto al trabajo antes de abrir veinte pestañas.",
+    detail: "Barrio y trayectos",
   },
   {
-    n: "03",
-    Icon: Path,
-    t: "Trayecto al trabajo",
-    d: "Cuánto tardas de tu oficina a cada piso: a pie, en bici, en coche o en transporte público.",
-  },
-  {
-    n: "04",
-    Icon: ShieldCheck,
-    t: "Seguridad del barrio",
-    d: "Un índice de seguridad y el contexto de criminalidad de la zona, para que decidas con datos y no con rumores.",
-  },
-  {
-    n: "05",
-    Icon: Leaf,
-    t: "Calidad de vida",
-    d: "Transporte, zonas verdes, servicios, vida nocturna y tranquilidad, resumidos de un vistazo.",
-  },
-  {
-    n: "06",
-    Icon: Calculator,
-    t: "Hipoteca y esfuerzo",
-    d: "Cuota mensual, coste total y qué porcentaje de tu sueldo se llevaría. Para compra, cuando toque dar el salto.",
+    Icon: Sparkle,
+    title: "Verás primero lo que importa",
+    copy: "HabitIA ordena las opciones según tu presupuesto, prioridades e imprescindibles.",
+    detail: "Recomendaciones personales",
   },
 ];
 
 const STEPS = [
   {
-    i: "01",
-    t: "Cuéntanos quién eres",
-    d: "Un onboarding de medio minuto: zona, presupuesto, dónde trabajas y qué te importa de un barrio.",
+    number: "1",
+    title: "Elige alquilar o comprar",
+    copy: "Escribe una zona. Puedes empezar sin cuenta y sin completar un perfil.",
   },
   {
-    i: "02",
-    t: "Recibe tus 3-5 pisos",
-    d: "Sin formularios interminables: te enseño en el mapa los que mejor encajan contigo, ya analizados.",
+    number: "2",
+    title: "Compara sobre el mapa",
+    copy: "Revisa precio, metros, barrio y trayecto en una sola vista.",
   },
   {
-    i: "03",
-    t: "Decide con datos claros",
-    d: "Precio frente a la zona, seguridad del barrio y trayecto al trabajo — y el chat ahí si quieres preguntar.",
+    number: "3",
+    title: "Guarda y pregunta",
+    copy: "Conserva tus favoritas y usa el asistente para profundizar cuando lo necesites.",
   },
 ];
 
 export function Landing() {
-  const fecha = new Date().toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "long",
-  });
-
   return (
-    <div className="relative z-10">
+    <div className="relative z-10 overflow-hidden">
       <SiteNav />
 
-      <main className="mx-auto w-full max-w-[1100px] px-5 sm:px-8">
-        {/* ─── Hero ─── */}
-        <section className="pt-14 sm:pt-20">
-          <div className="flex items-center justify-between gap-4 border-y border-ink py-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink">
-            <span>Edición · {fecha}</span>
-            <span className="hidden sm:inline">IA conversacional · mercado español</span>
-            <span className="tabular text-stone">№ 001</span>
+      <main>
+        <section className="mx-auto grid w-full max-w-[1200px] gap-12 px-5 pb-20 pt-12 sm:px-8 sm:pb-24 sm:pt-16 lg:grid-cols-[1.08fr,0.92fr] lg:items-center lg:gap-16 lg:pt-16">
+          <div className="animate-fade-up">
+            <div className="inline-flex items-center gap-2 rounded-full border border-saffron-200 bg-saffron-50 px-3 py-1.5 text-sm font-medium text-saffron-700">
+              <Sparkle aria-hidden size={14} weight="fill" />
+              Tu búsqueda de vivienda, más clara
+            </div>
+
+            <h1 className="mt-6 max-w-[11ch] text-balance font-display text-[clamp(3.2rem,6.4vw,5.6rem)] font-semibold leading-[0.94] tracking-[-0.065em] text-ink">
+              Encuentra tu próximo hogar.
+            </h1>
+            <p className="mt-6 max-w-[58ch] text-pretty text-lg leading-relaxed text-stone-600 sm:text-xl">
+              HabitIA te ayuda a alquilar o comprar con menos ruido: busca,
+              compara el precio y te cuenta cómo encaja cada vivienda en tu vida.
+            </p>
+
+            <HeroSearch />
+
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-stone-600">
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle aria-hidden size={16} weight="fill" className="text-saffron-700" />
+                Sin registro para empezar
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <ShieldCheck aria-hidden size={16} weight="fill" className="text-saffron-700" />
+                Fuentes explicadas
+              </span>
+            </div>
           </div>
 
-          <div className="mt-12 grid items-end gap-x-12 gap-y-10 lg:grid-cols-[1.45fr,1fr]">
-            <div className="animate-fade-up">
-              <Logo
-                variant="stack"
-                className="text-[clamp(3rem,8.5vw,7rem)]"
-                highlightClassName="font-display italic font-light text-saffron-700"
-              />
-              <p className="mt-7 max-w-[46ch] text-pretty text-xl leading-relaxed text-stone-600">
-                Cuéntame qué buscas y te enseño los pisos que mejor encajan
-                contigo, sobre el mapa: si están bien de precio, cómo se vive en
-                el barrio y cuánto tardas a tu trabajo.
-              </p>
+          <div className="relative mx-auto w-full max-w-[520px] animate-fade-up [animation-delay:100ms] lg:mx-0">
+            <div className="habitia-map relative aspect-[4/4.45] overflow-hidden rounded-[2rem] border border-white/80 shadow-lift">
+              <div className="absolute inset-x-5 top-5 flex items-center justify-between rounded-2xl bg-white/82 px-4 py-3 shadow-lift backdrop-blur-xl sm:inset-x-7 sm:top-7">
+                <div>
+                  <p className="text-xs font-medium text-stone">5 opciones analizadas</p>
+                  <p className="mt-0.5 font-semibold text-ink">Chamberí · alquiler</p>
+                </div>
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-saffron-50 text-saffron-700">
+                  <MapPin aria-hidden size={19} weight="fill" />
+                </span>
+              </div>
 
-              <div className="mt-9 flex flex-wrap items-center gap-3">
-                <Link
-                  href="/dashboard"
-                  className="group inline-flex items-center gap-2 rounded-lg bg-ink px-6 py-3.5 text-paper transition hover:bg-ink-700 active:scale-[0.98]"
-                >
-                  Buscar mi piso
-                  <ArrowRight size={16} weight="bold" className="text-saffron-300 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-                <a
-                  href="#como-funciona"
-                  className="inline-flex items-center gap-2 rounded-lg border border-hairline-strong px-6 py-3.5 text-ink-700 transition hover:border-ink/40 hover:text-ink"
-                >
-                  Ver cómo funciona
-                </a>
+              <div aria-hidden className="absolute left-[28%] top-[37%] grid h-11 w-11 place-items-center rounded-full border-[5px] border-white bg-saffron-700 text-xs font-semibold text-white shadow-lift">
+                1
+              </div>
+              <div aria-hidden className="absolute right-[18%] top-[44%] grid h-9 w-9 place-items-center rounded-full border-4 border-white bg-ink text-xs font-semibold text-white shadow-lift">
+                2
+              </div>
+              <div aria-hidden className="absolute left-[47%] top-[58%] h-7 w-7 rounded-full border-4 border-white bg-saffron-300 shadow-lift" />
+
+              <div className="absolute inset-x-4 bottom-4 rounded-[1.4rem] bg-white p-4 shadow-lift sm:inset-x-6 sm:bottom-6 sm:p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-semibold text-saffron-700">Mejor coincidencia</p>
+                    <p className="mt-1 font-semibold leading-tight text-ink">Piso luminoso en Trafalgar</p>
+                  </div>
+                  <Heart aria-hidden size={20} className="shrink-0 text-stone-400" />
+                </div>
+                <div className="mt-4 flex items-end justify-between gap-3 border-t border-hairline pt-4">
+                  <div>
+                    <p className="text-xl font-semibold tracking-tight text-ink">1.450 €<span className="text-sm font-normal text-stone">/mes</span></p>
+                    <p className="mt-0.5 text-sm text-stone">2 hab. · 74 m²</p>
+                  </div>
+                  <div className="space-y-1 text-right text-xs font-medium text-stone-600">
+                    <p className="text-saffron-700">4% bajo la zona</p>
+                    <p className="inline-flex items-center gap-1"><Clock aria-hidden size={12} /> 18 min al trabajo</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <blockquote className="border-l border-hairline pl-6 font-display text-2xl italic leading-snug text-ink-700 animate-fade-up [animation-delay:120ms] sm:text-[1.7rem]">
-              “El piso lo veo yo, los datos los pongo yo. Tú dime cómo quieres
-              vivir.”
-            </blockquote>
+            <div className="glass-surface absolute -right-2 top-[29%] hidden rounded-2xl px-4 py-3 text-sm sm:block lg:-right-8">
+              <p className="font-semibold text-ink">Barrio 82/100</p>
+              <p className="text-xs text-stone">Buen transporte · tranquilo</p>
+            </div>
           </div>
         </section>
 
-        {/* ─── Qué hace ─── */}
-        <section className="mt-24 sm:mt-32">
-          <div className="flex items-baseline justify-between gap-4 border-b border-hairline pb-4">
-            <h2 className="font-display text-3xl text-ink sm:text-4xl">
-              Un asesor inmobiliario en una conversación
+        <section aria-label="Ventajas" className="border-y border-hairline bg-white/55">
+          <div className="mx-auto grid w-full max-w-[1200px] gap-px px-5 sm:grid-cols-3 sm:px-8">
+            {[
+              [Buildings, "Alquiler y compra", "Una búsqueda para cada momento"],
+              [MapPin, "Todo en contexto", "Mapa, precio, barrio y trayecto"],
+              [ChatCircleText, "Una IA a tu lado", "Pregunta lo que no sale en la ficha"],
+            ].map(([Icon, title, copy]) => {
+              const ItemIcon = Icon as typeof Buildings;
+              return (
+                <div key={String(title)} className="flex items-start gap-3 border-b border-hairline py-6 last:border-b-0 sm:border-b-0 sm:border-r sm:px-7 sm:first:pl-0 sm:last:border-r-0 sm:last:pr-0">
+                  <ItemIcon aria-hidden size={20} weight="duotone" className="mt-0.5 shrink-0 text-saffron-700" />
+                  <div>
+                    <p className="font-semibold text-ink">{String(title)}</p>
+                    <p className="mt-0.5 text-sm text-stone-600">{String(copy)}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-[1200px] px-5 py-24 sm:px-8 sm:py-32">
+          <div className="max-w-[680px]">
+            <p className="text-sm font-semibold text-saffron-700">Decide con contexto</p>
+            <h2 className="mt-3 text-balance font-display text-4xl font-semibold leading-[1.02] tracking-[-0.045em] text-ink sm:text-5xl">
+              Menos pestañas. Mejores preguntas.
             </h2>
-            <span className="hidden shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-stone sm:inline">
-              Qué hace
-            </span>
+            <p className="mt-4 text-lg leading-relaxed text-stone-600">
+              Cada señal responde a una duda real antes de visitar una vivienda.
+            </p>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map(({ n, Icon, t, d }) => (
-              <article
-                key={n}
-                className="group rounded-xl border border-hairline bg-paper-50 p-6 transition hover:border-ink/20"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="grid h-9 w-9 place-items-center rounded-lg border border-hairline bg-paper text-ink transition group-hover:border-saffron-300">
-                    <Icon size={17} weight="bold" className="text-saffron-700" />
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-mist tabular">
-                    {n}
-                  </span>
-                </div>
-                <h3 className="mt-5 font-display text-xl leading-tight text-ink">
-                  {t}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-stone-600">{d}</p>
+          <div className="mt-12 grid gap-4 md:grid-cols-3">
+            {BENEFITS.map(({ Icon, title, copy, detail }) => (
+              <article key={title} className="group rounded-2xl border border-hairline bg-paper-50 p-6 shadow-hairline transition hover:-translate-y-0.5 hover:shadow-lift sm:p-7">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-saffron-50 text-saffron-700">
+                  <Icon aria-hidden size={23} weight="duotone" />
+                </span>
+                <p className="mt-8 text-xs font-semibold uppercase tracking-[0.08em] text-stone">{detail}</p>
+                <h3 className="mt-2 text-xl font-semibold leading-tight tracking-[-0.025em] text-ink">{title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-stone-600">{copy}</p>
               </article>
             ))}
           </div>
         </section>
 
-        {/* ─── Cómo funciona ─── */}
-        <section id="como-funciona" className="mt-24 scroll-mt-24 sm:mt-32">
-          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone">
-            Cómo funciona
-          </p>
-          <div className="mt-5 grid gap-px overflow-hidden rounded-xl border border-hairline bg-hairline sm:grid-cols-3">
-            {STEPS.map((s) => (
-              <div key={s.i} className="bg-paper-50 p-7">
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-saffron-700 tabular">
-                  {s.i}
-                </p>
-                <h3 className="mt-3 font-display text-2xl leading-tight text-ink">
-                  {s.t}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-stone-600">{s.d}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ─── Marca + transparencia de datos ─── */}
-        <section className="mt-24 grid gap-10 sm:mt-32 lg:grid-cols-2">
-          <div className="grainy-blob relative rounded-xl border border-hairline bg-paper-50 p-8">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone">
-              La marca
-            </p>
-            <div className="mt-5 flex items-center gap-5">
-              <Logo variant="mark" className="text-5xl" />
-              <p className="text-sm leading-relaxed text-stone-600">
-                La <span className="font-display italic text-saffron-700">A</span> de
-                Agente y la <span className="font-display italic text-saffron-700">I</span> de
-                Inmobiliario forman el sigil <span className="font-display italic text-saffron-700">A·I</span> —
-                IA. El nombre es también lo que es: inteligencia artificial al
-                servicio de tu próxima casa.
+        <section id="como-funciona" className="scroll-mt-24 bg-ink text-paper">
+          <div className="mx-auto grid w-full max-w-[1200px] gap-12 px-5 py-24 sm:px-8 sm:py-28 lg:grid-cols-[0.78fr,1.22fr] lg:gap-20">
+            <div>
+              <p className="text-sm font-semibold text-saffron-300">Cómo funciona</p>
+              <h2 className="mt-3 text-balance font-display text-4xl font-semibold leading-[1.04] tracking-[-0.045em] sm:text-5xl">
+                De la zona a una lista corta.
+              </h2>
+              <p className="mt-5 max-w-[44ch] text-paper/65">
+                Empieza con lo imprescindible. Añade preferencias solo si quieres afinar el orden.
               </p>
+              <Link href="/como-funciona" className="pressable mt-7 inline-flex min-h-11 items-center gap-2 rounded-xl bg-paper px-4 font-medium text-ink hover:bg-paper-200">
+                Ver el método
+                <ArrowRight aria-hidden size={15} weight="bold" className="text-saffron-700" />
+              </Link>
             </div>
-          </div>
 
-          <div className="rounded-xl border border-hairline bg-paper-50 p-8">
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone">
-              De dónde salen los datos
-            </p>
-            <ul className="mt-5 space-y-3 text-sm leading-relaxed text-stone-600">
-              <li className="flex gap-3">
-                <ChartBar size={16} weight="bold" className="mt-0.5 shrink-0 text-saffron-700" />
-                <span>
-                  Anuncios reales de <span className="text-ink">Idealista</span> y
-                  datos de mercado del <span className="text-ink">INE</span> y el{" "}
-                  <span className="text-ink">Banco de España</span>.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <ShieldCheck size={16} weight="bold" className="mt-0.5 shrink-0 text-saffron-700" />
-                <span>
-                  Los indicadores de seguridad y calidad de vida son{" "}
-                  <span className="text-ink">estimaciones orientativas</span>,
-                  compuestas a partir de fuentes públicas. Te avisamos siempre.
-                </span>
-              </li>
-            </ul>
+            <ol className="divide-y divide-white/10 border-y border-white/10">
+              {STEPS.map((step) => (
+                <li key={step.number} className="grid grid-cols-[auto,1fr] gap-5 py-6 sm:gap-8 sm:py-7">
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-white/10 text-sm font-semibold text-saffron-300">
+                    {step.number}
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-semibold text-paper">{step.title}</h3>
+                    <p className="mt-1.5 max-w-[52ch] text-sm leading-relaxed text-paper/60">{step.copy}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
-        {/* ─── CTA final ─── */}
-        <section className="mt-24 sm:mt-32">
-          <div className="grainy-blob relative overflow-hidden rounded-2xl border border-ink bg-ink px-8 py-14 text-center text-paper sm:py-20">
-            <h2 className="mx-auto max-w-[20ch] font-display text-4xl leading-tight sm:text-5xl">
-              Busca piso de otra forma.
+        <section className="mx-auto grid w-full max-w-[1200px] gap-6 px-5 py-24 sm:px-8 sm:py-28 lg:grid-cols-2">
+          <div className="rounded-[2rem] border border-hairline bg-saffron-50 p-7 sm:p-10">
+            <p className="text-sm font-semibold text-saffron-700">Antes de decidir</p>
+            <h2 className="mt-3 max-w-[14ch] text-balance text-3xl font-semibold leading-tight tracking-[-0.04em] text-ink sm:text-4xl">
+              ¿Te conviene comprar o alquilar?
             </h2>
-            <p className="mx-auto mt-4 max-w-[44ch] text-pretty text-paper/70">
-              Sin filtros interminables. Solo una conversación que entiende cómo
-              quieres vivir.
+            <p className="mt-4 max-w-[50ch] leading-relaxed text-stone-600">
+              Compara ambos escenarios con entrada, hipoteca, alquiler e inversión a lo largo del tiempo.
             </p>
-            <Link
-              href="/dashboard"
-              className="group mt-8 inline-flex items-center gap-2 rounded-lg bg-paper px-7 py-3.5 text-ink transition hover:bg-paper-200 active:scale-[0.98]"
-            >
-              Empezar ahora
-              <ArrowRight size={16} weight="bold" className="text-saffron-700 transition-transform group-hover:translate-x-0.5" />
+            <Link href="/comprar-o-alquilar" className="pressable mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl bg-ink px-5 font-medium text-paper hover:bg-ink-700">
+              Comparar escenarios
+              <ArrowRight aria-hidden size={16} weight="bold" className="text-saffron-300" />
+            </Link>
+          </div>
+
+          <div className="rounded-[2rem] border border-hairline bg-paper-50 p-7 sm:p-10">
+            <p className="text-sm font-semibold text-saffron-700">Transparencia</p>
+            <h2 className="mt-3 max-w-[16ch] text-balance text-3xl font-semibold leading-tight tracking-[-0.04em] text-ink sm:text-4xl">
+              Cada dato tiene una fuente y un límite.
+            </h2>
+            <p className="mt-4 max-w-[50ch] leading-relaxed text-stone-600">
+              Indicamos qué viene del anuncio, qué es una referencia pública y qué es una estimación. La disponibilidad se confirma siempre en la fuente original.
+            </p>
+            <Link href="/datos" className="pressable mt-7 inline-flex min-h-12 items-center gap-2 rounded-xl border border-hairline-strong bg-white px-5 font-medium text-ink hover:border-saffron-300">
+              Ver datos y fuentes
+              <ArrowRight aria-hidden size={16} weight="bold" className="text-saffron-700" />
             </Link>
           </div>
         </section>
 
-        {/* ─── Footer ─── */}
-        <footer className="mt-20 flex flex-col items-center justify-between gap-4 border-t border-hairline py-10 sm:flex-row">
-          <Logo variant="inline" className="text-[0.95rem]" />
-          <p className="text-center font-mono text-[10px] uppercase tracking-[0.16em] text-mist sm:text-right">
-            La IA puede equivocarse · verifica los anuncios en Idealista
-          </p>
-        </footer>
+        <section className="mx-auto w-full max-w-[1200px] px-5 pb-24 sm:px-8 sm:pb-28">
+          <div className="relative overflow-hidden rounded-[2rem] bg-saffron-700 px-6 py-16 text-center text-white sm:px-12 sm:py-20">
+            <div aria-hidden className="absolute -left-20 -top-28 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
+            <div aria-hidden className="absolute -bottom-36 -right-16 h-80 w-80 rounded-full bg-ink/20 blur-2xl" />
+            <div className="relative">
+              <h2 className="mx-auto max-w-[17ch] text-balance text-4xl font-semibold leading-tight tracking-[-0.045em] sm:text-5xl">
+                Tu próxima vivienda empieza por una zona.
+              </h2>
+              <p className="mx-auto mt-4 max-w-[48ch] text-white/75">
+                Busca ahora y personaliza las recomendaciones cuando quieras.
+              </p>
+              <Link href="/dashboard" className="pressable mt-8 inline-flex min-h-12 items-center gap-2 rounded-xl bg-white px-6 py-3.5 font-semibold text-saffron-700 shadow-lift hover:bg-paper-100">
+                Empezar a buscar
+                <ArrowRight aria-hidden size={16} weight="bold" />
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <footer className="border-t border-hairline bg-paper-50/70">
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-6 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div>
+            <Logo variant="inline" className="text-lg" />
+            <p className="mt-1 text-sm text-stone">Menos ruido. Mejores decisiones de vivienda.</p>
+          </div>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-stone-600">
+            <Link href="/como-funciona" className="hover:text-ink">Cómo funciona</Link>
+            <Link href="/datos" className="hover:text-ink">Datos y fuentes</Link>
+            <Link href="/chat" className="hover:text-ink">Asistente</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

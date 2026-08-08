@@ -73,7 +73,7 @@ export async function geocodeAddress(
     const res = await fetch(url, {
       headers: {
         // Nominatim exige un User-Agent identificable.
-        "User-Agent": "AgenteInmobiliario/1.0 (TFM; contacto via app)",
+        "User-Agent": "HabitIA/1.0 (TFM; contacto via app)",
         "Accept-Language": "es",
       },
       cache: "no-store",
@@ -106,7 +106,7 @@ export async function reverseGeocode(
       `?format=jsonv2&zoom=14&addressdetails=1&lat=${lat}&lon=${lon}`;
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "AgenteInmobiliario/1.0 (TFM; contacto via app)",
+        "User-Agent": "HabitIA/1.0 (TFM; contacto via app)",
         "Accept-Language": "es",
       },
       cache: "no-store",

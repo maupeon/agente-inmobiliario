@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Map, {
   Layer,
   Marker,
@@ -42,6 +42,15 @@ export default function MapPanel({
   showTrajectory,
 }: MapPanelProps) {
   const mapRef = useRef<MapRef | null>(null);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduceMotion(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   const plotted = useMemo(
     () => items.filter((it) => it.property.latitude != null && it.property.longitude != null),
@@ -102,7 +111,7 @@ export default function MapPanel({
     if (work) pts.push([work.lon, work.lat]);
     if (pts.length === 0) return;
     if (pts.length === 1) {
-      map.flyTo({ center: pts[0], zoom: 13.5, duration: 600 });
+      map.flyTo({ center: pts[0], zoom: 13.5, duration: reduceMotion ? 0 : 600 });
       return;
     }
     let minLon = pts[0][0],
@@ -120,7 +129,7 @@ export default function MapPanel({
         [minLon, minLat],
         [maxLon, maxLat],
       ],
-      { padding: 64, maxZoom: 14, duration: 600 }
+      { padding: 64, maxZoom: 14, duration: reduceMotion ? 0 : 600 }
     );
   }
 
@@ -137,7 +146,7 @@ export default function MapPanel({
     map.flyTo({
       center: [selected.property.longitude!, selected.property.latitude!],
       zoom: Math.max(map.getZoom(), 13),
-      duration: 500,
+      duration: reduceMotion ? 0 : 500,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCode]);
@@ -183,24 +192,30 @@ export default function MapPanel({
             <button
               type="button"
               aria-label={it.property.title}
-              className="block cursor-pointer rounded-full border-2 border-paper-50 transition-all"
-              style={{
-                width: isSel ? 22 : 15,
-                height: isSel ? 22 : 15,
-                background: color,
-                boxShadow: isSel
-                  ? `0 0 0 4px ${color}33, 0 1px 3px rgba(0,0,0,0.35)`
-                  : "0 1px 3px rgba(0,0,0,0.35)",
-              }}
-            />
+              aria-pressed={isSel}
+              className="grid h-11 w-11 cursor-pointer place-items-center rounded-full"
+            >
+              <span
+                aria-hidden
+                className="block rounded-full border-2 border-paper-50 transition-all"
+                style={{
+                  width: isSel ? 22 : 16,
+                  height: isSel ? 22 : 16,
+                  background: color,
+                  boxShadow: isSel
+                    ? `0 0 0 4px ${color}33, 0 1px 3px rgba(0,0,0,0.35)`
+                    : "0 1px 3px rgba(0,0,0,0.35)",
+                }}
+              />
+            </button>
           </Marker>
         );
       })}
 
       {work && (
         <Marker longitude={work.lon} latitude={work.lat} anchor="center">
-          <div className="flex items-center gap-1 rounded-sm border border-ink bg-ink px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-[0.16em] text-paper shadow">
-            <span style={{ color: "#D8B254" }}>◆</span> Trabajo
+          <div className="flex min-h-8 items-center gap-1.5 rounded-lg border border-ink bg-ink px-2 text-xs font-medium text-paper shadow">
+            <span className="text-saffron-300">◆</span> Trabajo
           </div>
         </Marker>
       )}
@@ -258,7 +273,7 @@ const TRAJECTORY_SOLID: LayerProps = {
   id: "trajectory-line",
   type: "line",
   layout: { "line-cap": "round", "line-join": "round" },
-  paint: { "line-color": "#7A5610", "line-width": 3.5, "line-opacity": 0.9 },
+  paint: { "line-color": "#176547", "line-width": 3.5, "line-opacity": 0.9 },
 };
 
 const TRAJECTORY_DASHED: LayerProps = {
@@ -266,7 +281,7 @@ const TRAJECTORY_DASHED: LayerProps = {
   type: "line",
   layout: { "line-cap": "round", "line-join": "round" },
   paint: {
-    "line-color": "#7A5610",
+    "line-color": "#176547",
     "line-width": 3,
     "line-opacity": 0.85,
     "line-dasharray": [1.5, 1.5],

@@ -61,7 +61,7 @@ async function resolveCenter(name) {
   }
   // Nominatim (sin clave) como en lib/commute/index.ts.
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=es&q=${encodeURIComponent(name)}`;
-  const res = await fetch(url, { headers: { "User-Agent": "AgenteInmobiliario/1.0 (TFM)", "Accept-Language": "es" } });
+  const res = await fetch(url, { headers: { "User-Agent": "HabitIA/1.0 (TFM)", "Accept-Language": "es" } });
   if (!res.ok) return null;
   const arr = await res.json();
   const hit = arr?.[0];

@@ -1,10 +1,9 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Sistema de diseño "minimalist-ui editorial".
- * Canvas warm bone, tipografía editorial serif + sans geométrica + mono,
- * un único acento pastel muted (saffron) y un secundario (clay/sage).
- * Sin shadows pesadas, bordes hairline, radios crujientes.
+ * Sistema de diseño HabitIA inspirado en interfaces Apple.
+ * Canvas cálido, tipografía sans muy legible, verde botánico como acento,
+ * superficies translúcidas y profundidad contenida.
  */
 const config: Config = {
   content: [
@@ -18,41 +17,41 @@ const config: Config = {
       colors: {
         // Canvas y superficies. "Paper" es el fondo cálido del documento.
         paper: {
-          DEFAULT: "#FBFAF6",
+          DEFAULT: "#F7F8F5",
           50: "#FFFFFF",
-          100: "#FDFCF8",
-          200: "#F7F6F3",
-          300: "#F1EFE9",
+          100: "#FAFBF8",
+          200: "#F1F4EF",
+          300: "#E8ECE6",
         },
         // Texto y tinta.
         ink: {
-          DEFAULT: "#1A1A1A",
-          900: "#111111",
-          800: "#1F1F1F",
-          700: "#2F3437",
+          DEFAULT: "#17211D",
+          900: "#101713",
+          800: "#1B2822",
+          700: "#34443D",
         },
         stone: {
-          DEFAULT: "#6B6862",
-          400: "#8B8780",
-          500: "#6B6862",
-          600: "#4A4844",
+          DEFAULT: "#68736D",
+          400: "#8B9690",
+          500: "#68736D",
+          600: "#4C5A53",
         },
-        mist: "#A8A49B",
+        mist: "#98A39D",
         // Hairlines y reglas.
         hairline: {
-          DEFAULT: "#EAE7DF",
-          strong: "#D9D5CB",
+          DEFAULT: "#E3E8E3",
+          strong: "#CFD7D1",
         },
-        // Único acento principal: saffron pastel muted.
+        // Acento HabitIA: verde botánico calmado, legible y no estridente.
         saffron: {
-          50: "#FBF3DB",
-          100: "#F8E9B6",
-          200: "#EFD78A",
-          300: "#D8B254",
-          500: "#956400",
-          700: "#7A5610",
+          50: "#ECF8F1",
+          100: "#D8F0E2",
+          200: "#B4DFC7",
+          300: "#83C8A4",
+          500: "#2D7C59",
+          700: "#176547",
         },
-        // Secundario para tags semánticos: clay (terracota muteada).
+        // Colores secundarios reservados para estados semánticos.
         clay: {
           50: "#F4E5D9",
           100: "#EBD3C0",
@@ -68,9 +67,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        // Cargadas con next/font en app/layout.tsx → CSS variables.
-        display: ["var(--font-display)", "Newsreader", "Lyon Text", "serif"],
-        sans: ["var(--font-sans)", "Geist", "SF Pro Display", "system-ui", "sans-serif"],
+        // Cargadas localmente con Geist en app/layout.tsx → CSS variables.
+        display: ["var(--font-sans)", "Geist", "SF Pro Display", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "Geist", "SF Pro Text", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "Geist Mono", "SF Mono", "monospace"],
       },
       fontSize: {
@@ -79,16 +78,16 @@ const config: Config = {
         "display-md": ["clamp(1.75rem, 3vw, 2.5rem)", { lineHeight: "1.1", letterSpacing: "-0.02em" }],
       },
       borderRadius: {
-        sm: "4px",
-        DEFAULT: "6px",
-        lg: "8px",
-        xl: "12px",
-        "2xl": "16px",
+        sm: "6px",
+        DEFAULT: "8px",
+        lg: "12px",
+        xl: "16px",
+        "2xl": "24px",
       },
       boxShadow: {
         // Ultra difusas, opacidad < 0.05.
         hairline: "0 0 0 1px rgba(0, 0, 0, 0.04)",
-        lift: "0 1px 1px rgba(17, 17, 17, 0.02), 0 8px 24px -12px rgba(17, 17, 17, 0.06)",
+        lift: "0 1px 2px rgba(16, 23, 19, 0.04), 0 18px 44px -20px rgba(16, 23, 19, 0.18)",
         nudge: "0 1px 0 rgba(17, 17, 17, 0.03)",
       },
       animation: {

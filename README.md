@@ -1,8 +1,8 @@
-# Agente Inmobiliario — IA conversacional para el mercado español
+# HabitIA — encuentra piso para alquilar o comprar
 
-Aplicación web conversacional que actúa como agente inmobiliario para el
-mercado español. El usuario habla en lenguaje natural con un agente
-construido sobre `claude-opus-4-6`. Cuando lo necesita, el agente llama
+HabitIA es una aplicación web para encontrar vivienda en el mercado español.
+El usuario explica en lenguaje natural qué quiere alquilar o comprar. Un agente
+construido sobre `claude-opus-4-6` llama, cuando lo necesita, a
 herramientas conectadas a la API de Idealista para buscar propiedades,
 abrir la ficha de un anuncio y calcular hipotecas. Las conversaciones y
 favoritos se persisten en Supabase.
@@ -12,7 +12,7 @@ Next.js 14 (App Router, RSC + SSE)
 Anthropic SDK · streaming · tool-use multi-turn
 Idealista API · OAuth2 client_credentials
 Supabase · conversaciones, favoritos, eventos
-Tailwind 3 · sistema editorial-noir mediterráneo
+Tailwind 3 · sistema de diseño HabitIA
 ```
 
 ## Arranque local
@@ -29,8 +29,8 @@ la experiencia principal: tras el onboarding, la pestaña **"Para ti"** busca en
 Idealista con tu perfil y te enseña los **3-5 pisos que mejor encajan** sobre un
 mapa, coloreados por precio frente a la zona, con halo de seguridad del barrio y
 el trayecto desde tu trabajo a cada piso, cada uno con una explicación de por
-qué encaja. El chat sigue disponible como opción secundaria ("Pregúntale a la
-IA"). Si dejas
+qué encaja. El chat sigue disponible como opción secundaria ("Pregúntale a
+HabitIA"). Si dejas
 `MOCK_IDEALISTA=true` (por defecto en `.env.local`) las búsquedas
 devuelven datos sintéticos coherentes generados en `lib/idealista/mock.ts`.
 
@@ -50,6 +50,7 @@ el primer turno.
 | `SUPABASE_SERVICE_ROLE_KEY` | recomendada | Escrituras desde API routes. |
 | `MOCK_IDEALISTA` | no | `true` evita llamar a Idealista y devuelve datos ficticios. |
 | `ANTHROPIC_MODEL` | no | Permite forzar otro modelo (default `claude-opus-4-6`). |
+| `NEXT_PUBLIC_SITE_URL` | recomendada en prod | URL pública usada en los metadatos sociales. |
 
 Si Supabase no está configurado, los endpoints `/api/conversations` y
 `/api/favorites` devuelven listas vacías; el chat sigue funcionando y los
@@ -99,14 +100,12 @@ vercel.json
 
 ## Diseño
 
-Editorial-noir mediterráneo. Off-black tintado en cálido, **un único**
-acento ámbar/saffron (sin lila/cyan AI-slop), tipografía editorial:
-Fraunces para display, DM Sans para UI, DM Mono para datos. Las
-propiedades se presentan como spreads de revista con un *feature*
-grande seguido de bloques compactos en bento asimétrico, no como tres
-tarjetas iguales en horizontal. Layouts asimétricos también en la
-home: hero más ancho que la columna de chips, tres pasos numerados con
-el `00 01 02` en mono.
+Sistema cálido y sereno inspirado en las interfaces de Apple: jerarquía clara,
+Geist para lectura y datos, verde botánico como acento, controles cómodos,
+superficies translúcidas y profundidad contenida. La búsqueda principal aparece
+en el primer viewport; el perfil se completa de forma progresiva y opcional.
+Los resultados priorizan título, precio, características, motivo de encaje y
+acciones, con cambio claro entre lista y mapa en móvil.
 
 Tokens en `tailwind.config.ts` y `app/globals.css`.
 

@@ -20,7 +20,7 @@ interface LocationPickerProps {
   searchPlaceholder?: string;
   /** Centro inicial si aún no hay valor. */
   defaultCenter?: { lat: number; lon: number; zoom?: number };
-  /** Color del pin (saffron para la zona, ink para el trabajo, p. ej.). */
+  /** Color del pin (verde HabitIA para la zona, ink para el trabajo, p. ej.). */
   accent?: string;
   heightClass?: string;
 }
@@ -30,7 +30,7 @@ export default function LocationPicker({
   onChange,
   searchPlaceholder = "Busca una zona o dirección…",
   defaultCenter,
-  accent = "#7A5610",
+  accent = "#176547",
   heightClass = "h-[300px]",
 }: LocationPickerProps) {
   const mapRef = useRef<MapRef | null>(null);

@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowSquareOut, Heart, X } from "@phosphor-icons/react";
 import { bandaColor, formatDiff } from "@/lib/dashboard-format";
 import { cn, formatEUR, formatNumber } from "@/lib/utils";
@@ -26,7 +26,14 @@ export function PropertyDetailDrawer({
 }) {
   const [detail, setDetail] = useState<PropertyDetail | null>(null);
   const [loading, setLoading] = useState(false);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
   const code = item?.property.propertyCode ?? null;
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!code) {
@@ -51,12 +58,41 @@ export function PropertyDetailDrawer({
   }, [code]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    if (!code) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const frame = requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
+
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [code]);
 
   if (!item) return null;
   const p = item.property;
@@ -70,10 +106,17 @@ export function PropertyDetailDrawer({
       <button
         type="button"
         aria-label="Cerrar ficha"
+        tabIndex={-1}
         onClick={onClose}
         className="fixed inset-0 z-40 animate-fade-in bg-ink/40 backdrop-blur-sm"
       />
-      <aside className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[640px] flex-col bg-paper shadow-lift">
+      <aside
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="property-detail-title"
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-[640px] flex-col bg-paper shadow-lift"
+      >
         <header className="flex items-center justify-between gap-3 border-b border-hairline px-5 py-3">
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone">
             Ficha completa
@@ -82,16 +125,18 @@ export function PropertyDetailDrawer({
             <button
               type="button"
               onClick={onToggleFavorite}
+              aria-pressed={isFavorite}
               aria-label={isFavorite ? "Quitar de favoritos" : "Guardar en favoritos"}
-              className="grid h-8 w-8 place-items-center rounded-md border border-hairline text-stone transition hover:border-ink/30 hover:text-ink"
+              className="pressable grid h-11 w-11 place-items-center rounded-xl border border-hairline text-stone hover:border-saffron-300 hover:text-saffron-700"
             >
               <Heart size={14} weight={isFavorite ? "fill" : "regular"} className={isFavorite ? "text-clay-500" : ""} />
             </button>
             <button
+              ref={closeButtonRef}
               type="button"
               onClick={onClose}
               aria-label="Cerrar"
-              className="grid h-8 w-8 place-items-center rounded-md border border-hairline text-stone transition hover:border-ink/30 hover:text-ink"
+              className="pressable grid h-11 w-11 place-items-center rounded-xl border border-hairline text-stone hover:border-saffron-300 hover:text-ink"
             >
               <X size={14} weight="bold" />
             </button>
@@ -105,8 +150,8 @@ export function PropertyDetailDrawer({
                 <img
                   key={i}
                   src={src}
-                  alt={p.title}
-                  loading="lazy"
+                  alt={i === 0 ? p.title : ""}
+                  loading={i === 0 ? "eager" : "lazy"}
                   className={cn(
                     "w-full rounded-lg object-cover",
                     i === 0 ? "col-span-2 h-56" : "h-36"
@@ -117,7 +162,7 @@ export function PropertyDetailDrawer({
           )}
 
           <div>
-            <h2 className="font-display text-2xl leading-tight text-ink">{p.title}</h2>
+            <h2 id="property-detail-title" className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-ink">{p.title}</h2>
             <p className="mt-1 text-sm text-stone">
               {[p.address, p.district, p.municipality].filter(Boolean).join(" · ")}
             </p>

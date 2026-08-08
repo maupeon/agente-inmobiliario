@@ -1,7 +1,7 @@
-# Cómo funciona Agente Inmobiliario
+# Cómo funciona HabitIA
 
-> Un agente inmobiliario que no te hace rellenar filtros: le cuentas cómo
-> quieres vivir y te devuelve los pisos que mejor encajan, sobre un mapa, con el
+> HabitIA evita los filtros interminables: le cuentas cómo quieres vivir y te
+> devuelve los pisos que mejor encajan, sobre un mapa, con el
 > porqué de cada uno. Este documento explica el flujo, la arquitectura y de
 > dónde salen los datos. La versión interactiva vive en `/como-funciona`.
 
@@ -98,6 +98,6 @@ OpenRouteService, e INE/MITMA/Banco de España para el mercado.
 - `/` — portada
 - `/dashboard` — onboarding + panel «para ti» con mapa
 - `/como-funciona` — esta explicación
-- `/chat` — el agente conversacional (opcional)
+- `/chat` — conversación con HabitIA (opcional)
 - `/api/recommend`, `/api/enrich`, `/api/property`, `/api/geocode`,
   `/api/chat`, `/api/cron/market`

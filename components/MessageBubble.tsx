@@ -106,8 +106,8 @@ export function MessageBubble({
           variant="mark"
           className={cn("text-base transition-transform", isStreaming && "mark-pulse")}
         />
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-stone">
-          Agente Inmobiliario
+        <span className="font-mono text-[10px] tracking-[0.2em] text-stone">
+          HabitIA
         </span>
         <span className="h-px flex-1 bg-hairline" />
       </header>

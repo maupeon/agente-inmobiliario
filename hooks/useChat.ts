@@ -29,6 +29,7 @@ interface UseChatReturn {
   activeTool: string | null;
   error: string | null;
   send(text: string): Promise<void>;
+  stop(): void;
   reset(): void;
   loadConversation(id: string): Promise<void>;
 }
@@ -51,6 +52,10 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
   const [activeTool, setActiveTool] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const stop = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
@@ -291,6 +296,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
     activeTool,
     error,
     send,
+    stop,
     reset,
     loadConversation,
   };

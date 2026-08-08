@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { ArrowLeft, ArrowRight, Check } from "@phosphor-icons/react";
@@ -16,7 +17,7 @@ import { Logo } from "./ui/Logo";
 const LocationPicker = dynamic(() => import("./LocationPicker"), {
   ssr: false,
   loading: () => (
-    <div className="grid h-[300px] place-items-center rounded-lg border border-hairline bg-paper-200 font-mono text-[10px] uppercase tracking-[0.2em] text-stone">
+    <div className="grid h-[300px] place-items-center rounded-2xl border border-hairline bg-paper-200 text-sm text-stone">
       Cargando mapa…
     </div>
   ),
@@ -34,7 +35,7 @@ const PRIORITIES: Array<{ key: Priority; label: string }> = [
 const MODES: Array<{ key: CommuteMode; label: string }> = [
   { key: "a_pie", label: "A pie" },
   { key: "bici", label: "En bici" },
-  { key: "transporte", label: "Transporte" },
+  { key: "transporte", label: "Transporte público" },
   { key: "coche", label: "En coche" },
 ];
 
@@ -47,7 +48,7 @@ const HOGARES: Array<{ key: Hogar; label: string }> = [
 
 const MUST: Array<{ key: Imprescindible; label: string }> = [
   { key: "ascensor", label: "Ascensor" },
-  { key: "exterior", label: "Exterior / luminoso" },
+  { key: "exterior", label: "Exterior o luminoso" },
   { key: "terraza", label: "Terraza o balcón" },
   { key: "aire_acondicionado", label: "Aire acondicionado" },
   { key: "amueblado", label: "Amueblado" },
@@ -55,7 +56,7 @@ const MUST: Array<{ key: Imprescindible; label: string }> = [
   { key: "trastero", label: "Trastero" },
 ];
 
-const STEPS = ["Tú", "Zona", "Sobre ti", "Trabajo", "Prioridades"] as const;
+const STEPS = ["Búsqueda", "Sobre ti", "Trabajo", "Prioridades"] as const;
 
 export function Onboarding({
   initial,
@@ -63,30 +64,32 @@ export function Onboarding({
   onSkip,
 }: {
   initial?: UserProfile | null;
-  onComplete: (p: UserProfile) => void;
+  onComplete: (profile: UserProfile) => void;
   onSkip: () => void;
 }) {
   const [step, setStep] = useState(0);
-
+  const [zoneError, setZoneError] = useState(false);
   const [name, setName] = useState(initial?.name ?? "");
-  const [operacion, setOperacion] = useState<UserProfile["operacion"]>(
+  const [operation, setOperation] = useState<UserProfile["operacion"]>(
     initial?.operacion ?? "alquiler"
   );
-  const [tipo, setTipo] = useState<"pisos" | "casas">(initial?.tipo ?? "pisos");
-  const [zonaLoc, setZonaLoc] = useState<PickedLocation | null>(
+  const [propertyType, setPropertyType] = useState<"pisos" | "casas">(
+    initial?.tipo ?? "pisos"
+  );
+  const [zone, setZone] = useState<PickedLocation | null>(
     initial?.zona && initial.zonaLat != null && initial.zonaLon != null
       ? { lat: initial.zonaLat, lon: initial.zonaLon, label: initial.zona }
       : null
   );
-  const [presupuesto, setPresupuesto] = useState(
+  const [budget, setBudget] = useState(
     initial?.presupuestoMax ? String(initial.presupuestoMax) : ""
   );
-  const [habitaciones, setHabitaciones] = useState(
+  const [rooms, setRooms] = useState(
     initial?.habitaciones ? String(initial.habitaciones) : ""
   );
-  const [hogar, setHogar] = useState<Hogar | undefined>(initial?.hogar);
-  const [mascota, setMascota] = useState<boolean | undefined>(initial?.mascota);
-  const [trabajoLoc, setTrabajoLoc] = useState<PickedLocation | null>(
+  const [household, setHousehold] = useState<Hogar | undefined>(initial?.hogar);
+  const [pet, setPet] = useState<boolean | undefined>(initial?.mascota);
+  const [work, setWork] = useState<PickedLocation | null>(
     initial?.trabajo?.lat != null && initial?.trabajo?.lon != null
       ? {
           lat: initial.trabajo.lat,
@@ -95,294 +98,342 @@ export function Onboarding({
         }
       : null
   );
-  const [modo, setModo] = useState<CommuteMode | undefined>(initial?.trabajo?.modo);
-  const [imprescindibles, setImprescindibles] = useState<Imprescindible[]>(
+  const [commuteMode, setCommuteMode] = useState<CommuteMode | undefined>(
+    initial?.trabajo?.modo
+  );
+  const [mustHaves, setMustHaves] = useState<Imprescindible[]>(
     initial?.imprescindibles ?? []
   );
-  const [prioridades, setPrioridades] = useState<Priority[]>(initial?.prioridades ?? []);
+  const [priorities, setPriorities] = useState<Priority[]>(
+    initial?.prioridades ?? []
+  );
 
-  const unidad = operacion === "venta" ? "€" : "€/mes";
-  const isLast = step === STEPS.length - 1;
+  const unit = operation === "venta" ? "€" : "€/mes";
+  const lastStep = step === STEPS.length - 1;
 
-  function finish() {
-    const profile: UserProfile = {
+  function buildProfile(): UserProfile {
+    return {
       name: name.trim() || undefined,
-      operacion,
-      tipo,
-      zona: zonaLoc?.label || undefined,
-      zonaLat: zonaLoc?.lat,
-      zonaLon: zonaLoc?.lon,
-      presupuestoMax: presupuesto ? Number(presupuesto) : undefined,
-      habitaciones: habitaciones ? Number(habitaciones) : undefined,
-      hogar,
-      mascota,
-      imprescindibles: imprescindibles.length ? imprescindibles : undefined,
-      trabajo: trabajoLoc
+      operacion: operation,
+      tipo: propertyType,
+      zona: zone?.label,
+      zonaLat: zone?.lat,
+      zonaLon: zone?.lon,
+      presupuestoMax: budget ? Number(budget) : undefined,
+      habitaciones: rooms ? Number(rooms) : undefined,
+      hogar: household,
+      mascota: pet,
+      imprescindibles: mustHaves.length ? mustHaves : undefined,
+      trabajo: work
         ? {
-            direccion: trabajoLoc.label,
-            lat: trabajoLoc.lat,
-            lon: trabajoLoc.lon,
-            modo,
+            direccion: work.label,
+            lat: work.lat,
+            lon: work.lon,
+            modo: commuteMode,
           }
         : undefined,
-      prioridades: prioridades.length ? prioridades : undefined,
-      createdAt: new Date().toISOString(),
+      prioridades: priorities.length ? priorities : undefined,
+      createdAt: initial?.createdAt ?? new Date().toISOString(),
     };
-    onComplete(profile);
   }
 
-  function toggle<T>(value: T, list: T[], set: (l: T[]) => void) {
-    set(list.includes(value) ? list.filter((x) => x !== value) : [...list, value]);
+  function requireZone(): boolean {
+    if (zone) return true;
+    setZoneError(true);
+    setStep(0);
+    return false;
   }
 
-  const greeting = name.trim() ? `Encantado, ${name.trim()}.` : "Vamos a conocerte.";
+  function finish() {
+    if (!requireZone()) return;
+    onComplete(buildProfile());
+  }
+
+  function next() {
+    if (step === 0 && !requireZone()) return;
+    setStep((current) => Math.min(current + 1, STEPS.length - 1));
+  }
+
+  function toggle<T>(value: T, list: T[], update: (items: T[]) => void) {
+    update(list.includes(value) ? list.filter((item) => item !== value) : [...list, value]);
+  }
 
   return (
-    <div className="mx-auto max-w-[680px] animate-fade-up">
-      <div className="flex items-center justify-between gap-4 border-y border-ink py-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink">
-        <span>
-          Paso {String(step + 1).padStart(2, "0")} · {STEPS[step]}
-        </span>
-        <button type="button" onClick={onSkip} className="text-stone transition hover:text-ink">
-          Saltar →
+    <section aria-labelledby="onboarding-title" className="mx-auto max-w-[760px] animate-fade-up">
+      <div className="flex items-center justify-between gap-4">
+        <Logo variant="inline" className="text-2xl" />
+        <button
+          type="button"
+          onClick={step === 0 ? onSkip : finish}
+          className="pressable min-h-11 rounded-lg px-3 text-sm font-medium text-stone-600 hover:bg-paper-200 hover:text-ink"
+        >
+          {step === 0 ? "Ir a búsqueda rápida" : "Ver resultados ahora"}
         </button>
       </div>
 
-      <div className="mt-10">
-        <Logo variant="inline" className="text-2xl" />
+      <div className="mt-7 flex items-center gap-4" aria-live="polite">
+        <div
+          role="progressbar"
+          aria-label={`Paso ${step + 1} de ${STEPS.length}: ${STEPS[step]}`}
+          aria-valuemin={1}
+          aria-valuemax={STEPS.length}
+          aria-valuenow={step + 1}
+          className="flex flex-1 gap-1.5"
+        >
+          {STEPS.map((label, index) => (
+            <span
+              key={label}
+              className={cn(
+                "h-1.5 flex-1 rounded-full transition-colors",
+                index <= step ? "bg-saffron-500" : "bg-hairline-strong"
+              )}
+            />
+          ))}
+        </div>
+        <span className="shrink-0 text-sm font-medium text-stone">
+          {step + 1} de {STEPS.length}
+        </span>
+      </div>
 
-        <div className="mt-8 min-h-[320px]">
+      <div className="glass-surface mt-6 rounded-[1.75rem] p-5 sm:p-8">
+        <div className="min-h-[360px]">
           {step === 0 && (
-            <Step eyebrow="Para empezar" title="¿Cómo te llamas y qué buscas?">
-              <Field label="Tu nombre (opcional)">
-                <input
-                  autoFocus
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Mauricio"
-                  className={inputCls}
+            <Step
+              eyebrow="Tu búsqueda"
+              title="Empecemos por lo imprescindible"
+              subtitle="Puedes ver resultados desde este paso. El resto solo sirve para personalizar el orden."
+            >
+              <ChoiceGroup label="¿Quieres alquilar o comprar?">
+                <Segment active={operation === "alquiler"} onClick={() => setOperation("alquiler")}>
+                  Alquilar
+                </Segment>
+                <Segment active={operation === "venta"} onClick={() => setOperation("venta")}>
+                  Comprar
+                </Segment>
+              </ChoiceGroup>
+
+              <ChoiceGroup label="Tipo de vivienda">
+                <Segment active={propertyType === "pisos"} onClick={() => setPropertyType("pisos")}>
+                  Piso
+                </Segment>
+                <Segment active={propertyType === "casas"} onClick={() => setPropertyType("casas")}>
+                  Casa
+                </Segment>
+              </ChoiceGroup>
+
+              <div>
+                <p className="mb-2 text-sm font-medium text-ink">Zona donde quieres vivir</p>
+                <LocationPicker
+                  value={zone}
+                  onChange={(nextZone) => {
+                    setZone(nextZone);
+                    setZoneError(false);
+                  }}
+                  accent="#176547"
+                  searchPlaceholder="Barrio o ciudad: Chamberí, Madrid…"
                 />
-              </Field>
+                {zoneError && (
+                  <p role="alert" className="mt-2 text-sm font-medium text-rose-500">
+                    Elige una zona para poder buscar viviendas.
+                  </p>
+                )}
+              </div>
 
-              <Field label="¿Alquilar o comprar?">
-                <div className="flex gap-2">
-                  <Segment active={operacion === "alquiler"} onClick={() => setOperacion("alquiler")}>
-                    Alquilar
-                  </Segment>
-                  <Segment active={operacion === "venta"} onClick={() => setOperacion("venta")}>
-                    Comprar
-                  </Segment>
-                </div>
-              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <InputField label={`Presupuesto máximo (${unit})`} htmlFor="profile-budget">
+                  <div className="relative">
+                    <input
+                      id="profile-budget"
+                      inputMode="numeric"
+                      value={budget}
+                      onChange={(event) => setBudget(event.target.value.replace(/[^\d]/g, ""))}
+                      placeholder={operation === "venta" ? "320000" : "1400"}
+                      className={cn(inputClass, "pr-20")}
+                    />
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-stone">
+                      {unit}
+                    </span>
+                  </div>
+                </InputField>
 
-              <Field label="¿Qué tipo de vivienda?">
-                <div className="flex gap-2">
-                  <Segment active={tipo === "pisos"} onClick={() => setTipo("pisos")}>
-                    Piso
-                  </Segment>
-                  <Segment active={tipo === "casas"} onClick={() => setTipo("casas")}>
-                    Casa
-                  </Segment>
-                </div>
-              </Field>
+                <ChoiceGroup label="Habitaciones mínimas">
+                  {['1', '2', '3', '4'].map((number) => (
+                    <Segment
+                      key={number}
+                      active={rooms === number}
+                      onClick={() => setRooms(rooms === number ? "" : number)}
+                    >
+                      {number}{number === "4" ? "+" : ""}
+                    </Segment>
+                  ))}
+                </ChoiceGroup>
+              </div>
             </Step>
           )}
 
           {step === 1 && (
             <Step
-              eyebrow={greeting}
-              title="¿Dónde quieres vivir?"
-              subtitle="Busca la zona o muévete por el mapa y suelta el pin donde te gustaría."
+              eyebrow="Personalización opcional"
+              title="Cuéntanos un poco sobre ti"
+              subtitle="Usamos estas respuestas para priorizar, nunca para excluir opciones por ti."
             >
-              <LocationPicker
-                value={zonaLoc}
-                onChange={setZonaLoc}
-                accent="#956400"
-                searchPlaceholder="Barrio o ciudad: Malasaña, Madrid…"
-              />
+              <InputField label="Tu nombre (opcional)" htmlFor="profile-name">
+                <input
+                  id="profile-name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  autoComplete="given-name"
+                  placeholder="¿Cómo te llamamos?"
+                  className={inputClass}
+                />
+              </InputField>
+
+              <ChoiceGroup label="¿Con quién vivirás?">
+                {HOGARES.map((item) => (
+                  <Segment
+                    key={item.key}
+                    active={household === item.key}
+                    onClick={() => setHousehold(household === item.key ? undefined : item.key)}
+                  >
+                    {item.label}
+                  </Segment>
+                ))}
+              </ChoiceGroup>
+
+              <ChoiceGroup label="¿Tienes mascota?">
+                <Segment active={pet === true} onClick={() => setPet(pet === true ? undefined : true)}>
+                  Sí
+                </Segment>
+                <Segment active={pet === false} onClick={() => setPet(pet === false ? undefined : false)}>
+                  No
+                </Segment>
+              </ChoiceGroup>
             </Step>
           )}
 
           {step === 2 && (
-            <Step eyebrow="Sobre ti" title="Para afinar lo que te enseño">
-              <Field label="¿Con quién vivirás?">
-                <div className="flex flex-wrap gap-2">
-                  {HOGARES.map((h) => (
-                    <Segment
-                      key={h.key}
-                      active={hogar === h.key}
-                      onClick={() => setHogar(hogar === h.key ? undefined : h.key)}
-                    >
-                      {h.label}
-                    </Segment>
-                  ))}
-                </div>
-              </Field>
+            <Step
+              eyebrow="Tu día a día"
+              title="Compara los trayectos"
+              subtitle="Añade tu trabajo o lugar habitual y calcularemos el tiempo desde cada vivienda. Puedes omitirlo."
+            >
+              <LocationPicker
+                value={work}
+                onChange={setWork}
+                accent="#17211D"
+                searchPlaceholder="Dirección o zona habitual…"
+                defaultCenter={zone ? { lat: zone.lat, lon: zone.lon, zoom: 12 } : undefined}
+              />
 
-              <Field label="Habitaciones mínimas (opcional)">
-                <div className="flex gap-2">
-                  {["1", "2", "3", "4"].map((n) => (
-                    <Segment
-                      key={n}
-                      active={habitaciones === n}
-                      onClick={() => setHabitaciones(habitaciones === n ? "" : n)}
-                    >
-                      {n}
-                      {n === "4" ? "+" : ""}
-                    </Segment>
-                  ))}
-                </div>
-              </Field>
-
-              <Field label={`Presupuesto máximo (${unidad})`}>
-                <div className="relative">
-                  <input
-                    inputMode="numeric"
-                    value={presupuesto}
-                    onChange={(e) => setPresupuesto(e.target.value.replace(/[^\d]/g, ""))}
-                    placeholder={operacion === "venta" ? "320000" : "1200"}
-                    className={cn(inputCls, "pr-16")}
-                  />
-                  <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 font-mono text-xs text-stone">
-                    {unidad}
-                  </span>
-                </div>
-              </Field>
-
-              <Field label="¿Tienes mascota?">
-                <div className="flex gap-2">
-                  <Segment active={mascota === true} onClick={() => setMascota(mascota === true ? undefined : true)}>
-                    Sí
+              <ChoiceGroup label="¿Cómo te mueves normalmente?">
+                {MODES.map((item) => (
+                  <Segment
+                    key={item.key}
+                    active={commuteMode === item.key}
+                    onClick={() => setCommuteMode(commuteMode === item.key ? undefined : item.key)}
+                  >
+                    {item.label}
                   </Segment>
-                  <Segment active={mascota === false} onClick={() => setMascota(mascota === false ? undefined : false)}>
-                    No
-                  </Segment>
-                </div>
-              </Field>
+                ))}
+              </ChoiceGroup>
             </Step>
           )}
 
           {step === 3 && (
             <Step
-              eyebrow="Tu día a día"
-              title="¿Dónde trabajas?"
-              subtitle="Sitúalo en el mapa y calculo el trayecto diario hasta cada piso. Si no aplica, puedes saltar."
+              eyebrow="El toque final"
+              title="¿Qué hace que una vivienda encaje?"
+              subtitle="Marca tantas opciones como quieras. Podrás cambiarlas después."
             >
-              <LocationPicker
-                value={trabajoLoc}
-                onChange={setTrabajoLoc}
-                accent="#1A1A1A"
-                searchPlaceholder="Dirección o zona del trabajo…"
-                defaultCenter={
-                  zonaLoc ? { lat: zonaLoc.lat, lon: zonaLoc.lon, zoom: 12 } : undefined
-                }
-              />
+              <ChoiceGroup label="Prioridades del barrio">
+                {PRIORITIES.map((item) => (
+                  <Chip
+                    key={item.key}
+                    active={priorities.includes(item.key)}
+                    onClick={() => toggle(item.key, priorities, setPriorities)}
+                  >
+                    {item.label}
+                  </Chip>
+                ))}
+              </ChoiceGroup>
 
-              <Field label="¿Cómo te mueves normalmente?">
-                <div className="flex flex-wrap gap-2">
-                  {MODES.map((m) => (
-                    <Segment
-                      key={m.key}
-                      active={modo === m.key}
-                      onClick={() => setModo(modo === m.key ? undefined : m.key)}
-                    >
-                      {m.label}
-                    </Segment>
-                  ))}
-                </div>
-              </Field>
-            </Step>
-          )}
-
-          {step === 4 && (
-            <Step
-              eyebrow="Casi está"
-              title="¿Qué es lo que más te importa?"
-              subtitle="Elige lo que quieras. Priorizo los pisos y los análisis según esto."
-            >
-              <Field label="Prioridades del barrio">
-                <div className="flex flex-wrap gap-2.5">
-                  {PRIORITIES.map((p) => (
-                    <Chip
-                      key={p.key}
-                      active={prioridades.includes(p.key)}
-                      onClick={() => toggle(p.key, prioridades, setPrioridades)}
-                    >
-                      {p.label}
-                    </Chip>
-                  ))}
-                </div>
-              </Field>
-
-              <Field label="Imprescindibles del piso">
-                <div className="flex flex-wrap gap-2.5">
-                  {MUST.map((m) => (
-                    <Chip
-                      key={m.key}
-                      active={imprescindibles.includes(m.key)}
-                      onClick={() => toggle(m.key, imprescindibles, setImprescindibles)}
-                    >
-                      {m.label}
-                    </Chip>
-                  ))}
-                </div>
-              </Field>
+              <ChoiceGroup label="Imprescindibles de la vivienda">
+                {MUST.map((item) => (
+                  <Chip
+                    key={item.key}
+                    active={mustHaves.includes(item.key)}
+                    onClick={() => toggle(item.key, mustHaves, setMustHaves)}
+                  >
+                    {item.label}
+                  </Chip>
+                ))}
+              </ChoiceGroup>
             </Step>
           )}
         </div>
 
-        <div className="mt-10 flex items-center justify-between border-t border-hairline pt-6">
-          <div className="flex items-center gap-2">
-            {STEPS.map((_, i) => (
-              <span
-                key={i}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  i === step ? "w-6 bg-saffron-500" : "w-1.5 bg-hairline-strong"
-                )}
-              />
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
+        <div className="mt-8 flex flex-col-reverse gap-3 border-t border-hairline pt-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
             {step > 0 && (
               <button
                 type="button"
-                onClick={() => setStep((s) => s - 1)}
-                className="inline-flex items-center gap-1.5 rounded-md border border-hairline px-4 py-2.5 text-sm text-ink-700 transition hover:border-ink/30"
+                onClick={() => setStep((current) => current - 1)}
+                className="pressable inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-4 font-medium text-stone-600 hover:bg-paper-200 hover:text-ink sm:w-auto"
               >
-                <ArrowLeft size={14} weight="bold" />
+                <ArrowLeft aria-hidden size={16} weight="bold" />
                 Atrás
               </button>
             )}
-            {isLast ? (
+          </div>
+
+          <div className="flex flex-col-reverse gap-2 sm:flex-row">
+            {step === 0 ? (
+              <>
+                <button
+                  type="button"
+                  onClick={next}
+                  className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 font-medium text-stone-600 hover:bg-paper-200 hover:text-ink"
+                >
+                  Personalizar
+                  <ArrowRight aria-hidden size={15} weight="bold" />
+                </button>
+                <button
+                  type="button"
+                  onClick={finish}
+                  className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-ink px-5 font-medium text-paper shadow-lift hover:bg-ink-700"
+                >
+                  Ver viviendas
+                  <ArrowRight aria-hidden size={16} weight="bold" className="text-saffron-300" />
+                </button>
+              </>
+            ) : lastStep ? (
               <button
                 type="button"
                 onClick={finish}
-                className="inline-flex items-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm text-paper transition hover:bg-ink-700 active:scale-[0.98]"
+                className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-ink px-5 font-medium text-paper shadow-lift hover:bg-ink-700"
               >
-                Ver mis pisos
-                <ArrowRight size={14} weight="bold" className="text-saffron-300" />
+                Ver mis recomendaciones
+                <ArrowRight aria-hidden size={16} weight="bold" className="text-saffron-300" />
               </button>
             ) : (
               <button
                 type="button"
-                onClick={() => setStep((s) => s + 1)}
-                className="inline-flex items-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm text-paper transition hover:bg-ink-700 active:scale-[0.98]"
+                onClick={next}
+                className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-ink px-5 font-medium text-paper shadow-lift hover:bg-ink-700"
               >
                 Siguiente
-                <ArrowRight size={14} weight="bold" className="text-saffron-300" />
+                <ArrowRight aria-hidden size={16} weight="bold" className="text-saffron-300" />
               </button>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-const inputCls =
-  "w-full rounded-lg border border-hairline bg-paper-50 px-4 py-3 text-ink placeholder:text-mist transition focus:border-ink/40 focus:outline-none";
+const inputClass =
+  "h-12 w-full rounded-xl border border-hairline bg-paper-50 px-4 text-ink shadow-nudge placeholder:text-stone-400 focus:border-saffron-500 focus:outline-none";
 
 function Step({
   eyebrow,
@@ -392,29 +443,48 @@ function Step({
 }: {
   eyebrow: string;
   title: string;
-  subtitle?: string;
+  subtitle: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="animate-fade-up space-y-6">
       <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-saffron-700">{eyebrow}</p>
-        <h2 className="mt-2 font-display text-3xl leading-tight text-ink sm:text-4xl">{title}</h2>
-        {subtitle && <p className="mt-2 max-w-[46ch] text-sm text-stone-600">{subtitle}</p>}
+        <p className="text-sm font-semibold text-saffron-700">{eyebrow}</p>
+        <h1 id="onboarding-title" className="mt-2 text-balance text-3xl font-semibold leading-tight tracking-[-0.04em] text-ink sm:text-4xl">
+          {title}
+        </h1>
+        <p className="mt-2 max-w-[58ch] text-sm leading-relaxed text-stone-600 sm:text-base">{subtitle}</p>
       </div>
-      <div className="space-y-5">{children}</div>
+      <div className="space-y-6">{children}</div>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function InputField({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
   return (
-    <label className="block">
-      <span className="mb-2 block font-mono text-[10px] uppercase tracking-[0.16em] text-stone">
+    <div>
+      <label htmlFor={htmlFor} className="mb-2 block text-sm font-medium text-ink">
         {label}
-      </span>
+      </label>
       {children}
-    </label>
+    </div>
+  );
+}
+
+function ChoiceGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <fieldset>
+      <legend className="mb-2 text-sm font-medium text-ink">{label}</legend>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </fieldset>
   );
 }
 
@@ -430,12 +500,13 @@ function Segment({
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "rounded-lg border px-4 py-2.5 text-sm transition active:scale-[0.98]",
+        "pressable min-h-11 rounded-xl border px-4 text-sm font-medium",
         active
-          ? "border-ink bg-ink text-paper"
-          : "border-hairline bg-paper-50 text-ink-700 hover:border-ink/30"
+          ? "border-ink bg-ink text-paper shadow-nudge"
+          : "border-hairline bg-paper-50 text-ink-700 hover:border-saffron-300 hover:bg-saffron-50"
       )}
     >
       {children}
@@ -455,15 +526,16 @@ function Chip({
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm transition active:scale-[0.98]",
+        "pressable inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-medium",
         active
-          ? "border-ink bg-ink text-paper"
-          : "border-hairline bg-paper-50 text-ink-700 hover:border-ink/30"
+          ? "border-saffron-700 bg-saffron-50 text-saffron-700"
+          : "border-hairline bg-paper-50 text-ink-700 hover:border-saffron-300"
       )}
     >
-      {active && <Check size={13} weight="bold" className="text-saffron-300" />}
+      {active && <Check aria-hidden size={14} weight="bold" />}
       {children}
     </button>
   );

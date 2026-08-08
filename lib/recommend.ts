@@ -51,6 +51,11 @@ export async function recommend(input: RecommendInput): Promise<RecommendResult>
   const operacion = input.operacion ?? profile?.operacion ?? "alquiler";
   const precioMax = input.precioMax ?? profile?.presupuestoMax;
   const habitaciones = input.habitaciones ?? profile?.habitaciones;
+  const usesProfileZone =
+    input.zona == null ||
+    input.zona.trim().localeCompare(profile?.zona?.trim() ?? "", "es", {
+      sensitivity: "base",
+    }) === 0;
 
   const filters: SearchFilters = {
     zona,
@@ -61,7 +66,7 @@ export async function recommend(input: RecommendInput): Promise<RecommendResult>
     // Coordenadas exactas del punto elegido en el mapa del onboarding: evita
     // geocodificar la zona y centra la búsqueda donde el usuario marcó.
     centro:
-      profile?.zonaLat != null && profile?.zonaLon != null
+      usesProfileZone && profile?.zonaLat != null && profile?.zonaLon != null
         ? { lat: profile.zonaLat, lon: profile.zonaLon }
         : undefined,
   };

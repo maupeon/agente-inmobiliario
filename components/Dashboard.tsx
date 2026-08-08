@@ -1,8 +1,17 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
-import { ArrowSquareOut, Heart, MagnifyingGlass } from "@phosphor-icons/react";
+import { useSearchParams } from "next/navigation";
+import {
+  ArrowSquareOut,
+  Bed,
+  Buildings,
+  Heart,
+  ListBullets,
+  MagnifyingGlass,
+  MapTrifold,
+  PencilSimple,
+} from "@phosphor-icons/react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useProfile } from "@/hooks/useProfile";
 import { readLastSearch } from "@/lib/last-search";
@@ -52,12 +61,20 @@ interface FilterForm {
 const EMPTY_ENRICH: Record<string, PropertyEnrichment> = {};
 
 export function Dashboard() {
+  const searchParams = useSearchParams();
   const { profile, loaded, save } = useProfile();
   const favs = useFavorites();
 
+  const launchZone = searchParams.get("zona")?.trim() ?? "";
+  const launchOperation: FilterForm["operacion"] =
+    searchParams.get("operacion") === "venta" ? "venta" : "alquiler";
+  const hasLaunchSearch = launchZone.length > 0;
+
   const [skipped, setSkipped] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
   const [lastSearch, setLastSearch] = useState<Property[]>([]);
   const [source, setSource] = useState<Source>("para_ti");
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [detailItem, setDetailItem] = useState<ViewItem | null>(null);
   const [showSafety, setShowSafety] = useState(true);
@@ -68,9 +85,10 @@ export function Dashboard() {
   const [recIntro, setRecIntro] = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
+  const recRequestRef = useRef(0);
   const [form, setForm] = useState<FilterForm>({
-    zona: "",
-    operacion: "alquiler",
+    zona: launchZone,
+    operacion: launchOperation,
     precioMax: "",
     habitaciones: "",
   });
@@ -81,6 +99,7 @@ export function Dashboard() {
     { key: "", map: {} }
   );
   const [enriching, setEnriching] = useState(false);
+  const enrichRequestRef = useRef(0);
 
   useEffect(() => {
     setLastSearch(readLastSearch().properties);
@@ -89,7 +108,7 @@ export function Dashboard() {
   // Inicializa filtros desde el perfil una sola vez.
   const initRef = useRef(false);
   useEffect(() => {
-    if (initRef.current || !profile) return;
+    if (initRef.current || !profile || hasLaunchSearch) return;
     initRef.current = true;
     const f: FilterForm = {
       zona: profile.zona ?? "",
@@ -99,7 +118,7 @@ export function Dashboard() {
     };
     setForm(f);
     setApplied(f);
-  }, [profile]);
+  }, [hasLaunchSearch, profile]);
 
   const work = useMemo(() => {
     const t = profile?.trabajo;
@@ -118,10 +137,15 @@ export function Dashboard() {
 
   // ── "Para ti": busca + rankea desde el perfil/filtros ──
   useEffect(() => {
-    if (source !== "para_ti") return;
+    const requestId = ++recRequestRef.current;
+    if (source !== "para_ti") {
+      setRecLoading(false);
+      return;
+    }
     const zona = applied.zona.trim();
     if (!zona) {
       setRecs([]);
+      setRecLoading(false);
       return;
     }
     const ctrl = new AbortController();
@@ -141,13 +165,18 @@ export function Dashboard() {
     })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("HTTP"))))
       .then((d: { items?: PropertyRecommendation[]; intro?: string | null }) => {
+        if (ctrl.signal.aborted || requestId !== recRequestRef.current) return;
         setRecs(d.items ?? []);
         setRecIntro(d.intro ?? null);
       })
       .catch(() => {
         if (!ctrl.signal.aborted) setRecError("No he podido cargar recomendaciones.");
       })
-      .finally(() => setRecLoading(false));
+      .finally(() => {
+        if (!ctrl.signal.aborted && requestId === recRequestRef.current) {
+          setRecLoading(false);
+        }
+      });
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appliedKey, recProfileKey, source]);
@@ -161,10 +190,15 @@ export function Dashboard() {
   const enrichments = enrichCache.key === enrichProfileKey ? enrichCache.map : EMPTY_ENRICH;
 
   useEffect(() => {
-    if (source === "para_ti") return;
+    const requestId = ++enrichRequestRef.current;
+    if (source === "para_ti") {
+      setEnriching(false);
+      return;
+    }
     const base = enrichCache.key === enrichProfileKey ? enrichCache.map : {};
     const missing = enrichList.filter((p) => !base[p.propertyCode]).slice(0, 24);
     if (missing.length === 0) {
+      setEnriching(false);
       if (enrichCache.key !== enrichProfileKey) setEnrichCache({ key: enrichProfileKey, map: base });
       return;
     }
@@ -178,6 +212,7 @@ export function Dashboard() {
     })
       .then((r) => (r.ok ? r.json() : { enrichments: [] }))
       .then((data: { enrichments?: PropertyEnrichment[] }) => {
+        if (ctrl.signal.aborted || requestId !== enrichRequestRef.current) return;
         const add: Record<string, PropertyEnrichment> = {};
         for (const e of data.enrichments ?? []) add[e.propertyCode] = e;
         setEnrichCache((prev) => {
@@ -186,7 +221,11 @@ export function Dashboard() {
         });
       })
       .catch(() => {})
-      .finally(() => setEnriching(false));
+      .finally(() => {
+        if (!ctrl.signal.aborted && requestId === enrichRequestRef.current) {
+          setEnriching(false);
+        }
+      });
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enrichListKey, enrichProfileKey, source]);
@@ -209,23 +248,42 @@ export function Dashboard() {
 
   useEffect(() => {
     if (!selectedCode) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     document
       .getElementById(`card-${selectedCode}`)
-      ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
   }, [selectedCode]);
 
-  // ── Onboarding como puerta de entrada ──
-  if (loaded && !profile && !skipped) {
+  // El perfil personaliza, pero una búsqueda lanzada desde la home entra directa.
+  if (loaded && ((!profile && !skipped && !hasLaunchSearch) || editingProfile)) {
     return (
       <>
         <SiteNav />
-        <div className="relative z-10 mx-auto w-full max-w-[760px] px-5 pb-16 pt-10 sm:px-8">
+        <main className="relative z-10 mx-auto w-full max-w-[820px] px-5 pb-20 pt-8 sm:px-8 sm:pt-12">
           <Onboarding
-            initial={null}
-            onComplete={(p) => save(p)}
-            onSkip={() => setSkipped(true)}
+            initial={editingProfile ? profile : null}
+            onComplete={(nextProfile) => {
+              save(nextProfile);
+              const nextForm: FilterForm = {
+                zona: nextProfile.zona ?? "",
+                operacion: nextProfile.operacion,
+                precioMax: nextProfile.presupuestoMax
+                  ? String(nextProfile.presupuestoMax)
+                  : "",
+                habitaciones: nextProfile.habitaciones
+                  ? String(nextProfile.habitaciones)
+                  : "",
+              };
+              setForm(nextForm);
+              setApplied(nextForm);
+              setEditingProfile(false);
+            }}
+            onSkip={() => {
+              setEditingProfile(false);
+              setSkipped(true);
+            }}
           />
-        </div>
+        </main>
       </>
     );
   }
@@ -236,7 +294,15 @@ export function Dashboard() {
     busqueda: lastSearch.length,
   };
   const busy = source === "para_ti" ? recLoading : enriching;
-  const greeting = profile?.name ? `Para ti, ${profile.name}` : "Para ti";
+  const operationLabel = applied.operacion === "venta" ? "Comprar" : "Alquilar";
+  const heading =
+    source === "para_ti"
+      ? applied.zona
+        ? `${operationLabel} en ${applied.zona}`
+        : "Encuentra tu próxima vivienda"
+      : source === "favoritos"
+      ? "Viviendas guardadas"
+      : "Tu última búsqueda";
   const plottableCount = items.filter(
     (it) => it.property.latitude != null && it.property.longitude != null
   ).length;
@@ -244,149 +310,192 @@ export function Dashboard() {
   return (
     <>
       <SiteNav />
-      <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-[1400px] flex-col px-5 pb-16 pt-8 sm:px-8 lg:px-12">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <div>
-          <h1 className="font-display text-display-md text-ink">{greeting}</h1>
-          <p className="mt-2 max-w-[54ch] text-sm text-stone-600">
-            {source === "para_ti"
-              ? "Los pisos que mejor encajan con lo que me has contado, sobre el mapa: precio frente a la zona, seguridad del barrio y trayecto a tu trabajo."
-              : "Tus pisos sobre el mapa, con precio frente a la zona, seguridad del barrio y trayecto a tu trabajo."}{" "}
-            <span className="text-mist">Datos de barrio y precio orientativos.</span>
-          </p>
-        </div>
+      <main className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-[1400px] flex-col px-5 pb-20 pt-8 sm:px-8 sm:pt-10 lg:px-12">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-saffron-700">
+              <MagnifyingGlass aria-hidden size={15} weight="bold" />
+              Buscar vivienda
+            </div>
+            <h1 className="mt-2 text-balance text-3xl font-semibold leading-tight tracking-[-0.045em] text-ink sm:text-4xl">
+              {heading}
+            </h1>
+            <p className="mt-2 max-w-[64ch] text-sm leading-relaxed text-stone-600 sm:text-base">
+              {source === "para_ti"
+                ? "Compara las opciones por precio, zona y trayecto. Los indicadores son orientativos; confirma siempre la disponibilidad en el anuncio."
+                : "Vuelve a tus viviendas y compáralas con el mismo contexto."}
+            </p>
+          </div>
 
-        <div className="flex gap-2">
-          {(["para_ti", "favoritos", "busqueda"] as Source[]).map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => {
-                setSource(s);
-                setSelectedCode(null);
-              }}
-              className={cn(
-                "rounded-lg border px-3.5 py-2 text-sm transition active:scale-[0.98]",
-                source === s
-                  ? "border-ink bg-ink text-paper"
-                  : "border-hairline bg-paper-50 text-ink-700 hover:border-ink/30"
-              )}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div
+              role="tablist"
+              aria-label="Colección de viviendas"
+              className="flex min-w-0 gap-1 overflow-x-auto rounded-xl bg-paper-200 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              {s === "para_ti" ? "Para ti" : s === "favoritos" ? "Favoritos" : "Búsqueda"}
-              <span
-                className={cn(
-                  "ml-1.5 font-mono text-[10px]",
-                  source === s ? "text-paper/60" : "text-mist"
-                )}
-              >
-                {counts[s]}
-              </span>
+              {(["para_ti", "favoritos", "busqueda"] as Source[]).map((item) => {
+                const active = source === item;
+                const label =
+                  item === "para_ti"
+                    ? "Resultados"
+                    : item === "favoritos"
+                    ? "Guardados"
+                    : "Última búsqueda";
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => {
+                      setSource(item);
+                      setSelectedCode(null);
+                    }}
+                    className={cn(
+                      "pressable min-h-11 shrink-0 rounded-lg px-3.5 text-sm font-medium",
+                      active
+                        ? "bg-paper-50 text-ink shadow-nudge"
+                        : "text-stone-600 hover:text-ink"
+                    )}
+                  >
+                    {label}
+                    <span className="ml-1.5 text-xs text-stone">{counts[item]}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => setEditingProfile(true)}
+              className="pressable inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-hairline bg-paper-50 px-4 text-sm font-medium text-ink hover:border-saffron-300"
+            >
+              <PencilSimple aria-hidden size={15} weight="bold" />
+              Preferencias
             </button>
-          ))}
+          </div>
         </div>
-      </div>
 
-      {/* Controles de búsqueda (solo "Para ti") */}
-      {source === "para_ti" && (
-        <FilterBar
-          form={form}
-          setForm={setForm}
-          onApply={() => setApplied(form)}
-          busy={recLoading}
-        />
-      )}
+        {source === "para_ti" && (
+          <FilterBar
+            form={form}
+            setForm={setForm}
+            onApply={() => setApplied(form)}
+            busy={recLoading}
+          />
+        )}
 
-      {/* Toggles + leyenda */}
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-hairline pt-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <Toggle on={showSafety} onClick={() => setShowSafety((v) => !v)}>
-            Seguridad
-          </Toggle>
-          <Toggle on={showTrajectory} onClick={() => setShowTrajectory((v) => !v)}>
-            Trayecto
-          </Toggle>
-          {busy && (
-            <span className="ml-1 animate-pulse-soft font-mono text-[10px] uppercase tracking-[0.18em] text-stone">
-              {source === "para_ti" ? "buscando para ti…" : "calculando…"}
-            </span>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Toggle on={showSafety} onClick={() => setShowSafety((value) => !value)}>
+              Seguridad
+            </Toggle>
+            <Toggle on={showTrajectory} onClick={() => setShowTrajectory((value) => !value)}>
+              Trayecto
+            </Toggle>
+            {busy && (
+              <span role="status" className="ml-1 animate-pulse-soft text-sm font-medium text-stone">
+                {source === "para_ti" ? "Buscando para ti…" : "Calculando contexto…"}
+              </span>
+            )}
+          </div>
+
+          {items.length > 0 && (
+            <div className="flex rounded-xl bg-paper-200 p-1 lg:hidden" aria-label="Vista de resultados">
+              <ViewButton active={mobileView === "list"} onClick={() => setMobileView("list")}>
+                <ListBullets aria-hidden size={16} weight="bold" /> Lista
+              </ViewButton>
+              <ViewButton active={mobileView === "map"} onClick={() => setMobileView("map")}>
+                <MapTrifold aria-hidden size={16} weight="bold" /> Mapa
+              </ViewButton>
+            </div>
           )}
+
+          <div className="hidden sm:block">
+            <Legend />
+          </div>
         </div>
-        <Legend />
-      </div>
 
-      {!work && (
-        <p className="mt-4 rounded-lg border border-saffron-200 bg-saffron-50 px-4 py-3 text-sm text-ink-700">
-          Añade tu lugar de trabajo{" "}
-          {profile ? (
-            <Link href="/chat" className="underline decoration-saffron-300 underline-offset-2">
-              (Editar perfil en el chat)
-            </Link>
-          ) : (
-            "en el onboarding"
-          )}{" "}
-          para ver el tiempo y el trayecto hasta cada piso.
-        </p>
-      )}
+        {!work && source === "para_ti" && (
+          <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-saffron-200 bg-saffron-50 px-4 py-3 text-sm text-ink-700 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              ¿Quieres comparar trayectos? Añade tu trabajo o lugar habitual; es opcional.
+            </p>
+            <button
+              type="button"
+              onClick={() => setEditingProfile(true)}
+              className="pressable min-h-10 shrink-0 rounded-lg bg-white px-3 font-medium text-saffron-700 shadow-nudge"
+            >
+              Añadir ubicación
+            </button>
+          </div>
+        )}
 
-      {source === "para_ti" && recIntro && items.length > 0 && (
-        <p className="mt-4 border-l-2 border-saffron-300 bg-paper-50 px-4 py-3 font-display text-lg italic leading-snug text-ink-700">
-          {recIntro}
-        </p>
-      )}
+        {source === "para_ti" && recIntro && items.length > 0 && (
+          <p className="mt-4 rounded-2xl border border-hairline bg-paper-50 px-4 py-3 text-sm leading-relaxed text-ink-700">
+            <span className="font-semibold text-saffron-700">Resumen de HabitIA: </span>
+            {recIntro}
+          </p>
+        )}
 
-      {/* Cuerpo */}
-      {recError && source === "para_ti" ? (
-        <p className="mt-6 rounded-lg border border-rose-500/30 bg-rose-50 p-4 text-sm text-ink-700">
-          {recError}
-        </p>
-      ) : items.length === 0 ? (
-        <EmptyPanel source={source} loading={busy} hasZona={!!applied.zona.trim()} />
-      ) : (
-        <div className="mt-6 grid gap-6 lg:grid-cols-5">
-          <div className="lg:col-span-3">
-            <div className="sticky top-6 h-[52vh] overflow-hidden rounded-xl border border-hairline-strong lg:h-[680px]">
-              <MapPanel
-                items={items}
-                work={work}
-                selectedCode={selectedCode}
-                onSelect={setSelectedCode}
-                showSafety={showSafety}
-                showTrajectory={showTrajectory}
-              />
+        {recError && source === "para_ti" ? (
+          <p role="alert" className="mt-6 rounded-2xl border border-rose-500/30 bg-rose-50 p-4 text-sm text-ink-700">
+            {recError} Revisa la zona o inténtalo de nuevo.
+          </p>
+        ) : items.length === 0 ? (
+          <EmptyPanel source={source} loading={busy} hasZona={!!applied.zona.trim()} />
+        ) : (
+          <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+            <div className={cn(mobileView === "list" ? "hidden lg:block" : "block")}>
+              <div className="sticky top-20 h-[62dvh] min-h-[480px] overflow-hidden rounded-2xl border border-hairline-strong bg-paper-200 shadow-hairline lg:h-[calc(100dvh-7rem)] lg:max-h-[760px]">
+                <MapPanel
+                  items={items}
+                  work={work}
+                  selectedCode={selectedCode}
+                  onSelect={setSelectedCode}
+                  showSafety={showSafety}
+                  showTrajectory={showTrajectory}
+                />
+              </div>
+            </div>
+
+            <div className={cn("space-y-3", mobileView === "map" ? "hidden lg:block" : "block")}>
+              <div className="flex items-center justify-between gap-3 px-1">
+                <p className="text-sm font-semibold text-ink">
+                  {items.length} vivienda{items.length === 1 ? "" : "s"}
+                </p>
+                <p className="text-xs text-stone">
+                  {plottableCount} en el mapa
+                </p>
+              </div>
+              {items.map((item) => (
+                <PropertyRow
+                  key={item.property.propertyCode}
+                  item={item}
+                  selected={item.property.propertyCode === selectedCode}
+                  hasWork={!!work}
+                  isFavorite={favs.isFavorite(item.property.propertyCode)}
+                  onSelect={() =>
+                    setSelectedCode(
+                      selectedCode === item.property.propertyCode
+                        ? null
+                        : item.property.propertyCode
+                    )
+                  }
+                  onToggleFavorite={() => favs.toggleFavorite(item.property)}
+                  onOpenDetail={() => setDetailItem(item)}
+                />
+              ))}
             </div>
           </div>
+        )}
 
-          <div className="space-y-3 lg:col-span-2">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone">
-              {plottableCount} de {items.length} en el mapa
-            </p>
-            {items.map((it) => (
-              <PropertyRow
-                key={it.property.propertyCode}
-                item={it}
-                selected={it.property.propertyCode === selectedCode}
-                hasWork={!!work}
-                isFavorite={favs.isFavorite(it.property.propertyCode)}
-                onSelect={() =>
-                  setSelectedCode(
-                    selectedCode === it.property.propertyCode ? null : it.property.propertyCode
-                  )
-                }
-                onToggleFavorite={() => favs.toggleFavorite(it.property)}
-                onOpenDetail={() => setDetailItem(it)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
+      </main>
       <PropertyDetailDrawer
         item={detailItem}
         isFavorite={detailItem ? favs.isFavorite(detailItem.property.propertyCode) : false}
         onToggleFavorite={() => detailItem && favs.toggleFavorite(detailItem.property)}
         onClose={() => setDetailItem(null)}
       />
-      </div>
     </>
   );
 }
@@ -404,88 +513,111 @@ function FilterBar({
 }) {
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
+      onSubmit={(event) => {
+        event.preventDefault();
         onApply();
       }}
-      className="mt-6 flex flex-wrap items-end gap-3 rounded-xl border border-hairline bg-paper-50 p-4"
+      className="glass-surface mt-6 grid gap-3 rounded-2xl p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-[auto,minmax(220px,1fr),150px,110px,auto] lg:items-end"
+      aria-label="Criterios de búsqueda"
     >
-      <Field label="Zona o ciudad">
+      <fieldset>
+        <legend className="mb-1.5 block text-xs font-medium text-stone-600">Operación</legend>
+        <div className="flex rounded-xl bg-paper-200 p-1">
+          {(["alquiler", "venta"] as const).map((operation) => {
+            const active = form.operacion === operation;
+            return (
+              <button
+                key={operation}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setForm({ ...form, operacion: operation })}
+                className={cn(
+                  "pressable min-h-11 flex-1 rounded-lg px-3 text-sm font-medium",
+                  active ? "bg-paper-50 text-ink shadow-nudge" : "text-stone-600 hover:text-ink"
+                )}
+              >
+                {operation === "alquiler" ? "Alquilar" : "Comprar"}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      <Field label="Zona o ciudad" htmlFor="search-zone">
         <input
+          id="search-zone"
           value={form.zona}
-          onChange={(e) => setForm({ ...form, zona: e.target.value })}
-          placeholder="Malasaña, Madrid"
+          onChange={(event) => setForm({ ...form, zona: event.target.value })}
+          placeholder="Chamberí, Madrid"
+          autoComplete="address-level2"
           className={inputCls}
         />
       </Field>
-      <Field label="Operación">
-        <div className="flex gap-1.5">
-          {(["alquiler", "venta"] as const).map((op) => (
-            <button
-              key={op}
-              type="button"
-              onClick={() => setForm({ ...form, operacion: op })}
-              className={cn(
-                "rounded-md border px-3 py-2 text-sm capitalize transition",
-                form.operacion === op
-                  ? "border-ink bg-ink text-paper"
-                  : "border-hairline bg-paper text-ink-700 hover:border-ink/30"
-              )}
-            >
-              {op === "alquiler" ? "Alquilar" : "Comprar"}
-            </button>
-          ))}
-        </div>
-      </Field>
-      <Field label={`Precio máx. (${form.operacion === "venta" ? "€" : "€/mes"})`}>
+
+      <Field
+        label={`Precio máx. (${form.operacion === "venta" ? "€" : "€/mes"})`}
+        htmlFor="search-price"
+      >
         <input
+          id="search-price"
           inputMode="numeric"
           value={form.precioMax}
-          onChange={(e) =>
-            setForm({ ...form, precioMax: e.target.value.replace(/[^\d]/g, "") })
+          onChange={(event) =>
+            setForm({ ...form, precioMax: event.target.value.replace(/[^\d]/g, "") })
           }
-          placeholder={form.operacion === "venta" ? "320000" : "1400"}
-          className={cn(inputCls, "w-32")}
+          placeholder="Sin límite"
+          className={inputCls}
         />
       </Field>
-      <Field label="Hab.">
+
+      <Field label="Habitaciones" htmlFor="search-rooms">
         <select
+          id="search-rooms"
           value={form.habitaciones}
-          onChange={(e) => setForm({ ...form, habitaciones: e.target.value })}
-          className={cn(inputCls, "w-20")}
+          onChange={(event) => setForm({ ...form, habitaciones: event.target.value })}
+          className={inputCls}
         >
-          <option value="">—</option>
-          {["1", "2", "3", "4"].map((n) => (
-            <option key={n} value={n}>
-              {n}
-              {n === "4" ? "+" : ""}
+          <option value="">Cualquiera</option>
+          {["1", "2", "3", "4"].map((number) => (
+            <option key={number} value={number}>
+              {number}
+              {number === "4" ? "+" : ""}
             </option>
           ))}
         </select>
       </Field>
+
       <button
         type="submit"
         disabled={busy || !form.zona.trim()}
-        className="inline-flex items-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm text-paper transition hover:bg-ink-700 active:scale-[0.98] disabled:opacity-50"
+        className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-ink px-5 text-sm font-medium text-paper shadow-lift hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-45"
       >
-        <MagnifyingGlass size={14} weight="bold" className="text-saffron-300" />
-        Buscar para mí
+        <MagnifyingGlass aria-hidden size={16} weight="bold" className="text-saffron-300" />
+        {busy ? "Buscando…" : "Buscar"}
       </button>
     </form>
   );
 }
 
 const inputCls =
-  "rounded-lg border border-hairline bg-paper px-3 py-2 text-sm text-ink placeholder:text-mist transition focus:border-ink/40 focus:outline-none";
+  "h-12 w-full rounded-xl border border-hairline bg-paper-50 px-3.5 text-sm text-ink shadow-nudge placeholder:text-stone-400 focus:border-saffron-500 focus:outline-none";
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
   return (
-    <label className="block">
-      <span className="mb-1.5 block font-mono text-[9px] uppercase tracking-[0.16em] text-stone">
+    <div>
+      <label htmlFor={htmlFor} className="mb-1.5 block text-xs font-medium text-stone-600">
         {label}
-      </span>
+      </label>
       {children}
-    </label>
+    </div>
   );
 }
 
@@ -501,15 +633,40 @@ function Toggle({
   return (
     <button
       type="button"
+      aria-pressed={on}
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] transition",
+        "pressable inline-flex min-h-10 items-center gap-2 rounded-xl border px-3 text-xs font-medium",
         on
-          ? "border-ink bg-ink text-paper"
-          : "border-hairline bg-paper-50 text-stone hover:border-ink/30"
+          ? "border-saffron-700 bg-saffron-50 text-saffron-700"
+          : "border-hairline bg-paper-50 text-stone-600 hover:border-saffron-300"
       )}
     >
-      <span className={cn("h-1.5 w-1.5 rounded-full", on ? "bg-saffron-300" : "bg-mist")} />
+      <span className={cn("h-2 w-2 rounded-full", on ? "bg-saffron-700" : "bg-mist")} />
+      {children}
+    </button>
+  );
+}
+
+function ViewButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={cn(
+        "pressable inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-xs font-medium",
+        active ? "bg-paper-50 text-ink shadow-nudge" : "text-stone-600"
+      )}
+    >
       {children}
     </button>
   );
@@ -517,27 +674,17 @@ function Toggle({
 
 function Legend() {
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] uppercase tracking-[0.14em] text-stone">
-      <div className="flex items-center gap-1.5">
-        <span className="text-mist">Precio</span>
-        {(["barato", "en_linea", "muy_caro"] as const).map((b) => (
-          <span key={b} className="h-2.5 w-2.5 rounded-full" style={{ background: BANDA_COLOR[b] }} />
-        ))}
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="text-mist">Barrio</span>
-        {[80, 67, 50].map((v) => (
-          <span
-            key={v}
-            className="h-2.5 w-2.5 rounded-full opacity-60"
-            style={{ background: safetyColor(v) }}
-          />
-        ))}
-      </div>
-      <div className="flex items-center gap-1.5">
-        <span className="text-mist">Trayecto</span>
-        <span className="inline-block h-0.5 w-6" style={{ background: "#7A5610" }} />
-      </div>
+    <div className="flex flex-wrap items-center gap-3 text-xs text-stone" aria-label="Leyenda del mapa">
+      <span className="font-medium text-stone-600">Precio:</span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.barato }} /> favorable
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.en_linea }} /> en línea
+      </span>
+      <span className="inline-flex items-center gap-1.5">
+        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.muy_caro }} /> alto
+      </span>
     </div>
   );
 }
@@ -572,66 +719,106 @@ function PropertyRow({
   const op = property.operation === "rent" ? "alquiler" : "venta";
 
   return (
-    <div
+    <article
       id={`card-${property.propertyCode}`}
       className={cn(
-        "rounded-xl border bg-paper-50 p-4 transition",
-        selected ? "border-ink shadow-lift" : "border-hairline hover:border-ink/25"
+        "rounded-2xl border bg-paper-50 p-3 transition",
+        selected
+          ? "border-saffron-700 shadow-lift"
+          : "border-hairline shadow-hairline hover:border-saffron-300"
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left">
-          <p className="line-clamp-1 font-display text-base leading-tight text-ink">
-            {rank ? <span className="text-saffron-700">{rank}. </span> : null}
-            {property.title}
-          </p>
-          <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-stone">
-            {[property.district, property.municipality].filter(Boolean).join(" · ") || "Sin zona"}
-            {noCoords && " · sin ubicación"}
-          </p>
-        </button>
+      <div className="flex gap-3">
         <button
           type="button"
-          onClick={onToggleFavorite}
-          aria-label={isFavorite ? "Quitar de favoritos" : "Guardar en favoritos"}
-          className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-hairline text-stone transition hover:border-ink/30 hover:text-ink"
+          onClick={onSelect}
+          aria-label={`Mostrar ${property.title} en el mapa`}
+          className="pressable relative h-24 w-28 shrink-0 overflow-hidden rounded-xl bg-paper-200 text-left sm:h-28 sm:w-36"
         >
-          <Heart size={14} weight={isFavorite ? "fill" : "regular"} className={isFavorite ? "text-clay-500" : ""} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={property.thumbnail}
+            alt=""
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            className="h-full w-full object-cover"
+            onError={(event) => {
+              event.currentTarget.style.display = "none";
+            }}
+          />
+          {rank && (
+            <span className="absolute left-2 top-2 grid h-7 min-w-7 place-items-center rounded-full bg-ink px-1 text-xs font-semibold text-paper shadow-lift">
+              {rank}
+            </span>
+          )}
         </button>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-2">
+            <button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left">
+              <p className="line-clamp-2 text-base font-semibold leading-snug tracking-[-0.02em] text-ink">
+                {property.title}
+              </p>
+              <p className="mt-1 line-clamp-1 text-xs text-stone">
+                {[property.district, property.municipality].filter(Boolean).join(" · ") || "Zona no indicada"}
+                {noCoords && " · sin ubicación"}
+              </p>
+            </button>
+            <button
+              type="button"
+              onClick={onToggleFavorite}
+              aria-label={isFavorite ? "Quitar de guardados" : "Guardar vivienda"}
+              aria-pressed={isFavorite}
+              className="pressable grid h-11 w-11 shrink-0 place-items-center rounded-full border border-hairline bg-paper-50 text-stone hover:border-saffron-300 hover:text-saffron-700"
+            >
+              <Heart
+                aria-hidden
+                size={18}
+                weight={isFavorite ? "fill" : "regular"}
+                className={isFavorite ? "text-saffron-700" : ""}
+              />
+            </button>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="text-xl font-semibold tracking-[-0.025em] text-ink">
+              {formatEUR(property.price)}
+            </span>
+            {property.operation === "rent" && <span className="text-xs text-stone">/mes</span>}
+            {property.pricePerSqm && (
+              <span className="text-xs text-stone">{eurM2Label(property.pricePerSqm, op)}</span>
+            )}
+          </div>
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-600">
+            <span className="inline-flex items-center gap-1">
+              <Bed aria-hidden size={14} weight="bold" /> {property.rooms} hab.
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Buildings aria-hidden size={14} weight="bold" /> {formatNumber(property.size)} m²
+            </span>
+          </div>
+        </div>
       </div>
 
-      {rationale && (
-        <p className="mt-2 text-sm leading-snug text-ink-700">{rationale}</p>
-      )}
+      {rationale && <p className="mt-3 text-sm leading-relaxed text-ink-700">{rationale}</p>}
 
-      <div className="mt-2 flex items-baseline gap-2">
-        <span className="font-mono text-lg text-ink">{formatEUR(property.price)}</span>
-        {property.operation === "rent" && (
-          <span className="font-mono text-[11px] text-stone">/mes</span>
-        )}
-        {property.pricePerSqm && (
-          <span className="ml-auto font-mono text-[11px] text-stone">
-            {eurM2Label(property.pricePerSqm, op)}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-hairline pt-3">
+      <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-paper-200/75 p-3">
         <Signal label="Precio">
           <PriceBadge val={val} />
         </Signal>
         <Signal label="Trayecto">
           {!hasWork ? (
-            <span className="text-stone">—</span>
+            <span className="text-stone">Sin configurar</span>
           ) : leg?.minutos != null ? (
             <span className="text-ink">
-              {leg.minutos}′{" "}
+              {leg.minutos} min{" "}
               <span className="text-stone">
                 {commute?.recomendado ? MODE_LABEL[commute.recomendado] : ""}
               </span>
             </span>
           ) : (
-            <span className="text-stone">—</span>
+            <span className="text-stone">Sin dato</span>
           )}
         </Signal>
         <Signal label="Barrio">
@@ -641,54 +828,51 @@ function PropertyRow({
               {safety.indice}/100
             </span>
           ) : (
-            <span className="text-stone">—</span>
+            <span className="text-stone">Sin dato</span>
           )}
         </Signal>
       </div>
 
-      {selected && (
-        <div className="mt-3 space-y-1.5 border-t border-hairline pt-3 text-sm text-ink-700">
+      {selected && (val || enrichment?.neighborhood?.resumen) && (
+        <div className="mt-3 space-y-1.5 border-t border-hairline pt-3 text-sm leading-relaxed text-ink-700">
           {val && (
             <p>
-              Pide <strong className="text-ink">{formatEUR(property.price)}</strong>
-              {property.operation === "rent" ? "/mes" : ""} — {val.etiqueta ?? "sin referencia de zona"}
-              {val.referenciaEurM2 != null && (
-                <span className="text-stone"> (zona ≈ {eurM2Label(val.referenciaEurM2, val.operacion)})</span>
-              )}
-              .
+              La vivienda pide <strong className="text-ink">{formatEUR(property.price)}</strong>
+              {property.operation === "rent" ? "/mes" : ""}; {val.etiqueta ?? "no hay referencia comparable"}.
             </p>
           )}
           {enrichment?.neighborhood?.resumen && (
             <p className="text-stone-600">{enrichment.neighborhood.resumen}</p>
           )}
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onOpenDetail}
-              className="inline-flex items-center gap-1.5 rounded-md bg-ink px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-paper transition hover:bg-ink-700"
-            >
-              Ver ficha completa
-            </button>
-            <a
-              href={property.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-saffron-700 transition hover:text-ink"
-            >
-              Ver en Idealista <ArrowSquareOut size={11} weight="bold" />
-            </a>
-          </div>
         </div>
       )}
-    </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-hairline pt-3">
+        <button
+          type="button"
+          onClick={onOpenDetail}
+          className="pressable inline-flex min-h-10 items-center rounded-lg bg-ink px-3.5 text-xs font-semibold text-paper hover:bg-ink-700"
+        >
+          Ver detalles
+        </button>
+        <a
+          href={property.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pressable inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-saffron-700 hover:bg-saffron-50"
+        >
+          Ver anuncio <ArrowSquareOut aria-hidden size={13} weight="bold" />
+        </a>
+      </div>
+    </article>
   );
 }
 
 function Signal({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-mist">{label}</p>
-      <p className="mt-1 text-sm">{children}</p>
+      <p className="text-[11px] font-medium text-stone">{label}</p>
+      <p className="mt-1 text-xs font-medium sm:text-sm">{children}</p>
     </div>
   );
 }
@@ -714,8 +898,12 @@ function EmptyPanel({
 }) {
   if (loading) {
     return (
-      <div className="mt-10 grid place-items-center rounded-xl border border-dashed border-hairline-strong bg-paper-50 p-12 font-mono text-[10px] uppercase tracking-[0.2em] text-stone">
-        Buscando los mejores pisos para ti…
+      <div role="status" className="mt-8 grid min-h-56 place-items-center rounded-2xl border border-hairline bg-paper-50 p-8 text-center">
+        <div>
+          <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-hairline-strong border-t-saffron-700" />
+          <p className="mt-4 font-medium text-ink">Buscando viviendas que encajen…</p>
+          <p className="mt-1 text-sm text-stone">Estamos comparando precio y contexto de la zona.</p>
+        </div>
       </div>
     );
   }
@@ -727,12 +915,21 @@ function EmptyPanel({
         : "Dime en qué zona buscas (arriba) y te enseño los pisos que mejor encajan contigo."
       : source === "favoritos"
       ? "Aún no has guardado favoritos. Marca el corazón en cualquier piso y aparecerá aquí."
-      : "Aún no has hecho ninguna búsqueda en el chat.";
+      : "Aún no hay una búsqueda reciente. Puedes buscar aquí o pedirle una comparación al asistente.";
 
   return (
-    <div className="mt-10 rounded-xl border border-dashed border-hairline-strong bg-paper-50 p-10 text-center">
-      <p className="font-display text-2xl text-ink">Nada que mapear todavía</p>
-      <p className="mx-auto mt-2 max-w-[46ch] text-sm text-stone-600">{copy}</p>
+    <div className="mt-8 rounded-2xl border border-dashed border-hairline-strong bg-paper-50 p-8 text-center sm:p-12">
+      <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-saffron-50 text-saffron-700">
+        <Buildings aria-hidden size={23} weight="duotone" />
+      </span>
+      <p className="mt-4 text-xl font-semibold tracking-[-0.025em] text-ink">
+        {source === "favoritos"
+          ? "Aún no has guardado viviendas"
+          : hasZona
+          ? "No hay resultados con estos filtros"
+          : "Empieza con una zona"}
+      </p>
+      <p className="mx-auto mt-2 max-w-[50ch] text-sm leading-relaxed text-stone-600">{copy}</p>
     </div>
   );
 }

@@ -65,7 +65,7 @@ export function NetWorthChart({
   const stepX = Math.max(1, Math.ceil(n / 8));
   const xTicks = serie.filter((d, i) => i % stepX === 0 || i === n - 1).map((d) => d.anio);
 
-  const winColor = "#956400"; // saffron-500
+  const winColor = "#2D7C59"; // verde HabitIA
   const compraColor = ganador === "comprar" ? winColor : "#2F3437";
   const alquilerColor = ganador === "alquilar" ? winColor : "#2F3437";
   const compraIsWinner = ganador === "comprar";
@@ -156,11 +156,11 @@ export function NetWorthChart({
               x2={beX}
               y1={padT}
               y2={H - padB}
-              stroke="#956400"
+              stroke="#2D7C59"
               strokeWidth={1}
               strokeDasharray="4 4"
             />
-            <circle cx={beX} cy={padT} r={3} fill="#956400" />
+            <circle cx={beX} cy={padT} r={3} fill="#2D7C59" />
             <text
               x={beX + 6}
               y={padT + 11}

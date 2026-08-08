@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { List } from "@phosphor-icons/react";
 import { useChat } from "@/hooks/useChat";
 import { useFavorites } from "@/hooks/useFavorites";
@@ -23,11 +23,13 @@ export function ChatInterface() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [skippedOnboarding, setSkippedOnboarding] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const shouldFollowRef = useRef(true);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
   useEffect(() => {
     const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    if (!el || !shouldFollowRef.current) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
   }, [chat.messages, chat.agentState]);
 
   useEffect(() => {
@@ -67,35 +69,45 @@ export function ChatInterface() {
         activeConversationId={chat.conversationId}
         favorites={favs.favorites}
         onNewChat={() => {
+          shouldFollowRef.current = true;
           chat.reset();
           setSidebarOpen(false);
         }}
         onSelectConversation={(id) => {
+          shouldFollowRef.current = true;
           void chat.loadConversation(id);
           setSidebarOpen(false);
         }}
         onRemoveFavorite={(p) => favs.toggleFavorite(p)}
         open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={closeSidebar}
       />
 
-      <div className="relative z-10 flex min-w-0 flex-1 flex-col">
+      <main className="relative z-10 flex min-w-0 flex-1 flex-col">
         {/* Topbar móvil */}
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-hairline bg-paper/85 px-5 py-3 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-white/70 bg-paper/80 px-5 backdrop-blur-xl lg:hidden">
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
-            className="grid h-9 w-9 place-items-center rounded-md border border-hairline text-ink-700"
+            className="pressable grid h-11 w-11 place-items-center rounded-xl border border-hairline bg-paper-50 text-ink-700"
             aria-label="Abrir menú"
           >
             <List size={15} weight="bold" />
           </button>
           <Logo variant="inline" className="text-[1rem]" />
-          <div className="w-9" />
+          <div className="w-11" />
         </header>
 
         {/* Cuerpo */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto">
+        <div
+          ref={scrollRef}
+          onScroll={(event) => {
+            const el = event.currentTarget;
+            const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+            shouldFollowRef.current = distanceFromBottom <= 160;
+          }}
+          className="flex-1 overflow-y-auto"
+        >
           <div className="mx-auto w-full max-w-[960px] px-5 pb-32 pt-12 sm:px-8 lg:px-12 lg:pt-20">
             {onboardingVisible ? (
               <Onboarding
@@ -115,8 +127,8 @@ export function ChatInterface() {
                 profile={profile}
                 onEditProfile={() => setShowOnboarding(true)}
                 onPick={(prompt) => {
-                  setInput(prompt);
-                  setTimeout(() => void chat.send(prompt), 50);
+                  setInput("");
+                  void chat.send(prompt);
                 }}
               />
             ) : (
@@ -160,10 +172,10 @@ export function ChatInterface() {
                 value={input}
                 onChange={setInput}
                 onSubmit={submit}
-                onStop={() => chat.reset()}
+                onStop={chat.stop}
                 isStreaming={chat.isStreaming}
               />
-              <p className="mt-3 text-center font-mono text-[9px] uppercase tracking-[0.2em] text-mist">
+              <p className="mt-3 text-center text-[11px] leading-relaxed text-stone">
                 Enter envía · Shift + Enter salta de línea
                 <span className="mx-2 text-hairline-strong">·</span>
                 La IA puede equivocarse — verifica los anuncios en Idealista
@@ -171,7 +183,7 @@ export function ChatInterface() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

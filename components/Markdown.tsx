@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
  *
  * Hereda el color del padre (no fija text-ink-700) para que cada bloque del
  * mensaje pueda decidir su jerarquía. Sin `prose`: clases explícitas por tag
- * para mantener el sistema editorial (Geist + serif Newsreader + Geist Mono).
+ * para mantener el sistema HabitIA (Geist + Geist Mono).
  *
  * El `streaming` activa un caret parpadeante al final del último bloque de
  * texto — la sensación es que la respuesta se está escribiendo a tiempo real.

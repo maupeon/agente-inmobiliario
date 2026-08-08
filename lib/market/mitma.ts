@@ -43,7 +43,7 @@ const RENAME: Record<string, string> = {
 export async function fetchMitmaPriceByProvince(): Promise<InePriceByProvince> {
   try {
     const res = await fetch(MITMA_XLS_URL, {
-      headers: { "User-Agent": "AgenteInmobiliario/1.0 (TFM)" },
+      headers: { "User-Agent": "HabitIA/1.0 (TFM)" },
       cache: "no-store",
     });
     if (!res.ok) throw new Error(`MITMA ${res.status}`);

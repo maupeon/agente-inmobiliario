@@ -55,8 +55,8 @@ const SUGGESTIONS: Array<{ label: string; prompt: string; tone?: "primary" | "mu
 ];
 
 const STEPS = [
-  { i: "01", t: "Cuenta lo que buscas", d: "Zona, presupuesto y si es compra o alquiler. Sin formularios." },
-  { i: "02", t: "AI busca en Idealista", d: "Te enseña 6 candidatos con foto, precio/m² y enlace al anuncio." },
+  { i: "01", t: "Cuenta lo que buscas", d: "Zona, presupuesto y si es compra o alquiler. Sin jerga." },
+  { i: "02", t: "HabitIA compara", d: "Te enseña opciones con foto, precio, contexto y enlace al anuncio." },
   { i: "03", t: "Pide detalles o números", d: "Más fotos de un piso concreto o el cálculo exacto de la hipoteca." },
 ];
 
@@ -112,7 +112,6 @@ export function EmptyState({
             <Logo
               variant="stack"
               className="text-[clamp(3rem,8vw,6.5rem)]"
-              highlightClassName="font-display italic font-light text-saffron-700"
             />
             <p className="mt-6 max-w-[42ch] text-pretty text-lg text-stone-600">
               {profile ? (
@@ -124,8 +123,8 @@ export function EmptyState({
                 </>
               ) : (
                 <>
-                  Habla en lenguaje natural. Yo busco en Idealista, te leo la
-                  letra pequeña y te calculo la hipoteca cuando quieras.
+                  Habla en lenguaje natural. HabitIA busca, compara el contexto
+                  y te ayuda con los números cuando lo necesites.
                 </>
               )}
             </p>
@@ -174,7 +173,7 @@ export function EmptyState({
                   type="button"
                   onClick={() => onPick(s.prompt)}
                   className={cn(
-                    "group flex w-full items-center justify-between gap-4 rounded-lg border px-4 py-3.5 text-left transition active:scale-[0.99]",
+                    "pressable group flex min-h-12 w-full items-center justify-between gap-4 rounded-xl border px-4 py-3.5 text-left",
                     s.tone === "primary"
                       ? "border-ink bg-ink text-paper hover:bg-ink-700"
                       : "border-hairline bg-paper text-ink-700 hover:border-ink/30 hover:text-ink"

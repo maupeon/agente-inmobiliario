@@ -2,7 +2,32 @@
 import { useCallback, useEffect, useState } from "react";
 import type { UserProfile } from "@/types";
 
-const KEY = "agente-inmobiliario:profile:v1";
+const KEY = "habitia:profile:v1";
+const LEGACY_KEY = "agente-inmobiliario:profile:v1";
+const STORAGE_KEYS = [KEY, LEGACY_KEY] as const;
+
+function readStoredProfile(): UserProfile | null {
+  for (const key of STORAGE_KEYS) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) return JSON.parse(raw) as UserProfile;
+    } catch {
+      // Si una entrada está corrupta, probamos la siguiente clave compatible.
+    }
+  }
+  return null;
+}
+
+function writeStoredProfile(profile: UserProfile): void {
+  const raw = JSON.stringify(profile);
+  for (const key of STORAGE_KEYS) {
+    try {
+      localStorage.setItem(key, raw);
+    } catch {
+      // La copia que sí quepa o esté disponible seguirá manteniendo el perfil.
+    }
+  }
+}
 
 /**
  * Perfil del inquilino persistido en localStorage (no hay auth). `loaded`
@@ -13,30 +38,28 @@ export function useProfile() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setProfile(JSON.parse(raw) as UserProfile);
-    } catch {
-      // localStorage no disponible / JSON corrupto: arrancamos sin perfil.
+    const stored = readStoredProfile();
+    if (stored) {
+      setProfile(stored);
+      // Sincroniza la clave nueva y la antigua para conservar compatibilidad.
+      writeStoredProfile(stored);
     }
     setLoaded(true);
   }, []);
 
   const save = useCallback((p: UserProfile) => {
     setProfile(p);
-    try {
-      localStorage.setItem(KEY, JSON.stringify(p));
-    } catch {
-      // Ignoramos: el perfil sigue vivo en memoria durante la sesión.
-    }
+    writeStoredProfile(p);
   }, []);
 
   const clear = useCallback(() => {
     setProfile(null);
-    try {
-      localStorage.removeItem(KEY);
-    } catch {
-      // no-op
+    for (const key of STORAGE_KEYS) {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // no-op
+      }
     }
   }, []);
 

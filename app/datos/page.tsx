@@ -8,8 +8,9 @@ import {
 import { formatNumber, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Datos — Agente Inmobiliario",
-  description: "Todos los datos que usa el agente, su contenido real, su fuente y dónde están.",
+  title: "Datos y fuentes",
+  description:
+    "Consulta los datos que usa HabitIA para comparar viviendas, sus fuentes y cuándo se actualizaron.",
 };
 
 // Siempre refleja el estado actual de la caché (no se prerenderiza).
