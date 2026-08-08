@@ -167,7 +167,7 @@ export async function POST(req: NextRequest) {
             }
           }
         } catch (err) {
-          console.warn("[chat] post-stream persistence failed", err);
+          console.warn("[chat ] post-stream persistence failed", err);
         }
       })();
     },
