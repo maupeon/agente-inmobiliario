@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowSquareOut,
+  ArrowClockwise,
   Bed,
   Buildings,
   Heart,
@@ -58,6 +59,12 @@ interface FilterForm {
   habitaciones: string;
 }
 
+interface RecommendResponse {
+  items?: PropertyRecommendation[];
+  intro?: string | null;
+  error?: string;
+}
+
 const EMPTY_ENRICH: Record<string, PropertyEnrichment> = {};
 
 export function Dashboard() {
@@ -85,6 +92,7 @@ export function Dashboard() {
   const [recIntro, setRecIntro] = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
+  const [recRetry, setRecRetry] = useState(0);
   const recRequestRef = useRef(0);
   const [form, setForm] = useState<FilterForm>({
     zona: launchZone,
@@ -163,14 +171,28 @@ export function Dashboard() {
       }),
       signal: ctrl.signal,
     })
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("HTTP"))))
-      .then((d: { items?: PropertyRecommendation[]; intro?: string | null }) => {
+      .then(async (r) => {
+        const data = (await r.json().catch(() => ({}))) as RecommendResponse;
+        if (!r.ok) {
+          throw new Error(
+            data.error ?? "No he podido contactar con el servicio de recomendaciones."
+          );
+        }
+        return data;
+      })
+      .then((d) => {
         if (ctrl.signal.aborted || requestId !== recRequestRef.current) return;
         setRecs(d.items ?? []);
         setRecIntro(d.intro ?? null);
       })
-      .catch(() => {
-        if (!ctrl.signal.aborted) setRecError("No he podido cargar recomendaciones.");
+      .catch((error: unknown) => {
+        if (!ctrl.signal.aborted) {
+          setRecError(
+            error instanceof Error
+              ? error.message
+              : "No he podido contactar con el servicio de recomendaciones."
+          );
+        }
       })
       .finally(() => {
         if (!ctrl.signal.aborted && requestId === recRequestRef.current) {
@@ -179,7 +201,7 @@ export function Dashboard() {
       });
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appliedKey, recProfileKey, source]);
+  }, [appliedKey, recProfileKey, recRetry, source]);
 
   // ── Favoritos / búsqueda: enriquece lo que falta ──
   const enrichList = useMemo(
@@ -438,9 +460,23 @@ export function Dashboard() {
         )}
 
         {recError && source === "para_ti" ? (
-          <p role="alert" className="mt-6 rounded-2xl border border-rose-500/30 bg-rose-50 p-4 text-sm text-ink-700">
-            {recError} Revisa la zona o inténtalo de nuevo.
-          </p>
+          <div
+            role="alert"
+            className="mt-6 flex flex-col gap-4 rounded-2xl border border-rose-500/30 bg-rose-50 p-4 text-sm text-ink-700 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <p className="font-semibold text-ink">No se pudieron cargar las recomendaciones</p>
+              <p className="mt-1 leading-relaxed">{recError}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setRecRetry((value) => value + 1)}
+              className="pressable inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-hairline-strong bg-white px-4 font-semibold text-ink shadow-nudge"
+            >
+              <ArrowClockwise aria-hidden size={17} weight="bold" />
+              Reintentar
+            </button>
+          </div>
         ) : items.length === 0 ? (
           <EmptyPanel source={source} loading={busy} hasZona={!!applied.zona.trim()} />
         ) : (
