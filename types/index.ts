@@ -292,9 +292,15 @@ export interface PropertyValuation {
   etiqueta: string | null;
   /** Banda normalizada para colorear el mapa. */
   banda: "barato" | "ajustado" | "en_linea" | "caro" | "muy_caro" | null;
-  nivel: "barrio" | "provincia" | null;
+  nivel: "barrio" | "provincia" | "modelo" | null;
   referencia: string | null;
   fromFallback: boolean;
+  /** Solo con `nivel: "modelo"`: intervalo con cobertura del 90 %. */
+  intervalo?: [number, number];
+  /** El precio cae por debajo del borde inferior del intervalo. */
+  oportunidad?: boolean;
+  /** Trimestre al que está renivelada la estimación, p. ej. "2026T1". */
+  nivelPrecios?: string;
 }
 
 /** Una propiedad con sus tres señales calculadas para el panel/mapa. */

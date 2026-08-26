@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, List, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { IdealistaUsageBadge } from "./IdealistaUsageBadge";
 import { Logo } from "./ui/Logo";
 
 const LINKS = [
@@ -58,6 +59,7 @@ export function SiteNav() {
         </div>
 
         <div className="flex items-center gap-2">
+          <IdealistaUsageBadge className="hidden lg:inline-flex" />
           <Link
             href="/dashboard"
             aria-current={path === "/dashboard" ? "page" : undefined}
@@ -92,6 +94,9 @@ export function SiteNav() {
         )}
       >
         <div className="mx-auto grid max-w-[1200px] gap-1">
+          <div className="px-4 pb-2 pt-1">
+            <IdealistaUsageBadge />
+          </div>
           {[
             { href: "/dashboard", label: "Buscar vivienda" },
             ...LINKS,

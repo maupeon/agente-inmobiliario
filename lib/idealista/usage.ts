@@ -2,10 +2,10 @@ import "server-only";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 /**
- * Contador de peticiones REALES a la API de Idealista (plan gratuito: 100/mes).
+ * Contador de peticiones REALES a la API de Idealista (100/mes por defecto).
  * Persiste en la tabla `events` (event_name = "idealista_request"), así sobrevive
- * a reinicios del servidor y refleja el consumo real del mes natural. Si no hay
- * Supabase configurado, degrada a 0 sin romper nada.
+ * a reinicios del servidor y refleja el consumo registrado del mes natural. Si
+ * Supabase no está disponible, devuelve un estado desconocido sin romper la app.
  */
 
 const EVENT = "idealista_request";
@@ -29,9 +29,10 @@ function monthStartIso(): string {
 
 export interface IdealistaUsage {
   month: string;
-  count: number;
+  count: number | null;
   limit: number;
-  remaining: number;
+  remaining: number | null;
+  available: boolean;
 }
 
 /** Cuántas peticiones reales se han hecho en el mes natural actual. */
@@ -39,18 +40,27 @@ export async function getIdealistaUsage(): Promise<IdealistaUsage> {
   const limit = monthlyLimit();
   const month = currentMonth();
   const supabase = getServerSupabase();
-  if (!supabase) return { month, count: 0, limit, remaining: limit };
+  if (!supabase) {
+    return { month, count: null, limit, remaining: null, available: false };
+  }
   try {
-    const { count } = await supabase
+    const { count, error } = await supabase
       .from("events")
       .select("*", { count: "exact", head: true })
       .eq("event_name", EVENT)
       .gte("created_at", monthStartIso());
+    if (error) throw error;
     const used = count ?? 0;
-    return { month, count: used, limit, remaining: Math.max(0, limit - used) };
+    return {
+      month,
+      count: used,
+      limit,
+      remaining: Math.max(0, limit - used),
+      available: true,
+    };
   } catch (err) {
     console.warn("[idealista-usage] no se pudo contar", err);
-    return { month, count: 0, limit, remaining: limit };
+    return { month, count: null, limit, remaining: null, available: false };
   }
 }
 
@@ -66,13 +76,17 @@ export async function recordIdealistaRequest(kind: string): Promise<void> {
     return;
   }
   try {
-    await supabase.from("events").insert({ event_name: EVENT, event_data: { kind } });
+    const { error } = await supabase
+      .from("events")
+      .insert({ event_name: EVENT, event_data: { kind } });
+    if (error) throw error;
   } catch (err) {
     console.warn("[idealista] no se pudo registrar la petición", err);
     return;
   }
   getIdealistaUsage()
-    .then(({ count, limit }) => {
+    .then(({ count, limit, available }) => {
+      if (!available || count === null) return;
       const warn =
         count >= limit ? " ⛔ TOPE MENSUAL ALCANZADO" : count >= limit * 0.9 ? " ⚠️ casi en el tope" : "";
       console.log(`[idealista] ${kind} → ${count}/${limit} peticiones este mes${warn}`);

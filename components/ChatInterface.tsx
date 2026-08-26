@@ -9,6 +9,7 @@ import { Composer } from "./Composer";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import { EmptyState } from "./EmptyState";
+import { IdealistaUsageBadge } from "./IdealistaUsageBadge";
 import { Onboarding } from "./Onboarding";
 import { Logo } from "./ui/Logo";
 import type { Conversation } from "@/types";
@@ -95,7 +96,7 @@ export function ChatInterface() {
             <List size={15} weight="bold" />
           </button>
           <Logo variant="inline" className="text-[1rem]" />
-          <div className="w-11" />
+          <IdealistaUsageBadge compact />
         </header>
 
         {/* Cuerpo */}

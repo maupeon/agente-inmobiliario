@@ -7,5 +7,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const usage = await getIdealistaUsage();
   const mock = process.env.MOCK_IDEALISTA === "true";
-  return Response.json({ ...usage, mock });
+  return Response.json(
+    { ...usage, mock },
+    { headers: { "Cache-Control": "no-store, max-age=0" } }
+  );
 }

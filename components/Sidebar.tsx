@@ -13,6 +13,7 @@ import {
 import { cn, timeAgo } from "@/lib/utils";
 import type { Conversation, Property } from "@/types";
 import { FavoritesList } from "./FavoritesList";
+import { IdealistaUsageBadge } from "./IdealistaUsageBadge";
 import { Logo } from "./ui/Logo";
 
 export function Sidebar({
@@ -162,6 +163,9 @@ export function Sidebar({
         </div>
 
         <footer className="mt-4 space-y-1 border-t border-hairline pt-3">
+          <div className="px-2 pb-2">
+            <IdealistaUsageBadge />
+          </div>
           <Link
             href="/como-funciona"
             onClick={onClose}

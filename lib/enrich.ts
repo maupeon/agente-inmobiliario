@@ -5,6 +5,8 @@ import { getMarketData } from "@/lib/market/cache";
 import { findProvincePrice } from "@/lib/market/match-province";
 import { findRentReference } from "@/lib/market/rent";
 import { buildNeighborhoodReport } from "@/lib/neighborhood/report";
+import { valorarLote } from "@/lib/valoracion/client";
+import type { ValoracionModelo } from "@/lib/valoracion/types";
 import type {
   CommuteMode,
   CommuteResult,
@@ -37,6 +39,11 @@ export async function enrichProperties(
     getMarketData("ine_price_by_province"),
   ]);
 
+  // Valoración con el modelo del TFM: una sola llamada para todo el lote. Si el
+  // servicio no está configurado o falla, el mapa viene vacío y cada propiedad
+  // cae a la heurística de siempre.
+  const porModelo = await valorarLote(properties);
+
   // Origen del trayecto: coordenadas del trabajo (del perfil), geocodificando
   // una sola vez si solo tenemos la dirección.
   const origen = await resolveWorkOrigin(profile);
@@ -45,7 +52,8 @@ export async function enrichProperties(
   return Promise.all(
     properties.map(async (p) => ({
       propertyCode: p.propertyCode,
-      valuation: valuate(p, rentRef, prices),
+      valuation:
+        desdeModelo(p, porModelo.get(p.propertyCode)) ?? valuate(p, rentRef, prices),
       neighborhood: buildNeighborhoodReport(zonaOf(p), provinciaOf(p)),
       commute: await commuteFor(p, origen, modoPreferido),
     }))
@@ -55,6 +63,34 @@ export async function enrichProperties(
 // ─── Valoración de precio ───────────────────────────────────────────────────
 
 type Banda = NonNullable<PropertyValuation["banda"]>;
+
+/**
+ * Traduce la salida del modelo al contrato que ya consume la interfaz. La
+ * diferencia con `valuate()` es la referencia: en lugar del €/m² medio de la
+ * provincia, el €/m² que el modelo estima para ESTA vivienda.
+ */
+function desdeModelo(
+  p: Property,
+  v: ValoracionModelo | undefined
+): PropertyValuation | null {
+  if (!v || p.size <= 0) return null;
+  const eurM2 = p.pricePerSqm ?? round1(p.price / p.size);
+  const banda = (v.banda ?? null) as Banda | null;
+  return {
+    operacion: "venta",
+    eurM2,
+    referenciaEurM2: round1(v.precio_justo / p.size),
+    diferenciaPorcentual: v.brecha_pct,
+    etiqueta: banda ? VALORACION_VENTA[banda] : null,
+    banda,
+    nivel: "modelo",
+    referencia: `modelo HabitIA · nivel de precios ${v.nivel_precios}`,
+    fromFallback: false,
+    intervalo: v.intervalo,
+    oportunidad: v.oportunidad,
+    nivelPrecios: v.nivel_precios,
+  };
+}
 
 const VALORACION_ALQUILER: Record<Banda, string> = {
   barato: "barato para lo que se paga en la zona",
