@@ -245,6 +245,37 @@ export function PropertyDetailDrawer({
                   Por debajo de lo explicable
                 </p>
               )}
+              {/* El contraste con la referencia de zona al uso: sobre este mismo
+                  anuncio, cuánto cambia la respuesta según con qué se compare. */}
+              {val.nivel === "modelo" &&
+                val.comparativa?.diferenciaPorcentual != null &&
+                val.comparativa.referenciaEurM2 != null && (
+                  <div className="mt-4 rounded-lg border border-hairline bg-paper-200/60 p-3">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-mist">
+                      Comparado con la referencia de zona habitual
+                    </p>
+                    <div className="mt-1.5 flex items-baseline gap-2">
+                      <span
+                        className="font-display text-xl"
+                        style={{ color: bandaColor(val.comparativa.banda) }}
+                      >
+                        {formatDiff(val.comparativa.diferenciaPorcentual)}
+                      </span>
+                      <span className="text-[13px] text-ink-700">
+                        {val.comparativa.etiqueta}
+                      </span>
+                    </div>
+                    <p className="mt-1 font-mono text-[11px] text-stone">
+                      {val.comparativa.fuente} ·{" "}
+                      {formatNumber(Math.round(val.comparativa.referenciaEurM2))} €/m²
+                    </p>
+                    <p className="mt-2 text-[12px] leading-relaxed text-stone">
+                      Esa cifra compara este piso con una media que mezcla toda la zona.
+                      El modelo lo compara consigo mismo: con lo que deberían costar sus{" "}
+                      {p.size} m², su planta y su ubicación exacta.
+                    </p>
+                  </div>
+                )}
               <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-mist">
                 {val.nivel === "modelo"
                   ? `Modelo HabitIA · error mediano 8,8 % · niveles de ${val.nivelPrecios ?? "hoy"}`

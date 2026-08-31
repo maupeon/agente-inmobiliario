@@ -52,8 +52,10 @@ export async function enrichProperties(
   return Promise.all(
     properties.map(async (p) => ({
       propertyCode: p.propertyCode,
-      valuation:
-        desdeModelo(p, porModelo.get(p.propertyCode)) ?? valuate(p, rentRef, prices),
+      valuation: conComparativa(
+        desdeModelo(p, porModelo.get(p.propertyCode)),
+        valuate(p, rentRef, prices)
+      ),
       neighborhood: buildNeighborhoodReport(zonaOf(p), provinciaOf(p)),
       commute: await commuteFor(p, origen, modoPreferido),
     }))
@@ -69,6 +71,32 @@ type Banda = NonNullable<PropertyValuation["banda"]>;
  * diferencia con `valuate()` es la referencia: en lugar del €/m² medio de la
  * provincia, el €/m² que el modelo estima para ESTA vivienda.
  */
+/**
+ * Devuelve la valoración del modelo con la de referencia adosada, para poder
+ * contrastarlas en la ficha. Si el modelo no respondió, se usa la de referencia
+ * a secas, como siempre.
+ */
+function conComparativa(
+  modelo: PropertyValuation | null,
+  referencia: PropertyValuation | null
+): PropertyValuation | null {
+  if (!modelo) return referencia;
+  if (!referencia || referencia.referenciaEurM2 == null) return modelo;
+  return {
+    ...modelo,
+    comparativa: {
+      referenciaEurM2: referencia.referenciaEurM2,
+      diferenciaPorcentual: referencia.diferenciaPorcentual,
+      etiqueta: referencia.etiqueta,
+      banda: referencia.banda,
+      fuente:
+        referencia.nivel === "provincia"
+          ? "media provincial (INE)"
+          : `media de ${referencia.referencia ?? "la zona"}`,
+    },
+  };
+}
+
 function desdeModelo(
   p: Property,
   v: ValoracionModelo | undefined

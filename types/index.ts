@@ -301,6 +301,18 @@ export interface PropertyValuation {
   oportunidad?: boolean;
   /** Trimestre al que está renivelada la estimación, p. ej. "2026T1". */
   nivelPrecios?: string;
+  /**
+   * Qué habría dicho la referencia de zona al uso sobre esta misma vivienda.
+   * Solo se rellena cuando responde el modelo: sirve para enseñar, sobre el
+   * anuncio concreto, cuánto se equivoca comparar contra una media provincial.
+   */
+  comparativa?: {
+    referenciaEurM2: number | null;
+    diferenciaPorcentual: number | null;
+    etiqueta: string | null;
+    banda: PropertyValuation["banda"];
+    fuente: string;
+  };
 }
 
 /** Una propiedad con sus tres señales calculadas para el panel/mapa. */
