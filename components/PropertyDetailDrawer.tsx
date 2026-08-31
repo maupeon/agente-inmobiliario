@@ -226,14 +226,29 @@ export function PropertyDetailDrawer({
                   {op === "alquiler"
                     ? `${val.eurM2} €/m²·mes`
                     : `${formatNumber(Math.round(val.eurM2))} €/m²`}{" "}
-                  · zona ≈{" "}
+                  · {val.nivel === "modelo" ? "precio justo ≈" : "zona ≈"}{" "}
                   {op === "alquiler"
                     ? `${val.referenciaEurM2} €/m²·mes`
                     : `${formatNumber(Math.round(val.referenciaEurM2))} €/m²`}
                 </p>
               )}
+              {/* Con el modelo hay intervalo: se enseña, porque un número solo
+                  finge una precisión que no tenemos. */}
+              {val.nivel === "modelo" && val.intervalo && (
+                <p className="mt-1 font-mono text-[11px] text-stone">
+                  Rango probable {formatNumber(val.intervalo[0])} –{" "}
+                  {formatNumber(val.intervalo[1])} € · 9 de cada 10 viviendas así caen aquí
+                </p>
+              )}
+              {val.oportunidad && (
+                <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-saffron-50 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-saffron-700">
+                  Por debajo de lo explicable
+                </p>
+              )}
               <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-mist">
-                Referencia orientativa{val.fromFallback ? " · respaldo local" : ""}
+                {val.nivel === "modelo"
+                  ? `Modelo HabitIA · error mediano 8,8 % · niveles de ${val.nivelPrecios ?? "hoy"}`
+                  : `Referencia orientativa${val.fromFallback ? " · respaldo local" : ""}`}
               </p>
             </section>
           )}

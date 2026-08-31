@@ -17,7 +17,9 @@ import type {
 
 const URL_BASE = process.env.VALORACION_URL;
 const TOKEN = process.env.VALORACION_TOKEN;
-const TIMEOUT_MS = Number(process.env.VALORACION_TIMEOUT_MS ?? 4000);
+// 10 s por defecto: con auto-stop en Fly, la primera petición tras un rato de
+// inactividad tiene que esperar a que arranque la máquina (~3-5 s).
+const TIMEOUT_MS = Number(process.env.VALORACION_TIMEOUT_MS ?? 10000);
 /** El servicio solo sabe de Madrid capital: fuera de ahí no se le pregunta. */
 const MUNICIPIO = /madrid/i;
 
@@ -105,7 +107,9 @@ export async function saludValoracion(): Promise<Record<string, unknown> | null>
   try {
     const res = await fetch(`${URL_BASE.replace(/\/$/, "")}/salud`, {
       cache: "no-store",
-      signal: AbortSignal.timeout(2500),
+      // Mismo margen que las valoraciones: con auto-stop en Fly la máquina puede
+      // estar dormida y 2,5 s no bastan para el arranque en frío.
+      signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     return res.ok ? ((await res.json()) as Record<string, unknown>) : null;
   } catch {
