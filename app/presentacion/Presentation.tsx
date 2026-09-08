@@ -49,67 +49,109 @@ const SCENES: SceneDefinition[] = [
       "Deja que el vídeo plantee la promesa de producto. Al terminar: «Lo que acabamos de ver no es una maqueta. Detrás hay un problema de medición, un modelo validado y una aplicación desplegada».",
   },
   {
+    kicker: "Problema",
+    title: "Buscar agota. Decidir exige contexto.",
+    target: 79,
+    note: "La oferta está fragmentada, comparar exige tiempo y una misma vivienda depende de muchos factores. El borrador incluye cifras de mercado sin fuente completa; aquí explicamos el problema sin convertirlas en evidencia. La oportunidad es conectar anuncios, contexto y preferencias.",
+  },
+  {
+    kicker: "Oportunidad · solución",
+    title: "De buscar viviendas a tomar decisiones.",
+    target: 104,
+    note: "Recorre el antes y el después: portales, comparación manual e incertidumbre se convierten en perfil, datos, ranking y explicación. Ahorrar tiempo y decidir con más confianza son objetivos del producto, todavía no resultados medidos con usuarios.",
+  },
+  {
+    kicker: "Propuesta de valor",
+    title: "Seis capacidades. Una decisión.",
+    target: 129,
+    note: "La ventaja propuesta está en combinar las capas. Hoy se integra Idealista con fuentes de contexto, scoring y conversación. La integración multiportal y las alertas personales son evolución prevista; no confundir el refresco de datos de mercado con un workflow de búsqueda por usuario.",
+  },
+  {
     kicker: "Problema y propuesta",
     title: "Tres preguntas, no una media",
-    target: 100,
+    target: 149,
     note:
       "El comprador solo ve el promedio de una zona, aunque dos pisos del mismo barrio puedan ser radicalmente distintos. HabitIA responde tres preguntas encadenadas: precio justo, confianza y oportunidad. Cada una requiere una técnica distinta.",
   },
   {
     kicker: "Aplicación del máster",
     title: "22 asignaturas, una cadena de decisión",
-    target: 160,
+    target: 179,
     note:
       "No intentamos marcar veintidós casillas. Organizamos lo aprendido en cuatro capas: ingeniería, modelización, IA y producto. También justificamos qué no usar: 94.000 filas tabulares no necesitaban Spark, una RNN ni deep learning; y la persistencia relacional favorecía PostgreSQL frente a NoSQL.",
   },
   {
     kicker: "Metodología · datos",
     title: "Del anuncio sucio a una matriz fiable",
-    target: 225,
+    target: 214,
     note:
       "Partimos de 94.852 anuncios reales. Los cruzamos espacialmente con 2.440 secciones censales, depuramos anomalías, construimos variables y dejamos 93.619 viviendas. La partición por activo produce 70.203 filas de entrenamiento y 23.416 de prueba sin valores ausentes.",
   },
   {
     kicker: "Metodología · validación",
     title: "Diseñamos cómo fallar antes de entrenar",
-    target: 290,
+    target: 249,
     note:
       "La parte más importante fue evitar resultados artificialmente buenos. Excluimos variables derivadas del precio, agrupamos por activo, calculamos las codificaciones fuera de muestra y añadimos dos pruebas adversas: futuro no visto y barrios completos no vistos.",
   },
   {
     kicker: "Metodología · modelización",
     title: "Cada modelo tuvo que justificar su complejidad",
-    target: 365,
+    target: 294,
     note:
       "Construimos una escalera desde la regla del sector hasta LightGBM y stacking. El gran salto viene de los datos y del primer modelo multivariante; el apilamiento aporta centésimas. La ablación revela que la localización vale 4,25 puntos, pero nuestras codificaciones construidas perjudican. Por eso producimos el modelo más simple: 54 variables y 8,20 %.",
   },
   {
     kicker: "Metodología · incertidumbre",
     title: "Un número no basta: hace falta un rango honesto",
-    target: 420,
+    target: 324,
     note:
       "Entrenamos tres LightGBM cuantílicos y reservamos un 20 % del entrenamiento para conformalizar. La cobertura pasa de 72,4 % a 89,8 %, prácticamente el 90 % nominal. SHAP explica cada predicción y el intervalo impide llamar ganga a un caso donde el modelo simplemente duda.",
   },
   {
     kicker: "Resultados · predicción",
     title: "Precisión útil, no universal",
-    target: 475,
+    target: 354,
     note:
       "En activos nunca vistos reducimos el error mediano del 15,4 al 8,20 %, un 47 %. El 57,6 % queda dentro de más o menos 10 %. En el futuro inmediato el error sube solo a 9,72 %. Pero al ocultar barrios completos llega a 19,86 %: el modelo no debe desplegarse en ciudades sin datos locales.",
   },
   {
     kicker: "Resultados · decisión",
     title: "Barato no es lo mismo que infravalorado",
-    target: 525,
+    target: 384,
     note:
       "Definimos oportunidad solo cuando el anuncio cae por debajo del intervalo. Detectamos 1.271 casos, con 28 % de descuento y 60.106 euros de ahorro mediano. La regla ingenua de menor precio por metro cuadrado concentra el 71,7 % en tres distritos. La nuestra mantiene diversidad y, controlando por distrito, gana 2,06 puntos de rentabilidad en 19 de 19 distritos.",
   },
   {
+    kicker: "Motor de recomendación",
+    title: "El mejor piso depende de ti.",
+    target: 419,
+    note: "El flujo real pide hasta ocho candidatos, los enriquece y devuelve hasta cinco. El score es una media ponderada de precio, presupuesto, trayecto, seguridad, calidad de vida e imprescindibles. Las prioridades ajustan pesos; sin destino laboral no puntúa el trayecto. Fair, Zone y Opportunity son las tres lentes conceptuales del documento, no tres subíndices que el código sume.",
+  },
+  {
+    kicker: "Comprar vs. alquilar",
+    title: "Compara tu patrimonio. No solo la cuota.",
+    target: 459,
+    note: "La calculadora ya existe. Ambos escenarios parten del mismo capital e invierten la diferencia de gasto. Incluye hipoteca, impuestos, comunidad, IBI, mantenimiento, alquiler, inflación, inversión y revalorización. El horizonte, la movilidad y la situación laboral contextualizan la decisión. Son escenarios sujetos a supuestos, no una predicción garantizada.",
+  },
+  {
     kicker: "Innovación y producto",
     title: "El modelo no vive en un cuaderno",
-    target: 570,
+    target: 489,
     note:
       "La innovación no es solo el algoritmo: es la unión de modelo puntual, intervalo y agente. Ocho herramientas orquestan datos en vivo, valoración por lotes, trayecto y barrio. SSE permite respuesta progresiva; Supabase aporta persistencia y trazabilidad; y la degradación elegante evita inventar datos cuando falla una fuente.",
+  },
+  {
+    kicker: "Demo",
+    title: "Del perfil al porqué, en directo.",
+    target: 549,
+    note: "Abre el panel en otra pestaña y muestra un perfil, el ranking y la explicación de una vivienda. Después cambia el horizonte en comprar o alquilar. Las fuentes en vivo pueden no estar disponibles; explica las limitaciones que muestre la aplicación. Vuelve a esta pestaña para continuar.",
+  },
+  {
+    kicker: "Roadmap",
+    title: "Demostrar. Validar. Escalar.",
+    target: 579,
+    note: "El borrador sitúa comprar o alquilar en el MVP, pero el repositorio ya contiene el módulo. Presentamos el estado actualizado: prototipo disponible; validación con usuarios, multiportal y alertas como siguiente fase; más ciudades, B2B, visita 2D a 3D y predicción de revalorización como visión sin fecha comprometida.",
   },
   {
     kicker: "Conclusión",
@@ -292,7 +334,8 @@ export function Presentation() {
         setNotesOpen(false);
         return;
       }
-      if (isEditable) return;
+      if (isEditable || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (event.key === " " && target?.closest("button, a, video")) return;
 
       if (event.key === "ArrowRight" || event.key === "PageDown") {
         event.preventDefault();
@@ -342,7 +385,7 @@ export function Presentation() {
   );
 
   return (
-    <main className={styles.presentation} data-started={started} data-active={active}>
+    <main className={styles.presentation} data-started={started} data-active={active} data-closing={active === SCENES.length - 1}>
       <a className={styles.skipLink} href="#presentation-controls">
         Ir a los controles
       </a>
@@ -371,7 +414,7 @@ export function Presentation() {
             <div
               className={`${styles.opening} ${started ? styles.openingHidden : ""}`}
               aria-hidden={started}
-              inert={started ? true : undefined}
+              ref={(element) => { if (element) element.inert = started; }}
             >
               <div className={styles.openingMeta}>
                 <Logo
@@ -384,10 +427,11 @@ export function Presentation() {
               <div>
                 <p className={styles.kickerLight}>Defensa · 10 minutos</p>
                 <h1 className={styles.openingTitle}>
-                  De 94.852 anuncios
+                  Inteligencia inmobiliaria.
                   <br />
-                  a una decisión explicable.
+                  Decisiones explicables.
                 </h1>
+                <p className={styles.openingSubtitle}>Datos + scoring + IA conversacional</p>
                 <p className={styles.openingByline}>
                   Mauricio Peón García · João Paulo Nogueira Cunha · Manuel Macedo Púlido
                   <br />
@@ -404,6 +448,54 @@ export function Presentation() {
         </SceneShell>
 
         <SceneShell index={1} active={active} state={sceneState(1)} label={SCENES[1].title}>
+          <section className={styles.sceneCanvas}>
+            <SceneHeader kicker="El problema" title="Buscar agota. Decidir exige contexto." />
+
+            <div className={styles.problemLayout}>
+              <div className={styles.editorialLead}><span className={styles.overline}>La oportunidad</span><h3>Más anuncios.<br /><em>Menos claridad.</em></h3><p>La información existe. Falta conectarla con la vida de quien busca.</p></div>
+              <div className={styles.editorialRows}>
+                {[
+                  ["01", "Oferta fragmentada", "Saltar entre portales, repetir filtros y comparar anuncios."],
+                  ["02", "Demasiadas variables", "Precio, estado, barrio, trayecto y financiación compiten por tu atención."],
+                  ["03", "Referencias incompletas", "El precio anunciado no explica cuánto encaja una vivienda."],
+                  ["04", "Tiempo e incertidumbre", "Encontrar opciones es solo el comienzo de la decisión."],
+                ].map(([n, title, copy]) => <article key={n}><span>{n}</span><div><h3>{title}</h3><p>{copy}</p></div></article>)}
+              </div>
+            </div>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={2} active={active} state={sceneState(2)} label={SCENES[2].title}>
+          <section className={styles.sceneCanvas}>
+            <SceneHeader kicker="Oportunidad · solución" title="De buscar viviendas a tomar decisiones." />
+
+            <div className={styles.comparisonGrid}>
+              <article><span className={styles.overline}>Hoy</span><h3>Todo por conectar.</h3><ul><li>Buscar en varios portales</li><li>Comparar manualmente</li><li>Interpretar el precio sin contexto</li><li>Decidir con dudas</li></ul></article>
+              <article className={styles.greenPanel}><span className={styles.overline}>Con HabitIA</span><h3>Un criterio compartido.</h3><ol><li>Tu perfil y tus prioridades</li><li>Datos + scoring + IA</li><li>Ranking personalizado</li><li>Una recomendación explicable</li></ol></article>
+            </div>
+            <p className={styles.takeaway}>El objetivo: <strong>menos tiempo comparando, más confianza al decidir.</strong></p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={3} active={active} state={sceneState(3)} label={SCENES[3].title}>
+          <section className={styles.sceneCanvas}>
+            <SceneHeader kicker="Propuesta de valor 360º" title="Seis capacidades. Una decisión." />
+
+            <div className={styles.valueGrid}>
+              {[
+                ["01", "Centraliza", "Anuncios y contexto en un punto de entrada."],
+                ["02", "Agiliza", "Prioriza opciones relevantes para tu búsqueda."],
+                ["03", "Entiende", "Convierte preferencias en criterios comparables."],
+                ["04", "Explica", "Hace visible el porqué de cada recomendación."],
+                ["05", "Anticipa", "Detecta oportunidades; alertas personales como siguiente paso."],
+                ["06", "Personaliza", "Adapta el ranking a lo que te importa."],
+              ].map(([n, title, copy]) => <article key={n}><span>{n}</span><h3>{title}</h3><p>{copy}</p></article>)}
+            </div>
+            <p className={styles.takeaway}>La ventaja está en <strong>combinar datos, valoración y conversación.</strong></p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={4} active={active} state={sceneState(4)} label={SCENES[4].title}>
           <section className={`${styles.sceneCanvas} ${styles.thesisScene}`}>
             <SceneHeader kicker="El problema" title="El mercado da una media. HabitIA responde tres preguntas." />
             <div className={styles.thesisGrid}>
@@ -439,7 +531,7 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={2} active={active} state={sceneState(2)} label={SCENES[2].title}>
+        <SceneShell index={5} active={active} state={sceneState(5)} label={SCENES[5].title}>
           <section className={`${styles.sceneCanvas} ${styles.curriculumScene}`}>
             <SceneHeader kicker="Criterio 1 · aplicación del máster" title="22 asignaturas. Una sola cadena de decisión." />
             <div className={styles.curriculumGrid}>
@@ -477,7 +569,7 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={3} active={active} state={sceneState(3)} label={SCENES[3].title}>
+        <SceneShell index={6} active={active} state={sceneState(6)} label={SCENES[6].title}>
           <section className={`${styles.sceneCanvas} ${styles.pipelineScene}`}>
             <SceneHeader kicker="Metodología · obtención y preparación" title="Del anuncio sucio a una matriz fiable." />
             <div className={styles.pipeline}>
@@ -503,7 +595,7 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={4} active={active} state={sceneState(4)} label={SCENES[4].title}>
+        <SceneShell index={7} active={active} state={sceneState(7)} label={SCENES[7].title}>
           <section className={`${styles.sceneCanvas} ${styles.validationScene}`}>
             <SceneHeader kicker="Metodología · diseño experimental" title="Diseñamos cómo fallar antes de entrenar." />
             <div className={styles.validationGrid}>
@@ -542,7 +634,7 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={5} active={active} state={sceneState(5)} label={SCENES[5].title}>
+        <SceneShell index={8} active={active} state={sceneState(8)} label={SCENES[8].title}>
           <section className={`${styles.sceneCanvas} ${styles.modelsScene}`}>
             <SceneHeader kicker="Metodología · comparación y ablación" title="Cada modelo tuvo que justificar su complejidad." />
             <div className={styles.modelsGrid}>
@@ -584,7 +676,7 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={6} active={active} state={sceneState(6)} label={SCENES[6].title}>
+        <SceneShell index={9} active={active} state={sceneState(9)} label={SCENES[9].title}>
           <section className={`${styles.sceneCanvas} ${styles.uncertaintyScene}`}>
             <SceneHeader kicker="Metodología · incertidumbre e interpretabilidad" title="Un número no basta. Hace falta un rango honesto." />
             <div className={styles.uncertaintyGrid}>
@@ -616,7 +708,7 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={7} active={active} state={sceneState(7)} label={SCENES[7].title}>
+        <SceneShell index={10} active={active} state={sceneState(10)} label={SCENES[10].title}>
           <section className={`${styles.sceneCanvas} ${styles.resultsScene}`}>
             <SceneHeader kicker="Resultados · activos nunca vistos" title="Precisión útil. No universal." />
             <div className={styles.resultHero}>
@@ -642,7 +734,7 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={8} active={active} state={sceneState(8)} label={SCENES[8].title}>
+        <SceneShell index={11} active={active} state={sceneState(11)} label={SCENES[11].title}>
           <section className={`${styles.sceneCanvas} ${styles.economicScene}`}>
             <SceneHeader kicker="Resultados · validación económica" title="Barato no es lo mismo que infravalorado." />
             <div className={styles.economicGrid}>
@@ -669,7 +761,38 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={9} active={active} state={sceneState(9)} label={SCENES[9].title}>
+        <SceneShell index={12} active={active} state={sceneState(12)} label={SCENES[12].title}>
+          <section className={styles.sceneCanvas}>
+            <SceneHeader kicker="Motor de recomendación" title="El mejor piso depende de ti." />
+
+            <ol className={styles.journey}>
+              {["Tu perfil", "Filtrado en Idealista", "Scoring personalizado", "Hasta 5 recomendaciones"].map((step, i) => <li key={step}><span>0{i + 1}</span><strong>{step}</strong></li>)}
+            </ol>
+            <div className={styles.scoreLayout}>
+              <div className={styles.scoreHero}><span>HabitIA Score</span><strong>0–100</strong><p>Precio · presupuesto · trayecto · seguridad · calidad de vida · imprescindibles</p><small>Media ponderada; los pesos cambian con tus prioridades.</small></div>
+              <div className={styles.editorialRows}>
+                {[["Fair Score", "¿Está bien valorada?", "Precio frente a su referencia."], ["Zone Score", "¿Encaja la zona?", "Entorno y conexiones para tu día a día."], ["Opportunity Score", "¿Hay oportunidad?", "Descuento respaldado por la incertidumbre del modelo."]].map(([label, title, copy]) => <article key={label}><div><span className={styles.overline}>{label}</span><h3>{title}</h3><p>{copy}</p></div></article>)}
+              </div>
+            </div>
+            <p className={styles.finePrint}>Tres lentes de la propuesta conceptual. El ranking actual utiliza los seis factores indicados; no suma tres subíndices.</p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={13} active={active} state={sceneState(13)} label={SCENES[13].title}>
+          <section className={styles.sceneCanvas}>
+            <SceneHeader kicker="Comprar vs. alquilar" title="Compara tu patrimonio. No solo la cuota." />
+
+            <div className={styles.financePremise}><span>Mismo capital inicial</span><ArrowRight aria-hidden /><strong>Dos escenarios, año a año</strong><ArrowRight aria-hidden /><span>Patrimonio neto</span></div>
+            <div className={styles.comparisonGrid}>
+              <article><span className={styles.overline}>Comprar</span><h3>Vivienda + inversión</h3><p>Entrada, hipoteca e intereses.<br />Impuestos y gastos de compra y venta.<br />Comunidad, IBI, seguros y mantenimiento.<br />Revalorización de la vivienda.</p></article>
+              <article><span className={styles.overline}>Alquilar</span><h3>Flexibilidad + inversión</h3><p>Alquiler y sus subidas.<br />Capital disponible que permanece invertido.<br />Diferencia de gasto invertida cada año.<br />Rentabilidad neta e inflación.</p></article>
+            </div>
+            <p className={styles.takeaway}><strong>Tu vida cambia el resultado.</strong> Horizonte, movilidad, liquidez y perspectivas laborales.</p>
+            <p className={styles.finePrint}>Simulación bajo supuestos ajustables, con año de equilibrio y sensibilidad. No garantiza rentabilidades futuras.</p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={14} active={active} state={sceneState(14)} label={SCENES[14].title}>
           <section className={`${styles.sceneCanvas} ${styles.productScene}`}>
             <SceneHeader kicker="Innovación · productivización" title="El modelo no vive en un cuaderno." />
             <div className={styles.architectureFlow}>
@@ -695,7 +818,35 @@ export function Presentation() {
           </section>
         </SceneShell>
 
-        <SceneShell index={10} active={active} state={sceneState(10)} label={SCENES[10].title}>
+        <SceneShell index={15} active={active} state={sceneState(15)} label={SCENES[15].title}>
+          <section className={styles.sceneCanvas}>
+            <SceneHeader kicker="Demo · producto en funcionamiento" title="Del perfil al porqué, en directo." />
+
+            <div className={styles.demoLayout}>
+              <div className={styles.editorialLead}><span className={styles.overline}>Una búsqueda real</span><h3>«Quiero vivir<br /><em>más cerca.»</em></h3><p>Define zona, presupuesto y trayecto. Descubre qué viviendas encajan y por qué.</p></div>
+              <div className={styles.demoLinks}>
+                <a href="/dashboard" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}><span>01 · Explorar viviendas</span><strong>Del perfil al ranking <ArrowRight aria-hidden /></strong><small>Abrir el panel en otra pestaña</small></a>
+                <a href="/comprar-o-alquilar" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}><span>02 · Comparar escenarios</span><strong>Comprar o alquilar <ArrowRight aria-hidden /></strong><small>Abrir la calculadora en otra pestaña</small></a>
+              </div>
+            </div>
+            <p className={styles.finePrint}>El reloj se pausa al abrir la demo. Al volver, pulsa P para continuar la exposición.</p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={16} active={active} state={sceneState(16)} label={SCENES[16].title}>
+          <section className={styles.sceneCanvas}>
+            <SceneHeader kicker="Roadmap" title="Demostrar. Validar. Escalar." />
+
+            <div className={styles.roadmapGrid}>
+              <article><span className={styles.statusPill}>Prototipo disponible</span><h3>Demostrar<br />inteligencia.</h3><ul><li>Idealista + fuentes de contexto</li><li>Scoring y chatbot</li><li>Valoración y dashboard</li><li>Comprar vs. alquilar</li></ul></article>
+              <article><span className={styles.overline}>Siguiente · MVP</span><h3>Validar<br />con usuarios.</h3><ul><li>Medir utilidad y tiempo ahorrado</li><li>Integración multiportal</li><li>Alertas y búsquedas periódicas</li><li>Validación del servicio B2C</li></ul></article>
+              <article><span className={styles.overline}>Visión</span><h3>Escalar<br />el producto.</h3><ul><li>Más ciudades</li><li>Despliegue a empresas · B2B</li><li>Visita virtual de 2D a 3D</li><li>Predicción de revalorización</li></ul></article>
+            </div>
+            <p className={styles.finePrint}>Hoja de ruta propuesta, sin fechas comprometidas. La expansión requiere nuevos datos y validación local.</p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={17} active={active} state={sceneState(17)} label={SCENES[17].title}>
           <section className={`${styles.sceneCanvas} ${styles.closingScene}`}>
             <div className={styles.closingMark}><Logo variant="mark" highlightClassName={styles.closingAccent} /></div>
             <div className={styles.closingContent}>
@@ -722,11 +873,11 @@ export function Presentation() {
 
       <header
         className={`${styles.topChrome} ${chromeVisible ? "" : styles.chromeHidden}`}
-        aria-hidden={!started}
-        inert={!started ? true : undefined}
+        aria-hidden={!started || !chromeVisible}
+        ref={(element) => { if (element) element.inert = !started || !chromeVisible; }}
       >
         <div className={styles.brandChip}>
-          <Logo variant="inline" />
+          <a href="/" className={styles.exitLink} aria-label="Salir de la presentación" title="Salir de la presentación"><Logo variant="inline" /></a>
           <span>TFM</span>
         </div>
         <div className={styles.sceneIdentity}>
@@ -751,8 +902,8 @@ export function Presentation() {
       <footer
         id="presentation-controls"
         className={`${styles.controls} ${chromeVisible ? "" : styles.chromeHidden}`}
-        aria-hidden={!started}
-        inert={!started ? true : undefined}
+        aria-hidden={!started || !chromeVisible}
+        ref={(element) => { if (element) element.inert = !started || !chromeVisible; }}
       >
         <button type="button" onClick={previous} disabled={active === 0} aria-label="Escena anterior" title="Anterior (←)">
           <ArrowLeft aria-hidden />
@@ -792,7 +943,7 @@ export function Presentation() {
       <aside
         className={`${styles.notesPanel} ${notesOpen ? styles.notesOpen : ""}`}
         aria-hidden={!notesOpen}
-        inert={!notesOpen ? true : undefined}
+        ref={(element) => { if (element) element.inert = !notesOpen; }}
       >
         <button type="button" onClick={() => setNotesOpen(false)} aria-label="Cerrar notas"><X aria-hidden /></button>
         <div className={styles.notesHeading}>
@@ -836,7 +987,7 @@ function SceneShell({
     <div
       className={`${styles.scene} ${state}`}
       aria-hidden={index !== active}
-      inert={index !== active ? true : undefined}
+      ref={(element) => { if (element) element.inert = index !== active; }}
       aria-label={label}
       data-scene={index}
     >
