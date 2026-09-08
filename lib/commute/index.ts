@@ -77,6 +77,7 @@ export async function geocodeAddress(
         "Accept-Language": "es",
       },
       cache: "no-store",
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return null;
     const arr = (await res.json()) as Array<{ lat: string; lon: string; display_name?: string }>;
@@ -110,6 +111,7 @@ export async function reverseGeocode(
         "Accept-Language": "es",
       },
       cache: "no-store",
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return null;
     const json = (await res.json()) as {
@@ -180,7 +182,7 @@ export async function computeCommute(opts: {
         [origen.lon, origen.lat],
         [destino.lon, destino.lat],
       ] as Array<[number, number]>),
-    aprox: !geometria,
+    aprox: !geometria || recomendado === "transporte",
   };
 
   return {
@@ -225,6 +227,7 @@ async function orsGeojson(
         ],
       }),
       cache: "no-store",
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return null;
     const json = (await res.json()) as {

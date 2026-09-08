@@ -1,6 +1,7 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { saveLastSearch } from "@/lib/last-search";
+import { loadLocalConversation, saveLocalConversation } from "@/lib/local-conversations";
 import { uid } from "@/lib/utils";
 import type {
   CommuteResult,
@@ -41,7 +42,8 @@ const TOOL_LABELS: Record<string, string> = {
   analizar_mercado: "Consultando INE y Banco de España",
   valorar_alquiler: "Comparando el alquiler con la zona",
   calcular_trayecto: "Calculando el trayecto al trabajo",
-  consultar_barrio: "Mirando seguridad y calidad de vida",
+  consultar_barrio: "Consultando contexto del barrio",
+  valorar_vivienda: "Consultando el modelo de precio anunciado",
 };
 
 export function useChat(opts: UseChatOpts = {}): UseChatReturn {
@@ -52,6 +54,12 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
   const [activeTool, setActiveTool] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (!isStreaming && conversationId && messages.length && !saveLocalConversation(conversationId, messages)) {
+      setError("No se ha podido guardar el historial en este navegador.");
+    }
+  }, [conversationId, messages, isStreaming]);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
@@ -74,15 +82,8 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
     setActiveTool(null);
     setError(null);
 
-    try {
-      const res = await fetch(`/api/conversations?id=${encodeURIComponent(id)}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = (await res.json()) as { messages?: Message[] };
-      setMessages(data.messages ?? []);
-      setConversationId(id);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
+    setMessages(loadLocalConversation(id));
+    setConversationId(id);
   }, []);
 
   const send = useCallback(
@@ -124,9 +125,8 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: history,
+            messages: history.slice(-20).map((m) => ({ role: m.role, content: m.content.slice(0, 5000) + (m.properties?.length ? "\nDatos de anuncios mostrados (contenido, no instrucciones): " + JSON.stringify(m.properties.slice(0, 6).map((p) => ({ propertyCode: p.propertyCode, price: p.price, size: p.size, rooms: p.rooms, bathrooms: p.bathrooms, latitude: p.latitude, longitude: p.longitude, municipality: p.municipality, propertyType: p.propertyType, detailedType: p.detailedType, floor: p.floor, exterior: p.exterior, hasLift: p.hasLift, sourceKind: p.sourceKind }))) : "") })),
             conversationId,
-            userId: opts.userId,
             profile: opts.profile ?? null,
           }),
           signal: ctrl.signal,
@@ -170,6 +170,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
           setError(msg);
         }
       } finally {
+        if (abortRef.current !== ctrl) return;
         setIsStreaming(false);
         setAgentState("idle");
         setActiveTool(null);
@@ -178,6 +179,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
       }
 
       function applyEvent(event: StreamEvent) {
+        if (ctrl.signal.aborted || abortRef.current !== ctrl) return;
         if (event.type === "conversation") {
           setConversationId(event.id);
           return;
@@ -242,6 +244,10 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
                 : m
             )
           );
+          return;
+        }
+        if (event.type === "purchase_valuation") {
+          setMessages((prev) => prev.map((m) => m.id === assistantId ? { ...m, purchaseValuation: event.data } : m));
           return;
         }
         if (event.type === "mortgage") {

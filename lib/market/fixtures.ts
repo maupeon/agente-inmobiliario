@@ -16,7 +16,7 @@ import type {
 
 export const FALLBACK_PRICE_BY_PROVINCE: InePriceByProvince = {
   periodo: "2024T4",
-  fuente: "INE — Estadística Registral Inmobiliaria (datos de respaldo)",
+  fuente: "Datos ilustrativos de respaldo; precios provinciales sin verificación documental",
   data: [
     { provincia: "Madrid", precioM2: 4150, variacionInteranual: 7.8 },
     { provincia: "Barcelona", precioM2: 3920, variacionInteranual: 6.4 },
@@ -75,13 +75,13 @@ export const FALLBACK_PRICE_BY_PROVINCE: InePriceByProvince = {
 
 export const FALLBACK_MORTGAGE_RATES: BdeMortgageRates = {
   periodo: "2024-12",
-  fuente: "Banco de España — Tipos de interés (datos de respaldo)",
+  fuente: "Datos ilustrativos de respaldo; tipos de interés sin verificación documental",
   tipoMedio: 3.21,
   euribor12m: 2.44,
 };
 
 export const FALLBACK_IPV: IneIpvQuarterly = {
-  fuente: "INE — Índice de Precios de la Vivienda (datos de respaldo)",
+  fuente: "Datos ilustrativos de respaldo; evolución de precios sin verificación documental",
   serie: [
     { periodo: "2024T1", variacionInteranual: 6.3 },
     { periodo: "2024T2", variacionInteranual: 7.8 },
@@ -99,7 +99,7 @@ export const FALLBACK_IPV: IneIpvQuarterly = {
  */
 export const FALLBACK_RENT_REFERENCE: RentReference = {
   periodo: "2025T1",
-  fuente: "Referencia de alquiler €/m²/mes (datos de respaldo orientativos)",
+  fuente: "Datos manuales ilustrativos de alquiler; no son una medición de mercado verificada",
   zonas: [
     { zona: "Salamanca", municipio: "Madrid", provincia: "Madrid", eurM2Mes: 21.5, min: 18, max: 26 },
     { zona: "Chamberí", municipio: "Madrid", provincia: "Madrid", eurM2Mes: 20.0, min: 17, max: 24 },

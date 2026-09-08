@@ -1,3 +1,4 @@
+import type { ValoracionModelo } from "@/lib/valoracion/types";
 export type Role = "user" | "assistant" | "tool";
 
 export interface ToolCall {
@@ -20,6 +21,7 @@ export interface Message {
   rent?: RentValuation;
   commute?: CommuteResult;
   neighborhood?: NeighborhoodReport;
+  purchaseValuation?: PurchaseValuation;
   createdAt: string;
 }
 
@@ -88,13 +90,15 @@ export interface Property {
   price: number;
   pricePerSqm?: number;
   size: number;
-  rooms: number;
+  rooms?: number;
   bathrooms?: number;
   address: string;
   district?: string;
   municipality?: string;
   province?: string;
   propertyType: string;
+  detailedType?: { typology?: string; subTypology?: string };
+  sourceKind?: "idealista" | "demo";
   operation: "sale" | "rent";
   thumbnail: string;
   url: string;
@@ -122,6 +126,14 @@ export interface Conversation {
   createdAt: string;
   updatedAt: string;
   preview?: string;
+}
+
+export interface PurchaseValuation {
+  propertyCode: string;
+  resultado: ValoracionModelo | null;
+  estado: "ok" | "fuera_ambito" | "datos_insuficientes" | "no_disponible";
+  aviso: string;
+  sourceKind?: "idealista" | "demo";
 }
 
 export interface MortgageCalc {
@@ -275,10 +287,8 @@ export interface NeighborhoodReport {
 }
 
 /**
- * Valoración de precio de una propiedad concreta frente a la referencia de la
- * zona. Resume tanto alquiler (€/m²/mes) como compra (€/m²). El panel la usa
- * para colorear los pisos y mostrar "cuánto se desvía del precio de mercado"
- * frente al precio que pide el anuncio (Idealista).
+ * Estimación individual del modelo o contexto territorial con procedencia.
+ * Solo las estimaciones válidas del modelo pueden aportar bandas al panel.
  */
 export interface PropertyValuation {
   operacion: "alquiler" | "venta";
@@ -295,23 +305,23 @@ export interface PropertyValuation {
   nivel: "barrio" | "provincia" | "modelo" | null;
   referencia: string | null;
   fromFallback: boolean;
-  /** Solo con `nivel: "modelo"`: intervalo con cobertura del 90 %. */
+  fuente?: string;
+  periodo?: string;
+  /** Solo con `nivel: "modelo"`: intervalo histórico; cobertura actual no validada. */
   intervalo?: [number, number];
   /** El precio cae por debajo del borde inferior del intervalo. */
   oportunidad?: boolean;
   /** Trimestre al que está renivelada la estimación, p. ej. "2026T1". */
   nivelPrecios?: string;
-  /**
-   * Qué habría dicho la referencia de zona al uso sobre esta misma vivienda.
-   * Solo se rellena cuando responde el modelo: sirve para enseñar, sobre el
-   * anuncio concreto, cuánto se equivoca comparar contra una media provincial.
-   */
+  modeloVersion?: string;
+  avisoModelo?: string;
+  estadoModelo?: "ok" | "fuera_ambito" | "datos_insuficientes" | "no_disponible";
+  /** Contexto territorial verificado; no clasifica ni valora esta vivienda. */
   comparativa?: {
     referenciaEurM2: number | null;
-    diferenciaPorcentual: number | null;
-    etiqueta: string | null;
-    banda: PropertyValuation["banda"];
     fuente: string;
+    periodo: string;
+    territorio: string;
   };
 }
 
@@ -407,6 +417,8 @@ export interface RentVsBuyInput {
   /** Vivienda habitual: la ganancia de la venta puede estar exenta de IRPF
    *  (asume reinversión en otra habitual o titular mayor de 65 años). */
   viviendaHabitual: boolean;
+  /** Supuesto fiscal separado y desactivado por defecto. */
+  exencionGananciaVenta?: boolean;
 
   // ── Alquiler ──
   /** Subida anual del alquiler (%). */
@@ -536,6 +548,7 @@ export type StreamEvent =
   | { type: "rent"; data: RentValuation }
   | { type: "commute"; data: CommuteResult }
   | { type: "neighborhood"; data: NeighborhoodReport }
+  | { type: "purchase_valuation"; data: PurchaseValuation }
   | { type: "conversation"; id: string }
   | { type: "error"; message: string }
   | { type: "done" };

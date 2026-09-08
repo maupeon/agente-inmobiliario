@@ -19,7 +19,7 @@ const STEPS = [
   {
     n: "02",
     t: "Recomendación “para ti”",
-    d: "Buscamos en Idealista con tu perfil y puntuamos cada piso según tus prioridades, el presupuesto, el precio frente a la zona, el trayecto y la seguridad.",
+    d: "Buscamos en Idealista con tu perfil y puntuamos cada piso según tus prioridades, el presupuesto, el precio frente a la zona, el trayecto y los requisitos comprobables.",
   },
   {
     n: "03",
@@ -29,7 +29,7 @@ const STEPS = [
   {
     n: "04",
     t: "Mapa + explicación",
-    d: "Te enseñamos los 3-5 mejores sobre el mapa, coloreados por precio, con el halo de seguridad y el trayecto dibujado — y una frase de por qué encaja contigo.",
+    d: "Te enseñamos los 3-5 mejores sobre el mapa, coloreados por precio, con el trayecto dibujado — y una frase de por qué encaja contigo.",
   },
 ];
 
@@ -37,16 +37,16 @@ const SIGNALS = [
   {
     t: "Precio frente a la zona",
     d: "Comparamos el €/m² del anuncio con la referencia de la zona (alquiler) o de la provincia (compra) y te decimos cuánto se desvía.",
-    fuente: "MITMA · SERPAVI",
+    fuente: "Modelo histórico · referencia provincial si está verificada",
   },
   {
     t: "Seguridad del barrio",
-    d: "Un índice 0-100 de seguridad y calidad de vida (transporte, zonas verdes, servicios, ocio, tranquilidad).",
-    fuente: "Min. Interior",
+    d: "Los índices manuales de barrio se han retirado por falta de fuentes verificables.",
+    fuente: "Sin fuente verificada",
   },
   {
     t: "Trayecto al trabajo",
-    d: "Tiempo y ruta real desde tu trabajo hasta cada piso, en tu medio de transporte habitual.",
+    d: "Tiempo y ruta según proveedor disponible. El transporte público y los respaldos son aproximaciones.",
     fuente: "OpenRouteService",
   },
 ];
@@ -59,8 +59,8 @@ const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco:
   { fuente: "Banco de España", aporta: "Tipo hipotecario medio + Euríbor 12m", estado: "real", refresco: "Mensual" },
   { fuente: "OpenRouteService", aporta: "Rutas y tiempos de trayecto", estado: "real", refresco: "En vivo (con ORS_API_KEY)" },
   { fuente: "Nominatim (OpenStreetMap)", aporta: "Geocodificación del mapa", estado: "real", refresco: "En vivo" },
-  { fuente: "SERPAVI — MIVAU", aporta: "Alquiler €/m²/mes por zona", estado: "orientativo", refresco: "Snapshot (el portal bloquea descargas automáticas)" },
-  { fuente: "Min. del Interior", aporta: "Criminalidad y seguridad por barrio", estado: "orientativo", refresco: "Snapshot (datos curados)" },
+  { fuente: "Referencia de alquiler", aporta: "Sin medición verificada para valorar", estado: "orientativo", refresco: "Datos manuales solo ilustrativos" },
+  { fuente: "Indicadores de barrio", aporta: "Sin fuente verificada: retirados", estado: "orientativo", refresco: "No intervienen en el ranking" },
   { fuente: "Supabase", aporta: "Conversaciones, favoritos y caché de mercado", estado: "infra", refresco: "Persistencia" },
 ];
 
@@ -118,13 +118,12 @@ export default function ComoFuncionaPage() {
             Pedimos varios candidatos a Idealista y los puntuamos de 0 a 100
             combinando: <Strong>precio frente a la zona</Strong>,{" "}
             <Strong>ajuste a tu presupuesto</Strong>, <Strong>trayecto</Strong> al
-            trabajo, <Strong>seguridad</Strong> del barrio,{" "}
-            <Strong>calidad de vida</Strong> e <Strong>imprescindibles</Strong>{" "}
-            (ascensor, exterior…). Tus prioridades del onboarding suben el peso de
-            lo que más te importa: si marcaste “seguridad”, los barrios seguros
-            pesan más; si marcaste “cerca del trabajo”, manda el trayecto. Nos
-            quedamos con los 3-5 mejores y un modelo de lenguaje redacta el “por
-            qué encaja” usando solo esos datos (sin inventar nada).
+            trabajo e <Strong>imprescindibles</Strong> comprobables. Se excluyen
+            los incumplimientos conocidos y se señalan los datos pendientes de comprobar.
+            La prioridad de cercanía refuerza el trayecto. Comparamos hasta ocho anuncios
+            recuperados y mostramos hasta cinco; no representan todo el mercado.
+            Las explicaciones son deterministas salvo que se active la narración opcional.
+            La estimación de compra usa oferta de 2018 indexada: es un escenario sin precisión actual validada.
           </p>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {SIGNALS.map((s) => (
@@ -142,9 +141,7 @@ export default function ComoFuncionaPage() {
         {/* Datos */}
         <Section eyebrow="De dónde salen los datos" title="Fuentes, con transparencia">
           <p className="mb-5 max-w-[68ch] text-sm leading-relaxed text-stone-600">
-            Marcamos en verde lo que viene de una fuente oficial en vivo y en
-            ámbar lo orientativo (datos curados o snapshots, mientras integramos
-            el dataset oficial). El agente siempre lo advierte en sus tarjetas.
+            El tipo de fuente describe el proveedor previsto. Consulta Datos y fuentes para comprobar el periodo y la procedencia disponible. Si no hay una referencia verificada, el producto lo indica y no clasifica el precio con los datos ilustrativos.
           </p>
           <div className="overflow-hidden rounded-xl border border-hairline">
             <table className="w-full border-collapse text-left text-sm">
@@ -237,7 +234,7 @@ export default function ComoFuncionaPage() {
         </div>
 
         <p className="mt-10 text-xs leading-relaxed text-mist">
-          Los indicadores de seguridad y las referencias de alquiler son
+          Los indicadores de seguridad se han retirado; las referencias de alquiler son
           orientativos (no oficiales en vivo a nivel de barrio). La IA puede
           equivocarse: verifica los anuncios en Idealista.
         </p>

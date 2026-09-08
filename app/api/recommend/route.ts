@@ -1,3 +1,4 @@
+import { isRecord, readJson, validatedProfile } from "@/lib/api-validation";
 import { NextRequest } from "next/server";
 import { recommend } from "@/lib/recommend";
 import { handleError, RateLimitError } from "@/lib/errors";
@@ -34,9 +35,11 @@ export async function POST(req: NextRequest) {
 
   let body: RecommendRequestBody;
   try {
-    body = (await req.json()) as RecommendRequestBody;
+    const raw = await readJson(req, 12_000);
+    if (!isRecord(raw) || (raw.zona !== undefined && (typeof raw.zona !== "string" || raw.zona.length > 200)) || (raw.operacion !== undefined && !["venta", "alquiler"].includes(String(raw.operacion))) || ["precioMax", "habitaciones"].some((k) => raw[k] !== undefined && !Number.isFinite(raw[k]))) return Response.json({ error: "Filtros inválidos." }, { status: 400 });
+    body = { ...raw, profile: validatedProfile(raw.profile) } as RecommendRequestBody;
   } catch {
-    body = {};
+    return Response.json({ error: "Petición inválida." }, { status: 400 });
   }
 
   try {

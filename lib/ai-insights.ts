@@ -25,9 +25,9 @@ export async function narrateRecommendations(
   items: PropertyRecommendation[]
 ): Promise<Narration | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || items.length === 0) return null;
+  if (process.env.LLM_ENABLED === "false" || process.env.LLM_INSIGHTS_ENABLED !== "true" || !apiKey || items.length === 0) return null;
 
-  const client = new Anthropic({ apiKey });
+  const client = new Anthropic({ apiKey, maxRetries: 0, timeout: TIMEOUT_MS });
   const system =
     "Eres un asesor inmobiliario español, cercano y honesto (tuteo, español de España). " +
     "Te paso el perfil de una persona y una lista de pisos YA analizados. " +

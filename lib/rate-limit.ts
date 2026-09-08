@@ -1,6 +1,6 @@
 /**
- * Rate limiter en memoria del worker. Suficiente para una instancia única
- * en Vercel. Para multi-region o autoscale real usar Upstash Redis.
+ * Rate limiter en memoria del worker. Protección orientativa por proceso: se reinicia con él y NO constituye
+ * un presupuesto global ni un límite distribuido en Vercel.
  *
  * Reglas:
  *   - máx 10 requests / minuto por IP
@@ -22,6 +22,10 @@ const HOUR_MS = 60 * 60_000;
 
 function check(map: Map<string, Bucket>, ip: string, windowMs: number, limit: number) {
   const now = Date.now();
+  if (map.size > 5000) {
+    for (const [key, value] of Array.from(map.entries())) if (now - value.windowStartMs >= windowMs) map.delete(key);
+    if (map.size > 5000 && !map.has(ip)) return { ok: false, retryAfter: Math.ceil(windowMs / 1000) };
+  }
   const b = map.get(ip);
   if (!b || now - b.windowStartMs >= windowMs) {
     map.set(ip, { windowStartMs: now, count: 1 });

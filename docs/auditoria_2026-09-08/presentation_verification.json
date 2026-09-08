@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "source_sha256": "714a907424475d3b77ed715f93d2d811f0cb803249a8a69a946fd27e8b87c790",
+  "checks": [
+    "hash",
+    "three_model_metrics",
+    "fixed_artifact_metric",
+    "temporal_metric",
+    "eligible_counts",
+    "SHAP_normalization",
+    "segment_and_temporal_limits"
+  ],
+  "artifact_evaluated": 18782
+}

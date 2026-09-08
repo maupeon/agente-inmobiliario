@@ -12,6 +12,7 @@ import { EmptyState } from "./EmptyState";
 import { IdealistaUsageBadge } from "./IdealistaUsageBadge";
 import { Onboarding } from "./Onboarding";
 import { Logo } from "./ui/Logo";
+import { listLocalConversations, clearLocalConversations, CONVERSATIONS_CHANGED } from "@/lib/local-conversations";
 import type { Conversation } from "@/types";
 
 export function ChatInterface() {
@@ -34,15 +35,13 @@ export function ChatInterface() {
   }, [chat.messages, chat.agentState]);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch("/api/conversations")
-      .then((r) => (r.ok ? r.json() : { conversations: [] }))
-      .then((data: { conversations?: Conversation[] }) => {
-        if (!cancelled) setConversations(data.conversations ?? []);
-      })
-      .catch(() => {});
+    const sync = () => setConversations(listLocalConversations());
+    sync();
+    window.addEventListener(CONVERSATIONS_CHANGED, sync);
+    window.addEventListener("storage", sync);
     return () => {
-      cancelled = true;
+      window.removeEventListener(CONVERSATIONS_CHANGED, sync);
+      window.removeEventListener("storage", sync);
     };
   }, [chat.conversationId]);
 
@@ -110,6 +109,10 @@ export function ChatInterface() {
           className="flex-1 overflow-y-auto"
         >
           <div className="mx-auto w-full max-w-[960px] px-5 pb-32 pt-12 sm:px-8 lg:px-12 lg:pt-20">
+            <div className="mb-6 text-xs leading-relaxed text-stone-600">
+              Historial, perfil y favoritos se guardan en este navegador. Al enviar, el mensaje y el perfil se procesan con Anthropic; las búsquedas consultan Idealista. Evita datos sensibles. En un equipo compartido, borra los datos al terminar.
+              {conversations.length > 0 && <button type="button" className="ml-2 min-h-11 underline" onClick={() => { chat.reset(); clearLocalConversations(); setConversations([]); }}>Borrar historial</button>}
+            </div>
             {onboardingVisible ? (
               <Onboarding
                 initial={profile}

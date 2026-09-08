@@ -1,3 +1,4 @@
+import { runValorarVivienda } from "./tools/valorar-vivienda";
 import {
   runBuscarPropiedades,
   type BuscarPropiedadesInput,
@@ -38,6 +39,7 @@ import type {
   MortgageCalc,
   NeighborhoodReport,
   RentValuation,
+  PurchaseValuation,
 } from "@/types";
 
 /**
@@ -46,6 +48,22 @@ import type {
  * El SDK de Anthropic acepta este formato literalmente como `tools[]`.
  */
 export const TOOL_DEFINITIONS = [
+  {
+    name: "valorar_vivienda",
+    description: "Estima el precio de oferta de un piso de compra en Madrid con el mismo modelo que el panel. Usa solo campos observados de buscar_propiedades o aportados por el usuario; no inventes coordenadas ni características. Es un escenario indexado desde anuncios2018, no un precio de compraventa ni una ganga validada. Respeta estado y advertencias; si no responde, dilo.",
+    input_schema: {
+      type: "object", additionalProperties: false,
+      properties: {
+        propertyCode: { type: "string" }, price: { type: "number" }, size: { type: "number" },
+        latitude: { type: "number" }, longitude: { type: "number" }, municipality: { type: "string" },
+        propertyType: { type: "string" }, rooms: { type: "number" }, bathrooms: { type: "number" },
+        floor: { type: "string" }, hasLift: { type: "boolean" }, exterior: { type: "boolean" },
+        sourceKind: { type: "string", enum: ["idealista", "demo"] },
+        detailedType: { type: "object", properties: { typology: { type: "string" }, subTypology: { type: "string" } } },
+      },
+      required: ["propertyCode", "price", "size", "latitude", "longitude", "municipality", "propertyType"],
+    },
+  },
   {
     name: "buscar_propiedades",
     description:
@@ -194,7 +212,7 @@ export const TOOL_DEFINITIONS = [
   {
     name: "consultar_barrio",
     description:
-      "Devuelve la seguridad y los indicadores de calidad de vida de un barrio o zona (transporte, zonas verdes, servicios, vida nocturna, tranquilidad). Úsala cuando el usuario pregunte si una zona es segura o cómo se vive allí, y proactivamente al recomendar pisos según sus prioridades. Los datos son orientativos (no oficiales en vivo): cítalos siempre como una estimación.",
+      "Informa de que no hay indicadores de seguridad verificados a escala de barrio. Los índices manuales están retirados; no los inventes ni clasifiques barrios como seguros o peligrosos.",
     input_schema: {
       type: "object",
       properties: {
@@ -248,7 +266,8 @@ export interface ToolRunResult {
     | { kind: "market"; data: MarketAnalysis }
     | { kind: "rent"; data: RentValuation }
     | { kind: "commute"; data: CommuteResult }
-    | { kind: "neighborhood"; data: NeighborhoodReport };
+    | { kind: "neighborhood"; data: NeighborhoodReport }
+    | { kind: "purchase_valuation"; data: PurchaseValuation };
 }
 
 /**
@@ -258,6 +277,10 @@ export interface ToolRunResult {
  */
 export async function runTool(name: string, input: unknown): Promise<ToolRunResult> {
   switch (name) {
+    case "valorar_vivienda": {
+      const data = await runValorarVivienda(input);
+      return { forModel: data, forClient: { kind: "purchase_valuation", data } };
+    }
     case "buscar_propiedades": {
       const data = await runBuscarPropiedades(input as BuscarPropiedadesInput);
       // Para el modelo solo el resumen plano (sin propiedades duplicadas).

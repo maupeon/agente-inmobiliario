@@ -287,7 +287,7 @@ function ChartCard({ r }: { r: RentVsBuyResult }) {
       <SectionHead
         eyebrow="La película"
         title="Cómo evoluciona tu patrimonio"
-        sub="La línea de compra arranca por debajo (entrada y gastos) y, si cruza, te adelanta a partir del año de equilibrio."
+        sub="La línea de compra arranca por debajo (entrada y gastos) y, puede cruzarse más de una vez. El veredicto compara el patrimonio al horizonte elegido."
       />
       <div className="mt-6">
         <NetWorthChart
@@ -576,7 +576,7 @@ function AuditDetails({ r }: { r: RentVsBuyResult }) {
     ["Gastos de compra", `${i.gastosCompraPorcentaje}%${i.esObraNueva ? " · obra nueva" : ""}`],
     ["Gastos de venta", `${i.gastosVentaPorcentaje}%`],
     ["IBI · comunidad · mantenimiento", `${formatEUR(i.ibiAnual)} · ${formatEUR(i.comunidadMensual)}/mes · ${i.mantenimientoPorcentaje}%`],
-    ["Vivienda habitual (exención)", i.viviendaHabitual ? "Sí" : "No"],
+    ["Exención de ganancia simulada", i.viviendaHabitual && i.exencionGananciaVenta ? "Sí" : "No"],
     ["Inflación / costes", `${i.inflacionAnual}% · ${i.inflacionCostes}%`],
   ];
 

@@ -1,8 +1,9 @@
-import { IdealistaError } from "@/lib/errors";
+import { cachedSearch } from "./search-cache";
+import { IdealistaError, ValidationError } from "@/lib/errors";
 import type { Property, SearchFilters } from "@/types";
 import { getAccessToken } from "./auth";
 import { mockSearch } from "./mock";
-import { recordIdealistaRequest } from "./usage";
+import { reserveIdealistaRequest } from "./usage";
 import { lookupPlace } from "@/lib/commute/places";
 import { geocodeAddress } from "@/lib/commute";
 
@@ -140,7 +141,7 @@ export function normalizeProperty(
 ): Property {
   const city = raw.municipality ?? raw.district ?? "";
   const district = raw.district ?? "";
-  const rooms = raw.rooms ?? 0;
+  const rooms = typeof raw.rooms === "number" && Number.isFinite(raw.rooms) ? raw.rooms : undefined;
   const sizeLabel = raw.size ? `${raw.size} m²` : "";
   const title = [
     raw.detailedType?.typology ?? "Vivienda",
@@ -164,8 +165,10 @@ export function normalizeProperty(
     municipality: raw.municipality,
     province: raw.province,
     propertyType: raw.propertyType,
+    detailedType: raw.detailedType,
+    sourceKind: "idealista",
     operation: op === "alquiler" ? "rent" : "sale",
-    thumbnail: raw.thumbnail ?? `https://picsum.photos/seed/${raw.propertyCode}/800/600`,
+    thumbnail: raw.thumbnail || "/property-unavailable.svg",
     url: raw.url ?? `https://www.idealista.com/inmueble/${raw.propertyCode}/`,
     hasLift: raw.hasLift,
     exterior: raw.exterior,
@@ -184,22 +187,26 @@ export async function searchProperties(
   filters: SearchFilters,
   maxItems = 6
 ): Promise<Property[]> {
+  if (typeof filters.zona !== "string" || filters.zona.length > 200 || !["venta", "alquiler"].includes(filters.operacion)
+    || [filters.precioMin, filters.precioMax, filters.metrosMin, filters.metrosMax, filters.habitaciones].some((v) => v !== undefined && (!Number.isFinite(v) || v < 0))) throw new ValidationError("invalid search filters", "Revisa la zona, la operación y los límites numéricos de la búsqueda.");
+  maxItems = Math.max(1, Math.min(24, Math.floor(maxItems)));
   if (process.env.MOCK_IDEALISTA === "true") {
-    return mockSearch(filters, maxItems);
+    return mockSearch(filters, maxItems).map((p) => ({ ...p, sourceKind: "demo" as const }));
   }
 
-  const token = await getAccessToken();
   const params = await buildSearchParams(filters, maxItems);
   const url = `${BASE_URL.replace(/\/$/, "")}/es/search`;
 
+  return cachedSearch(params.toString(), async () => {
+  const token = await getAccessToken();
+  await reserveIdealistaRequest();
   const res = await fetch(url, {
     method: "POST",
     headers: SEARCH_HEADERS(token),
     body: params.toString(),
     cache: "no-store",
+    signal: AbortSignal.timeout(12_000),
   });
-  // La petición ya consumió cuota (haya ido bien o mal): contabilízala.
-  await recordIdealistaRequest("search");
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -212,4 +219,5 @@ export async function searchProperties(
   const data = (await res.json()) as { elementList?: IdealistaSearchResponseElement[] };
   const list = data.elementList ?? [];
   return list.map((el) => normalizeProperty(el, filters.operacion));
+  });
 }

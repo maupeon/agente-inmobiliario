@@ -176,7 +176,8 @@ export default function MapPanel({
 
       {plotted.map((it) => {
         const code = it.property.propertyCode;
-        const color = bandaColor(it.enrichment?.valuation?.banda);
+        const v = it.enrichment?.valuation;
+        const color = bandaColor(v?.nivel === "modelo" && v.estadoModelo === "ok" && !v.fromFallback ? v.banda : null);
         const isSel = code === selectedCode;
         return (
           <Marker

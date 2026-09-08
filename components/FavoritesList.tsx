@@ -47,12 +47,13 @@ export function FavoritesList({
             </p>
             <div className="mt-1 flex items-center gap-2">
               <a
-                href={p.url}
+                href={p.sourceKind === "demo" ? undefined : p.url}
+                aria-disabled={p.sourceKind === "demo"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-saffron-700 hover:text-saffron-500"
               >
-                Anuncio <ArrowUpRight size={9} weight="bold" />
+                {p.sourceKind === "demo" ? "Anuncio ficticio" : "Anuncio"} <ArrowUpRight size={9} weight="bold" />
               </a>
               {onRemove && (
                 <button

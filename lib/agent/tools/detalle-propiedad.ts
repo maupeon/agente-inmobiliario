@@ -12,7 +12,7 @@ export interface DetallePropiedadResult {
   price: number;
   pricePerSqm?: number;
   size: number;
-  rooms: number;
+  rooms?: number;
   bathrooms?: number;
   address?: string;
   district?: string;

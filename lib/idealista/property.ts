@@ -1,5 +1,5 @@
 import type { PropertyDetail } from "@/types";
-import { mockDetail } from "./mock";
+
 
 /**
  * "Detalle" de un anuncio.
@@ -17,8 +17,8 @@ import { mockDetail } from "./mock";
 export async function getPropertyDetail(
   propertyCode: string
 ): Promise<PropertyDetail | null> {
-  if (process.env.MOCK_IDEALISTA === "true") {
-    return mockDetail(propertyCode);
-  }
+  void propertyCode;
+  // La ficha conserva los campos del resultado de búsqueda, también en demo.
+
   return null;
 }

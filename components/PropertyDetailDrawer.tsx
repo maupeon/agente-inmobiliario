@@ -144,6 +144,7 @@ export function PropertyDetailDrawer({
         </header>
 
         <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
+          {p.sourceKind === "demo" && <p className="text-xs text-stone-600">Vivienda sintética. La imagen es ilustrativa y no corresponde a un anuncio real.</p>}
           {photos.length > 0 && (
             <div className="grid grid-cols-2 gap-1.5">
               {photos.slice(0, 4).map((src, i) => (
@@ -162,7 +163,7 @@ export function PropertyDetailDrawer({
           )}
 
           <div>
-            <h2 id="property-detail-title" className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-ink">{p.title}</h2>
+            <h2 id="property-detail-title" className="text-2xl font-semibold leading-tight tracking-[-0.03em] text-ink">{p.sourceKind === "demo" ? "Demo ficticia · " : ""}{p.title}</h2>
             <p className="mt-1 text-sm text-stone">
               {[p.address, p.district, p.municipality].filter(Boolean).join(" · ")}
             </p>
@@ -178,9 +179,9 @@ export function PropertyDetailDrawer({
               )}
             </div>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[11px] text-stone">
-              <span>{p.rooms} hab.</span>
+              <span>{p.rooms == null ? "Habitaciones sin dato" : `${p.rooms} hab.`}</span>
               <span>{p.size} m²</span>
-              {p.bathrooms && <span>{p.bathrooms} baños</span>}
+              {p.bathrooms != null && <span>{p.bathrooms} baños</span>}
               {detail?.yearBuilt && <span>año {detail.yearBuilt}</span>}
               {detail?.energyCertification && <span>energía {detail.energyCertification}</span>}
             </div>
@@ -200,19 +201,20 @@ export function PropertyDetailDrawer({
               <p className="mt-3 text-sm leading-relaxed text-stone-600">{detail.description}</p>
             )}
             <a
-              href={p.url}
+              href={p.sourceKind === "demo" ? undefined : p.url}
+              aria-disabled={p.sourceKind === "demo"}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-saffron-700 transition hover:text-ink"
             >
-              Ver en Idealista <ArrowSquareOut size={11} weight="bold" />
+              {p.sourceKind === "demo" ? "Anuncio ficticio" : "Ver en Idealista"} <ArrowSquareOut size={11} weight="bold" />
             </a>
           </div>
 
           {val && (
             <section className="rounded-xl border border-hairline bg-paper-50 p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-saffron-700">
-                Precio frente a la zona
+                {val.nivel === "modelo" ? "Precio frente a la estimación" : "Referencia territorial"}
               </p>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="font-display text-3xl" style={{ color: bandaColor(val.banda) }}>
@@ -226,7 +228,7 @@ export function PropertyDetailDrawer({
                   {op === "alquiler"
                     ? `${val.eurM2} €/m²·mes`
                     : `${formatNumber(Math.round(val.eurM2))} €/m²`}{" "}
-                  · {val.nivel === "modelo" ? "precio justo ≈" : "zona ≈"}{" "}
+                  · {val.nivel === "modelo" ? "estimación indexada ≈" : `${val.referencia ?? "referencia territorial"} ≈`}{" "}
                   {op === "alquiler"
                     ? `${val.referenciaEurM2} €/m²·mes`
                     : `${formatNumber(Math.round(val.referenciaEurM2))} €/m²`}
@@ -236,51 +238,41 @@ export function PropertyDetailDrawer({
                   finge una precisión que no tenemos. */}
               {val.nivel === "modelo" && val.intervalo && (
                 <p className="mt-1 font-mono text-[11px] text-stone">
-                  Rango probable {formatNumber(val.intervalo[0])} –{" "}
-                  {formatNumber(val.intervalo[1])} € · 9 de cada 10 viviendas así caen aquí
+                  Intervalo del escenario {formatNumber(val.intervalo[0])} –{" "}
+                  {formatNumber(val.intervalo[1])} € · cobertura actual no validada
                 </p>
               )}
               {val.oportunidad && (
                 <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-saffron-50 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-saffron-700">
-                  Por debajo de lo explicable
+                  Por debajo del intervalo estimado
                 </p>
               )}
-              {/* El contraste con la referencia de zona al uso: sobre este mismo
-                  anuncio, cuánto cambia la respuesta según con qué se compare. */}
+              {/* La media territorial se muestra como contexto, no como una
+                  segunda clasificación del precio individual. */}
               {val.nivel === "modelo" &&
-                val.comparativa?.diferenciaPorcentual != null &&
-                val.comparativa.referenciaEurM2 != null && (
+                val.comparativa?.referenciaEurM2 != null && (
                   <div className="mt-4 rounded-lg border border-hairline bg-paper-200/60 p-3">
                     <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-mist">
-                      Comparado con la referencia de zona habitual
+                      Contexto territorial
                     </p>
-                    <div className="mt-1.5 flex items-baseline gap-2">
-                      <span
-                        className="font-display text-xl"
-                        style={{ color: bandaColor(val.comparativa.banda) }}
-                      >
-                        {formatDiff(val.comparativa.diferenciaPorcentual)}
-                      </span>
-                      <span className="text-[13px] text-ink-700">
-                        {val.comparativa.etiqueta}
-                      </span>
-                    </div>
                     <p className="mt-1 font-mono text-[11px] text-stone">
-                      {val.comparativa.fuente} ·{" "}
-                      {formatNumber(Math.round(val.comparativa.referenciaEurM2))} €/m²
+                      {formatNumber(Math.round(val.comparativa.referenciaEurM2))} €/m² · {val.comparativa.territorio}
+                    </p>
+                    <p className="mt-1 text-[11px] text-stone">
+                      {val.comparativa.fuente} · {val.comparativa.periodo}
                     </p>
                     <p className="mt-2 text-[12px] leading-relaxed text-stone">
-                      Esa cifra compara este piso con una media que mezcla toda la zona.
-                      El modelo lo compara consigo mismo: con lo que deberían costar sus{" "}
-                      {p.size} m², su planta y su ubicación exacta.
+                      Esta media agrega viviendas distintas y no estima el precio de este anuncio. El modelo usa oferta de 2018 y un supuesto común de evolución de precios.
                     </p>
                   </div>
                 )}
               <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-mist">
                 {val.nivel === "modelo"
-                  ? `Modelo HabitIA · error mediano 8,8 % · niveles de ${val.nivelPrecios ?? "hoy"}`
-                  : `Referencia orientativa${val.fromFallback ? " · respaldo local" : ""}`}
+                  ? `Oferta 2018 · escenario ${val.nivelPrecios ?? "sin periodo"} · ${val.modeloVersion ?? "versión no identificada"}`
+                  : val.referenciaEurM2 == null ? "Sin referencia verificada" : "Referencia territorial orientativa"}
               </p>
+              {val.nivel !== "modelo" && val.referenciaEurM2 != null && <p className="mt-1 text-[11px] text-stone">{val.fuente} · {val.periodo}</p>}
+              {val.avisoModelo && <p className="mt-2 text-xs leading-relaxed text-stone-600">{val.avisoModelo}{val.estadoModelo !== "ok" && val.referenciaEurM2 != null ? " La referencia territorial mostrada no valora esta vivienda individualmente." : ""}</p>}
             </section>
           )}
 

@@ -1,13 +1,8 @@
 /**
- * Datos sintéticos para `MOCK_IDEALISTA=true`. Realistas y variados:
- *  - los resultados se reparten por los barrios reales de la ciudad consultada
- *    (o se concentran en el barrio si la búsqueda es específica),
- *  - el €/m² parte de la referencia de cada barrio con variación, así la
- *    valoración "precio vs zona" sale distinta en cada piso,
- *  - fotos vía picsum.photos con seed determinístico por propertyCode.
- *
- * Los barrios coinciden con `lib/neighborhood/fixtures.ts` y
- * `lib/market/fixtures.ts` para que seguridad y referencia de alquiler casen.
+ * Datos sintéticos para `MOCK_IDEALISTA=true`. Los nombres territoriales son
+ * reales; viviendas, direcciones, precios y características son ficticios.
+ * Se muestran con una ilustración local y sin enlace a un anuncio real.
+ * Los importes solo construyen ejemplos variados, no referencias de mercado.
  */
 import type { Property, PropertyDetail, SearchFilters } from "@/types";
 
@@ -86,7 +81,8 @@ function pickIndex<T>(arr: readonly T[], rng: () => number) {
 }
 
 function makePhotos(code: string, count: number) {
-  return Array.from({ length: count }, (_, i) => `https://picsum.photos/seed/${code}-${i}/1280/860`);
+  void code;
+  return count > 0 ? ["/property-demo.svg"] : [];
 }
 
 /**
@@ -146,7 +142,7 @@ function makeOne(filters: SearchFilters, idx: number, seed: Seed): Property {
   const hasLift = rng() > 0.3;
   const exterior = rng() > 0.35;
   const street = `${pickIndex(STREET_PREFIXES, rng)} ${pickIndex(STREET_NAMES, rng)}, ${Math.ceil(rng() * 180)}`;
-  const floor = `${Math.ceil(rng() * 7)}º ${rng() > 0.5 ? "izq." : "dcha."}`;
+  const floor = String(Math.ceil(rng() * 7));
 
   return {
     propertyCode: code,
@@ -160,10 +156,12 @@ function makeOne(filters: SearchFilters, idx: number, seed: Seed): Property {
     district: seed.zona,
     municipality: seed.municipio,
     province: seed.provincia,
-    propertyType: filters.tipo ?? "pisos",
+    propertyType: filters.tipo === "casas" ? "chalet" : "flat",
+    detailedType: { typology: filters.tipo === "casas" ? "chalet" : "flat", subTypology: "flat" },
+    sourceKind: "demo",
     operation: isRent ? "rent" : "sale",
-    thumbnail: `https://picsum.photos/seed/${code}-0/800/600`,
-    url: `https://www.idealista.com/inmueble/${code}/`,
+    thumbnail: "/property-demo.svg",
+    url: "",
     features: makeFeatures(rng, hasLift, exterior),
     hasLift,
     exterior,

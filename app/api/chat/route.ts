@@ -1,184 +1,58 @@
-import { NextRequest } from "next/server";
 import type { MessageParam } from "@anthropic-ai/sdk/resources/messages";
 import { executeAgentLoop } from "@/lib/agent/loop";
-import { handleError, RateLimitError, ValidationError } from "@/lib/errors";
+import { handleError, ValidationError } from "@/lib/errors";
 import { rateLimit } from "@/lib/rate-limit";
-import { trackEvent } from "@/lib/analytics";
-import { persistTurn } from "@/lib/supabase/conversations";
-import type { Message, StreamEvent, UserProfile } from "@/types";
+import { isRecord, readJson, requestIp, validatedProfile } from "@/lib/api-validation";
+import type { StreamEvent, UserProfile } from "@/types";
 import { uid } from "@/lib/utils";
-
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-interface ChatRequestBody {
-  messages?: Message[];
-  conversationId?: string;
-  userId?: string;
-  profile?: UserProfile | null;
-}
-
-function getIp(req: NextRequest): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) return fwd.split(",")[0].trim();
-  return req.headers.get("x-real-ip") ?? "anon";
-}
-
-function toAnthropicMessages(messages: Message[]): MessageParam[] {
-  return messages
-    .filter((m) => m.content && m.content.trim().length > 0)
-    .map((m) => ({
-      role: m.role,
-      content: m.content,
-    }));
-}
-
-export async function POST(req: NextRequest) {
-  const ip = getIp(req);
-  const limit = rateLimit(ip);
-  if (!limit.ok) {
-    const err = new RateLimitError(limit.retryAfter);
-    return Response.json(
-      { code: err.code, error: err.userMessage },
-      { status: err.status, headers: { "Retry-After": String(limit.retryAfter) } }
-    );
-  }
-
-  let body: ChatRequestBody;
+export async function POST(req: Request) {
+  const limit = rateLimit(`chat:${requestIp(req)}`);
+  if (!limit.ok) return Response.json({ error: "Espera un momento antes de continuar." }, { status: 429, headers: { "Retry-After": String(limit.retryAfter) } });
+  if (process.env.LLM_ENABLED === "false") return Response.json({ error: "El chat está pausado para controlar el consumo. Puedes usar el panel y la calculadora." }, { status: 503 });
+  let messages: MessageParam[];
+  let conversationId: string;
+  let profile: UserProfile | null = null;
   try {
-    body = (await req.json()) as ChatRequestBody;
-  } catch {
-    const err = new ValidationError("body inválido", "No he entendido la petición.");
-    return Response.json({ code: err.code, error: err.userMessage }, { status: 400 });
+    const body = await readJson(req, 120_000);
+    if (!isRecord(body) || !Array.isArray(body.messages) || !body.messages.length || body.messages.length > 20) throw new ValidationError("invalid messages", "Envía entre 1 y 20 mensajes de texto.");
+    messages = body.messages.map((m: unknown) => {
+      if (!isRecord(m) || !["user", "assistant"].includes(String(m.role)) || typeof m.content !== "string" || m.content.length > 8000) throw new ValidationError("invalid message", "Cada mensaje debe ser texto de hasta 8.000 caracteres.");
+      return { role: m.role as "user" | "assistant", content: m.content };
+    }).filter((m) => (m.content as string).trim());
+    if (!messages.length || messages[messages.length - 1].role !== "user" || messages.reduce((n, m) => n + (m.content as string).length, 0) > 32_000) throw new ValidationError("invalid history", "Acorta el historial o inicia una conversación nueva.");
+    conversationId = typeof body.conversationId === "string" && /^[a-zA-Z0-9-]{1,80}$/.test(body.conversationId) ? body.conversationId : uid();
+    profile = validatedProfile(body.profile);
+  } catch (err) {
+    const e = handleError(err, { route: "chat validation" });
+    return Response.json({ error: e.userMessage }, { status: 400 });
   }
-
-  if (!body.messages || body.messages.length === 0) {
-    const err = new ValidationError("messages vacío", "Falta el mensaje del usuario.");
-    return Response.json({ code: err.code, error: err.userMessage }, { status: 400 });
-  }
-
-  const userId = body.userId ?? null;
-  let conversationId = body.conversationId;
-  const isFirstTurn = !conversationId;
-
-  const userMessages = body.messages;
-  const lastUserMessage = [...userMessages].reverse().find((m) => m.role === "user");
-  if (!lastUserMessage) {
-    const err = new ValidationError("no user message", "Falta tu mensaje.");
-    return Response.json({ code: err.code, error: err.userMessage }, { status: 400 });
-  }
-
-  const anthropicMessages = toAnthropicMessages(userMessages);
-
-  // Acumulamos la respuesta del assistant para persistir al final.
-  let assistantText = "";
-  const assistantToolCalls: Message["toolCalls"] = [];
-
   const encoder = new TextEncoder();
+  const abort = new AbortController();
+  const cancel = () => abort.abort();
+  req.signal.addEventListener("abort", cancel, { once: true });
+  const timeout = setTimeout(cancel, 52_000);
   const stream = new ReadableStream({
     async start(controller) {
+      let closed = false;
       const send = (event: StreamEvent) => {
-        const payload = `data: ${JSON.stringify(event)}\n\n`;
-        controller.enqueue(encoder.encode(payload));
+        if (closed || abort.signal.aborted) return;
+        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`)); }
+        catch { closed = true; abort.abort(); }
       };
-
-      // Si no había conversación previa, generamos un id local provisional
-      // (Supabase confirmará el suyo en background).
-      if (isFirstTurn) {
-        conversationId = conversationId ?? uid();
-        send({ type: "conversation", id: conversationId });
-      }
-
       try {
-        await executeAgentLoop(anthropicMessages, (e) => {
-          if (e.type === "text") assistantText += e.text;
-          if (e.type === "tool_start") {
-            assistantToolCalls!.push({
-              id: e.id,
-              name: e.name,
-              input: e.input,
-              status: "running",
-            });
-          }
-          if (e.type === "tool_end") {
-            const tc = assistantToolCalls!.find((c) => c.id === e.id);
-            if (tc) {
-              tc.result = e.result;
-              tc.isError = e.isError;
-              tc.status = e.isError ? "error" : "done";
-            }
-          }
-          send(e);
-        }, body.profile ?? null);
+        send({ type: "conversation", id: conversationId });
+        await executeAgentLoop(messages, send, profile, abort.signal);
       } catch (err) {
-        const handled = handleError(err, { route: "POST /api/chat" });
-        send({ type: "error", message: handled.userMessage });
+        if (!abort.signal.aborted) send({ type: "error", message: handleError(err).userMessage });
       } finally {
-        send({ type: "done" });
-        controller.close();
+        clearTimeout(timeout); req.signal.removeEventListener("abort", cancel);
+        if (!closed) { send({ type: "done" }); try { controller.close(); } catch { /* Cancelado por el visitante. */ } }
       }
-
-      // Persistencia y analytics fuera del flujo crítico.
-      void (async () => {
-        try {
-          if (assistantText.trim().length > 0) {
-            const persisted = await persistTurn({
-              conversationId: isFirstTurn ? undefined : conversationId,
-              userId,
-              userMessage: lastUserMessage,
-              assistantMessage: {
-                id: uid(),
-                role: "assistant",
-                content: assistantText,
-                toolCalls: assistantToolCalls,
-                createdAt: new Date().toISOString(),
-              },
-            });
-            if (persisted) conversationId = persisted.conversationId;
-          }
-          if (isFirstTurn) {
-            await trackEvent({ name: "conversation_started", data: {} }, userId);
-          }
-          for (const tc of assistantToolCalls ?? []) {
-            if (tc.name === "buscar_propiedades" && !tc.isError) {
-              const r = tc.result as { count?: number; filters?: { zona?: string; operacion?: string } } | undefined;
-              await trackEvent({
-                name: "search_performed",
-                data: {
-                  zona: r?.filters?.zona ?? "",
-                  operacion: r?.filters?.operacion ?? "",
-                  resultCount: r?.count ?? 0,
-                },
-              }, userId);
-            } else if (tc.name === "calcular_hipoteca" && !tc.isError) {
-              const r = tc.result as { propertyPrice?: number; monthlyPayment?: number } | undefined;
-              await trackEvent({
-                name: "mortgage_calculated",
-                data: {
-                  price: r?.propertyPrice ?? 0,
-                  monthlyPayment: r?.monthlyPayment ?? 0,
-                },
-              }, userId);
-            } else if (tc.isError) {
-              await trackEvent({
-                name: "tool_error",
-                data: { tool: tc.name, reason: "tool_failure" },
-              }, userId);
-            }
-          }
-        } catch (err) {
-          console.warn("[chat ] post-stream persistence failed.", err);
-        }
-      })();
     },
+    cancel() { abort.abort(); clearTimeout(timeout); req.signal.removeEventListener("abort", cancel); },
   });
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream; charset=utf-8",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-      "X-Accel-Buffering": "no",
-    },
-  });
+  return new Response(stream, { headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
 }

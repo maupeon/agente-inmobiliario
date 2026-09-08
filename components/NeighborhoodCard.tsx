@@ -28,19 +28,18 @@ export function NeighborhoodCard({ data }: { data: NeighborhoodReport }) {
         </p>
         <span
           className="inline-flex items-center gap-1.5 rounded-md border border-hairline-strong/60 bg-paper-100 px-2 py-0.5 text-stone"
-          title="Datos compuestos a partir de fuentes públicas. Orientativos, no oficiales en vivo a nivel de barrio."
+          title="Sin indicadores verificados para comparar barrios."
         >
           <WarningCircle size={11} weight="bold" />
           <span className="font-mono text-[9px] uppercase tracking-[0.16em]">
-            estimación orientativa
+            sin medición verificada
           </span>
         </span>
       </header>
 
       {seg.indice == null && data.calidadVida.indiceGlobal == null ? (
         <p className="pt-5 text-sm text-ink-700">
-          No tengo datos de zona para “{data.zona.consultada}”. Prueba con el
-          nombre del barrio y la ciudad.
+          {data.resumen ?? "No hay una fuente verificada disponible para esta zona."}
         </p>
       ) : (
         <>

@@ -1,0 +1,31 @@
+import { isRecord } from "@/lib/api-validation";
+import { ValidationError } from "@/lib/errors";
+import { valorarLoteConEstado } from "@/lib/valoracion/client";
+import type { Property, PurchaseValuation } from "@/types";
+/** Solo usa campos observados; no inventa coordenadas o tipologías. */
+export async function runValorarVivienda(input: unknown): Promise<PurchaseValuation> {
+  if (!isRecord(input) || typeof input.propertyCode !== "string" || input.propertyCode.length > 80
+    || typeof input.municipality !== "string" || typeof input.propertyType !== "string"
+    || ![input.latitude, input.longitude, input.size, input.price].every(Number.isFinite)
+    || Number(input.price) <= 0) throw new ValidationError("invalid valuation input", "Para valorar hacen falta los datos observados del anuncio: precio, superficie, municipio, tipo y coordenadas.");
+  const p: Property = {
+    propertyCode: input.propertyCode, price: Number(input.price), size: Number(input.size),
+    rooms: Number.isFinite(input.rooms) ? Number(input.rooms) : undefined,
+    bathrooms: Number.isFinite(input.bathrooms) ? Number(input.bathrooms) : undefined,
+    municipality: input.municipality, propertyType: input.propertyType, operation: "sale",
+    latitude: Number(input.latitude), longitude: Number(input.longitude),
+    floor: typeof input.floor === "string" ? input.floor : undefined,
+    hasLift: typeof input.hasLift === "boolean" ? input.hasLift : undefined,
+    exterior: typeof input.exterior === "boolean" ? input.exterior : undefined,
+    detailedType: isRecord(input.detailedType) ? {
+      typology: typeof input.detailedType.typology === "string" ? input.detailedType.typology : undefined,
+      subTypology: typeof input.detailedType.subTypology === "string" ? input.detailedType.subTypology : undefined,
+    } : undefined,
+    sourceKind: input.sourceKind === "demo" ? "demo" : "idealista",
+    title: "Anuncio consultado", address: "", thumbnail: "", url: "",
+  };
+  const batch = await valorarLoteConEstado([p], { explicar: true });
+  const state = batch.estados.get(p.propertyCode);
+  return { propertyCode: p.propertyCode, resultado: batch.resultados.get(p.propertyCode) ?? null,
+    estado: state?.estado ?? "no_disponible", aviso: state?.motivo ?? "Sin resultado del modelo.", sourceKind: p.sourceKind };
+}

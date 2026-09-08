@@ -69,6 +69,7 @@ export const RENT_VS_BUY_DEFAULTS: RentVsBuyInput = {
   revalorizacionViviendaAnual: 4,
   inflacionCostes: 2,
   viviendaHabitual: true,
+  exencionGananciaVenta: false,
   // Alquiler
   subidaAlquilerAnual: 4,
   seguroInquilinoAnual: 0,
@@ -104,7 +105,7 @@ export const RENT_VS_BUY_FIELDS: RentVsBuyField[] = [
   { campo: "capitalDisponible", etiqueta: "Ahorro disponible hoy", unidad: "EUR", min: 0, max: 4500000, step: 5000, avanzado: false, grupo: "comun", nota: "Efectivo que podrías destinar a esto. Cubre entrada + gastos de compra." },
   { campo: "horizonteAnios", etiqueta: "Años que te quedarías", unidad: "años", min: 1, max: 40, step: 1, avanzado: false, grupo: "comun", nota: "El factor más decisivo: en horizontes cortos los costes de comprar y vender dominan." },
   { campo: "entradaPorcentaje", etiqueta: "Entrada", unidad: "%", min: 0, max: 100, step: 1, avanzado: false, grupo: "compra", nota: "El banco suele financiar hasta el 80% (entrada 20%). Por debajo del 20% es poco habitual en España." },
-  { campo: "tipoInteres", etiqueta: "Tipo de interés (TIN fijo)", unidad: "%", min: 0, max: 12, step: 0.1, avanzado: false, grupo: "compra", nota: "Tipo fijo de referencia en Madrid ~3% (Banco de España)." },
+  { campo: "tipoInteres", etiqueta: "Tipo de interés (TIN fijo)", unidad: "%", min: 0, max: 12, step: 0.1, avanzado: false, grupo: "compra", nota: "Supuesto editable de interés fijo; no es una oferta bancaria." },
   { campo: "plazoHipotecaAnios", etiqueta: "Plazo de la hipoteca", unidad: "años", min: 5, max: 40, step: 1, avanzado: false, grupo: "compra", nota: "Si el plazo es menor que tu horizonte, al terminar la hipoteca el dinero de la cuota pasa a invertirse." },
   { campo: "rentabilidadInversionAnual", etiqueta: "Rentabilidad de tus inversiones", unidad: "%", min: 0, max: 12, step: 0.5, avanzado: false, grupo: "comun", nota: "Rentabilidad bruta esperada de la cartera. La misma en ambos escenarios (el mercado no paga más por alquilar)." },
   { campo: "revalorizacionViviendaAnual", etiqueta: "Revalorización de la vivienda", unidad: "%", min: -5, max: 12, step: 0.5, avanzado: false, grupo: "compra", nota: "Distinta de la rentabilidad de la cartera. La vivienda en Madrid tiene ciclos, también caídas." },
@@ -119,6 +120,7 @@ export const RENT_VS_BUY_FIELDS: RentVsBuyField[] = [
   { campo: "comunidadMensual", etiqueta: "Comunidad", unidad: "EUR/mes", min: 0, max: 1000, step: 10, avanzado: true, grupo: "compra", nota: "Fondo perdido del propietario." },
   { campo: "seguroHogarAnual", etiqueta: "Seguro de hogar", unidad: "EUR/año", min: 0, max: 3000, step: 25, avanzado: true, grupo: "compra", nota: "Obligatorio (al menos incendios) con hipoteca." },
   { campo: "mantenimientoPorcentaje", etiqueta: "Mantenimiento", unidad: "%", min: 0, max: 3, step: 0.1, avanzado: true, grupo: "compra", nota: "Regla habitual ~1%/año del valor. El coste oculto mayor del propietario." },
+  { campo: "exencionGananciaVenta", etiqueta: "Simular exención de la ganancia", unidad: "boolean", min: 0, max: 1, avanzado: true, grupo: "compra", nota: "Supuesto explícito de simulación; comprueba previamente si cumples las condiciones fiscales. Ser vivienda habitual por sí solo no aplica esta exención." },
   { campo: "viviendaHabitual", etiqueta: "Es tu vivienda habitual", unidad: "boolean", min: 0, max: 1, avanzado: true, grupo: "compra", nota: "Si reinviertes en otra habitual o tienes >65 años, la ganancia de la venta está exenta de IRPF." },
 
   // Avanzados — alquiler / comunes
@@ -194,6 +196,7 @@ function normalizar(input: Partial<RentVsBuyInput>): RentVsBuyInput {
     revalorizacionViviendaAnual: get("revalorizacionViviendaAnual"),
     inflacionCostes: get("inflacionCostes"),
     viviendaHabitual: get("viviendaHabitual") === 1,
+    exencionGananciaVenta: get("exencionGananciaVenta") === 1,
     subidaAlquilerAnual: get("subidaAlquilerAnual"),
     seguroInquilinoAnual: get("seguroInquilinoAnual"),
     probMudanzaExtranjero: Math.round(clamp(input.probMudanzaExtranjero ?? d.probMudanzaExtranjero, 0, 2)) as Nivel3,
@@ -255,7 +258,7 @@ export function runCompararAlquilerCompra(
   const g = 1 + in_.rentabilidadInversionAnual / 100;
   // Vivienda habitual: ganancia exenta de IRPF (reinversión en otra habitual o
   // titular >65). Para inversión/2ª residencia, la ganancia tributa.
-  const exenta = in_.viviendaHabitual;
+  const exenta = in_.viviendaHabitual && in_.exencionGananciaVenta === true;
 
   // ── 2) Bucle anual ──
   for (let t = 1; t <= N; t++) {
@@ -437,7 +440,7 @@ export function runCompararAlquilerCompra(
       : null;
 
   const ganador: "comprar" | "alquilar" =
-    breakEvenAnios != null && breakEvenAnios <= N ? "comprar" : "alquilar";
+    ventajaCompra >= 0 ? "comprar" : "alquilar";
   const absPct = Math.abs(ventajaPorcentual);
   const banda: "empate" | "moderada" | "clara" =
     absPct < 5 ? "empate" : absPct < 20 ? "moderada" : "clara";
@@ -467,7 +470,7 @@ export function runCompararAlquilerCompra(
       breakEvenAnios != null && breakEvenAnios > 0
         ? ` El punto de equilibrio llega en el año ${anios(
             breakEvenAnios
-          )}: antes gana alquilar, después gana comprar.`
+          )}. Es el primer cruce; las curvas pueden volver a cruzarse.`
         : breakEvenAnios == null
         ? " Comprar no llega a alcanzar a alquilar dentro de tu horizonte."
         : "";

@@ -20,7 +20,7 @@ export async function fetchIneIpvQuarterly(): Promise<IneIpvQuarterly> {
   try {
     const res = await fetch(`${INE_BASE}/DATOS_TABLA/25171?nult=4&tip=AM`, {
       headers: { accept: "application/json" },
-      cache: "no-store",
+      cache: "no-store", signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) throw new Error(`INE 25171 ${res.status}`);
     const json = (await res.json()) as IneSeriesPayload[];
@@ -35,9 +35,10 @@ export async function fetchIneIpvQuarterly(): Promise<IneIpvQuarterly> {
       .slice(-4)
       .map((d) => ({
         periodo: formatIneQuarter(d.NombrePeriodo, d.Anyo),
-        variacionInteranual: roundOne(d.Valor ?? 0),
+        variacionInteranual: typeof d.Valor === "number" ? roundOne(d.Valor) : NaN,
       }));
 
+    if (serie.length !== 4 || new Set(serie.map((d) => d.periodo)).size !== 4 || serie.some((d) => !/^\d{4}T[1-4]$/.test(d.periodo) || !Number.isFinite(d.variacionInteranual))) throw new Error("Serie trimestral incompleta o ambigua");
     return {
       fuente: "INE — Índice de Precios de la Vivienda (tabla 25171)",
       serie,

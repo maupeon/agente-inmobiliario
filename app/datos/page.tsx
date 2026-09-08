@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/SiteNav";
 import { getMarketData } from "@/lib/market/cache";
-import {
-  NEIGHBORHOOD_FIXTURES,
-  NEIGHBORHOOD_PROVINCE_FIXTURES,
-} from "@/lib/neighborhood/fixtures";
 import { formatNumber, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -44,8 +40,8 @@ export default async function DatosPage() {
           <p className="mt-4 text-lg leading-relaxed text-stone-600">
             Esto es exactamente lo que el agente usa por dentro: el contenido real
             de cada conjunto de datos, su fuente, dónde vive en el código y cuándo
-            se actualizó. En <Pill estado="real" /> los datos oficiales en vivo; en{" "}
-            <Pill estado="orientativo" /> los orientativos (snapshots o curados).
+            se actualizó. En <Pill estado="real" /> los datos recuperados de fuentes oficiales, con su periodo de referencia; en{" "}
+            <Pill estado="orientativo" /> los respaldos ilustrativos o copias antiguas sin trazabilidad verificada.
           </p>
         </header>
 
@@ -102,7 +98,7 @@ export default async function DatosPage() {
           title="Alquiler · referencia €/m²/mes"
           estado="orientativo"
           fuente={rent.data.fuente}
-          ubicacion="lib/market/fixtures.ts (snapshot SERPAVI/MIVAU; el portal bloquea descargas)"
+          ubicacion="lib/market/fixtures.ts (referencias manuales sin validación documental)"
           meta={`${rent.data.zonas.length} barrios + ${rent.data.provincias.length} provincias · periodo ${rent.data.periodo}`}
         >
           <Collapsible summary={`Ver ${rent.data.zonas.length} barrios + ${rent.data.provincias.length} provincias`}>
@@ -124,25 +120,10 @@ export default async function DatosPage() {
           </Collapsible>
         </DataCard>
 
-        {/* Barrios: seguridad + calidad de vida */}
-        <DataCard
-          title="Barrios · seguridad y calidad de vida"
-          estado="orientativo"
-          fuente="Compuesto de fuentes públicas (Balance de Criminalidad, datos municipales)"
-          ubicacion="lib/neighborhood/fixtures.ts (datos curados, no en vivo a nivel de barrio)"
-          meta={`${NEIGHBORHOOD_FIXTURES.length} barrios + ${NEIGHBORHOOD_PROVINCE_FIXTURES.length} provincias`}
-        >
-          <Collapsible summary={`Ver ${NEIGHBORHOOD_FIXTURES.length} barrios`}>
-            <Table head={["Barrio", "Ciudad", "Seguridad", "Crim./1k", "Transp.", "Verde", "Servic.", "Ocio", "Tranq."]}>
-              {NEIGHBORHOOD_FIXTURES.map((n) => (
-                <Row
-                  key={`${n.zona}-${n.municipio ?? ""}`}
-                  cells={[n.zona, n.municipio ?? "—", `${n.seguridad}`, `${n.tasaCriminalidad}`, `${n.transporte}`, `${n.zonasVerdes}`, `${n.servicios}`, `${n.vidaNocturna}`, `${n.tranquilidad}`]}
-                />
-              ))}
-            </Table>
-          </Collapsible>
-        </DataCard>
+        <section className="mt-8 rounded-xl border border-hairline bg-paper-50 p-5">
+          <h2 className="font-display text-xl">Indicadores de barrio</h2>
+          <p className="mt-3 text-sm text-stone-600">Los índices manuales de seguridad y calidad de vida se han retirado: no disponemos de una fuente verificable a esa escala. No intervienen en el ranking.</p>
+        </section>
 
         {/* Otras fuentes no tabulares */}
         <section className="mt-12 rounded-xl border border-hairline bg-paper-50 p-6">
@@ -151,14 +132,13 @@ export default async function DatosPage() {
             <li><Strong>Anuncios:</Strong> Idealista (mock coherente hasta tener clave propia) — <Code>lib/idealista/</Code></li>
             <li><Strong>Trayecto y rutas:</Strong> OpenRouteService (real con <Code>ORS_API_KEY</Code>) — <Code>lib/commute/index.ts</Code></li>
             <li><Strong>Geocodificación del mapa:</Strong> Nominatim / OpenStreetMap — <Code>lib/commute/index.ts</Code> y <Code>/api/geocode</Code></li>
-            <li><Strong>Persistencia:</Strong> Supabase — conversaciones, favoritos y caché de mercado — <Code>lib/supabase/</Code></li>
+            <li><Strong>Persistencia:</Strong> Navegador — conversaciones y favoritos. Supabase — caché de mercado y consumo técnico — <Code>lib/supabase/</Code></li>
           </ul>
         </section>
 
         <p className="mt-10 text-xs leading-relaxed text-mist">
           Los datos de mercado se refrescan con el cron <Code>/api/cron/market</Code> y se cachean en Supabase; si la
-          caché está vacía se intenta la fuente en vivo y, si falla, se usa el respaldo local. Seguridad y alquiler por
-          barrio son orientativos.
+          caché está vacía se intenta la fuente en vivo y, si falla, se usa el respaldo local. Los indicadores de seguridad están retirados y las referencias de alquiler son ilustrativas.
         </p>
       </main>
     </div>

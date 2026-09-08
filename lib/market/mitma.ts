@@ -44,7 +44,7 @@ export async function fetchMitmaPriceByProvince(): Promise<InePriceByProvince> {
   try {
     const res = await fetch(MITMA_XLS_URL, {
       headers: { "User-Agent": "HabitIA/1.0 (TFM)" },
-      cache: "no-store",
+      cache: "no-store", signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) throw new Error(`MITMA ${res.status}`);
     const buf = Buffer.from(await res.arrayBuffer());

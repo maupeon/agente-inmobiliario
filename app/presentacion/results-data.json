@@ -1,115 +1,259 @@
 {
-  "sources": {
-    "models": "memoria/resultados/modelos.json",
-    "final": "memoria/resultados/seleccion.json",
-    "coverage": "memoria/resultados/oportunidades.json",
-    "explanation": "memoria/resultados/interpretabilidad.json"
-  },
+  "schema_version": 2,
+  "status": "complete",
+  "model_id": "habitIA-oferta-2018-v2",
+  "source": "memoria/revision_2026-09-08/experimento/resultados_revision.json",
+  "source_sha256": "714a907424475d3b77ed715f93d2d811f0cb803249a8a69a946fd27e8b87c790",
+  "generated_at": "2026-09-08T10:59:46.764514+00:00",
+  "n_features": 25,
   "sample": {
-    "filas_iniciales": 94852,
-    "geo_imposible": 1,
-    "sin_barrio": 752,
-    "estructura_imposible": 36,
-    "precio_extremo": 444,
-    "corte_precio_inferior": 56000,
-    "corte_precio_superior": 3038845,
-    "filas_finales": 93619,
-    "train": 70203,
-    "test": 23416,
-    "n_features": 54
+    "input": 94852,
+    "eligible": 94026,
+    "fit": 60166,
+    "calibration": 15062,
+    "test": 18798,
+    "evaluated": 93944,
+    "abstentions": 82
   },
   "models": [
     {
-      "name": "Referencia del barrio",
-      "value": 15.401149433095885
+      "name": "Referencia territorial",
+      "value": 15.41232294801331
     },
     {
-      "name": "Regresión Ridge",
-      "value": 10.941355482095185
+      "name": "Hedónico Ridge",
+      "value": 13.127247950030258
     },
     {
-      "name": "Random Forest",
-      "value": 8.652121183081054
-    },
-    {
-      "name": "XGBoost",
-      "value": 8.705759328499848
-    },
-    {
-      "name": "LightGBM ajustado",
-      "value": 8.45430088198721
-    },
-    {
-      "name": "Stacking",
-      "value": 8.44479163136889
-    },
-    {
-      "name": "LightGBM final",
-      "value": 8.204748480283126
+      "name": "LightGBM",
+      "value": 10.311659218990643
     }
   ],
-  "ablation": [
+  "artifactModels": [
     {
-      "name": "Sin localización",
-      "value": 12.45545145355535
+      "name": "Referencia territorial",
+      "value": 15.552186237289774
     },
     {
-      "name": "Todas las variables",
-      "value": 8.45430088198721
+      "name": "Hedónico Ridge",
+      "value": 13.04362865193076
     },
     {
-      "name": "Selección final · 54",
-      "value": 8.204748480283126
+      "name": "LightGBM",
+      "value": 10.251034052456248
     }
   ],
   "scope": {
-    "holdout": 8.204748480283126,
-    "temporal": 9.721633611902696,
-    "spatial": 19.860342502898238,
+    "outer": 10.311659218990643,
+    "artifact": 10.251034052456248,
+    "temporal": 11.216239172605754,
     "folds": [
-      16.086358065840482,
-      20.308930200438002,
-      19.717153429241954,
-      21.70134062411154,
-      21.487930194859196
+      10.270717615477981,
+      10.394056262019662,
+      10.281033894754351
     ]
   },
   "coverage": {
-    "alfa": 0.1,
-    "Q_conformal": 0.0898,
-    "cobertura_sin_calibrar_pct": 72.36,
-    "cobertura_conformal_pct": 89.77,
-    "ancho_mediano_eur": 139100,
-    "ancho_mediano_pct": 52.7
+    "outer": 90.77003321127481,
+    "artifact": 90.9328080076669,
+    "outer_assets": 89.91511668130173,
+    "artifact_assets": 90.21355864546604,
+    "width_pct": 62.32803466691617,
+    "target": 90.0
   },
-  "shap": {
-    "Tiempo": 1.8,
-    "Mercado de alquiler": 4.9,
-    "Equipamiento": 12.1,
-    "Localización": 33.0,
-    "Vivienda y edificio": 48.1
+  "uncertainty": {
+    "mdape_outer_ci95": [
+      10.210312307811428,
+      10.424717838487704
+    ],
+    "bootstrap_repetitions": 400
   },
-  "districts": {
-    "Vicálvaro": 6.49,
-    "Barajas": 6.51,
-    "Villa de Vallecas": 6.83,
-    "Retiro": 6.91,
-    "Arganzuela": 7.18,
-    "Moratalaz": 7.61,
-    "Chamberí": 7.61,
-    "San Blas-Canillejas": 7.74,
-    "Chamartín": 7.81,
-    "Fuencarral-El Pardo": 7.84,
-    "Hortaleza": 7.95,
-    "Salamanca": 8.11,
-    "Ciudad Lineal": 8.18,
-    "Villaverde": 8.47,
-    "Centro": 8.64,
-    "Moncloa-Aravaca": 8.7,
-    "Latina": 8.74,
-    "Tetuán": 8.78,
-    "Carabanchel": 9.46,
-    "Puente de Vallecas": 9.52,
-    "Usera": 10.06
-  }
+  "limitations": {
+    "cheap_decile_coverage_pct": 81.80669614655717,
+    "cheap_decile_mdape_pct": 16.244678780193194,
+    "temporal_asset_coverage_pct": 87.88015029384373
+  },
+  "shap": [
+    {
+      "name": "Superficie",
+      "value": 32.25491429840502
+    },
+    {
+      "name": "Distrito aproximado",
+      "value": 18.518739544356436
+    },
+    {
+      "name": "Barrio aproximado",
+      "value": 16.834815052842195
+    },
+    {
+      "name": "Baños",
+      "value": 11.099719569389402
+    },
+    {
+      "name": "Ascensor",
+      "value": 7.145680397668261
+    },
+    {
+      "name": "Planta",
+      "value": 3.621266020827617
+    },
+    {
+      "name": "Resto de variables",
+      "value": 10.524865116511046
+    }
+  ],
+  "metrics": {
+    "outer": {
+      "Referencia territorial": {
+        "n": 93944,
+        "MdAPE_pct": 15.41232294801331,
+        "MAPE_pct": 20.441925595162587,
+        "MAE_eur": 75878.94113673497,
+        "MdAE_eur": 40357.142857142884,
+        "sesgo_mediano_pct": -0.4921870814908899,
+        "dentro_10_pct": 34.02239632121264,
+        "dentro_20_pct": 61.42595588861449,
+        "n_activos": 75162,
+        "mediana_APE_mediano_por_activo_pct": 15.496160231075983
+      },
+      "Hedónico Ridge": {
+        "n": 93944,
+        "MdAPE_pct": 13.127247950030258,
+        "MAPE_pct": 17.433307820455628,
+        "MAE_eur": 67362.73130877911,
+        "MdAE_eur": 33716.31743174413,
+        "sesgo_mediano_pct": -0.9667906104709252,
+        "dentro_10_pct": 39.43200204377076,
+        "dentro_20_pct": 68.7750149024951,
+        "n_activos": 75162,
+        "mediana_APE_mediano_por_activo_pct": 13.19260518816876
+      },
+      "LightGBM": {
+        "n": 93944,
+        "MdAPE_pct": 10.311659218990643,
+        "MAPE_pct": 14.766691307537542,
+        "MAE_eur": 55440.32028719732,
+        "MdAE_eur": 26854.84470046971,
+        "sesgo_mediano_pct": -0.5245030654738577,
+        "dentro_10_pct": 48.81844503108235,
+        "dentro_20_pct": 76.61904964659797,
+        "n_activos": 75162,
+        "mediana_APE_mediano_por_activo_pct": 10.298440743398706,
+        "cobertura_pct": 90.77003321127481,
+        "anchura_mediana_eur": 163609.87294678437,
+        "anchura_relativa_mediana_pct": 62.32803466691617,
+        "puntos_fuera_intervalo": 0,
+        "intervalos_invertidos": 0,
+        "cobertura_activos_todos_registros_pct": 89.91511668130173
+      }
+    },
+    "artifact": {
+      "Referencia territorial": {
+        "n": 18782,
+        "MdAPE_pct": 15.552186237289774,
+        "MAPE_pct": 20.395450584241104,
+        "MAE_eur": 75936.14291439625,
+        "MdAE_eur": 40106.701030927856,
+        "sesgo_mediano_pct": -0.6708078108231771,
+        "dentro_10_pct": 33.915450963688635,
+        "dentro_20_pct": 61.08508146097327,
+        "n_activos": 15031,
+        "mediana_APE_mediano_por_activo_pct": 15.513392857142858
+      },
+      "Hedónico Ridge": {
+        "n": 18782,
+        "MdAPE_pct": 13.04362865193076,
+        "MAPE_pct": 17.25026044159292,
+        "MAE_eur": 66574.48365518161,
+        "MdAE_eur": 33003.58984876328,
+        "sesgo_mediano_pct": -0.9763711336878662,
+        "dentro_10_pct": 39.6549888190821,
+        "dentro_20_pct": 68.63486316686189,
+        "n_activos": 15031,
+        "mediana_APE_mediano_por_activo_pct": 13.008524629236993
+      },
+      "LightGBM": {
+        "n": 18782,
+        "MdAPE_pct": 10.251034052456248,
+        "MAPE_pct": 14.549115151754766,
+        "MAE_eur": 54884.07563050913,
+        "MdAE_eur": 26439.221453190796,
+        "sesgo_mediano_pct": -0.5574881491718906,
+        "dentro_10_pct": 49.100202321371526,
+        "dentro_20_pct": 76.89809391971036,
+        "n_activos": 15031,
+        "mediana_APE_mediano_por_activo_pct": 10.16140382007954,
+        "cobertura_pct": 90.9328080076669,
+        "anchura_mediana_eur": 159105.57549073757,
+        "anchura_relativa_mediana_pct": 61.481547277852286,
+        "puntos_fuera_intervalo": 0,
+        "intervalos_invertidos": 0,
+        "cobertura_activos_todos_registros_pct": 90.21355864546604
+      }
+    },
+    "temporal": {
+      "Referencia territorial": {
+        "n": 43839,
+        "MdAPE_pct": 15.11403169694628,
+        "MAPE_pct": 19.2656741455695,
+        "MAE_eur": 76872.23193694289,
+        "MdAE_eur": 41000.0,
+        "sesgo_mediano_pct": -5.146114322414903,
+        "dentro_10_pct": 34.31419512306394,
+        "dentro_20_pct": 62.55389037158694,
+        "n_activos": 31139,
+        "mediana_APE_mediano_por_activo_pct": 15.159676798768764
+      },
+      "Hedónico Ridge": {
+        "n": 43839,
+        "MdAPE_pct": 12.99465006097581,
+        "MAPE_pct": 16.50441499767152,
+        "MAE_eur": 68491.42653573073,
+        "MdAE_eur": 34334.80334732027,
+        "sesgo_mediano_pct": -4.859442563558816,
+        "dentro_10_pct": 39.49907616505851,
+        "dentro_20_pct": 69.8419215766783,
+        "n_activos": 31139,
+        "mediana_APE_mediano_por_activo_pct": 13.055103998150422
+      },
+      "LightGBM": {
+        "n": 43839,
+        "MdAPE_pct": 11.216239172605754,
+        "MAPE_pct": 14.777845976228255,
+        "MAE_eur": 60302.82878326283,
+        "MdAE_eur": 29848.876251707145,
+        "sesgo_mediano_pct": -4.237774618507141,
+        "dentro_10_pct": 45.46180341704875,
+        "dentro_20_pct": 75.07926731905381,
+        "n_activos": 31139,
+        "mediana_APE_mediano_por_activo_pct": 11.27365802313241,
+        "cobertura_pct": 89.34966582266931,
+        "anchura_mediana_eur": 165360.6722068649,
+        "anchura_relativa_mediana_pct": 60.39709606276222,
+        "puntos_fuera_intervalo": 0,
+        "intervalos_invertidos": 0,
+        "cobertura_activos_todos_registros_pct": 87.88015029384373
+      }
+    },
+    "bootstrap": {
+      "unidad": "ASSETID",
+      "repeticiones": 400,
+      "tipo": "percentil 95 % descriptivo",
+      "alcance": "variación de observaciones evaluadas; no incluye toda la incertidumbre del ajuste",
+      "MdAPE_pct": [
+        10.210312307811428,
+        10.424717838487704
+      ],
+      "mejora_frente_baseline_pp": [
+        4.960595272625569,
+        5.250770964318396
+      ],
+      "cobertura_pct": [
+        90.55636223070218,
+        90.9921150545536
+      ]
+    }
+  },
+  "notice": "Evaluación retrospectiva agrupada: todo el histórico de 2018 ya había sido explorado. Sin validación externa de 2026."
 }

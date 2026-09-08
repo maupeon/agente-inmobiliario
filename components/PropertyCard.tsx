@@ -86,7 +86,7 @@ export function PropertyCard({
                   : ""}
               </p>
               <h3 className="mt-2 text-balance font-display text-xl leading-tight text-ink sm:text-2xl">
-                {property.title}
+                {property.sourceKind === "demo" ? "Demo ficticia · " : ""}{property.title}
               </h3>
               <p className="mt-3 break-words font-display text-3xl font-medium leading-none text-ink tabular sm:text-4xl">
                 {priceLabel}
@@ -98,12 +98,13 @@ export function PropertyCard({
               </p>
             </div>
             <a
-              href={property.url}
+              href={property.sourceKind === "demo" ? undefined : property.url}
+              aria-disabled={property.sourceKind === "demo"}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex shrink-0 items-center gap-1 rounded-md border border-ink bg-ink px-3.5 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-paper transition hover:bg-ink-700 active:scale-[0.98]"
             >
-              Ver anuncio <ArrowUpRight size={11} weight="bold" />
+              {property.sourceKind === "demo" ? "Anuncio ficticio" : "Ver anuncio"} <ArrowUpRight size={11} weight="bold" />
             </a>
           </div>
 
@@ -111,7 +112,7 @@ export function PropertyCard({
             <PropertyMetric
               icon={<Bed size={13} weight="bold" />}
               label="hab."
-              value={String(property.rooms)}
+              value={property.rooms == null ? "Sin dato" : String(property.rooms)}
             />
             {sqmLabel && (
               <PropertyMetric
@@ -182,7 +183,7 @@ export function PropertyCard({
         </p>
 
         <h3 className="mt-1.5 line-clamp-2 break-words font-display text-lg leading-tight text-ink">
-          {property.title}
+          {property.sourceKind === "demo" ? "Demo ficticia · " : ""}{property.title}
         </h3>
 
         <div className="mt-auto flex flex-wrap items-baseline gap-x-3 gap-y-1 pt-3">
@@ -200,7 +201,7 @@ export function PropertyCard({
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-hairline pt-3 text-xs text-stone">
           <span className="inline-flex items-center gap-1">
             <Bed size={12} weight="bold" />
-            <span className="tabular">{property.rooms} hab.</span>
+            <span className="tabular">{property.rooms == null ? "Habitaciones sin dato" : `${property.rooms} hab.`}</span>
           </span>
           {sqmLabel && (
             <span className="inline-flex items-center gap-1">
@@ -219,12 +220,13 @@ export function PropertyCard({
         </div>
 
         <a
-          href={property.url}
+          href={property.sourceKind === "demo" ? undefined : property.url}
+          aria-disabled={property.sourceKind === "demo"}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-4 inline-flex w-fit max-w-full items-center gap-1 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-saffron-700 transition hover:text-saffron-500"
         >
-          Ver en Idealista <ArrowUpRight size={11} weight="bold" />
+          {property.sourceKind === "demo" ? "Anuncio ficticio" : "Ver en Idealista"} <ArrowUpRight size={11} weight="bold" />
         </a>
       </div>
     </article>

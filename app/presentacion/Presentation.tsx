@@ -21,6 +21,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MotionPreferenceProvider, DataPartition, ModelEvidence, UncertaintyEvidence, ScopeEvidence, ExplanationEvidence, ProductConcept } from "./ResultsVisuals";
 import { Logo } from "@/components/ui/Logo";
+import { results, formatCount } from "./results-contract";
 import styles from "./presentation.module.css";
 
 const TOTAL_SECONDS = 10 * 60;
@@ -45,7 +46,7 @@ const SCENES: SceneDefinition[] = [
     kicker: "Apertura · promocional",
     title: "Una vivienda. Una decisión importante.",
     target: 54,
-    note: "Abre con el vídeo promocional de 54 segundos para presentar la idea de HabitIA. Al terminar, continúa con el problema. La demo de 75 segundos es una pieza distinta: muestra el recorrido real por la plataforma en la penúltima escena, después de explicar el proyecto.",
+    note: "El vídeo promocional de 54 segundos es una grabación anterior y presenta la idea del producto; no demuestra las métricas ni el comportamiento de la versión revisada. La demostración de la revisión se realiza en vivo desde el panel.",
   },
   {
     kicker: "Problema",
@@ -63,42 +64,37 @@ const SCENES: SceneDefinition[] = [
     kicker: "Recomendación",
     title: "Tus prioridades cambian el orden.",
     target: 154,
-    note: "El flujo real pide hasta ocho candidatos, los enriquece y devuelve hasta cinco. El score es una media ponderada de precio, presupuesto, trayecto, seguridad, calidad de vida e imprescindibles. Las prioridades ajustan pesos; sin destino laboral no puntúa el trayecto. Fair, Zone y Opportunity son las tres lentes conceptuales del documento, no tres subíndices que el código sume.",
+    note: "Se recuperan hasta ocho anuncios y se muestran hasta cinco. Se filtran incumplimientos conocidos de requisitos; se advierten los datos ausentes. Presupuesto, trayecto, requisitos y estimación del modelo cuando existe orientan el orden. Los índices manuales de seguridad/calidad de vida están retirados.",
   },
   {
     kicker: "Metodología · datos",
-    title: "De los anuncios a una prueba fiable.",
+    title: "De los anuncios a un protocolo trazable.",
     target: 194,
-    note:
-      "Partimos de 94.852 anuncios reales. Los cruzamos espacialmente con 2.440 secciones censales, depuramos anomalías, construimos variables y dejamos 93.619 viviendas. La partición por activo produce 70.203 filas de entrenamiento y 23.416 de prueba sin valores ausentes.",
+    note: "La copia enriquecida contiene 94.852 registros históricos. Se auditan duplicados sobre las 41 variables originales y discrepancias de enriquecimiento, se aplican criterios de ámbito fijos y se documentan las exclusiones. Los precios y coordenadas de la fuente están perturbados. El protocolo principal comparte 25 variables con el servicio; no utiliza alquiler ni catastro de fecha no verificada.",
   },
   {
     kicker: "Metodología · validación",
-    title: "El examen usa viviendas que el modelo no ha visto.",
+    title: "Aprender, calibrar y evaluar por separado.",
     target: 229,
-    note:
-      "La parte más importante fue evitar resultados artificialmente buenos. Excluimos variables derivadas del precio, agrupamos por activo, calculamos las codificaciones fuera de muestra y añadimos dos pruebas adversas: futuro no visto y barrios completos no vistos.",
+    note: "La revisión utiliza tres grupos exteriores y tres internos por activo. Solo los grupos internos seleccionan hiperparámetros; calibración y evaluación permanecen separadas de cada ajuste. Todo 2018 ya fue inspeccionado: es una evaluación retrospectiva corregida, no un test virgen. El artefacto final se conserva tal como se evaluó.",
   },
   {
     kicker: "Modelo de precio",
     title: "Del barrio a cada vivienda.",
     target: 279,
-    note:
-      "Construimos una escalera desde la regla del sector hasta LightGBM y stacking. Usa los controles El avance, 7 modelos y La localización para comparar las tres lecturas. El gran salto viene de los datos y del primer modelo multivariante; el apilamiento aporta centésimas. La ablación revela que la localización vale 4,25 puntos, pero nuestras codificaciones construidas perjudican. Por eso producimos el modelo más simple: 54 variables y 8,20 %. Comparación completa (MdAPE): barrio 15,40 %; Ridge 10,94 %; Random Forest 8,65 %; XGBoost 8,71 %; LightGBM ajustado 8,45 %; stacking 8,44 %; final 8,20 %.",
+    note: "La vista principal carga exclusivamente resultados_revision.json terminado: referencia territorial, hedónico Ridge y LightGBM con la misma entrada observable. Las pestañas Antecedentes y Ablación previa conservan el análisis exploratorio antiguo, identificado como no independiente porque su test intervino en la selección. No comparar directamente sus cifras con el artefacto revisado.",
   },
   {
     kicker: "Incertidumbre",
     title: "Un precio estimado necesita un margen.",
     target: 324,
-    note:
-      "Entrenamos tres LightGBM cuantílicos y reservamos un 20 % del entrenamiento para conformalizar. Mueve el precio del ejemplo para mostrar cuándo queda bajo, dentro o sobre el intervalo. Alterna Sin calibrar y Con calibración para mostrar la mejora real. La cobertura pasa de 72,4 % a 89,8 %, prácticamente el 90 % nominal. SHAP explica cada predicción y el intervalo impide llamar ganga a un caso donde el modelo simplemente duda.",
+    note: "El intervalo se calibra por activo con máximo residual del grupo; el punto se incluye antes de calibrar. La interfaz muestra cobertura y anchura observadas en la revisión cuando existen resultados. El ejemplo deslizable es ilustrativo. Ni el 90 % nominal ni la cobertura histórica son la probabilidad de que una vivienda sea una ganga o de que el modelo acierte en 2026.",
   },
   {
     kicker: "Resultados · alcance",
     title: "¿Hasta dónde llega la precisión?",
     target: 369,
-    note:
-      "En activos nunca vistos reducimos el error mediano del 15,4 al 8,20 %, un 47 %. El 57,6 % queda dentro de más o menos 10 %. En el futuro inmediato el error sube solo a 9,72 %. Pero al ocultar barrios completos llega a 19,86 %: el modelo no debe desplegarse en ciudades sin datos locales.",
+    note: "Distinguir evaluación exterior, artefacto fijo y diagnóstico Q1–Q3 a Q4: retrospectivas del mismo histórico, no tres pruebas externas. El promedio oculta límites: el decil más barato tiene cobertura por anuncio del 81,81 % y MdAPE del 16,24 %; en Q4 la cobertura por activo es 87,88 %. No mezclar ambas unidades. El salto a 2026 permanece sin validación actual.",
   },
   {
     kicker: "Comprar vs. alquilar",
@@ -110,8 +106,7 @@ const SCENES: SceneDefinition[] = [
     kicker: "Del modelo al producto",
     title: "Una pregunta activa toda la cadena.",
     target: 449,
-    note:
-      "La innovación no es solo el algoritmo: es la unión de modelo puntual, intervalo y agente. Ocho herramientas orquestan datos en vivo, valoración por lotes, trayecto y barrio. SSE permite respuesta progresiva; Supabase aporta persistencia y trazabilidad; y la degradación elegante evita inventar datos cuando falla una fuente.",
+    note: "Panel y chat usan el mismo backend de valoración de oferta. El servicio devuelve estado, versión, intervalo y SHAP opcional. SSE permite respuesta progresiva. Historial y favoritos viven en el navegador; Supabase solo conserva caché y cuota técnica. Si una fuente falla o falta soporte, se informa y se evita presentar respaldo ilustrativo como evidencia.",
   },
   {
     kicker: "Roadmap",
@@ -123,14 +118,13 @@ const SCENES: SceneDefinition[] = [
     kicker: "Demo · 75 segundos",
     title: "Así se convierte una búsqueda en una decisión.",
     target: 559,
-    note: "Reproduce el recorrido de 75 segundos. Las imágenes son capturas reales de la plataforma con un perfil de ejemplo. Explica el hilo: preferencias, viviendas, contexto y compra frente a alquiler. El vídeo no avanza de escena automáticamente; tú controlas el cierre. Si prefieres mostrarlo en directo, usa los enlaces inferiores.",
+    note: "Usa el enlace Abrir el panel para demostrar en vivo la versión revisada. El vídeo de 75 segundos es una grabación anterior del concepto, marcada como tal; sus pantallas no son evidencia del modelo ni de las garantías actuales.",
   },
   {
     kicker: "Conclusión",
     title: "La herramienta que echábamos en falta",
     target: 579,
-    note:
-      "Cierra con cuatro ideas: 47 % menos error frente a la referencia mediana del barrio; 54 variables para estimar; intervalos con cobertura observada del 89,8 %; y un Score de 0 a 100 según las preferencias. Reconoce dos límites: datos de 2018 renivelados con el IPV y mala extrapolación geográfica. Termina con la motivación personal: Creamos HabitIA porque también hemos sufrido la búsqueda de piso. Es la herramienta que echábamos en falta para encontrarlo y acertar de forma más fácil y rápida. Gracias.",
+    note: "Cierra con tres contribuciones: protocolo retrospectivo trazable, transformación compartida entre entrenamiento y servicio, y producto que explica resultados y abstenciones. No prometer ahorro o precisión actual sin medirlos. El valor está en unir evidencia, incertidumbre y utilidad de forma defendible.",
   },
   {
     kicker: "Propuesta de valor",
@@ -156,14 +150,13 @@ const SCENES: SceneDefinition[] = [
     kicker: "Resultados · decisión",
     title: "Barato no es lo mismo que infravalorado",
     target: 579,
-    note:
-      "Definimos oportunidad solo cuando el anuncio cae por debajo del intervalo. Detectamos 1.271 casos, con 28 % de descuento y 60.106 euros de ahorro mediano. La regla ingenua de menor precio por metro cuadrado concentra el 71,7 % en tres distritos. La nuestra mantiene diversidad y, controlando por distrito, gana 2,06 puntos de rentabilidad en 19 de 19 distritos.",
+    note: "La regla compara el precio anunciado con el intervalo del modelo. El contraste de rentabilidad anterior comparte PRICE en su denominador, por lo que no constituye una validación económica independiente. No llamar ahorro observado a una brecha estimada. La revisión externa de candidatos, comparables y precios de cierre queda pendiente.",
   },
   {
     kicker: "Qué utiliza el modelo",
     title: "El precio tiene más de una explicación.",
     target: 579,
-    note: "Gráfica de importancia SHAP agrupada: vivienda y edificio 48,1 %, localización 33,0 %, equipamiento 12,1 %, mercado de alquiler 4,9 % y tiempo 1,8 %. Son participaciones en la importancia del modelo, no efectos causales ni porcentajes del precio. La suma difiere de 100 por el redondeo. Fuente: interpretabilidad.json.",
+    note: "Las importancias se recalculan desde los valores SHAP nativos del experimento revisado, promediando magnitudes por grupo exterior. Se muestran las seis variables principales y el resto agrupado. Son atribuciones en escala logarítmica normalizadas, no efectos causales ni proporciones del precio. Hasta terminar el experimento no se muestran porcentajes nuevos.",
   },
 ];
 
@@ -407,6 +400,7 @@ export function Presentation() {
               Tu navegador no puede reproducir el vídeo promocional.
             </video>
             <div className={styles.videoShade} aria-hidden />
+            <p className={styles.videoProvenance}>Grabación anterior · concepto del producto · no demuestra la versión revisada</p>
             <div
               className={`${styles.opening} ${started ? styles.openingHidden : ""}`}
               aria-hidden={started}
@@ -471,24 +465,24 @@ export function Presentation() {
         <SceneShell index={3} active={active} state={sceneState(3)} label={SCENES[3].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
             <SceneHeader kicker="El ranking personalizado" title="Tus prioridades cambian el orden." />
-            <div className={styles.scoreStory}><div><span className={styles.overline}>Primero, filtrar</span><h3>Lo que necesitas.</h3><p>Zona, operación, presupuesto y habitaciones definen los candidatos.</p><div className={styles.preferenceChips}><span>Chamberí</span><span>Hasta 1.500 €/mes</span><span>Alquiler</span></div><small>Perfil de ejemplo</small></div><ArrowRight aria-hidden /><div><span className={styles.overline}>Después, ordenar</span><h3>Lo que te importa.</h3><p>Precio, presupuesto, trayecto, seguridad, calidad de vida e imprescindibles.</p><div className={styles.scoreOutput}><strong>0–100</strong><span>Encaje personalizado<br />Hasta 5 recomendaciones</span></div></div></div>
+            <div className={styles.scoreStory}><div><span className={styles.overline}>Primero, filtrar</span><h3>Lo que necesitas.</h3><p>Zona, operación, presupuesto y habitaciones definen los candidatos.</p><div className={styles.preferenceChips}><span>Chamberí</span><span>Hasta 1.500 €/mes</span><span>Alquiler</span></div><small>Perfil de ejemplo</small></div><ArrowRight aria-hidden /><div><span className={styles.overline}>Después, ordenar</span><h3>Lo que te importa.</h3><p>Presupuesto, trayecto, requisitos y estimación disponible.</p><div className={styles.scoreOutput}><strong>0–100</strong><span>Encaje personalizado<br />Hasta 5 recomendaciones</span></div></div></div>
             <div className={styles.lesson}><Gauge aria-hidden /><p><strong>El Score compara el encaje con tu perfil.</strong> No es una probabilidad de acierto ni una garantía de inversión.</p></div>
           </section>
         </SceneShell>
 
         <SceneShell index={4} active={active} state={sceneState(4)} label={SCENES[4].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
-            <SceneHeader kicker="01 · Preparar los datos" title="De los anuncios a una prueba fiable." />
+            <SceneHeader kicker="01 · Preparar los datos" title="De los anuncios a un protocolo trazable." />
             <DataPartition active={active === 4} />
           </section>
         </SceneShell>
 
         <SceneShell index={5} active={active} state={sceneState(5)} label={SCENES[5].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
-            <SceneHeader kicker="02 · Validar sin trampas" title="El examen usa viviendas que el modelo no ha visto." />
-            <div className={styles.examSplit}><article><span>75 % · aprendizaje</span><strong>70.203</strong><p>El modelo aprende con estas viviendas.</p></article><div className={styles.examDivider}><ShieldCheck aria-hidden /><span>Sin repetir<br />el mismo activo</span></div><article><span>25 % · examen</span><strong>23.416</strong><p>Se evalúa con viviendas distintas.</p></article></div>
-            <div className={styles.validationChecks}><span><Check aria-hidden /> No usar variables que revelan el precio</span><span><Check aria-hidden /> Probar un trimestre posterior</span><span><Check aria-hidden /> Probar barrios no vistos</span></div>
-            <p className={styles.takeaway}>La pregunta es <strong>si generaliza, no si memoriza.</strong></p>
+            <SceneHeader kicker="02 · Evaluación retrospectiva" title="Aprender, calibrar y evaluar por separado." />
+            <div className={styles.examSplit}><article><span>Evaluación agrupada</span><strong>3 × 3</strong><p>Tres grupos exteriores y selección en tres grupos internos.</p></article><div className={styles.examDivider}><ShieldCheck aria-hidden /><span>Separación<br />por activo</span></div><article><span>Artefacto conservado</span><strong>{formatCount(results.sample.test)}</strong><p>Registros reservados en su partición fija histórica.</p></article></div>
+            <div className={styles.validationChecks}><span><Check aria-hidden /> Estadísticas ajustadas solo donde corresponde</span><span><Check aria-hidden /> Calibración separada por activo</span><span><Check aria-hidden /> Mismo transformador en el servicio</span></div>
+            <p className={styles.takeaway}><strong>El histórico ya fue explorado.</strong> La revisión mejora el protocolo; no crea datos externos nuevos.</p>
           </section>
         </SceneShell>
 
@@ -553,7 +547,7 @@ export function Presentation() {
           <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.demoScene}`}>
             <SceneHeader kicker="Demo · recorrido de la plataforma" title="Así se convierte una búsqueda en una decisión." />
             <div className={styles.demoPlayer}><video ref={videoRef} controls playsInline preload="metadata" poster="/presentacion/demo-poster.jpg"><source src="/presentacion/habitia-demo.mp4" type="video/mp4" /><track kind="captions" src="/presentacion/demo-captions.vtt" srcLang="es" label="Español" />Tu navegador no puede reproducir el vídeo.</video></div>
-            <div className={styles.demoActions}><span>Capturas reales · perfil de ejemplo · 75 s</span><a href="/dashboard" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}>Abrir el panel <ArrowRight aria-hidden /></a><a href="/comprar-o-alquilar" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}>Abrir la calculadora <ArrowRight aria-hidden /></a></div>
+            <div className={styles.demoActions}><span>Grabación anterior · recorrido conceptual · la revisión se demuestra en vivo</span><a href="/dashboard" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}>Abrir el panel <ArrowRight aria-hidden /></a><a href="/comprar-o-alquilar" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}>Abrir la calculadora <ArrowRight aria-hidden /></a></div>
           </section>
         </SceneShell>
 
@@ -643,27 +637,19 @@ export function Presentation() {
 
         <SceneShell index={17} active={active} state={sceneState(17)} label={SCENES[17].title}>
           <section className={`${styles.sceneCanvas} ${styles.economicScene}`}>
-            <SceneHeader kicker="Resultados · validación económica" title="Barato no es lo mismo que infravalorado." />
+            <SceneHeader kicker="Anexo · lectura económica" title="Una señal del modelo no demuestra infravaloración." />
             <div className={styles.economicGrid}>
               <div className={styles.opportunityCount}>
-                <span>Señal sobre el mercado</span>
-                <strong>1.271</strong>
-                <p>oportunidades · 5,4 % de los activos</p>
-                <div className={styles.dotField} aria-hidden>
-                  {Array.from({ length: 48 }).map((_, index) => <i key={index} className={index < 3 ? styles.dotHot : ""} />)}
-                </div>
+                <span>Precio bajo el intervalo</span><strong>≠</strong><p>ganancia o ganga acreditada</p>
+                <div className={styles.dotField} aria-hidden>{Array.from({ length: 48 }).map((_, index) => <i key={index} className={index < 3 ? styles.dotHot : ""} />)}</div>
               </div>
               <div className={styles.economicFindings}>
-                <div><span>Descuento mediano</span><strong>−28 %</strong></div>
-                <div><span>Ahorro mediano</span><strong>60.106 €</strong></div>
-                <div><span>Rentabilidad intradistrito</span><strong>+2,06 pp</strong><small>19 de 19 distritos · p = 1,9 × 10⁻⁶</small></div>
+                <div><span>Brecha del modelo</span><strong>Señal</strong></div>
+                <div><span>Ahorro efectivo</span><strong>No medido</strong></div>
+                <div><span>Revisión externa de casos</span><strong>Pendiente</strong><small>Comparables y factores omitidos</small></div>
               </div>
             </div>
-            <div className={styles.naiveComparison}>
-              <span>La regla ingenua «menor €/m²»</span>
-              <div><i style={{ width: "71.7%" }} /><strong>71,7 %</strong></div>
-              <p>de su selección cae en solo tres distritos: no encuentra gangas, cambia de barrio.</p>
-            </div>
+            <div className={styles.naiveComparison}><span>El contraste anterior comparte el precio</span><p>Una menor oferta reduce la brecha y aumenta la rentabilidad calculada: ambas usan el mismo precio. Esa dependencia impide tomar el contraste como validación económica independiente.</p></div>
             <CourseLine courses="Contraste de hipótesis · Segmentación · Economía espacial · Data science aplicada" />
           </section>
         </SceneShell>

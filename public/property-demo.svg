@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-labelledby="title desc">
+<title id="title">Vivienda ficticia de demostración</title><desc id="desc">Ilustración de una fachada; no es una fotografía de un inmueble.</desc>
+<rect width="800" height="600" fill="#e8e4dc"/><rect y="466" width="800" height="134" fill="#d6d2c9"/>
+<path d="M210 470V185h380v285" fill="#f9f6f0" stroke="#b6b6a5" stroke-width="4"/>
+<path d="M180 186h440L400 85Z" fill="#637463"/>
+<g fill="#c7d2cc" stroke="#748575" stroke-width="5"><path d="M250 225h100v95H250Z"/><path d="M450 225h100v95H450Z"/><path d="M250 355h100v75H250Z"/><path d="M450 355h100v75H450Z"/></g>
+<path d="M367 360h66v110h-66Z" fill="#7e8d76"/><circle cx="418" cy="416" r="4" fill="#e9d0a0"/>
+<rect x="228" y="517" width="344" height="40" rx="20" fill="#f9f6f0"/><text x="400" y="543" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#425445">Ilustración · datos ficticios</text>
+</svg>

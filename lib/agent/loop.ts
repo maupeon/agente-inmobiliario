@@ -13,7 +13,8 @@ import { runTool, TOOL_DEFINITIONS } from "./tools";
 // Modelo solicitado por el usuario en el brief del proyecto.
 // Si el SDK aún no lo conoce a runtime, basta con cambiar ANTHROPIC_MODEL.
 const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-4-6";
-const MAX_TOOL_TURNS = 6;
+const MAX_TOOL_TURNS = 3;
+const MAX_TOOL_CALLS = 4;
 
 interface PartialToolUse {
   id: string;
@@ -32,7 +33,8 @@ interface PartialToolUse {
 export async function executeAgentLoop(
   messages: MessageParam[],
   onEvent: (e: StreamEvent) => void,
-  profile?: UserProfile | null
+  profile?: UserProfile | null,
+  signal?: AbortSignal
 ): Promise<void> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -44,11 +46,13 @@ export async function executeAgentLoop(
     return;
   }
 
-  const client = new Anthropic({ apiKey });
+  const client = new Anthropic({ apiKey, maxRetries: 0, timeout: 45_000 });
   const system = buildSystemPrompt(profile);
   const conversation: MessageParam[] = [...messages];
 
+  let toolCount = 0;
   for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
+    if (signal?.aborted) return;
     const collected: ContentBlock[] = [];
     const partialTools: Map<number, PartialToolUse> = new Map();
     let stopReason: string | null = null;
@@ -57,11 +61,11 @@ export async function executeAgentLoop(
     try {
       stream = client.messages.stream({
         model: MODEL,
-        max_tokens: 4096,
+        max_tokens: 1600,
         system,
         tools: TOOL_DEFINITIONS as unknown as Anthropic.Tool[],
         messages: conversation,
-      });
+      }, { signal });
     } catch (err) {
       const handled = handleError(err, { phase: "stream_init" });
       onEvent({ type: "error", message: handled.userMessage });
@@ -135,6 +139,7 @@ export async function executeAgentLoop(
 
       // Asegurar el stop_reason final.
       const finalMessage = await stream.finalMessage();
+      console.info("[chat usage]", { model: MODEL, input_tokens: finalMessage.usage.input_tokens, output_tokens: finalMessage.usage.output_tokens });
       if (finalMessage.stop_reason) stopReason = finalMessage.stop_reason;
 
       // Si por algún motivo no recibimos bloques (p.e. la API no se los pasó al
@@ -160,9 +165,13 @@ export async function executeAgentLoop(
 
       for (const tu of toolUses) {
         try {
+          if (signal?.aborted) return;
+          if (++toolCount > MAX_TOOL_CALLS) throw new Error("Límite de cuatro herramientas por turno alcanzado.");
           const result = await runTool(tu.name, tu.input);
           if (result.forClient) {
-            if (result.forClient.kind === "properties") {
+            if (result.forClient.kind === "purchase_valuation") {
+              onEvent({ type: "purchase_valuation", data: result.forClient.data });
+            } else if (result.forClient.kind === "properties") {
               onEvent({
                 type: "properties",
                 items: result.forClient.data.properties,
@@ -191,7 +200,7 @@ export async function executeAgentLoop(
             content: JSON.stringify(result.forModel),
           });
         } catch (err) {
-          const handled = handleError(err, { tool: tu.name, input: tu.input });
+          const handled = handleError(err, { tool: tu.name });
           onEvent({
             type: "tool_end",
             id: tu.id,

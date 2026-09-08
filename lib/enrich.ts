@@ -5,7 +5,7 @@ import { getMarketData } from "@/lib/market/cache";
 import { findProvincePrice } from "@/lib/market/match-province";
 import { findRentReference } from "@/lib/market/rent";
 import { buildNeighborhoodReport } from "@/lib/neighborhood/report";
-import { valorarLote } from "@/lib/valoracion/client";
+import { valorarLoteConEstado } from "@/lib/valoracion/client";
 import type { ValoracionModelo } from "@/lib/valoracion/types";
 import type {
   CommuteMode,
@@ -19,10 +19,9 @@ import type {
 /**
  * Enriquecimiento por lote de propiedades para el panel/mapa.
  *
- * Para cada piso calcula tres señales que en el chat viven en tools separadas:
- *  - valoración de precio frente a la referencia de la zona (€/m²),
- *  - trayecto (tiempo + geometría) desde el trabajo del usuario,
- *  - seguridad y calidad de vida del barrio.
+ * Para cada piso conserva la estimación o abstención del servicio, las
+ * referencias territoriales con procedencia y el trayecto aproximado.
+ * El informe de barrio declara ausencia de medición de seguridad/calidad.
  *
  * Los datasets de mercado se piden UNA vez y se reutilizan para todo el lote,
  * en lugar de invocar las tools una por una (que harían N lecturas a Supabase).
@@ -34,15 +33,15 @@ export async function enrichProperties(
   if (properties.length === 0) return [];
 
   // Datasets de mercado, una sola vez.
-  const [rentRef, prices] = await Promise.all([
+  const [rentRef, prices, lote] = await Promise.all([
     getMarketData("rent_reference"),
     getMarketData("ine_price_by_province"),
+    valorarLoteConEstado(properties),
   ]);
 
-  // Valoración con el modelo del TFM: una sola llamada para todo el lote. Si el
-  // servicio no está configurado o falla, el mapa viene vacío y cada propiedad
-  // cae a la heurística de siempre.
-  const porModelo = await valorarLote(properties);
+  // Resultados y abstenciones del servicio se conservan por anuncio. Una
+  // referencia territorial verificada puede mostrarse como alternativa explícita.
+  const porModelo = lote.resultados;
 
   // Origen del trayecto: coordenadas del trabajo (del perfil), geocodificando
   // una sola vez si solo tenemos la dirección.
@@ -52,10 +51,11 @@ export async function enrichProperties(
   return Promise.all(
     properties.map(async (p) => ({
       propertyCode: p.propertyCode,
-      valuation: conComparativa(
-        desdeModelo(p, porModelo.get(p.propertyCode)),
-        valuate(p, rentRef, prices)
-      ),
+      valuation: (() => {
+        const v = conComparativa(desdeModelo(p, porModelo.get(p.propertyCode)), valuate(p, rentRef, prices));
+        const state = lote.estados.get(p.propertyCode);
+        return v && p.operation === "sale" ? { ...v, estadoModelo: state?.estado, avisoModelo: state?.motivo } : v;
+      })(),
       neighborhood: buildNeighborhoodReport(zonaOf(p), provinciaOf(p)),
       commute: await commuteFor(p, origen, modoPreferido),
     }))
@@ -67,32 +67,25 @@ export async function enrichProperties(
 type Banda = NonNullable<PropertyValuation["banda"]>;
 
 /**
- * Traduce la salida del modelo al contrato que ya consume la interfaz. La
- * diferencia con `valuate()` es la referencia: en lugar del €/m² medio de la
- * provincia, el €/m² que el modelo estima para ESTA vivienda.
- */
-/**
  * Devuelve la valoración del modelo con la de referencia adosada, para poder
  * contrastarlas en la ficha. Si el modelo no respondió, se usa la de referencia
- * a secas, como siempre.
+ * con estado explícito del modelo. La referencia territorial no clasifica
+ * el precio individual cuando falta la estimación del modelo.
  */
 function conComparativa(
   modelo: PropertyValuation | null,
   referencia: PropertyValuation | null
 ): PropertyValuation | null {
-  if (!modelo) return referencia;
-  if (!referencia || referencia.referenciaEurM2 == null) return modelo;
+  if (!modelo) return referencia ? { ...referencia, banda: null, diferenciaPorcentual: null,
+    etiqueta: referencia.referenciaEurM2 == null ? "sin referencia verificada" : "referencia territorial, sin valoración individual" } : null;
+  if (!referencia || referencia.fromFallback || referencia.referenciaEurM2 == null) return modelo;
   return {
     ...modelo,
     comparativa: {
       referenciaEurM2: referencia.referenciaEurM2,
-      diferenciaPorcentual: referencia.diferenciaPorcentual,
-      etiqueta: referencia.etiqueta,
-      banda: referencia.banda,
-      fuente:
-        referencia.nivel === "provincia"
-          ? "media provincial (INE)"
-          : `media de ${referencia.referencia ?? "la zona"}`,
+      fuente: referencia.fuente ?? "Fuente sin identificar",
+      periodo: referencia.periodo ?? "Periodo sin identificar",
+      territorio: referencia.referencia ?? "Territorio sin identificar",
     },
   };
 }
@@ -109,14 +102,15 @@ function desdeModelo(
     eurM2,
     referenciaEurM2: round1(v.precio_justo / p.size),
     diferenciaPorcentual: v.brecha_pct,
-    etiqueta: banda ? VALORACION_VENTA[banda] : null,
+    etiqueta: v.brecha_pct == null ? null : v.brecha_pct < -4 ? "por debajo de la estimación indexada" : v.brecha_pct > 8 ? "por encima de la estimación indexada" : "cerca de la estimación indexada",
     banda,
     nivel: "modelo",
-    referencia: `modelo HabitIA · nivel de precios ${v.nivel_precios}`,
+    referencia: `oferta 2018 · escenario indexado a ${v.nivel_precios}`,
     fromFallback: false,
     intervalo: v.intervalo,
     oportunidad: v.oportunidad,
     nivelPrecios: v.nivel_precios,
+    modeloVersion: v.model_version,
   };
 }
 
@@ -145,7 +139,7 @@ function valuate(
   if (!eurM2) return null;
 
   if (p.operation === "rent") {
-    const match = findRentReference(rentRef.data, zonaOf(p), provinciaOf(p));
+    const match = rentRef.fromFallback ? null : findRentReference(rentRef.data, zonaOf(p), provinciaOf(p));
     const referencia = match?.eurM2Mes ?? null;
     const diff =
       referencia != null ? round1(((eurM2 - referencia) / referencia) * 100) : null;
@@ -160,10 +154,12 @@ function valuate(
       nivel: match?.nivel ?? null,
       referencia: match?.referencia ?? null,
       fromFallback: rentRef.fromFallback,
+      fuente: rentRef.data.fuente,
+      periodo: rentRef.data.periodo,
     };
   }
 
-  const match = findProvincePrice(prices.data.data, provinciaOf(p) || zonaOf(p));
+  const match = prices.fromFallback ? null : findProvincePrice(prices.data.data, provinciaOf(p) || zonaOf(p));
   const referencia = match?.precioM2 ?? null;
   const diff =
     referencia != null ? round1(((eurM2 - referencia) / referencia) * 100) : null;
@@ -178,6 +174,8 @@ function valuate(
     nivel: match ? "provincia" : null,
     referencia: match ? `provincia de ${match.provincia}` : null,
     fromFallback: prices.fromFallback,
+    fuente: prices.data.fuente,
+    periodo: prices.data.periodo,
   };
 }
 

@@ -5,11 +5,9 @@ import { searchProperties } from "@/lib/idealista/search";
 import { MODE_LABEL, formatDiff } from "@/lib/dashboard-format";
 import type {
   Imprescindible,
-  Priority,
   Property,
   PropertyEnrichment,
   PropertyRecommendation,
-  QolIndicator,
   SearchFilters,
   UserProfile,
 } from "@/types";
@@ -71,7 +69,7 @@ export async function recommend(input: RecommendInput): Promise<RecommendResult>
         : undefined,
   };
 
-  const candidates = await searchProperties(filters, CANDIDATES);
+  const candidates = (await searchProperties(filters, CANDIDATES)).filter((p) => (profile?.imprescindibles ?? []).every((m) => satisfiesMust(p, m) !== false));
   if (candidates.length === 0) return { filters, items: [] };
 
   const enriched = await enrichProperties(candidates, profile);
@@ -127,32 +125,24 @@ function scoreOne(
   const hasWork = profile?.trabajo?.lat != null && profile?.trabajo?.lon != null;
 
   // Componentes 0..1.
-  const value = e.valuation?.banda ? VALUE_SCORE[e.valuation.banda] : 0.5;
+  const value = e.valuation?.banda && !e.valuation.fromFallback && e.valuation.nivel === "modelo" ? VALUE_SCORE[e.valuation.banda] : 0.5;
   const budget = budgetScore(p.price, precioMax);
   const commute = commuteScore(e, hasWork);
-  const safety = e.neighborhood?.seguridad.indice != null
-    ? clamp01(e.neighborhood.seguridad.indice / 100)
-    : 0.5;
-  const qol = qolScore(e, prioridades);
   const musts = profile?.imprescindibles ?? [];
   const must = mustScore(p, musts);
 
   // Pesos base, reforzados por las prioridades del usuario.
-  const w = { value: 1, budget: 1, commute: 1, safety: 1, qol: 0.6, must: musts.length ? 1 : 0 };
+  const w = { value: 1, budget: 1, commute: 1, must: musts.length ? 1 : 0 };
   for (const prio of prioridades) {
-    if (prio === "seguridad") w.safety += 1.2;
-    else if (prio === "cerca_trabajo") w.commute += 1.2;
-    else w.qol += 0.8; // transporte, zonas_verdes, vida_nocturna, tranquilidad
+    if (prio === "cerca_trabajo") w.commute += 1.2;
   }
   if (!hasWork) w.commute = 0; // sin trabajo, el trayecto no puntúa
 
-  const total = w.value + w.budget + w.commute + w.safety + w.qol + w.must;
+  const total = w.value + w.budget + w.commute + w.must;
   const raw =
     w.value * value +
     w.budget * budget +
     w.commute * commute +
-    w.safety * safety +
-    w.qol * qol +
     w.must * must;
   const score = Math.round((raw / total) * 100);
 
@@ -178,29 +168,6 @@ function commuteScore(e: PropertyEnrichment, hasWork: boolean): number {
   return clamp01(1 - (min - 10) / 50);
 }
 
-const QOL_FROM_PRIORITY: Partial<Record<Priority, QolIndicator["clave"]>> = {
-  transporte: "transporte",
-  zonas_verdes: "zonas_verdes",
-  vida_nocturna: "vida_nocturna",
-  tranquilidad: "tranquilidad",
-};
-
-function qolScore(e: PropertyEnrichment, prioridades: Priority[]): number {
-  const indicadores = e.neighborhood?.calidadVida.indicadores ?? [];
-  const claves = prioridades
-    .map((p) => QOL_FROM_PRIORITY[p])
-    .filter((c): c is QolIndicator["clave"] => Boolean(c));
-  if (claves.length > 0) {
-    const vals = claves
-      .map((clave) => indicadores.find((i) => i.clave === clave)?.valor)
-      .filter((v): v is number => v != null);
-    if (vals.length) return clamp01(avg(vals) / 100);
-  }
-  const global = e.neighborhood?.calidadVida.indiceGlobal;
-  return global != null ? clamp01(global / 100) : 0.5;
-}
-
-/** Fracción de imprescindibles que el piso cumple (solo cuenta los evaluables). */
 function mustScore(p: Property, musts: Imprescindible[]): number {
   if (!musts.length) return 0.5;
   let evaluable = 0;
@@ -254,8 +221,10 @@ function explain(
   profile: UserProfile | null
 ): { highlights: string[]; rationale: string } {
   const highlights: string[] = [];
-  const prioridades = profile?.prioridades ?? [];
-
+  for (const must of profile?.imprescindibles ?? []) {
+    const sat = satisfiesMust(p, must);
+    highlights.push(sat === true ? MUST_LABEL[must] : `${MUST_LABEL[must]}: no comprobado`);
+  }
   // Trayecto (prioritario si le importa estar cerca del trabajo).
   const c = e.commute;
   const leg = c?.modos.find((m) => m.modo === c.recomendado);
@@ -263,44 +232,16 @@ function explain(
     highlights.push(`a ${leg.minutos}′ ${MODE_LABEL[c.recomendado]} del trabajo`);
   }
 
-  // Seguridad.
-  const seg = e.neighborhood?.seguridad;
-  if (seg?.indice != null) {
-    if (seg.indice >= 75) highlights.push(`barrio seguro (${seg.indice}/100)`);
-    else if (seg.indice >= 62) highlights.push(`barrio tranquilo (${seg.indice}/100)`);
-  }
-
   // Precio frente a la zona.
   const val = e.valuation;
-  if (val?.banda) {
+  if (val?.banda && !val.fromFallback && val.nivel === "modelo") {
     if (val.banda === "barato" || val.banda === "ajustado") {
-      highlights.push(`precio por debajo de la zona (${formatDiff(val.diferenciaPorcentual)})`);
+      highlights.push(`precio por debajo del escenario indexado (${formatDiff(val.diferenciaPorcentual)})`);
     } else if (val.banda === "en_linea") {
-      highlights.push("precio en línea con la zona");
+      highlights.push("precio cercano al escenario indexado");
     }
   }
 
-  // Calidad de vida según prioridades.
-  const indicadores = e.neighborhood?.calidadVida.indicadores ?? [];
-  const qolLabel: Partial<Record<Priority, [QolIndicator["clave"], string]>> = {
-    transporte: ["transporte", "bien comunicado"],
-    zonas_verdes: ["zonas_verdes", "con zonas verdes"],
-    tranquilidad: ["tranquilidad", "tranquilo"],
-    vida_nocturna: ["vida_nocturna", "con ambiente"],
-  };
-  for (const prio of prioridades) {
-    const entry = qolLabel[prio];
-    if (!entry) continue;
-    const ind = indicadores.find((i) => i.clave === entry[0]);
-    if (ind && ind.valor >= 72) highlights.push(entry[1]);
-  }
-
-  // Imprescindibles cumplidos.
-  for (const m of profile?.imprescindibles ?? []) {
-    if (satisfiesMust(p, m) === true) highlights.push(MUST_LABEL[m]);
-  }
-
-  // Presupuesto.
   if (profile?.presupuestoMax && p.price <= profile.presupuestoMax) {
     highlights.push("dentro de tu presupuesto");
   }
@@ -326,9 +267,7 @@ function explain(
 function clamp01(n: number): number {
   return Math.max(0, Math.min(1, n));
 }
-function avg(ns: number[]): number {
-  return ns.reduce((a, b) => a + b, 0) / ns.length;
-}
+
 function dedupe(xs: string[]): string[] {
   return Array.from(new Set(xs));
 }

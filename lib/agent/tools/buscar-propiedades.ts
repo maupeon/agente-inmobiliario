@@ -14,6 +14,7 @@ export interface BuscarPropiedadesInput {
 
 export interface BuscarPropiedadesResult {
   count: number;
+  procedencia: "demo_ficticia" | "idealista";
   filters: SearchFilters;
   /** Resumen plano que Claude puede leer y comentar al usuario. */
   summary: Array<{
@@ -22,13 +23,14 @@ export interface BuscarPropiedadesResult {
     price: number;
     pricePerSqm?: number;
     size: number;
-    rooms: number;
+    rooms?: number;
     district?: string;
     municipality?: string;
     floor?: string;
     hasLift?: boolean;
     exterior?: boolean;
     url: string;
+    latitude?: number; longitude?: number; propertyType: string; detailedType?: Property["detailedType"]; sourceKind?: Property["sourceKind"];
   }>;
   /** Para enriquecer el chunk de stream del cliente; no lo lee Claude. */
   properties: Property[];
@@ -37,8 +39,8 @@ export interface BuscarPropiedadesResult {
 export async function runBuscarPropiedades(
   input: BuscarPropiedadesInput
 ): Promise<BuscarPropiedadesResult> {
-  if (!input?.zona) throw new ValidationError("zona es obligatoria");
-  if (!input?.operacion) throw new ValidationError("operacion es obligatoria");
+  if (typeof input?.zona !== "string" || !input.zona.trim() || input.zona.length > 180) throw new ValidationError("zona es obligatoria");
+  if (!["venta", "alquiler"].includes(input?.operacion)) throw new ValidationError("operacion es obligatoria");
 
   const filters: SearchFilters = {
     zona: input.zona,
@@ -54,9 +56,11 @@ export async function runBuscarPropiedades(
 
   return {
     count: properties.length,
+    procedencia: process.env.MOCK_IDEALISTA === "true" ? "demo_ficticia" : "idealista",
     filters,
     summary: properties.map((p) => ({
       propertyCode: p.propertyCode,
+      latitude: p.latitude, longitude: p.longitude, propertyType: p.propertyType, detailedType: p.detailedType, sourceKind: p.sourceKind,
       title: p.title,
       price: p.price,
       pricePerSqm: p.pricePerSqm,

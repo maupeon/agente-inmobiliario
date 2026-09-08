@@ -24,7 +24,6 @@ const LocationPicker = dynamic(() => import("./LocationPicker"), {
 });
 
 const PRIORITIES: Array<{ key: Priority; label: string }> = [
-  { key: "seguridad", label: "Seguridad" },
   { key: "cerca_trabajo", label: "Cerca del trabajo" },
   { key: "transporte", label: "Buen transporte" },
   { key: "zonas_verdes", label: "Zonas verdes" },

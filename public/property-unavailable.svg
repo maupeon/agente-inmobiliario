@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-labelledby="title description">
+  <title id="title">Imagen no disponible</title>
+  <desc id="description">Marcador neutro. El anuncio no proporcionó una fotografía.</desc>
+  <rect width="800" height="600" fill="#f2f0e9"/>
+  <path d="M275 310 400 210 525 310V430H275Z" fill="none" stroke="#918f85" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M372 430V345H428V430" fill="none" stroke="#918f85" stroke-width="8" stroke-linejoin="round"/>
+  <text x="400" y="505" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" fill="#66665c">Imagen no disponible</text>
+</svg>

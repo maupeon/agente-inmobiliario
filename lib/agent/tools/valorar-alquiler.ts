@@ -15,14 +15,14 @@ export interface ValorarAlquilerInput {
 export async function runValorarAlquiler(
   input: ValorarAlquilerInput
 ): Promise<RentValuation> {
-  if (!input?.zona) throw new ValidationError("zona es obligatoria");
-  if (!input?.precioMes || input.precioMes <= 0)
+  if (typeof input?.zona !== "string" || !input.zona.trim()) throw new ValidationError("zona es obligatoria");
+  if (!Number.isFinite(input?.precioMes) || input.precioMes <= 0)
     throw new ValidationError("precioMes debe ser un número positivo");
-  if (!input?.metros || input.metros <= 0)
+  if (!Number.isFinite(input?.metros) || input.metros <= 0)
     throw new ValidationError("metros debe ser un número positivo");
 
   const ref = await getMarketData("rent_reference");
-  const match = findRentReference(ref.data, input.zona, input.provincia);
+  const match = ref.fromFallback ? null : findRentReference(ref.data, input.zona, input.provincia);
 
   const eurM2Mes = round1(input.precioMes / input.metros);
   const diferencia =

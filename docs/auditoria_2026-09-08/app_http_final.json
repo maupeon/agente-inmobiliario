@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "server": "http://127.0.0.1:3009",
+  "backend": "http://127.0.0.1:8018",
+  "model_version": "2.0.0",
+  "model_id": "habitIA-oferta-2018-v2",
+  "checks": {
+    "valuation_proxy": 200,
+    "conversations": 410,
+    "favorites": 410,
+    "chat_paused": 503
+  },
+  "paid_provider_calls": 0,
+  "cloud_writes": 0
+}

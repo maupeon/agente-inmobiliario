@@ -3,7 +3,7 @@
 Aplicación web conversacional. El usuario cuenta en lenguaje natural qué vivienda
 quiere alquilar o comprar y HabitIA usa herramientas conectadas a Idealista para
 buscar propiedades, mostrar el detalle de un anuncio y calcular hipotecas. Las
-conversaciones se persisten en Supabase.
+conversaciones y favoritos se guardan en el navegador para esta demo sin autenticación.
 
 El nombre del producto es **HabitIA** y debe escribirse siempre con `H` e `IA` en
 mayúsculas. El nombre une hogar e inteligencia artificial sin recurrir a siglas
@@ -17,11 +17,12 @@ y `mark`.
 - `lib/idealista/` — wrappers de la API REST de Idealista (auth OAuth2 + búsqueda + detalle)
 - `lib/agent/` — system prompt, definición de tools, loop de tool-use
 - `lib/agent/tools/` — implementación de cada tool (un archivo por tool)
-- `lib/supabase/` — cliente Supabase y queries de conversaciones / favoritos
+- `lib/supabase/` — cliente de servidor para caché y cuota; queries antiguas de conversaciones/favoritos fuera del recorrido activo
+- `lib/local-conversations.ts` — historial local con tarjetas, sin acceso a conversaciones de otros visitantes
 - `lib/errors.ts` — clases de error tipadas y `handleError()` para mensajes amigables
 - `lib/analytics.ts` — `trackEvent()` para la tabla `events`
 - `components/` — componentes React (Chat, PropertyCard, Sidebar, etc.)
-- `hooks/` — hooks de cliente (`useFavorites`, `useChat`)
+- `hooks/` — hooks de cliente (`useFavorites`, `useChat`), persistencia local sin sincronización remota
 - `types/index.ts` — tipos TypeScript compartidos
 - `supabase/schema.sql` — schema completo de la base de datos
 

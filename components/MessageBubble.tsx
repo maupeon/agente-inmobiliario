@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import type { Message, Property, ToolCall } from "@/types";
 import { Markdown } from "./Markdown";
 import { PropertyGrid } from "./PropertyGrid";
+import { PurchaseValuationCard } from "./PurchaseValuationCard";
 import { MortgageCard } from "./MortgageCard";
 import { MarketCard } from "./MarketCard";
 import { RentValuationCard } from "./RentValuationCard";
@@ -56,6 +57,7 @@ const TOOL_META: Record<
     activeLabel: "Calculando el trayecto",
     Icon: Path,
   },
+  valorar_vivienda: { label: "Modelo de oferta", activeLabel: "Valorando el anuncio", Icon: Scales },
   consultar_barrio: {
     label: "Seguridad y calidad de vida",
     activeLabel: "Mirando seguridad y calidad de vida",
@@ -97,7 +99,7 @@ export function MessageBubble({
     Boolean(message.market) ||
     Boolean(message.rent) ||
     Boolean(message.commute) ||
-    Boolean(message.neighborhood);
+    Boolean(message.neighborhood) || Boolean(message.purchaseValuation);
 
   return (
     <article className="animate-fade-up">
@@ -182,6 +184,7 @@ export function MessageBubble({
             </div>
           )}
 
+          {!isStreaming && message.purchaseValuation && <PurchaseValuationCard data={message.purchaseValuation} />}
           {!isStreaming && message.mortgage && (
             <div
               className="stage-reveal"

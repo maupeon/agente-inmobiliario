@@ -3,13 +3,28 @@
 export type BandaValoracion = "barato" | "ajustado" | "en_linea" | "caro" | "muy_caro";
 
 export interface ValoracionModelo {
-  propertyCode: string | null;
-  /** Precio que el modelo considera razonable, en euros del periodo indicado. */
+  propertyCode: string;
+  estado: "ok";
+  model_version: string;
+  model_id: "habitIA-oferta-2018-v2";
+  clasificacion_validada: false;
+  explicacion?: {
+    metodo: string; escala: string;
+    factores: Array<{ variable: string; valor: string | number | null; contribucion_log_euros: number; sentido: "aumenta" | "disminuye" }>;
+    advertencia: string; no_causal: true;
+  };
+  objetivo: "precio_anunciado";
+  periodo_entrenamiento: "2018";
+  extrapolacion_temporal: true;
+  precision_actual_validada: false;
+  factor_escenario: number;
+  advertencias: string[];
+  /** Alias técnico heredado para precio anunciado estimado, no precio justo. */
   precio_justo: number;
-  /** Intervalo con cobertura del 90 % (conformalizado). */
+  /** Intervalo histórico calibrado; la cobertura observada no garantiza cada caso. */
   intervalo: [number, number];
   precio_anunciado: number | null;
-  /** + = más caro que el precio justo; − = más barato. */
+  /** Desviación porcentual del anuncio respecto a la estimación indexada. */
   brecha_pct: number | null;
   banda: BandaValoracion | null;
   /** El precio cae por debajo del borde inferior del intervalo. */
@@ -24,8 +39,13 @@ export interface ValoracionModelo {
 
 export interface RespuestaValoracion {
   resultados: ValoracionModelo[];
+  errores?: Array<{ indice: number; propertyCode?: string; estado: string; detalle: string }>;
   ms: number;
   nivel_precios: string;
+  model_version: string;
+  objetivo: "precio_anunciado";
+  extrapolacion_temporal: true;
+  precision_actual_validada: false;
 }
 
 /** Lo que el servicio necesita de cada anuncio: es un subconjunto de /search. */
@@ -41,5 +61,6 @@ export interface AnuncioParaValorar {
   latitude: number;
   longitude: number;
   propertyType?: string;
+  municipality?: string;
   detailedType?: { typology?: string; subTypology?: string };
 }

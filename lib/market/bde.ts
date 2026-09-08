@@ -47,7 +47,7 @@ interface BdePoint {
  * inesperado se trata como ausencia de dato.
  */
 async function fetchBdeSeries(url: string): Promise<BdePoint | null> {
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`BdE ${url} ${res.status}`);
   const text = await res.text();
 

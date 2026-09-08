@@ -1,3 +1,4 @@
+import { isRecord, readJson, validProperty, validatedProfile } from "@/lib/api-validation";
 import { NextRequest } from "next/server";
 import { enrichProperties } from "@/lib/enrich";
 import { handleError, RateLimitError, ValidationError } from "@/lib/errors";
@@ -34,7 +35,9 @@ export async function POST(req: NextRequest) {
 
   let body: EnrichRequestBody;
   try {
-    body = (await req.json()) as EnrichRequestBody;
+    const raw = await readJson(req);
+    if (!isRecord(raw) || !Array.isArray(raw.properties) || raw.properties.length > MAX_PROPERTIES || !raw.properties.every(validProperty)) throw new ValidationError("invalid properties");
+    body = { properties: raw.properties, profile: validatedProfile(raw.profile) };
   } catch {
     const err = new ValidationError("body inválido", "No he entendido la petición.");
     return Response.json({ code: err.code, error: err.userMessage }, { status: 400 });

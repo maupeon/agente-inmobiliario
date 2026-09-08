@@ -39,6 +39,7 @@ export async function getAccessToken(): Promise<string> {
         body: "grant_type=client_credentials&scope=read",
         // El token endpoint no necesita streaming
         cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
       });
 
       if (!res.ok) {

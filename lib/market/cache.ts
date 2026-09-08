@@ -40,6 +40,12 @@ export interface CachedMarketData<K extends MarketDataKey> {
   fromFallback: boolean;
 }
 
+function isFallbackData(key: MarketDataKey, data: unknown): boolean {
+  if (!data || typeof data !== "object") return true;
+  return key === "rent_reference" || data === FALLBACKS[key]
+    || /respaldo|fictici|ilustrativ|manual|sin verificar/i.test(String((data as { fuente?: string }).fuente ?? ""));
+}
+
 export async function getMarketData<K extends MarketDataKey>(
   key: K
 ): Promise<CachedMarketData<K>> {
@@ -62,7 +68,7 @@ export async function getMarketData<K extends MarketDataKey>(
     key,
     data: data.data as MarketDataPayload[K],
     updatedAt: data.updated_at as string,
-    fromFallback: false,
+    fromFallback: isFallbackData(key, data.data) || data.data?._provenance?.kind !== "official",
   };
 }
 
@@ -90,13 +96,13 @@ async function wrapLive<K extends MarketDataKey>(key: K): Promise<CachedMarketDa
       key,
       data,
       updatedAt: new Date(cached.at).toISOString(),
-      fromFallback: data === FALLBACKS[key],
+      fromFallback: isFallbackData(key, data),
     };
   }
   try {
     const data = await LIVE_FETCHERS[key]();
     memCache.set(key, { at: Date.now(), data });
-    const isFallback = data === FALLBACKS[key];
+    const isFallback = isFallbackData(key, data);
     return {
       key,
       data,
@@ -147,7 +153,7 @@ export async function refreshMarketData(): Promise<RefreshSummary> {
     const { error } = await supabase
       .from("market_data")
       .upsert(
-        { key: item.key, data: item.data, updated_at: new Date().toISOString() },
+        { key: item.key, data: { ...item.data, _provenance: { kind: "official", fetchedAt: new Date().toISOString(), fuente: item.data.fuente } }, updated_at: new Date().toISOString() },
         { onConflict: "key" }
       );
     if (error) {
@@ -185,6 +191,7 @@ async function safeFetch<K extends MarketDataKey>(
 ): Promise<SafeFetched<K>> {
   try {
     const data = await fn();
+    if (isFallbackData(key, data)) return { ok: false, key, error: "La fuente devolvió respaldo; se conserva el último dato verificado." };
     return { ok: true, key, data };
   } catch (err) {
     return { ok: false, key, error: err instanceof Error ? err.message : String(err) };

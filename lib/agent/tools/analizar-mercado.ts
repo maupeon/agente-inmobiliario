@@ -53,8 +53,8 @@ export interface AnalizarMercadoResult {
 export async function runAnalizarMercado(
   input: AnalizarMercadoInput
 ): Promise<AnalizarMercadoResult> {
-  if (!input?.provincia) throw new ValidationError("provincia es obligatoria");
-  if (!input?.precioM2 || input.precioM2 <= 0)
+  if (typeof input?.provincia !== "string" || !input.provincia.trim()) throw new ValidationError("provincia es obligatoria");
+  if (!Number.isFinite(input?.precioM2) || input.precioM2 <= 0)
     throw new ValidationError("precioM2 debe ser un número positivo");
 
   const [pricesByProv, ipv, bde] = await Promise.all([
@@ -63,14 +63,14 @@ export async function runAnalizarMercado(
     getMarketData("bde_mortgage_rates"),
   ]);
 
-  const match = findProvincePrice(pricesByProv.data.data, input.provincia);
+  const match = pricesByProv.fromFallback ? null : findProvincePrice(pricesByProv.data.data, input.provincia);
 
   const diferencia =
     match != null
       ? round1(((input.precioM2 - match.precioM2) / match.precioM2) * 100)
       : null;
 
-  const serie = ipv.data.serie;
+  const serie = ipv.fromFallback ? [] : ipv.data.serie;
   const ultimo = serie.length > 0 ? serie[serie.length - 1] : null;
 
   return {
@@ -90,9 +90,9 @@ export async function runAnalizarMercado(
       serie,
     },
     hipoteca: {
-      tipoMedio: bde.data.tipoMedio,
-      euribor12m: bde.data.euribor12m ?? null,
-      periodo: bde.data.periodo,
+      tipoMedio: bde.fromFallback ? null : bde.data.tipoMedio,
+      euribor12m: bde.fromFallback ? null : bde.data.euribor12m ?? null,
+      periodo: bde.fromFallback ? null : bde.data.periodo,
     },
     fuentes: {
       precioProvincia: pricesByProv.data.fuente,

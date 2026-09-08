@@ -1,4 +1,5 @@
 import "server-only";
+import { IdealistaError } from "@/lib/errors";
 import { getServerSupabase } from "@/lib/supabase/server";
 
 /**
@@ -13,7 +14,7 @@ const EVENT = "idealista_request";
 /** Tope mensual del plan (configurable con IDEALISTA_MONTHLY_LIMIT). */
 export function monthlyLimit(): number {
   const n = Number(process.env.IDEALISTA_MONTHLY_LIMIT);
-  return Number.isFinite(n) && n > 0 ? n : 100;
+  return Number.isFinite(n) && n > 0 ? Math.min(100, Math.floor(n)) : 100;
 }
 
 /** Etiqueta del mes natural actual en UTC, p. ej. "2026-06". */
@@ -64,32 +65,13 @@ export async function getIdealistaUsage(): Promise<IdealistaUsage> {
   }
 }
 
-/**
- * Registra una petición real a Idealista y deja traza en el log del servidor
- * con el acumulado del mes. Nunca lanza: si Supabase falla, solo avisa.
- * El insert se espera (persistencia); el recuento para el log no bloquea.
- */
-export async function recordIdealistaRequest(kind: string): Promise<void> {
+/** Reserva atómica en Supabase. Sin contador seguro no se llama al proveedor. */
+export async function reserveIdealistaRequest(): Promise<void> {
   const supabase = getServerSupabase();
-  if (!supabase) {
-    console.warn(`[idealista] petición (${kind}) — sin Supabase, no se contabiliza`);
-    return;
+  if (!supabase) throw new IdealistaError("quota store unavailable", { status: 503, userMessage: "Las búsquedas nuevas están pausadas: no se puede verificar la cuota. Puedes consultar los resultados guardados." });
+  const { data, error } = await supabase.rpc("reserve_idealista_request", { p_limit: monthlyLimit(), p_kind: "search" });
+  if (error || !Array.isArray(data) || typeof data[0]?.allowed !== "boolean") {
+    throw new IdealistaError("quota reservation unavailable", { status: 503, userMessage: "Las búsquedas nuevas están pausadas hasta activar el control de cuota de la demo." });
   }
-  try {
-    const { error } = await supabase
-      .from("events")
-      .insert({ event_name: EVENT, event_data: { kind } });
-    if (error) throw error;
-  } catch (err) {
-    console.warn("[idealista] no se pudo registrar la petición", err);
-    return;
-  }
-  getIdealistaUsage()
-    .then(({ count, limit, available }) => {
-      if (!available || count === null) return;
-      const warn =
-        count >= limit ? " ⛔ TOPE MENSUAL ALCANZADO" : count >= limit * 0.9 ? " ⚠️ casi en el tope" : "";
-      console.log(`[idealista] ${kind} → ${count}/${limit} peticiones este mes${warn}`);
-    })
-    .catch(() => {});
+  if (!data[0].allowed) throw new IdealistaError("monthly quota exhausted", { status: 429, userMessage: "Se alcanzó el cupo mensual de búsquedas. Puedes seguir usando los anuncios guardados o la demo con datos ficticios." });
 }

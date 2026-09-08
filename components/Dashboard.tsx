@@ -793,7 +793,7 @@ function PropertyRow({
           <div className="flex items-start gap-2">
             <button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left">
               <p className="line-clamp-2 text-base font-semibold leading-snug tracking-[-0.02em] text-ink">
-                {property.title}
+                {property.sourceKind === "demo" ? "Demo ficticia · " : ""}{property.title}
               </p>
               <p className="mt-1 line-clamp-1 text-xs text-stone">
                 {[property.district, property.municipality].filter(Boolean).join(" · ") || "Zona no indicada"}
@@ -828,7 +828,7 @@ function PropertyRow({
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-600">
             <span className="inline-flex items-center gap-1">
-              <Bed aria-hidden size={14} weight="bold" /> {property.rooms} hab.
+              <Bed aria-hidden size={14} weight="bold" /> {property.rooms == null ? "Habitaciones sin dato" : `${property.rooms} hab.`}
             </span>
             <span className="inline-flex items-center gap-1">
               <Buildings aria-hidden size={14} weight="bold" /> {formatNumber(property.size)} m²
@@ -837,6 +837,7 @@ function PropertyRow({
         </div>
       </div>
 
+      {val?.avisoModelo && <p className="mt-3 text-xs leading-relaxed text-stone-600">{val.nivel === "modelo" ? `Oferta 2018 · escenario ${val.nivelPrecios}. Precisión actual no validada.` : val.avisoModelo}</p>}
       {rationale && <p className="mt-3 text-sm leading-relaxed text-ink-700">{rationale}</p>}
 
       <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-paper-200/75 p-3">
@@ -892,12 +893,13 @@ function PropertyRow({
           Ver detalles
         </button>
         <a
-          href={property.url}
+          href={property.sourceKind === "demo" ? undefined : property.url}
+          aria-disabled={property.sourceKind === "demo"}
           target="_blank"
           rel="noopener noreferrer"
           className="pressable inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold text-saffron-700 hover:bg-saffron-50"
         >
-          Ver anuncio <ArrowSquareOut aria-hidden size={13} weight="bold" />
+          {property.sourceKind === "demo" ? "Anuncio ficticio" : "Ver anuncio"} <ArrowSquareOut aria-hidden size={13} weight="bold" />
         </a>
       </div>
     </article>
@@ -914,7 +916,7 @@ function Signal({ label, children }: { label: string; children: React.ReactNode 
 }
 
 function PriceBadge({ val }: { val: PropertyValuation | null }) {
-  if (!val || val.diferenciaPorcentual == null) return <span className="text-stone">—</span>;
+  if (!val || val.nivel !== "modelo" || val.estadoModelo !== "ok" || val.fromFallback || val.diferenciaPorcentual == null) return <span className="text-stone">—</span>;
   return (
     <span className="inline-flex items-center gap-1.5" style={{ color: bandaColor(val.banda) }}>
       <span className="h-2 w-2 rounded-full" style={{ background: bandaColor(val.banda) }} />
