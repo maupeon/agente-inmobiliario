@@ -1,0 +1,115 @@
+{
+  "sources": {
+    "models": "memoria/resultados/modelos.json",
+    "final": "memoria/resultados/seleccion.json",
+    "coverage": "memoria/resultados/oportunidades.json",
+    "explanation": "memoria/resultados/interpretabilidad.json"
+  },
+  "sample": {
+    "filas_iniciales": 94852,
+    "geo_imposible": 1,
+    "sin_barrio": 752,
+    "estructura_imposible": 36,
+    "precio_extremo": 444,
+    "corte_precio_inferior": 56000,
+    "corte_precio_superior": 3038845,
+    "filas_finales": 93619,
+    "train": 70203,
+    "test": 23416,
+    "n_features": 54
+  },
+  "models": [
+    {
+      "name": "Referencia del barrio",
+      "value": 15.401149433095885
+    },
+    {
+      "name": "Regresión Ridge",
+      "value": 10.941355482095185
+    },
+    {
+      "name": "Random Forest",
+      "value": 8.652121183081054
+    },
+    {
+      "name": "XGBoost",
+      "value": 8.705759328499848
+    },
+    {
+      "name": "LightGBM ajustado",
+      "value": 8.45430088198721
+    },
+    {
+      "name": "Stacking",
+      "value": 8.44479163136889
+    },
+    {
+      "name": "LightGBM final",
+      "value": 8.204748480283126
+    }
+  ],
+  "ablation": [
+    {
+      "name": "Sin localización",
+      "value": 12.45545145355535
+    },
+    {
+      "name": "Todas las variables",
+      "value": 8.45430088198721
+    },
+    {
+      "name": "Selección final · 54",
+      "value": 8.204748480283126
+    }
+  ],
+  "scope": {
+    "holdout": 8.204748480283126,
+    "temporal": 9.721633611902696,
+    "spatial": 19.860342502898238,
+    "folds": [
+      16.086358065840482,
+      20.308930200438002,
+      19.717153429241954,
+      21.70134062411154,
+      21.487930194859196
+    ]
+  },
+  "coverage": {
+    "alfa": 0.1,
+    "Q_conformal": 0.0898,
+    "cobertura_sin_calibrar_pct": 72.36,
+    "cobertura_conformal_pct": 89.77,
+    "ancho_mediano_eur": 139100,
+    "ancho_mediano_pct": 52.7
+  },
+  "shap": {
+    "Tiempo": 1.8,
+    "Mercado de alquiler": 4.9,
+    "Equipamiento": 12.1,
+    "Localización": 33.0,
+    "Vivienda y edificio": 48.1
+  },
+  "districts": {
+    "Vicálvaro": 6.49,
+    "Barajas": 6.51,
+    "Villa de Vallecas": 6.83,
+    "Retiro": 6.91,
+    "Arganzuela": 7.18,
+    "Moratalaz": 7.61,
+    "Chamberí": 7.61,
+    "San Blas-Canillejas": 7.74,
+    "Chamartín": 7.81,
+    "Fuencarral-El Pardo": 7.84,
+    "Hortaleza": 7.95,
+    "Salamanca": 8.11,
+    "Ciudad Lineal": 8.18,
+    "Villaverde": 8.47,
+    "Centro": 8.64,
+    "Moncloa-Aravaca": 8.7,
+    "Latina": 8.74,
+    "Tetuán": 8.78,
+    "Carabanchel": 9.46,
+    "Puente de Vallecas": 9.52,
+    "Usera": 10.06
+  }
+}

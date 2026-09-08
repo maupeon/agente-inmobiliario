@@ -1,0 +1,159 @@
+.evidence, .dataVisual, .uncertainty, .concept { font-variant-numeric: tabular-nums; }
+.evidence { padding-top: clamp(1rem, 2.2vh, 1.8rem); }
+.chartToolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0 0 1.2rem; color: var(--stone); font-size: clamp(.8rem, 1vw, 1rem); line-height: 1.45; }
+.chartToolbar p { margin: 0; }
+.chartToolbar strong { color: var(--ink-soft); font-weight: 600; }
+.segmented { display: inline-flex; flex-shrink: 0; padding: .25rem; border-radius: 999px; background: #e8ece4; gap: .2rem; }
+.segmented button, .detailButton { border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft); padding: .58rem .9rem; font-size: .78rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: color 180ms, background-color 180ms, box-shadow 180ms; }
+.segmented button[aria-pressed="true"] { background: var(--paper-raised); color: var(--green); box-shadow: 0 1px 4px #17211d17; }
+.segmented button:active, .detailButton:active, .stepButtons button:active, .conceptLayers button:active { transform: scale(.97); }
+.segmented button:focus-visible, .detailButton:focus-visible, .stepButtons button:focus-visible, .conceptLayers button:focus-visible, .priceSlider:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+.detailButton { border: 1px solid var(--line); }
+.detailButton[aria-pressed="true"] { background: var(--green-light); color: var(--green); }
+.rows { display: grid; gap: clamp(.85rem, 2vh, 1.5rem); }
+.barRow { display: grid; grid-template-columns: minmax(10rem, .75fr) minmax(0, 1.8fr) 5.6rem; align-items: center; gap: 1.25rem; font-size: clamp(.85rem, 1.3vw, 1.3rem); min-width: 0; }
+.barRow > span { font-weight: 500; }
+.barRow > strong { font-size: 1.08em; font-weight: 600; text-align: right; }
+.track { height: clamp(1.6rem, 4.5vh, 3.2rem); position: relative; border-left: 1px solid var(--line); background: repeating-linear-gradient(90deg, transparent 0, transparent calc(var(--grid-step, 25%) - 1px), #17211d0b calc(var(--grid-step, 25%) - 1px), #17211d0b var(--grid-step, 25%)); }
+.fill { display: block; position: absolute; inset: 0; transform-origin: left center; background: #a4b9a7; border-radius: 0 .18rem .18rem 0; }
+.accentRow { color: var(--green); }
+.accentRow .fill { background: var(--green); }
+.modelChart { min-height: min(29vh, 16.5rem); display: flex; flex-direction: column; justify-content: center; }
+.denseChart .rows { gap: .48rem; }
+.denseChart .track { height: clamp(1.2rem, 2.8vh, 2rem); }
+.denseChart .barRow { font-size: clamp(.78rem, 1.15vw, 1.1rem); }
+.axis { position: relative; height: 1rem; color: var(--stone); font-size: .7rem; margin-top: .55rem; }
+.axis > span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.axis > span:first-child { transform: none; }
+.axis > span:last-child { transform: translateX(-100%); }
+.alignedAxis { display: grid; grid-template-columns: minmax(10rem, .75fr) minmax(0, 1.8fr) 5.6rem; gap: 1.25rem; }
+.alignedAxis .axis { grid-column: 2; }
+.insight { display: flex; align-items: flex-start; gap: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; margin-top: 1.1rem; }
+.insightMark { flex-shrink: 0; display: inline-block; font-size: 2.4rem; line-height: 1; color: var(--green); }
+.insight strong { font-size: clamp(1rem, 1.55vw, 1.65rem); font-weight: 600; letter-spacing: -.025em; color: var(--green); }
+.insight p { margin: .4rem 0 0; color: var(--ink-soft); line-height: 1.5; font-size: clamp(.85rem, 1.1vw, 1.12rem); max-width: 76ch; }
+.source { color: var(--stone); font-size: .7rem; line-height: 1.5; margin: .85rem 0 0; }
+.dataVisual { padding-top: 1.4rem; }
+.stepButtons { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
+.stepButtons button { text-align: left; cursor: pointer; border: 0; background: transparent; padding: .8rem .6rem 1rem 0; color: var(--stone); font-size: clamp(.85rem, 1.2vw, 1.25rem); position: relative; }
+.stepButtons button span { font-size: .65rem; display: block; margin-bottom: .5rem; letter-spacing: .12em; }
+.stepButtons button::after { content: ""; position: absolute; bottom: -1px; left: 0; right: 1.5rem; height: 3px; background: var(--green); transform: scaleX(0); transform-origin: left; transition: transform 250ms var(--ease-out); }
+.stepButtons button[aria-pressed="true"] { color: var(--green); font-weight: 600; }
+.stepButtons button[aria-pressed="true"]::after { transform: scaleX(1); }
+.partitionNumbers { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin: 1.8rem 0 1.2rem; }
+.partitionNumbers > div > span { display: block; font-size: .8rem; color: var(--stone); }
+.partitionNumbers strong { display: block; font-size: clamp(2.8rem, 5vw, 5.5rem); font-weight: 580; line-height: 1.1; letter-spacing: -.06em; }
+.partitionNumbers p { max-width: 36ch; color: var(--ink-soft); line-height: 1.5; font-size: clamp(.95rem, 1.4vw, 1.4rem); }
+.partitionTrack { height: clamp(3.3rem, 10vh, 7rem); position: relative; background: #e7d5c9; overflow: hidden; border-radius: .35rem; }
+.validFill { background: #9fc5ab; }
+.trainFill { background: var(--green); border-radius: 0; }
+.partitionLegend { display: flex; flex-wrap: wrap; gap: 1.3rem; margin-top: 1rem; font-size: clamp(.75rem, 1.1vw, 1.1rem); color: var(--ink-soft); }
+.partitionLegend > span { display: inline-flex; align-items: center; gap: .4rem; }
+.partitionLegend i { width: .65rem; height: .65rem; border-radius: 50%; }
+.trainKey { background: var(--green); }.testKey { background: #9fc5ab; }.excludedKey { background: #e7d5c9; border: 1px solid #a85b3866; }
+.dataSteps { display: flex; gap: 2rem; margin-top: 1.8rem; color: var(--green); font-size: .8rem; flex-wrap: wrap; }
+.dataSteps span + span::before { content: "→"; margin-right: 1.5rem; color: var(--stone); }
+.uncertainty { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(2rem, 5vw, 5.5rem); margin-top: 1.5rem; }
+.eyebrow { color: var(--green); font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; margin: 0 0 1rem; }
+.rangePanel, .coveragePanel { min-width: 0; }
+.coveragePanel { padding-left: clamp(1.5rem, 3vw, 3rem); border-left: 1px solid var(--line); }
+.priceReadout { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; }
+.priceReadout > span { color: var(--clay); font-size: .85rem; }
+.priceReadout > span::before { content: ""; display: inline-block; width: .5rem; height: .5rem; background: var(--clay); border-radius: 50%; margin-right: .45rem; }
+.priceReadout output { font-size: clamp(1.6rem, 2.5vw, 2.8rem); font-weight: 580; letter-spacing: -.04em; }
+.intervalDiagram { overflow: hidden; position: relative; height: 7rem; margin-top: 1.25rem; border-bottom: 1px solid var(--line); }
+.intervalBand { position: absolute; left: 40%; width: 20%; top: 3rem; bottom: 0; background: var(--green-light); border: 1px solid #1765472b; border-bottom: 0; border-radius: .3rem .3rem 0 0; }
+.intervalBand > span { position: absolute; top: .9rem; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: .65rem; color: var(--green); }
+.estimateLine { position: absolute; left: 50%; bottom: 0; height: .8rem; width: 2px; background: var(--green); }
+.estimateLine > span { position: absolute; bottom: 4.8rem; left: 0; transform: translateX(-50%); width: 9rem; text-align: center; font-size: .8rem; line-height: 1.4; color: var(--green); }
+.cursorRail { position: absolute; inset: 0; pointer-events: none; }
+.cursorRail i { position: absolute; left: -2px; bottom: -.4rem; width: 4px; height: 2.7rem; border-radius: 2px; background: var(--clay); }
+.cursorRail > span { position: absolute; bottom: 2.4rem; left: 0; transform: translateX(-50%); font-size: .65rem; color: var(--clay); }
+.priceTicks { display: flex; justify-content: space-between; margin-top: .8rem; font-size: .65rem; color: var(--stone); }
+.sliderLabel { display: flex; justify-content: space-between; margin-top: 1.2rem; color: var(--green); font-size: .72rem; }
+.priceSlider { width: 100%; margin: .3rem 0; height: 1.5rem; cursor: ew-resize; accent-color: var(--green); }
+.rangeVerdict { color: var(--ink-soft); font-size: .85rem; line-height: 1.5; min-height: 2.6rem; margin: .5rem 0; }
+.rangeVerdict strong { color: var(--ink); }
+.coverageReadout { margin: 1.4rem 0 1.8rem; }
+.coverageReadout strong { display: block; font-size: clamp(2.8rem, 5vw, 5rem); font-weight: 580; letter-spacing: -.06em; line-height: 1.08; color: var(--green); }
+.coverageReadout > span { font-size: .85rem; color: var(--stone); }
+.coverageTrack { height: 2rem; background: #e5e9e1; position: relative; }
+.coverageTrack .fill { background: var(--green); }
+.targetLine { position: absolute; left: 90%; top: -.5rem; bottom: -.5rem; width: 2px; background: var(--clay); }
+.targetLine > span { position: absolute; bottom: 2.5rem; right: -.5rem; white-space: nowrap; color: var(--clay); font-size: .67rem; font-style: normal; }
+.coverageExplanation { font-size: clamp(.9rem, 1.25vw, 1.15rem); line-height: 1.5; color: var(--ink-soft); margin: 1.2rem 0 0; }
+.scopePlot { margin-top: 1rem; }
+.scopeRow { display: grid; grid-template-columns: minmax(12rem, .85fr) minmax(0, 1.65fr) 6rem; gap: 1.5rem; align-items: center; margin-bottom: 1rem; }
+.scopeRow > div:first-child strong { font-size: clamp(.9rem, 1.4vw, 1.4rem); font-weight: 550; }
+.scopeRow > div:first-child span { display: block; margin-top: .35rem; color: var(--stone); font-size: .72rem; }
+.scopeRow > strong { font-size: clamp(1.2rem, 2.1vw, 2rem); font-weight: 580; text-align: right; letter-spacing: -.04em; }
+.scopeTrack { position: relative; height: 1.6rem; background: #17211d08; }
+.scopeTrack .fill { background: var(--green); }
+.warningRow { color: var(--clay); }
+.warningRow .fill { background: var(--clay); }
+.scopeAxis { display: grid; grid-template-columns: minmax(12rem, .85fr) minmax(0, 1.65fr) 6rem; gap: 1.5rem; }
+.scopeAxis .axis { grid-column: 2; }
+.foldPoint { position: absolute; width: .5rem; height: .5rem; border: 1px solid var(--clay); background: var(--paper); border-radius: 50%; transform: translateX(-50%); }
+.foldNote { color: var(--clay); font-size: .72rem; line-height: 1.5; margin: .8rem 0; }
+.concept { display: grid; grid-template-columns: 1.5fr 1fr; gap: 3rem; align-items: center; margin-top: .8rem; }
+.conceptImage { position: relative; min-width: 0; overflow: hidden; }
+.conceptImage > img { width: 100%; height: auto; display: block; mix-blend-mode: multiply; }
+.conceptCredit { position: absolute; bottom: .6rem; left: 1rem; font-size: .6rem; color: var(--stone); }
+.conceptPin { position: absolute; inset: 0; transform: translate(var(--pin-x),var(--pin-y)); pointer-events: none; transition: transform 400ms var(--ease-out); }
+.conceptPin span { transform: translate(-50%,-50%); display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border: 1px solid #fff9; border-radius: 50%; background: #176547ef; color: var(--paper); font-size: .8rem; box-shadow: 0 5px 20px #17211d30; }
+.conceptLayers { min-width: 0; }
+.conceptLayers > button { display: flex; gap: 1rem; align-items: baseline; text-align: left; width: 100%; padding: .9rem 0; background: none; border: 0; border-top: 1px solid var(--line); color: var(--stone); cursor: pointer; }
+.conceptLayers > button > span { font-size: .7rem; }
+.conceptLayers strong { display: block; font-size: clamp(1.2rem, 2vw, 2.15rem); letter-spacing: -.04em; font-weight: 580; }
+.conceptLayers button p { margin: .45rem 0 0; font-size: clamp(.8rem, 1.05vw, 1.05rem); line-height: 1.45; }
+.conceptLayers button[aria-pressed="true"] { color: var(--green); border-color: var(--green); }
+.conceptGoal { margin: 1.5rem 0 0; color: var(--ink-soft); font-size: .9rem; line-height: 1.5; }
+.conceptGoal strong { font-size: 1.05rem; margin-top: .3rem; }
+[data-active="true"] .conceptImage > img { animation: materialize 700ms cubic-bezier(.16,1,.3,1) both; }
+@keyframes materialize { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+@media (max-width: 900px) {
+  .chartToolbar { flex-wrap: wrap; }
+  .uncertainty { grid-template-columns: 1fr; gap: 2rem; }
+  .coveragePanel { border-left: 0; border-top: 1px solid var(--line); padding: 1.5rem 0 0; }
+  .coverageReadout { display: flex; align-items: baseline; gap: 1rem; }
+  .concept { grid-template-columns: 1fr; gap: .5rem; }
+  .conceptImage { max-width: 38rem; margin: auto; }
+  .conceptLayers > button { padding: .8rem 0; }
+}
+@media (max-width: 640px) {
+  .barRow, .scopeRow { grid-template-columns: minmax(0, 1fr) 5rem; gap: .6rem; }
+  .barRow .track, .scopeTrack { grid-column: 1 / -1; grid-row: 2; }
+  .barRow > strong, .scopeRow > strong { grid-column: 2; grid-row: 1; }
+  .track { height: 1.4rem; }
+  .alignedAxis, .scopeAxis { display: block; }
+  .modelChart { min-height: 0; margin-top: 1.4rem; }
+  .denseChart .track { height: .75rem; }
+  .denseChart .rows { gap: .8rem; }
+  .segmented { max-width: 100%; }
+  .segmented button { padding: .6rem .72rem; font-size: .72rem; }
+  .insight { gap: .7rem; }
+  .partitionNumbers { flex-direction: column; align-items: flex-start; gap: .2rem; margin: 1.2rem 0; }
+  .partitionNumbers p { margin: .5rem 0; }
+  .partitionLegend { gap: .7rem; }
+  .stepButtons button { font-size: .8rem; }
+  .stepButtons button::after { right: .5rem; }
+  .dataSteps { gap: .6rem 1rem; }
+  .dataSteps span + span::before { margin-right: .6rem; }
+  .scopeRow { margin-bottom: 1.6rem; }
+  .scopeTrack { height: 1.4rem; }
+  .concept { margin-top: 1rem; }
+  .conceptCredit { bottom: .1rem; font-size: .55rem; }
+  .source { font-size: .68rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .conceptImage > img { animation: none !important; }
+  .stepButtons button::after, .segmented button, .detailButton, .conceptPin { transition: none; }
+  .segmented button:active, .detailButton:active, .stepButtons button:active, .conceptLayers button:active { transform: none; }
+}
+@media (prefers-contrast: more) {
+  .source, .axis, .chartToolbar, .eyebrow, .priceTicks, .scopeRow > div:first-child span { color: var(--ink); }
+  .track, .scopeTrack, .coverageTrack { outline: 1px solid var(--ink); }
+  .segmented button[aria-pressed="true"] { outline: 2px solid var(--green); }
+}
+[data-motion="reduced"] .conceptImage > img { animation: none !important; }
+[data-motion="reduced"] .conceptPin, [data-motion="reduced"] .stepButtons button::after { transition: none; }
