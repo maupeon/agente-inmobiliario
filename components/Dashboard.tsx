@@ -29,6 +29,7 @@ import type {
   PropertyEnrichment,
   PropertyRecommendation,
   PropertyValuation,
+  UserProfile,
 } from "@/types";
 import { SiteNav } from "./SiteNav";
 import { Onboarding } from "./Onboarding";
@@ -92,8 +93,12 @@ export function Dashboard() {
   const [recIntro, setRecIntro] = useState<string | null>(null);
   const [recLoading, setRecLoading] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
-  const [recRetry, setRecRetry] = useState(0);
-  const recRequestRef = useRef(0);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [pendingSearch, setPendingSearch] = useState<{
+    filters: FilterForm;
+    profile: UserProfile | null;
+  } | null>(null);
+  const recControllerRef = useRef<AbortController | null>(null);
   const [form, setForm] = useState<FilterForm>({
     zona: launchZone,
     operacion: launchOperation,
@@ -136,72 +141,62 @@ export function Dashboard() {
     return null;
   }, [profile]);
 
-  const recProfileKey = useMemo(() => JSON.stringify(profile ?? null), [profile]);
   const enrichProfileKey = useMemo(
     () => JSON.stringify(profile?.trabajo ?? null),
     [profile]
   );
-  const appliedKey = JSON.stringify(applied);
 
-  // ── "Para ti": busca + rankea desde el perfil/filtros ──
-  useEffect(() => {
-    const requestId = ++recRequestRef.current;
-    if (source !== "para_ti") {
-      setRecLoading(false);
-      return;
-    }
-    const zona = applied.zona.trim();
-    if (!zona) {
-      setRecs([]);
-      setRecLoading(false);
-      return;
-    }
+  // Montar, cambiar de pestaña o guardar el perfil nunca inicia una búsqueda.
+  useEffect(() => () => recControllerRef.current?.abort(), []);
+
+  function prepareSearch(filters: FilterForm) {
+    if (recControllerRef.current || !filters.zona.trim()) return;
+    setPendingSearch({ filters: { ...filters, zona: filters.zona.trim() }, profile });
+  }
+
+  async function confirmSearch() {
+    if (!pendingSearch || recControllerRef.current) return;
+    const { filters, profile: searchProfile } = pendingSearch;
     const ctrl = new AbortController();
+    recControllerRef.current = ctrl;
+    setPendingSearch(null);
+    setApplied(filters);
+    setHasSearched(true);
+    setRecs([]);
+    setRecIntro(null);
+    setSelectedCode(null);
     setRecLoading(true);
     setRecError(null);
-    fetch("/api/recommend", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        profile,
-        zona,
-        operacion: applied.operacion,
-        precioMax: applied.precioMax ? Number(applied.precioMax) : undefined,
-        habitaciones: applied.habitaciones ? Number(applied.habitaciones) : undefined,
-      }),
-      signal: ctrl.signal,
-    })
-      .then(async (r) => {
-        const data = (await r.json().catch(() => ({}))) as RecommendResponse;
-        if (!r.ok) {
-          throw new Error(
-            data.error ?? "No he podido contactar con el servicio de recomendaciones."
-          );
-        }
-        return data;
-      })
-      .then((d) => {
-        if (ctrl.signal.aborted || requestId !== recRequestRef.current) return;
-        setRecs(d.items ?? []);
-        setRecIntro(d.intro ?? null);
-      })
-      .catch((error: unknown) => {
-        if (!ctrl.signal.aborted) {
-          setRecError(
-            error instanceof Error
-              ? error.message
-              : "No he podido contactar con el servicio de recomendaciones."
-          );
-        }
-      })
-      .finally(() => {
-        if (!ctrl.signal.aborted && requestId === recRequestRef.current) {
-          setRecLoading(false);
-        }
+    try {
+      const response = await fetch("/api/recommend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          confirmSearch: true,
+          profile: searchProfile,
+          zona: filters.zona,
+          operacion: filters.operacion,
+          precioMax: filters.precioMax ? Number(filters.precioMax) : null,
+          habitaciones: filters.habitaciones ? Number(filters.habitaciones) : null,
+        }),
+        signal: ctrl.signal,
       });
-    return () => ctrl.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appliedKey, recProfileKey, recRetry, source]);
+      const data = (await response.json().catch(() => ({}))) as RecommendResponse;
+      if (!response.ok) {
+        throw new Error(data.error ?? "No he podido contactar con el servicio de recomendaciones.");
+      }
+      if (ctrl.signal.aborted) return;
+      setRecs(data.items ?? []);
+      setRecIntro(data.intro ?? null);
+    } catch (error: unknown) {
+      if (!ctrl.signal.aborted) {
+        setRecError(error instanceof Error ? error.message : "No he podido contactar con el servicio de recomendaciones.");
+      }
+    } finally {
+      if (recControllerRef.current === ctrl) recControllerRef.current = null;
+      if (!ctrl.signal.aborted) setRecLoading(false);
+    }
+  }
 
   // ── Favoritos / búsqueda: enriquece lo que falta ──
   const enrichList = useMemo(
@@ -276,7 +271,7 @@ export function Dashboard() {
       ?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
   }, [selectedCode]);
 
-  // El perfil personaliza, pero una búsqueda lanzada desde la home entra directa.
+  // La home y el perfil solo rellenan filtros; buscar requiere confirmación.
   if (loaded && ((!profile && !skipped && !hasLaunchSearch) || editingProfile)) {
     return (
       <>
@@ -297,7 +292,6 @@ export function Dashboard() {
                   : "",
               };
               setForm(nextForm);
-              setApplied(nextForm);
               setEditingProfile(false);
             }}
             onSkip={() => {
@@ -316,11 +310,12 @@ export function Dashboard() {
     busqueda: lastSearch.length,
   };
   const busy = source === "para_ti" ? recLoading : enriching;
-  const operationLabel = applied.operacion === "venta" ? "Comprar" : "Alquilar";
+  const displayedFilters = hasSearched ? applied : form;
+  const operationLabel = displayedFilters.operacion === "venta" ? "Comprar" : "Alquilar";
   const heading =
     source === "para_ti"
-      ? applied.zona
-        ? `${operationLabel} en ${applied.zona}`
+      ? displayedFilters.zona
+        ? `${operationLabel} en ${displayedFilters.zona}`
         : "Encuentra tu próxima vivienda"
       : source === "favoritos"
       ? "Viviendas guardadas"
@@ -397,13 +392,25 @@ export function Dashboard() {
           </div>
         </div>
 
+        <p className="mt-4 text-xs leading-relaxed text-stone-600">
+          <strong>Demo compartida del TFM.</strong> Los inmuebles que guardes se almacenan en Supabase y aparecen para todos los visitantes.
+        </p>
+        {favs.error && <p role="alert" className="mt-2 text-sm text-rose-700">Guardados: {favs.error} <button type="button" className="min-h-11 underline" onClick={() => { void favs.refresh(); }}>Actualizar guardados</button></p>}
+        {favs.saving && <p role="status" className="mt-2 text-xs text-stone-600">Guardando cambio en Supabase…</p>}
+
         {source === "para_ti" && (
-          <FilterBar
-            form={form}
-            setForm={setForm}
-            onApply={() => setApplied(form)}
-            busy={recLoading}
-          />
+          <>
+            <FilterBar
+              form={form}
+              setForm={setForm}
+              onApply={() => prepareSearch(form)}
+              busy={recLoading}
+              ready={loaded}
+            />
+            <p className="mt-2 text-xs leading-relaxed text-stone-600">
+              Entrar o cambiar filtros no consume búsquedas. Te pediremos confirmación antes de consultar Idealista.
+            </p>
+          </>
         )}
 
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -470,7 +477,7 @@ export function Dashboard() {
             </div>
             <button
               type="button"
-              onClick={() => setRecRetry((value) => value + 1)}
+              onClick={() => prepareSearch(applied)}
               className="pressable inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-hairline-strong bg-white px-4 font-semibold text-ink shadow-nudge"
             >
               <ArrowClockwise aria-hidden size={17} weight="bold" />
@@ -478,7 +485,7 @@ export function Dashboard() {
             </button>
           </div>
         ) : items.length === 0 ? (
-          <EmptyPanel source={source} loading={busy} hasZona={!!applied.zona.trim()} />
+          <EmptyPanel source={source} loading={busy} hasZona={!!displayedFilters.zona.trim()} hasSearched={hasSearched} />
         ) : (
           <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
             <div className={cn(mobileView === "list" ? "hidden lg:block" : "block")}>
@@ -526,6 +533,13 @@ export function Dashboard() {
         )}
 
       </main>
+      {pendingSearch && (
+        <SearchConfirmation
+          filters={pendingSearch.filters}
+          onCancel={() => setPendingSearch(null)}
+          onConfirm={confirmSearch}
+        />
+      )}
       <PropertyDetailDrawer
         item={detailItem}
         isFavorite={detailItem ? favs.isFavorite(detailItem.property.propertyCode) : false}
@@ -536,16 +550,76 @@ export function Dashboard() {
   );
 }
 
+function SearchConfirmation({
+  filters,
+  onCancel,
+  onConfirm,
+}: {
+  filters: FilterForm;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    dialog?.showModal();
+    return () => dialog?.close();
+  }, []);
+
+  function cancel() {
+    dialogRef.current?.close();
+    onCancel();
+  }
+
+  return (
+    <dialog
+      ref={dialogRef}
+      onCancel={cancel}
+      aria-labelledby="confirm-search-title"
+      aria-describedby="confirm-search-description"
+      className="fixed inset-0 m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl border border-hairline bg-paper-50 p-6 text-ink shadow-lift backdrop:bg-ink/40"
+    >
+      <h2 id="confirm-search-title" className="text-xl font-semibold tracking-tight">
+        Confirmar búsqueda
+      </h2>
+      <p className="mt-3 font-medium">
+        {filters.operacion === "venta" ? "Comprar" : "Alquilar"} en {filters.zona}
+      </p>
+      <p className="mt-1 text-sm text-stone-600">
+        {filters.precioMax ? `Hasta ${formatEUR(Number(filters.precioMax))}` : "Sin precio máximo"}
+        {filters.operacion === "alquiler" && filters.precioMax ? "/mes" : ""}
+        {filters.habitaciones ? ` · ${filters.habitaciones} o más habitaciones` : " · Cualquier número de habitaciones"}
+      </p>
+      <p id="confirm-search-description" className="mt-4 text-sm leading-relaxed text-stone-600">
+        Esta búsqueda puede consumir 1 solicitud de tu cupo mensual de Idealista,
+        incluso si falla. Si hay resultados guardados vigentes, los reutilizamos
+        sin gastar cuota. En modo demo tampoco se consume cuota.
+      </p>
+      <div className="mt-6 flex flex-wrap justify-end gap-2">
+        <button type="button" onClick={cancel} className="pressable min-h-11 rounded-xl border border-hairline px-4 text-sm font-medium">
+          Cancelar
+        </button>
+        <button type="button" onClick={() => { dialogRef.current?.close(); onConfirm(); }} className="pressable min-h-11 rounded-xl bg-ink px-4 text-sm font-medium text-paper hover:bg-ink-700">
+          Confirmar y buscar
+        </button>
+      </div>
+    </dialog>
+  );
+}
+
 function FilterBar({
   form,
   setForm,
   onApply,
   busy,
+  ready,
 }: {
   form: FilterForm;
   setForm: (f: FilterForm) => void;
   onApply: () => void;
   busy: boolean;
+  ready: boolean;
 }) {
   return (
     <form
@@ -625,7 +699,7 @@ function FilterBar({
 
       <button
         type="submit"
-        disabled={busy || !form.zona.trim()}
+        disabled={busy || !ready || !form.zona.trim()}
         className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-ink px-5 text-sm font-medium text-paper shadow-lift hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-45"
       >
         <MagnifyingGlass aria-hidden size={16} weight="bold" className="text-saffron-300" />
@@ -929,10 +1003,12 @@ function EmptyPanel({
   source,
   loading,
   hasZona,
+  hasSearched,
 }: {
   source: Source;
   loading: boolean;
   hasZona: boolean;
+  hasSearched: boolean;
 }) {
   if (loading) {
     return (
@@ -948,7 +1024,9 @@ function EmptyPanel({
 
   const copy =
     source === "para_ti"
-      ? hasZona
+      ? !hasSearched
+        ? "Revisa los filtros y pulsa Buscar. Solo consultaremos Idealista cuando confirmes la búsqueda."
+        : hasZona
         ? "No he encontrado pisos con esos criterios. Prueba a ampliar el presupuesto o la zona."
         : "Dime en qué zona buscas (arriba) y te enseño los pisos que mejor encajan contigo."
       : source === "favoritos"
@@ -963,6 +1041,8 @@ function EmptyPanel({
       <p className="mt-4 text-xl font-semibold tracking-[-0.025em] text-ink">
         {source === "favoritos"
           ? "Aún no has guardado viviendas"
+          : source === "para_ti" && !hasSearched
+          ? "Tu búsqueda está por empezar"
           : hasZona
           ? "No hay resultados con estos filtros"
           : "Empieza con una zona"}

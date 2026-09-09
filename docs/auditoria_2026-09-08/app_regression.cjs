@@ -62,6 +62,37 @@ async function main() {
     assert(c.patrimonioFinalCompra>a.patrimonioFinalCompra);
   });
   const request=body=>new Request('http://localhost/api/test',{method:'POST',body:JSON.stringify(body)});
+  let recommendationsRequested = 0;
+  const recommendApi = loader({
+    '@/lib/rate-limit': { rateLimit: () => ({ ok: true }) },
+    '@/lib/recommend': { recommend: async () => { recommendationsRequested++; return { filters: null, items: [] }; } },
+  })('app/api/recommend/route.ts');
+  for (const confirmSearch of [undefined, false, 'true', 1, null]) {
+    const result = await recommendApi.POST(request({ zona: 'Madrid', confirmSearch }));
+    assert.equal(result.status, 428);
+    assert.equal((await result.json()).code, 'SEARCH_CONFIRMATION_REQUIRED');
+  }
+  check('recommend rejects missing or non-boolean confirmation before searching', () => assert.equal(recommendationsRequested, 0));
+  const confirmed = await recommendApi.POST(request({ zona: 'Madrid', confirmSearch: true }));
+  check('explicitly confirmed recommendation proceeds once', () => {
+    assert.equal(confirmed.status, 200);
+    assert.equal(recommendationsRequested, 1);
+  });
+  let requestedFilters;
+  const filterRecommend = loader({
+    '@/lib/idealista/search': { searchProperties: async (filters) => { requestedFilters = filters; return []; } },
+  })('lib/recommend.ts');
+  const filterProfile = { zona: 'Madrid', operacion: 'alquiler', presupuestoMax: 1500, habitaciones: 2 };
+  await filterRecommend.recommend({ profile: filterProfile, precioMax: null, habitaciones: null });
+  check('cleared confirmed filters do not silently reuse profile limits', () => {
+    assert.equal(requestedFilters.precioMax, undefined);
+    assert.equal(requestedFilters.habitaciones, undefined);
+  });
+  await filterRecommend.recommend({ profile: filterProfile });
+  check('omitted overrides retain profile defaults', () => {
+    assert.equal(requestedFilters.precioMax, 1500);
+    assert.equal(requestedFilters.habitaciones, 2);
+  });
   let cloudWrites=0;
   const chatLoad=loader({'@/lib/agent/loop':{executeAgentLoop:async(_,send)=>send({type:'text',text:'Respuesta local de prueba'})},'@/lib/supabase/conversations':{persistTurn:()=>{cloudWrites++;}},'@/lib/rate-limit':{rateLimit:()=>({ok:true})}});
   for (const body of [null,{messages:'wrong'},{messages:[{role:'user',content:42}]},{messages:[{role:'user',content:'x'.repeat(8001)}]}]) {
@@ -70,8 +101,42 @@ async function main() {
   const r=await chatLoad('app/api/chat/route.ts').POST(request({messages:[{role:'user',content:'Hola'}],conversationId:'local-test'}));
   const events=(await r.text()).trim().split('\n\n').map(x=>JSON.parse(x.slice(6)));
   check('chat id stable and no cloud persistence',()=>{assert.equal(events[0].id,'local-test');assert.equal(cloudWrites,0);assert(events.some(x=>x.type==='text'));});
-  assert.equal((await load('app/api/conversations/route.ts').GET()).status,410); passed++;
-  for(const method of ['GET','POST','DELETE']) {assert.equal((await load('app/api/favorites/route.ts')[method]()).status,410);passed++;}
+  assert.equal((await load('app/api/conversations/route.ts').GET(new Request('http://localhost/api/conversations'))).status,503); passed++;
+  assert.equal((await load('app/api/favorites/route.ts').GET()).status,503); passed++;
+  const demoValidation = load('lib/supabase/demo.ts');
+  const savedDemo = [];
+  const demoLoad = loader({
+    '@/lib/errors': load('lib/errors.ts'),
+    '@/lib/rate-limit': {rateLimit:()=>({ok:true})},
+    '@/lib/supabase/demo': {
+      demoId: demoValidation.demoId, demoMessages: demoValidation.demoMessages,
+      listDemoConversations: async()=>[{id:'demo-one',title:'TFM'}],
+      loadDemoConversation: async()=>savedDemo.at(-1)?.messages??[],
+      saveDemoConversation: async(id,messages)=>savedDemo.push({id,messages}),
+      listDemoFavorites: async()=>[],
+      saveDemoFavorite: async(property)=>savedDemo.push({property}),
+      removeDemoFavorite: async(code)=>savedDemo.push({removed:code}),
+    },
+  });
+  const demoReq=(body,method='POST',headers={})=>new Request('http://localhost/api/demo',{method,headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)});
+  const demoApi=demoLoad('app/api/conversations/route.ts');
+  const demoMessage={id:'message-one',role:'assistant',content:'Demo',createdAt:'2026-09-09T10:00:00Z',properties:[],purchaseValuation:{estado:'no_disponible',propertyCode:'demo'}};
+  assert.equal((await demoApi.POST(demoReq({id:'demo-one',messages:[demoMessage]}))).status,200);
+  check('shared conversation keeps structured cards',()=>assert.equal(savedDemo[0].messages[0].purchaseValuation.estado,'no_disponible'));
+  for(const body of [null,{id:'../private',messages:[demoMessage]},{id:'demo-one',messages:[]},{id:'demo-one',messages:[demoMessage,demoMessage]},{id:'demo-one',messages:[{...demoMessage,role:'system'}]},{id:'demo-one',messages:[{...demoMessage,content:{bad:true}}]},{id:'demo-one',messages:[{...demoMessage,toolCalls:{}}]}]) {
+    assert.equal((await demoApi.POST(demoReq(body))).status,400);passed++;
+  }
+  assert.equal((await demoApi.POST(demoReq({id:'demo-one',messages:[demoMessage]},'POST',{origin:'https://other.invalid'}))).status,403);passed++;
+  assert.equal((await demoApi.POST(demoReq({id:'demo-one',messages:[demoMessage]},'POST',{'content-type':'text/plain'}))).status,415);passed++;
+  check('invalid shared writes never reach the database',()=>assert.equal(savedDemo.length,1));
+  const demoList=await demoApi.GET(new Request('http://localhost/api/conversations'));
+  assert.equal(demoList.headers.get('cache-control'),'no-store, max-age=0');
+  check('shared history is returned without a user id',()=>assert.equal(demoList.status,200));
+  const demoFavApi=demoLoad('app/api/favorites/route.ts');
+  assert.equal((await demoFavApi.POST(demoReq({property:{propertyCode:'bad'}}))).status,400);passed++;
+  assert.equal((await demoFavApi.DELETE(demoReq({},'DELETE'))).status,400);passed++;
+  assert.equal((await demoFavApi.DELETE(demoReq({propertyCode:'demo-one'},'DELETE'))).status,200);passed++;
+  check('shared favorite removal is scoped to a property',()=>assert.equal(savedDemo.at(-1).removed,'demo-one'));
   const store=new Map();const win={dispatchEvent(){}};
   const local=loader({}, {localStorage:{getItem:k=>store.get(k)??null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},window:win,Event:class{}})('lib/local-conversations.ts');
   check('local history retains all cards across reload',()=>{

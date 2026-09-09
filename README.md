@@ -13,7 +13,7 @@ npm run dev
 
 Abre `http://localhost:3000/dashboard`. Los anuncios sintéticos llevan etiqueta Demo, imágenes ilustrativas locales y no enlazan a anuncios inexistentes. `MOCK_IDEALISTA=true` desactiva el proveedor inmobiliario; **no basta por sí solo para desactivar Anthropic**. Para ello utiliza `LLM_ENABLED=false` y `LLM_INSIGHTS_ENABLED=false`.
 
-El chat pagado requiere `ANTHROPIC_API_KEY` y `LLM_ENABLED=true`. El panel, favoritos y calculadora pueden revisarse sin esa clave. El historial y los favoritos permanecen en el perfil del navegador; no hay autenticación ni sincronización entre dispositivos.
+El chat pagado requiere `ANTHROPIC_API_KEY` y `LLM_ENABLED=true`. El panel, favoritos y calculadora pueden revisarse sin esa clave. El historial y los favoritos se guardan en un espacio global de Supabase compartido por todos los visitantes de la demo del TFM, sin registro. El perfil permanece en el navegador. Usa datos de ejemplo en las conversaciones.
 
 ## Variables
 
@@ -25,7 +25,7 @@ El chat pagado requiere `ANTHROPIC_API_KEY` y `LLM_ENABLED=true`. El panel, favo
 | `LLM_ENABLED` | `false` pausa el chat pagado. |
 | `LLM_INSIGHTS_ENABLED` | Narración adicional opcional; desactivada salvo `true`. |
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | Chat; modelo predeterminado `claude-opus-4-6`. |
-| `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Caché de mercado/búsquedas y cuota técnica; la clave de servicio nunca va al navegador. |
+| `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Historial y favoritos compartidos, caché y cuota técnica; la clave de servicio nunca va al navegador. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No es necesaria para historial o favoritos de esta demo. |
 | `VALORACION_URL` / `VALORACION_TOKEN` | Backend Python; por ejemplo `http://127.0.0.1:8018`. |
 | `VALORACION_TIMEOUT_MS` | Espera del modelo, 10 s por defecto y máximo 20 s. |
@@ -43,7 +43,13 @@ La migración activa RLS, retira acceso público a tablas privadas, crea caché 
 
 **Sin esa función o con un fallo de verificación, las búsquedas nuevas se bloquean.** No se sustituye por un contador en memoria. Los mocks y resultados cacheados siguen funcionando. `supabase/schema.sql` incluye la configuración para una instalación nueva. Estos archivos locales no prueban que la migración ya esté aplicada en el entorno remoto.
 
-Las rutas `/api/conversations` y `/api/favorites` están cerradas (410). Los datos antiguos de Supabase no se eliminan automáticamente; revisar su protección y conservación antes del despliegue.
+La demo global usa `supabase/migrations/20260909_shared_demo_storage.sql`: crea `demo_conversations`, `demo_messages`, `demo_favorites` y la función transaccional `save_demo_conversation`. Las API `/api/conversations` y `/api/favorites` acceden exclusivamente a este espacio compartido. Las tablas antiguas siguen cerradas y no se importan datos locales automáticamente.
+
+Todos los visitantes ven y pueden continuar el historial común y añadir o retirar favoritos. Cada mensaje conserva texto, anuncios y tarjetas como JSON; los guardados repetidos no duplican mensajes ni borran los anteriores. Se muestran las últimas 50 conversaciones, los últimos 200 mensajes de cada conversación y los últimos 100 favoritos. La interfaz sincroniza listas cada 30 s y al recuperar el foco, y avisa de errores de persistencia. Sin Supabase operativo se muestra el error: no se presenta un guardado local como si estuviera en la base de datos. El chat envía el guardado al finalizar o detener cada respuesta; no es una grabación continua del stream.
+
+Las tablas de demo mantienen RLS y acceso SQL solo para `service_role`; el acceso global intencional se ofrece a través de las API, con límites de cuerpo, validación y rate limit para escrituras. Este modo no proporciona privacidad entre visitantes y no sustituye un sistema de cuentas.
+
+El panel no busca al entrar, cargar el perfil, cambiar filtros o volver a Resultados. «Buscar» abre un resumen y solo «Confirmar y buscar» envía la petición. `/api/recommend` exige `confirmSearch: true` (428 si falta); es una protección contra llamadas accidentales, no autenticación. Reintentar requiere una nueva confirmación. La caché de 24 horas y la reserva mensual siguen aplicándose. El chat solo inicia herramientas tras enviar un mensaje y conserva su flujo propio.
 
 ## Evidencia y fuentes
 
@@ -84,10 +90,11 @@ El chat tiene hasta 3 rondas, 4 herramientas y 1.600 tokens de salida por ronda.
 - `app/api/`: chat SSE, recomendaciones, enriquecimiento y proxy de valoración.
 - `lib/agent/`: prompt y herramientas, incluida `valorar_vivienda`.
 - `lib/valoracion/`: contrato común con el backend de `../memoria/servicio/`.
-- `lib/local-conversations.ts`, `hooks/useFavorites.ts`: persistencia local.
+- `lib/shared-demo.ts`, `lib/supabase/demo.ts`: persistencia compartida en Supabase.
+- `lib/local-conversations.ts`: utilidades del historial local anterior, sin importación automática.
 - `lib/idealista/`: proveedor, mocks, caché y cuota.
 - `lib/market/`: fuentes, procedencia y respaldos explícitos.
 - `lib/finance/rent-vs-buy.ts`: simulación, ganador al horizonte final y exención fiscal como supuesto separado.
 - `docs/auditoria_2026-09-08/cambios_app.md`: cambios y límites de verificación.
 
-No se ha activado ningún pago, ejecutado una migración remota ni desplegado esta revisión automáticamente. El despliegue debe coordinar app, backend y artefactos comprobados.
+La revisión global del TFM requiere la migración de demo compartida además de la migración de cuota. No activa pagos ni despliega la aplicación automáticamente. El despliegue debe coordinar app, backend y artefactos comprobados.

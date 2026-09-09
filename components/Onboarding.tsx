@@ -166,7 +166,7 @@ export function Onboarding({
           onClick={step === 0 ? onSkip : finish}
           className="pressable min-h-11 rounded-lg px-3 text-sm font-medium text-stone-600 hover:bg-paper-200 hover:text-ink"
         >
-          {step === 0 ? "Ir a búsqueda rápida" : "Ver resultados ahora"}
+          {step === 0 ? "Ir a búsqueda rápida" : "Guardar y revisar búsqueda"}
         </button>
       </div>
 
@@ -200,7 +200,7 @@ export function Onboarding({
             <Step
               eyebrow="Tu búsqueda"
               title="Empecemos por lo imprescindible"
-              subtitle="Puedes ver resultados desde este paso. El resto solo sirve para personalizar el orden."
+              subtitle="Puedes preparar la búsqueda desde este paso. Antes de consultar Idealista, revisarás los filtros y confirmarás."
             >
               <ChoiceGroup label="¿Quieres alquilar o comprar?">
                 <Segment active={operation === "alquiler"} onClick={() => setOperation("alquiler")}>
@@ -401,7 +401,7 @@ export function Onboarding({
                   onClick={finish}
                   className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-ink px-5 font-medium text-paper shadow-lift hover:bg-ink-700"
                 >
-                  Ver viviendas
+                  Preparar búsqueda
                   <ArrowRight aria-hidden size={16} weight="bold" className="text-saffron-300" />
                 </button>
               </>
@@ -411,7 +411,7 @@ export function Onboarding({
                 onClick={finish}
                 className="pressable inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-ink px-5 font-medium text-paper shadow-lift hover:bg-ink-700"
               >
-                Ver mis recomendaciones
+                Guardar y revisar búsqueda
                 <ArrowRight aria-hidden size={16} weight="bold" className="text-saffron-300" />
               </button>
             ) : (

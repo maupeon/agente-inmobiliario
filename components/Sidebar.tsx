@@ -137,7 +137,7 @@ export function Sidebar({
         </Link>
 
         <div className="mt-5 flex-1 space-y-5 overflow-y-auto pr-1">
-          <SidebarSection title="Conversaciones" count={conversations.length}>
+          <SidebarSection title="Historial compartido" count={conversations.length}>
             {conversations.length === 0 ? (
               <p className="rounded-xl border border-dashed border-hairline-strong px-3 py-4 text-sm leading-relaxed text-stone">
                 Tus conversaciones aparecerán aquí cuando empieces a preguntar.
@@ -157,7 +157,7 @@ export function Sidebar({
             )}
           </SidebarSection>
 
-          <SidebarSection title="Guardados" count={favorites.length}>
+          <SidebarSection title="Guardados compartidos" count={favorites.length}>
             <FavoritesList favorites={favorites} onRemove={onRemoveFavorite} />
           </SidebarSection>
         </div>

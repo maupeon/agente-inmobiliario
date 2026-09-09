@@ -12,7 +12,7 @@ import { EmptyState } from "./EmptyState";
 import { IdealistaUsageBadge } from "./IdealistaUsageBadge";
 import { Onboarding } from "./Onboarding";
 import { Logo } from "./ui/Logo";
-import { listLocalConversations, clearLocalConversations, CONVERSATIONS_CHANGED } from "@/lib/local-conversations";
+import { listSharedConversations, DEMO_CONVERSATIONS_CHANGED } from "@/lib/shared-demo";
 import type { Conversation } from "@/types";
 
 export function ChatInterface() {
@@ -22,6 +22,8 @@ export function ChatInterface() {
   const [input, setInput] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyRetry, setHistoryRetry] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [skippedOnboarding, setSkippedOnboarding] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -35,15 +37,28 @@ export function ChatInterface() {
   }, [chat.messages, chat.agentState]);
 
   useEffect(() => {
-    const sync = () => setConversations(listLocalConversations());
-    sync();
-    window.addEventListener(CONVERSATIONS_CHANGED, sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener(CONVERSATIONS_CHANGED, sync);
-      window.removeEventListener("storage", sync);
+    let alive = true;
+    let requestId = 0;
+    const sync = async () => {
+      const request = ++requestId;
+      try {
+        const rows = await listSharedConversations();
+        if (alive && request === requestId) { setConversations(rows); setHistoryError(null); }
+      } catch (e) {
+        if (alive && request === requestId) setHistoryError(e instanceof Error ? e.message : "No se pudo cargar el historial compartido.");
+      }
     };
-  }, [chat.conversationId]);
+    sync();
+    window.addEventListener(DEMO_CONVERSATIONS_CHANGED, sync);
+    window.addEventListener("focus", sync);
+    const timer = setInterval(sync, 30_000);
+    return () => {
+      alive = false;
+      window.removeEventListener(DEMO_CONVERSATIONS_CHANGED, sync);
+      window.removeEventListener("focus", sync);
+      clearInterval(timer);
+    };
+  }, [historyRetry]);
 
   const submit = () => {
     const text = input;
@@ -110,9 +125,14 @@ export function ChatInterface() {
         >
           <div className="mx-auto w-full max-w-[960px] px-5 pb-32 pt-12 sm:px-8 lg:px-12 lg:pt-20">
             <div className="mb-6 text-xs leading-relaxed text-stone-600">
-              Historial, perfil y favoritos se guardan en este navegador. Al enviar, el mensaje y el perfil se procesan con Anthropic; las búsquedas consultan Idealista. Evita datos sensibles. En un equipo compartido, borra los datos al terminar.
-              {conversations.length > 0 && <button type="button" className="ml-2 min-h-11 underline" onClick={() => { chat.reset(); clearLocalConversations(); setConversations([]); }}>Borrar historial</button>}
+              <strong>Demo compartida del TFM.</strong> Las conversaciones y los inmuebles guardados se almacenan en Supabase y son visibles para todos los visitantes. Usa datos de ejemplo. El perfil permanece en este navegador; al enviar un mensaje se procesa junto con él en Anthropic.
             </div>
+            {historyError && <p role="alert" className="mb-4 text-sm text-rose-700">Historial: {historyError} <button type="button" className="min-h-11 underline" onClick={() => setHistoryRetry((value) => value + 1)}>Reintentar carga</button></p>}
+            {favs.error && <p role="alert" className="mb-4 text-sm text-rose-700">Guardados: {favs.error} <button type="button" className="min-h-11 underline" onClick={() => { void favs.refresh(); }}>Actualizar guardados</button></p>}
+            {favs.saving && <p role="status" className="mb-4 text-xs text-stone-600">Guardando inmueble en Supabase…</p>}
+            {chat.storageState === "saving" && <p role="status" className="mb-4 text-xs text-stone-600">Guardando conversación en Supabase…</p>}
+            {chat.storageState === "saved" && <p role="status" className="mb-4 text-xs text-stone-600">Conversación guardada en Supabase · compartida</p>}
+            {chat.storageError && <p role="alert" className="mb-4 text-sm text-rose-700">{chat.storageError} <button type="button" className="min-h-11 underline" onClick={chat.retrySave}>Reintentar guardado</button></p>}
             {onboardingVisible ? (
               <Onboarding
                 initial={profile}

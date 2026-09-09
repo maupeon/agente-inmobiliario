@@ -106,7 +106,7 @@ const SCENES: SceneDefinition[] = [
     kicker: "Del modelo al producto",
     title: "Una pregunta activa toda la cadena.",
     target: 449,
-    note: "Panel y chat usan el mismo backend de valoración de oferta. El servicio devuelve estado, versión, intervalo y SHAP opcional. SSE permite respuesta progresiva. Historial y favoritos viven en el navegador; Supabase solo conserva caché y cuota técnica. Si una fuente falla o falta soporte, se informa y se evita presentar respaldo ilustrativo como evidencia.",
+    note: "Panel y chat usan el mismo backend de valoración de oferta. El servicio devuelve estado, versión, intervalo y SHAP opcional. SSE permite respuesta progresiva. La demo del TFM guarda un historial y unos favoritos globales en Supabase, compartidos entre visitantes. El perfil permanece en el navegador; Supabase también conserva caché y cuota técnica. Si una fuente falla o falta soporte, se informa y se evita presentar respaldo ilustrativo como evidencia.",
   },
   {
     kicker: "Roadmap",

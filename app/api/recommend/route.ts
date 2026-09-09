@@ -9,11 +9,12 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 interface RecommendRequestBody {
+  confirmSearch?: boolean;
   profile?: UserProfile | null;
   zona?: string;
   operacion?: "venta" | "alquiler";
-  precioMax?: number;
-  habitaciones?: number;
+  precioMax?: number | null;
+  habitaciones?: number | null;
 }
 
 function getIp(req: NextRequest): string {
@@ -36,10 +37,18 @@ export async function POST(req: NextRequest) {
   let body: RecommendRequestBody;
   try {
     const raw = await readJson(req, 12_000);
-    if (!isRecord(raw) || (raw.zona !== undefined && (typeof raw.zona !== "string" || raw.zona.length > 200)) || (raw.operacion !== undefined && !["venta", "alquiler"].includes(String(raw.operacion))) || ["precioMax", "habitaciones"].some((k) => raw[k] !== undefined && !Number.isFinite(raw[k]))) return Response.json({ error: "Filtros inválidos." }, { status: 400 });
+    if (!isRecord(raw) || (raw.zona !== undefined && (typeof raw.zona !== "string" || raw.zona.length > 200)) || (raw.operacion !== undefined && !["venta", "alquiler"].includes(String(raw.operacion))) || ["precioMax", "habitaciones"].some((k) => raw[k] != null && !Number.isFinite(raw[k]))) return Response.json({ error: "Filtros inválidos." }, { status: 400 });
     body = { ...raw, profile: validatedProfile(raw.profile) } as RecommendRequestBody;
   } catch {
     return Response.json({ error: "Petición inválida." }, { status: 400 });
+  }
+
+  // Protección adicional frente a clientes que todavía busquen al montar.
+  if (body.confirmSearch !== true) {
+    return Response.json(
+      { code: "SEARCH_CONFIRMATION_REQUIRED", error: "Confirma la búsqueda antes de consultar Idealista." },
+      { status: 428 }
+    );
   }
 
   try {

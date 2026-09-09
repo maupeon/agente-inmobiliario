@@ -1,38 +1,71 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { demoRequest, DEMO_FAVORITES_CHANGED } from "@/lib/shared-demo";
 import type { Property } from "@/types";
-const KEY = "habitia.favorites.v1";
-const LEGACY_KEY = "agente-inmobiliario.favorites.v1";
-const CHANGED = "habitia-favorites-changed";
-function read(): Property[] {
-  try {
-    const value: unknown = JSON.parse(localStorage.getItem(KEY) ?? localStorage.getItem(LEGACY_KEY) ?? "[]");
-    return Array.isArray(value) ? value.filter((p) => p && typeof p.propertyCode === "string") : [];
-  } catch { return []; }
-}
-/** Favoritos de este perfil del navegador; no se sincronizan al servidor. */
+/** Lista global de la demo: se actualiza al guardar, al volver y cada 30 s. */
 export function useFavorites() {
   const [favorites, setFavorites] = useState<Property[]>([]);
   const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    const sync = () => setFavorites(read());
-    sync(); setLoaded(true);
-    window.addEventListener("storage", sync);
-    window.addEventListener(CHANGED, sync);
-    return () => { window.removeEventListener("storage", sync); window.removeEventListener(CHANGED, sync); };
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const mutationRef = useRef(false);
+  const favoritesRef = useRef<Property[]>([]);
+  const requestRef = useRef(0);
+  const alive = useRef(false);
+  const refresh = useCallback(async () => {
+    if (mutationRef.current) return;
+    const request = ++requestRef.current;
+    try {
+      const data = await demoRequest<{ favorites: Property[] }>("/api/favorites");
+      if (!alive.current || request !== requestRef.current) return;
+      favoritesRef.current = data.favorites;
+      setFavorites(data.favorites);
+      setError(null);
+    } catch (e) {
+      if (alive.current && request === requestRef.current) setError(e instanceof Error ? e.message : "No se pudieron cargar los favoritos compartidos.");
+    } finally {
+      if (alive.current && request === requestRef.current) setLoaded(true);
+    }
   }, []);
+  useEffect(() => {
+    alive.current = true;
+    const sync = () => { void refresh(); };
+    sync();
+    window.addEventListener("focus", sync);
+    window.addEventListener(DEMO_FAVORITES_CHANGED, sync);
+    const timer = setInterval(sync, 30_000);
+    return () => {
+      alive.current = false;
+      requestRef.current++;
+      window.removeEventListener("focus", sync);
+      window.removeEventListener(DEMO_FAVORITES_CHANGED, sync);
+      clearInterval(timer);
+    };
+  }, [refresh]);
   const isFavorite = useCallback((code: string) => favorites.some((p) => p.propertyCode === code), [favorites]);
   const toggleFavorite = useCallback(async (property: Property) => {
-    const current = read();
-    const next = current.some((p) => p.propertyCode === property.propertyCode)
-      ? current.filter((p) => p.propertyCode !== property.propertyCode)
-      : [property, ...current].slice(0, 100);
-    setFavorites(next);
+    if (mutationRef.current) return;
+    mutationRef.current = true;
+    requestRef.current++;
+    setSaving(true);
+    setError(null);
+    const remove = favoritesRef.current.some((p) => p.propertyCode === property.propertyCode);
     try {
-      localStorage.setItem(KEY, JSON.stringify(next));
-      localStorage.removeItem(LEGACY_KEY);
-      window.dispatchEvent(new Event(CHANGED));
-    } catch { /* Permanece en memoria si el navegador bloquea almacenamiento. */ }
+      await demoRequest("/api/favorites", {
+        method: remove ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(remove ? { propertyCode: property.propertyCode } : { property }),
+      });
+      const next = remove ? favoritesRef.current.filter((p) => p.propertyCode !== property.propertyCode) : [property, ...favoritesRef.current.filter((p) => p.propertyCode !== property.propertyCode)].slice(0, 100);
+      favoritesRef.current = next;
+      if (alive.current) setFavorites(next);
+      window.dispatchEvent(new Event(DEMO_FAVORITES_CHANGED));
+    } catch (e) {
+      if (alive.current) setError(e instanceof Error ? e.message : "No se pudo guardar el cambio en Supabase.");
+    } finally {
+      mutationRef.current = false;
+      if (alive.current) setSaving(false);
+    }
   }, []);
-  return { favorites, isFavorite, toggleFavorite, loaded };
+  return { favorites, isFavorite, toggleFavorite, loaded, error, saving, refresh };
 }

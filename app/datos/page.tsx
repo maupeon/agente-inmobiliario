@@ -132,7 +132,7 @@ export default async function DatosPage() {
             <li><Strong>Anuncios:</Strong> Idealista (mock coherente hasta tener clave propia) — <Code>lib/idealista/</Code></li>
             <li><Strong>Trayecto y rutas:</Strong> OpenRouteService (real con <Code>ORS_API_KEY</Code>) — <Code>lib/commute/index.ts</Code></li>
             <li><Strong>Geocodificación del mapa:</Strong> Nominatim / OpenStreetMap — <Code>lib/commute/index.ts</Code> y <Code>/api/geocode</Code></li>
-            <li><Strong>Persistencia:</Strong> Navegador — conversaciones y favoritos. Supabase — caché de mercado y consumo técnico — <Code>lib/supabase/</Code></li>
+            <li><Strong>Persistencia:</Strong> Supabase — conversaciones e inmuebles compartidos de la demo, caché de mercado y consumo técnico. El perfil permanece en el navegador — <Code>lib/supabase/demo.ts</Code></li>
           </ul>
         </section>
 

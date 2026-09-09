@@ -20,8 +20,9 @@ export interface RecommendInput {
   zona?: string;
   operacion?: "venta" | "alquiler";
   tipo?: "pisos" | "casas";
-  precioMax?: number;
-  habitaciones?: number;
+  /** null elimina expresamente el límite del perfil. */
+  precioMax?: number | null;
+  habitaciones?: number | null;
 }
 
 export interface RecommendResult {
@@ -47,8 +48,8 @@ export async function recommend(input: RecommendInput): Promise<RecommendResult>
   if (!zona) return { filters: null, items: [] };
 
   const operacion = input.operacion ?? profile?.operacion ?? "alquiler";
-  const precioMax = input.precioMax ?? profile?.presupuestoMax;
-  const habitaciones = input.habitaciones ?? profile?.habitaciones;
+  const precioMax = input.precioMax === null ? undefined : input.precioMax ?? profile?.presupuestoMax;
+  const habitaciones = input.habitaciones === null ? undefined : input.habitaciones ?? profile?.habitaciones;
   const usesProfileZone =
     input.zona == null ||
     input.zona.trim().localeCompare(profile?.zona?.trim() ?? "", "es", {
