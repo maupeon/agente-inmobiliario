@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Warning, Info, Scales } from "@phosphor-icons/react";
+import { Warning, Info, Scales, CaretDown } from "@phosphor-icons/react";
 import { cn, formatEUR, formatNumber } from "@/lib/utils";
 import {
   RENT_VS_BUY_DEFAULTS,
@@ -51,13 +51,13 @@ export function RentVsBuyCalculator() {
 
       <header className="mt-10 max-w-[64ch]">
         <h1 className="font-display text-display-md text-ink text-balance">
-          ¿Te conviene comprar, o alquilar e invertir?
+          ¿Y a ti, qué te sale más rentable, comprar o alquilar?
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-stone-600">
-          Compara comprar hoy con alquilar hoy e invertir el ahorro disponible.
-          Las dos opciones empiezan con el mismo capital y presupuesto. Calculamos
-          qué alternativa deja <strong className="font-medium text-ink">más patrimonio</strong> al
-          cabo de los años que elijas, incluidos gastos, inversión e impuestos.
+          Compara cómo evoluciona <strong className="font-medium text-ink">todo tu patrimonio</strong>.
+          Partimos de tus ahorros e inversiones actuales: al comprar, descontamos
+          la entrada y los gastos; al alquilar, el capital que conservas sigue invertido.
+          En ambas opciones, el dinero restante genera la rentabilidad que indiques.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-stone-600">
           Los valores iniciales son ejemplos editables. Usa viviendas comparables.
@@ -97,29 +97,59 @@ export function RentVsBuyCalculator() {
             </div>
           )}
 
-          <FieldSection title="1. Tu punto de partida">
+          <p className="mt-4 text-xs leading-relaxed text-stone-600">
+            Abre cada grupo para ajustar sus datos. El resumen y los resultados se actualizan al instante.
+          </p>
+
+          <FieldSection
+            number="01"
+            title="Tu punto de partida"
+            summary={`${formatEUR(input.capitalDisponible)} · ${input.horizonteAnios} años`}
+            description="El capital y el plazo que comparten ambas alternativas."
+            defaultOpen
+          >
             {controls(SEC_PARTIDA)}
           </FieldSection>
 
-          <FieldSection title="2. La vivienda que comprarías">
+          <FieldSection
+            number="02"
+            title="Compra de la vivienda"
+            summary={`${formatEUR(input.precioVivienda)} · ${input.esObraNueva ? "obra nueva" : "segunda mano"}`}
+            description="Precio, impuestos, gastos iniciales y costes de ser propietario."
+          >
             {controls(SEC_COMPRA)}
             <AdvancedGroup title="Gastos anuales de ser propietario">
               {controls(SEC_COSTES_COMPRA)}
             </AdvancedGroup>
           </FieldSection>
 
-          <FieldSection title="3. Cómo financiarías la compra">
+          <FieldSection
+            number="03"
+            title="Hipoteca"
+            summary={`${formatNumber(input.entradaPorcentaje)} % de entrada · ${formatNumber(input.tipoInteres)} % TIN · ${input.plazoHipotecaAnios} años`}
+            description="La parte que aportas y las condiciones del préstamo."
+          >
             {controls(SEC_HIPOTECA)}
           </FieldSection>
 
-          <FieldSection title="4. La vivienda que alquilarías">
+          <FieldSection
+            number="04"
+            title="Alquiler"
+            summary={`${formatEUR(input.alquilerMensual)}/mes · subida del ${formatNumber(input.subidaAlquilerAnual)} % anual`}
+            description="La renta de una vivienda comparable y sus gastos."
+          >
             {controls(SEC_ALQUILER)}
             <AdvancedGroup title="Seguro y otros costes del alquiler">
               {controls(SEC_COSTES_ALQUILER)}
             </AdvancedGroup>
           </FieldSection>
 
-          <FieldSection title="5. Inversión e inflación">
+          <FieldSection
+            number="05"
+            title="Inversión e inflación"
+            summary={`${formatNumber(input.rentabilidadInversionAnual)} % de rentabilidad · ${input.mostrarEnReales ? "€ de hoy" : "€ nominales"}`}
+            description="La rentabilidad del capital que conservas y la evolución de los gastos."
+          >
             {controls(["rentabilidadInversionAnual", "inflacionCostes"])}
             <AdvancedGroup title="Inflación y forma de ver el patrimonio">
               {controls(["inflacionAnual"])}
@@ -128,14 +158,24 @@ export function RentVsBuyCalculator() {
             </AdvancedGroup>
           </FieldSection>
 
-          <AdvancedGroup title="Tu capacidad económica y tus ingresos">
+          <FieldSection
+            number="06"
+            title="Ingresos y liquidez"
+            summary={`${formatEUR(input.ingresoAnualNeto)} netos/año`}
+            description="Tu capacidad de pago y la flexibilidad que necesitas."
+          >
             {controls(SEC_PERSONAL)}
-          </AdvancedGroup>
+          </FieldSection>
 
-          <AdvancedGroup title="Fiscalidad y costes de la venta hipotética">
+          <FieldSection
+            number="07"
+            title="Venta e impuestos"
+            summary={`${formatNumber(input.gastosVentaPorcentaje)} % de gastos de venta · ${input.viviendaHabitual && input.exencionGananciaVenta ? "con exención simulada" : "sin exención"}`}
+            description="Los costes de liquidar la vivienda al final de la simulación."
+          >
             <p className="text-xs leading-relaxed text-stone-600">Se calcula el valor neto de vender al cierre de cada año. Estos ajustes no crean un escenario de mudanza, alquiler a terceros ni cambio de residencia fiscal.</p>
             {controls(SEC_FISCAL)}
-          </AdvancedGroup>
+          </FieldSection>
         </div>
 
         {/* ───────── Resultados ───────── */}
@@ -669,14 +709,44 @@ function KPI({ label, value }: { label: string; value: string }) {
   );
 }
 
-function FieldSection({ title, children }: { title: string; children: React.ReactNode }) {
+function FieldSection({
+  number,
+  title,
+  summary,
+  description,
+  defaultOpen = false,
+  children,
+}: {
+  number: string;
+  title: string;
+  summary: string;
+  description: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
   return (
-    <div className="mt-5">
-      <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-saffron-700">
-        {title}
-      </p>
-      <div className="space-y-4">{children}</div>
-    </div>
+    <details
+      open={isOpen}
+      onToggle={(event) => setIsOpen(event.currentTarget.open)}
+      className="group/field border-b border-hairline last:border-b-0"
+    >
+      <summary className="flex min-h-11 cursor-pointer list-none items-start gap-3 rounded-sm py-5 text-ink transition hover:text-saffron-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-saffron-700 [&::-webkit-details-marker]:hidden">
+        <span aria-hidden="true" className="pt-1 font-mono text-[10px] tabular tracking-[0.1em] text-saffron-700">
+          {number}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-base font-medium leading-snug">{title}</span>
+          <span className="mt-1 block text-xs leading-relaxed tabular text-stone-600">{summary}</span>
+        </span>
+        <CaretDown aria-hidden="true" size={16} className="mt-1 shrink-0 text-stone transition-transform group-open/field:rotate-180 motion-reduce:transition-none" />
+      </summary>
+      <div className="space-y-4 pb-6">
+        <p className="text-xs leading-relaxed text-stone-600">{description}</p>
+        {children}
+      </div>
+    </details>
   );
 }
 

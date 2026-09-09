@@ -162,8 +162,9 @@ export function NetWorthChart({
             />
             <circle cx={beX} cy={padT} r={3} fill="#2D7C59" />
             <text
-              x={beX + 6}
-              y={padT + 11}
+              x={beX > W - padR - 140 ? beX - 6 : beX + 6}
+              y={padT - 10}
+              textAnchor={beX > W - padR - 140 ? "end" : "start"}
               className="fill-saffron-700"
               style={{ fontSize: 10, fontStyle: "italic", fontFamily: "var(--font-display), serif" }}
             >

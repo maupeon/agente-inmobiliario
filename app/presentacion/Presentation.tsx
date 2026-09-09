@@ -25,6 +25,9 @@ import { results, formatCount } from "./results-contract";
 import styles from "./presentation.module.css";
 
 const TOTAL_SECONDS = 10 * 60;
+const DEMO_SECONDS = 136;
+const DEMO_START_SECONDS = 440;
+const CLOSING_TARGET_SECONDS = DEMO_START_SECONDS + DEMO_SECONDS + 20;
 
 type CourseState = "applied" | "decision";
 
@@ -43,119 +46,119 @@ interface SceneDefinition {
 const MAIN_SCENE_COUNT = 14;
 const SCENES: SceneDefinition[] = [
   {
-    kicker: "Apertura · promocional",
+    kicker: "Apertura",
     title: "Una vivienda. Una decisión importante.",
-    target: 54,
-    note: "El vídeo promocional de 54 segundos es una grabación anterior y presenta la idea del producto; no demuestra las métricas ni el comportamiento de la versión revisada. La demostración de la revisión se realiza en vivo desde el panel.",
+    target: 10,
+    note: "Presenta HabitIA y al equipo. El vídeo único aparece al final del recorrido: une la historia conceptual de João con capturas de la aplicación actual y datos de ejemplo. La apertura es estática para no repetir el vídeo.",
   },
   {
     kicker: "Problema",
     title: "Buscar agota. Decidir exige contexto.",
-    target: 84,
+    target: 40,
     note: "La oferta está fragmentada, comparar exige tiempo y una misma vivienda depende de muchos factores. El borrador incluye cifras de mercado sin fuente completa; aquí explicamos el problema sin convertirlas en evidencia. La oportunidad es conectar anuncios, contexto y preferencias.",
   },
   {
     kicker: "Oportunidad · solución",
     title: "Una vivienda no se entiende aislada.",
-    target: 114,
+    target: 70,
     note: "Recorre el antes y el después: portales, comparación manual e incertidumbre se convierten en perfil, datos, ranking y explicación. Ahorrar tiempo y decidir con más confianza son objetivos del producto, todavía no resultados medidos con usuarios.",
   },
   {
     kicker: "Recomendación",
     title: "Tus prioridades cambian el orden.",
-    target: 154,
+    target: 110,
     note: "Se recuperan hasta ocho anuncios y se muestran hasta cinco. Se filtran incumplimientos conocidos de requisitos; se advierten los datos ausentes. Presupuesto, trayecto, requisitos y estimación del modelo cuando existe orientan el orden. Los índices manuales de seguridad/calidad de vida están retirados.",
   },
   {
     kicker: "Metodología · datos",
     title: "De los anuncios a un protocolo trazable.",
-    target: 194,
+    target: 150,
     note: "La copia enriquecida contiene 94.852 registros históricos. Se auditan duplicados sobre las 41 variables originales y discrepancias de enriquecimiento, se aplican criterios de ámbito fijos y se documentan las exclusiones. Los precios y coordenadas de la fuente están perturbados. El protocolo principal comparte 25 variables con el servicio; no utiliza alquiler ni catastro de fecha no verificada.",
   },
   {
     kicker: "Metodología · validación",
     title: "Aprender, calibrar y evaluar por separado.",
-    target: 229,
+    target: 185,
     note: "La revisión utiliza tres grupos exteriores y tres internos por activo. Solo los grupos internos seleccionan hiperparámetros; calibración y evaluación permanecen separadas de cada ajuste. Todo 2018 ya fue inspeccionado: es una evaluación retrospectiva corregida, no un test virgen. El artefacto final se conserva tal como se evaluó.",
   },
   {
     kicker: "Modelo de precio",
     title: "Del barrio a cada vivienda.",
-    target: 279,
+    target: 235,
     note: "La vista principal carga exclusivamente resultados_revision.json terminado: referencia territorial, hedónico Ridge y LightGBM con la misma entrada observable. Las pestañas Antecedentes y Ablación previa conservan el análisis exploratorio antiguo, identificado como no independiente porque su test intervino en la selección. No comparar directamente sus cifras con el artefacto revisado.",
   },
   {
     kicker: "Incertidumbre",
     title: "Un precio estimado necesita un margen.",
-    target: 324,
+    target: 280,
     note: "El intervalo se calibra por activo con máximo residual del grupo; el punto se incluye antes de calibrar. La interfaz muestra cobertura y anchura observadas en la revisión cuando existen resultados. El ejemplo deslizable es ilustrativo. Ni el 90 % nominal ni la cobertura histórica son la probabilidad de que una vivienda sea una ganga o de que el modelo acierte en 2026.",
   },
   {
     kicker: "Resultados · alcance",
     title: "¿Hasta dónde llega la precisión?",
-    target: 369,
+    target: 325,
     note: "Distinguir evaluación exterior, artefacto fijo y diagnóstico Q1–Q3 a Q4: retrospectivas del mismo histórico, no tres pruebas externas. El promedio oculta límites: el decil más barato tiene cobertura por anuncio del 81,81 % y MdAPE del 16,24 %; en Q4 la cobertura por activo es 87,88 %. No mezclar ambas unidades. El salto a 2026 permanece sin validación actual.",
   },
   {
     kicker: "Comprar vs. alquilar",
-    title: "Compara tu patrimonio. No solo la cuota.",
-    target: 414,
-    note: "La calculadora ya existe. Ambos escenarios parten del mismo capital e invierten la diferencia de gasto. Incluye hipoteca, impuestos, comunidad, IBI, mantenimiento, alquiler, inflación, inversión y revalorización. El horizonte, la movilidad y la situación laboral contextualizan la decisión. Son escenarios sujetos a supuestos, no una predicción garantizada.",
+    title: "Compara todo tu patrimonio.",
+    target: 370,
+    note: "Ambos escenarios parten del mismo capital disponible. Comprar destina una parte a la entrada y los gastos; el resto sigue invertido. Alquilar conserva invertido el capital que queda tras sus gastos iniciales. Ambas carteras usan la misma rentabilidad esperada e invierten la diferencia de gasto anual. La gráfica suma vivienda y cartera netas de deuda, costes e impuestos según los supuestos. Explica este coste de oportunidad sin afirmar que todos los demás comparadores lo omiten. Son escenarios, no rentabilidades garantizadas.",
   },
   {
     kicker: "Del modelo al producto",
     title: "Una pregunta activa toda la cadena.",
-    target: 449,
-    note: "Panel y chat usan el mismo backend de valoración de oferta. El servicio devuelve estado, versión, intervalo y SHAP opcional. SSE permite respuesta progresiva. La demo del TFM guarda un historial y unos favoritos globales en Supabase, compartidos entre visitantes. El perfil permanece en el navegador; Supabase también conserva caché y cuota técnica. Si una fuente falla o falta soporte, se informa y se evita presentar respaldo ilustrativo como evidencia.",
+    target: 405,
+    note: "Panel y chat usan el mismo backend de valoración de oferta. El servicio devuelve estado, versión, intervalo y SHAP opcional. SSE permite respuesta progresiva. La demo del TFM guarda un historial y unos favoritos globales en Supabase, compartidos entre visitantes. El perfil se configura en el navegador; al activar Notificaciones se guarda una copia en Supabase para preparar la selección diaria. La bandeja se identifica mediante una cookie propia de ese navegador, sin cuenta de usuario. Si una fuente falla o falta soporte, se informa y se evita presentar respaldo ilustrativo como evidencia.",
   },
   {
     kicker: "Roadmap",
     title: "Demostrar. Validar. Escalar.",
-    target: 484,
-    note: "El borrador sitúa comprar o alquilar en el MVP, pero el repositorio ya contiene el módulo. Presentamos el estado actualizado: prototipo disponible; validación con usuarios, multiportal y alertas como siguiente fase; más ciudades, B2B, visita 2D a 3D y predicción de revalorización como visión sin fecha comprometida.",
+    target: DEMO_START_SECONDS,
+    note: "Comprar o alquilar y las selecciones diarias ya están disponibles. Notificaciones permite activar hasta tres viviendas según el perfil guardado, a las 07:00 de Europe/Madrid por defecto, con horario editable. La configuración y el acceso a la bandeja pertenecen a ese navegador, sin autenticación de usuario. La bandeja se prepara con la app cerrada; el aviso del navegador solo funciona con ella abierta y permiso. No hay correo ni push en segundo plano. Quedan por validar la utilidad con usuarios, la integración multiportal y la expansión a más ciudades.",
   },
   {
-    kicker: "Demo · 75 segundos",
+    kicker: "Demo · historia y recorrido",
     title: "Así se convierte una búsqueda en una decisión.",
-    target: 559,
-    note: "Usa el enlace Abrir el panel para demostrar en vivo la versión revisada. El vídeo de 75 segundos es una grabación anterior del concepto, marcada como tal; sus pantallas no son evidencia del modelo ni de las garantías actuales.",
+    target: DEMO_START_SECONDS + DEMO_SECONDS,
+    note: "Un único vídeo une la historia conceptual de João con capturas de la aplicación actual y datos de ejemplo. La historia ilustra la propuesta; no es una prueba de resultados. En la demo, explica la elección de alquiler o compra, la ruta al trabajo, el desglose del Score, Cómo funciona y la gráfica patrimonial. Destaca el capital que permanece invertido en cada alternativa. La parte de João conserva su audio; el recorrido de la aplicación se explica en directo. Los enlaces permiten abrir el producto al terminar.",
   },
   {
     kicker: "Conclusión",
     title: "La herramienta que echábamos en falta",
-    target: 579,
+    target: CLOSING_TARGET_SECONDS,
     note: "Cierra con tres contribuciones: protocolo retrospectivo trazable, transformación compartida entre entrenamiento y servicio, y producto que explica resultados y abstenciones. No prometer ahorro o precisión actual sin medirlos. El valor está en unir evidencia, incertidumbre y utilidad de forma defendible.",
   },
   {
     kicker: "Propuesta de valor",
     title: "Seis capacidades. Una decisión.",
-    target: 579,
-    note: "La ventaja propuesta está en combinar las capas. Hoy se integra Idealista con fuentes de contexto, scoring y conversación. La integración multiportal y las alertas personales son evolución prevista; no confundir el refresco de datos de mercado con un workflow de búsqueda por usuario.",
+    target: CLOSING_TARGET_SECONDS,
+    note: "La ventaja propuesta está en combinar las capas. Hoy se integra Idealista con fuentes de contexto, scoring, conversación y selección diaria de hasta tres viviendas por perfil guardado. El horario inicial es 07:00 de Europe/Madrid y se puede editar en Notificaciones. La bandeja pertenece a ese navegador, sin cuenta de usuario; no es correo ni push con la app cerrada. La integración multiportal sigue pendiente.",
   },
   {
     kicker: "Problema y propuesta",
     title: "Precio, confianza y encaje",
-    target: 579,
+    target: CLOSING_TARGET_SECONDS,
     note:
       "El comprador solo ve el promedio de una zona, aunque dos pisos del mismo barrio puedan ser radicalmente distintos. HabitIA responde tres preguntas: qué precio cabe esperar, cuánto puede variar y qué vivienda encaja con la persona. La estimación usa el modelo, el rango expresa la incertidumbre y el Score ordena según las preferencias. Son tres conceptos distintos.",
   },
   {
     kicker: "Aplicación del máster",
     title: "22 asignaturas, una cadena de decisión",
-    target: 579,
+    target: CLOSING_TARGET_SECONDS,
     note:
       "No intentamos marcar veintidós casillas. Organizamos lo aprendido en cuatro capas: ingeniería, modelización, IA y producto. También justificamos qué no usar: 94.000 filas tabulares no necesitaban Spark, una RNN ni deep learning; y la persistencia relacional favorecía PostgreSQL frente a NoSQL.",
   },
   {
     kicker: "Resultados · decisión",
     title: "Barato no es lo mismo que infravalorado",
-    target: 579,
+    target: CLOSING_TARGET_SECONDS,
     note: "La regla compara el precio anunciado con el intervalo del modelo. El contraste de rentabilidad anterior comparte PRICE en su denominador, por lo que no constituye una validación económica independiente. No llamar ahorro observado a una brecha estimada. La revisión externa de candidatos, comparables y precios de cierre queda pendiente.",
   },
   {
     kicker: "Qué utiliza el modelo",
     title: "El precio tiene más de una explicación.",
-    target: 579,
+    target: CLOSING_TARGET_SECONDS,
     note: "Las importancias se recalculan desde los valores SHAP nativos del experimento revisado, promediando magnitudes por grupo exterior. Se muestran las seis variables principales y el resto agrupado. Son atribuciones en escala logarítmica normalizadas, no efectos causales ni proporciones del precio. Hasta terminar el experimento no se muestran porcentajes nuevos.",
   },
 ];
@@ -256,7 +259,6 @@ export function Presentation() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [chromeVisible, setChromeVisible] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const promoVideoRef = useRef<HTMLVideoElement>(null);
   const shortcutRef = useRef({ key: "", at: 0 });
   const {
     elapsed,
@@ -280,10 +282,12 @@ export function Presentation() {
   );
 
   const begin = useCallback(() => {
-    setStarted(true);
-    resetAndStart();
-    void promoVideoRef.current?.play().catch(() => promoVideoRef.current?.focus());
-  }, [resetAndStart]);
+    if (!started) {
+      setStarted(true);
+      resetAndStart();
+    }
+    setActive(1);
+  }, [resetAndStart, started]);
 
   const next = useCallback(() => goTo(Math.min(MAIN_SCENE_COUNT - 1, active + 1)), [active, goTo]);
   const previous = useCallback(() => goTo(active - 1), [active, goTo]);
@@ -299,7 +303,6 @@ export function Presentation() {
   }, []);
 
   useEffect(() => {
-    if (active !== 0) promoVideoRef.current?.pause();
     if (active !== 12) videoRef.current?.pause();
   }, [active]);
 
@@ -385,27 +388,9 @@ export function Presentation() {
       </div>
 
       <div className={styles.sceneStack} aria-live="polite">
-        <SceneShell index={0} active={active} state={sceneState(0)} label="Vídeo promocional">
-          <section className={`${styles.videoScene} ${styles.sceneCanvas}`}>
-            <video
-              ref={promoVideoRef}
-              className={styles.heroVideo}
-              poster="/presentacion/habitia-poster.jpg"
-              preload="metadata"
-              playsInline
-              controls={started && active === 0}
-              onEnded={next}
-            >
-              <source src="/presentacion/habitia-promo.mp4" type="video/mp4" />
-              Tu navegador no puede reproducir el vídeo promocional.
-            </video>
-            <div className={styles.videoShade} aria-hidden />
-            <p className={styles.videoProvenance}>Grabación anterior · concepto del producto · no demuestra la versión revisada</p>
-            <div
-              className={`${styles.opening} ${started ? styles.openingHidden : ""}`}
-              aria-hidden={started}
-              ref={(element) => { if (element) element.inert = started; }}
-            >
+        <SceneShell index={0} active={active} state={sceneState(0)} label={SCENES[0].title}>
+          <section className={`${styles.openingScene} ${styles.sceneCanvas}`}>
+            <div className={styles.opening}>
               <div className={styles.openingMeta}>
                 <Logo
                   variant="inline"
@@ -429,9 +414,9 @@ export function Presentation() {
                 </p>
               </div>
               <button type="button" className={styles.beginButton} onClick={begin}>
-                <Play aria-hidden weight="fill" size={18} />
-                Ver vídeo promocional
-                <span>54 s</span>
+                <ArrowRight aria-hidden size={18} />
+                {started ? "Continuar presentación" : "Comenzar presentación"}
+                <span>10 min</span>
               </button>
             </div>
           </section>
@@ -509,14 +494,14 @@ export function Presentation() {
 
         <SceneShell index={9} active={active} state={sceneState(9)} label={SCENES[9].title}>
           <section className={styles.sceneCanvas}>
-            <SceneHeader kicker="Comprar vs. alquilar" title="Compara tu patrimonio. No solo la cuota." />
+            <SceneHeader kicker="Comprar vs. alquilar" title="Compara todo tu patrimonio." />
 
             <div className={styles.financePremise}><span>Mismo capital inicial</span><ArrowRight aria-hidden /><strong>Dos escenarios, año a año</strong><ArrowRight aria-hidden /><span>Patrimonio neto</span></div>
             <div className={styles.comparisonGrid}>
-              <article><span className={styles.overline}>Comprar</span><h3>Vivienda + inversión</h3><p>Entrada, hipoteca e intereses.<br />Impuestos y gastos de compra y venta.<br />Comunidad, IBI, seguros y mantenimiento.<br />Revalorización de la vivienda.</p></article>
-              <article><span className={styles.overline}>Alquilar</span><h3>Flexibilidad + inversión</h3><p>Alquiler y sus subidas.<br />Capital disponible que permanece invertido.<br />Diferencia de gasto invertida cada año.<br />Rentabilidad neta e inflación.</p></article>
+              <article><span className={styles.overline}>Comprar</span><h3>Vivienda + inversión</h3><p>Entrada y gastos reducen la cartera inicial.<br />El capital restante sigue invertido.<br />Hipoteca, impuestos y costes de la vivienda.<br />Vivienda neta de deuda, gastos e impuestos de venta.</p></article>
+              <article><span className={styles.overline}>Alquilar</span><h3>Capital + inversión</h3><p>Capital invertido tras los gastos iniciales.<br />Alquiler y sus subidas.<br />Misma rentabilidad esperada de la cartera.<br />Impuestos e inflación según tus supuestos.</p></article>
             </div>
-            <p className={styles.takeaway}><strong>Tu vida cambia el resultado.</strong> Horizonte, movilidad, liquidez y perspectivas laborales.</p>
+            <p className={styles.takeaway}><strong>Tu capital también cuenta.</strong> En ambos escenarios se invierte la diferencia de gasto anual.</p>
             <p className={styles.finePrint}>Simulación bajo supuestos ajustables, con año de equilibrio y sensibilidad. No garantiza rentabilidades futuras.</p>
           </section>
         </SceneShell>
@@ -535,8 +520,8 @@ export function Presentation() {
             <SceneHeader kicker="Roadmap" title="Demostrar. Validar. Escalar." />
 
             <div className={styles.roadmapGrid}>
-              <article><span className={styles.statusPill}>Prototipo disponible</span><h3>Demostrar<br />inteligencia.</h3><ul><li>Idealista + fuentes de contexto</li><li>Scoring y chatbot</li><li>Valoración y dashboard</li><li>Comprar vs. alquilar</li></ul></article>
-              <article><span className={styles.overline}>Siguiente · MVP</span><h3>Validar<br />con usuarios.</h3><ul><li>Medir utilidad y tiempo ahorrado</li><li>Integración multiportal</li><li>Alertas y búsquedas periódicas</li><li>Validación del servicio B2C</li></ul></article>
+              <article><span className={styles.statusPill}>Prototipo disponible</span><h3>Demostrar<br />inteligencia.</h3><ul><li>Idealista + fuentes de contexto</li><li>Scoring, valoración y chatbot</li><li>Comprar vs. alquilar</li><li>Selección diaria · hasta tres viviendas</li></ul></article>
+              <article><span className={styles.overline}>Siguiente · MVP</span><h3>Validar<br />con usuarios.</h3><ul><li>Medir utilidad y tiempo ahorrado</li><li>Integración multiportal</li><li>Validar las selecciones diarias</li><li>Validación del servicio B2C</li></ul></article>
               <article><span className={styles.overline}>Visión</span><h3>Escalar<br />el producto.</h3><ul><li>Más ciudades</li><li>Despliegue a empresas · B2B</li><li>Visita virtual de 2D a 3D</li><li>Predicción de revalorización</li></ul></article>
             </div>
             <p className={styles.finePrint}>Hoja de ruta propuesta, sin fechas comprometidas. La expansión requiere nuevos datos y validación local.</p>
@@ -545,9 +530,9 @@ export function Presentation() {
 
         <SceneShell index={12} active={active} state={sceneState(12)} label={SCENES[12].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.demoScene}`}>
-            <SceneHeader kicker="Demo · recorrido de la plataforma" title="Así se convierte una búsqueda en una decisión." />
+            <SceneHeader kicker="Demo · historia y recorrido de la plataforma" title="Así se convierte una búsqueda en una decisión." />
             <div className={styles.demoPlayer}><video ref={videoRef} controls playsInline preload="metadata" poster="/presentacion/demo-poster.jpg"><source src="/presentacion/habitia-demo.mp4" type="video/mp4" /><track kind="captions" src="/presentacion/demo-captions.vtt" srcLang="es" label="Español" />Tu navegador no puede reproducir el vídeo.</video></div>
-            <div className={styles.demoActions}><span>Grabación anterior · recorrido conceptual · la revisión se demuestra en vivo</span><a href="/dashboard" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}>Abrir el panel <ArrowRight aria-hidden /></a><a href="/comprar-o-alquilar" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}>Abrir la calculadora <ArrowRight aria-hidden /></a></div>
+            <div className={styles.demoActions}><span>João: historia conceptual · Aplicación actual con datos de ejemplo</span><a href="/dashboard" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}>Abrir el panel <ArrowRight aria-hidden /></a><a href="/comprar-o-alquilar" target="_blank" rel="noopener noreferrer" onClick={pauseTimer}>Abrir la calculadora <ArrowRight aria-hidden /></a></div>
           </section>
         </SceneShell>
 
@@ -577,7 +562,7 @@ export function Presentation() {
                 ["02", "Agiliza", "Prioriza opciones relevantes para tu búsqueda."],
                 ["03", "Entiende", "Convierte preferencias en criterios comparables."],
                 ["04", "Explica", "Hace visible el porqué de cada recomendación."],
-                ["05", "Anticipa", "Detecta oportunidades; alertas personales como siguiente paso."],
+                ["05", "Anticipa", "Hasta tres viviendas diarias en tu bandeja; 07:00, horario editable."],
                 ["06", "Personaliza", "Adapta el ranking a lo que te importa."],
               ].map(([n, title, copy]) => <article key={n}><span>{n}</span><h3>{title}</h3><p>{copy}</p></article>)}
             </div>
