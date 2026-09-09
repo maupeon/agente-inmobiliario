@@ -1,0 +1,11 @@
+PASS cron always rejects missing or malformed authorization
+PASS private random identity is server issued and only hash is used in database
+PASS time and timezone validation
+PASS unauthorized cron performs no database or provider work
+PASS authenticated readiness identifies project without claiming or searching
+PASS no due profile performs no search
+PASS worker selects exactly top3 distinct properties and disables narration
+PASS failed provider gets a safe retry result without fabricated selection
+PASS settings and inbox reads both filter private owner
+PASS settings reject invalid time, cross-origin writes and missing identity
+10 notification API groups passed

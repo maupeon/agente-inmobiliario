@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/SiteNav";
 import { getMarketData } from "@/lib/market/cache";
+import { formatMarketPeriod, MARKET_SOURCES } from "@/lib/market/presentation";
 import { formatNumber, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -15,15 +16,14 @@ export const dynamic = "force-dynamic";
 type Estado = "real" | "orientativo";
 
 export default async function DatosPage() {
-  const [price, ipv, bde, rent] = await Promise.all([
+  const [price, ipv, bde] = await Promise.all([
     getMarketData("ine_price_by_province"),
     getMarketData("ine_ipv_quarterly"),
     getMarketData("bde_mortgage_rates"),
-    getMarketData("rent_reference"),
   ]);
 
   const freshness = (updatedAt: string | null, fromFallback: boolean) =>
-    fromFallback || !updatedAt ? "respaldo local" : `cacheado ${timeAgo(updatedAt)}`;
+    fromFallback || !updatedAt ? "sin actualización verificada" : `consultado ${timeAgo(updatedAt)}`;
 
   return (
     <div className="relative z-10">
@@ -31,28 +31,30 @@ export default async function DatosPage() {
       <main className="mx-auto w-full max-w-[1000px] px-5 pb-24 pt-10 sm:px-8">
         <div className="flex items-center justify-between gap-4 border-y border-ink py-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-ink">
           <span>Datos</span>
-          <span className="hidden sm:inline">Contenido real · Fuente · Ubicación</span>
+          <span className="hidden sm:inline">Fuente · Periodo · Límites</span>
           <span className="tabular text-stone">№ 003</span>
         </div>
 
         <header className="mt-10 max-w-[62ch]">
-          <h1 className="font-display text-display-md text-ink">Todos los datos, y dónde están</h1>
+          <h1 className="font-display text-display-md text-ink">De dónde sale cada dato</h1>
           <p className="mt-4 text-lg leading-relaxed text-stone-600">
-            Esto es exactamente lo que el agente usa por dentro: el contenido real
-            de cada conjunto de datos, su fuente, dónde vive en el código y cuándo
-            se actualizó. En <Pill estado="real" /> los datos recuperados de fuentes oficiales, con su periodo de referencia; en{" "}
-            <Pill estado="orientativo" /> los respaldos ilustrativos o copias antiguas sin trazabilidad verificada.
+            Consulta las referencias de mercado y abre su publicación original.
+            La fecha de consulta indica cuándo recuperamos el dato; el periodo
+            indica qué momento describe. Si solo hay ejemplos o una copia sin
+            procedencia verificada, lo señalamos y no mostramos sus cifras como referencia.
           </p>
         </header>
 
         {/* Precio €/m² compra por provincia */}
         <DataCard
-          title="Precio de compra · €/m² por provincia"
+          title="Compra · valor tasado medio por provincia"
           estado={price.fromFallback ? "orientativo" : "real"}
           fuente={price.data.fuente}
-          ubicacion="lib/market/mitma.ts → caché Supabase market_data"
-          meta={`${price.data.data.length} provincias · periodo ${price.data.periodo} · ${freshness(price.updatedAt, price.fromFallback)}`}
+          sourceLink={MARKET_SOURCES.valuation}
+          meta={price.fromFallback ? "Sin referencia verificada disponible" : `${price.data.data.length} provincias · ${formatMarketPeriod(price.data.periodo)} · ${freshness(price.updatedAt, false)}`}
         >
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">Es una media de tasaciones de vivienda libre, expresada en €/m². Sirve para dar contexto territorial; no determina por sí sola cuánto vale un piso concreto ni su HabitIA Score.</p>
+          {price.fromFallback ? <Unavailable /> : (
           <Collapsible summary={`Ver las ${price.data.data.length} provincias`}>
             <Table head={["Provincia", "€/m²", "Var. anual"]}>
               {[...price.data.data]
@@ -62,6 +64,7 @@ export default async function DatosPage() {
                 ))}
             </Table>
           </Collapsible>
+          )}
         </DataCard>
 
         {/* IPV */}
@@ -69,14 +72,17 @@ export default async function DatosPage() {
           title="Tendencia de precios · IPV (variación interanual)"
           estado={ipv.fromFallback ? "orientativo" : "real"}
           fuente={ipv.data.fuente}
-          ubicacion="lib/market/ine.ts (INE Tempus3, tabla 25171)"
-          meta={`${ipv.data.serie.length} trimestres · ${freshness(ipv.updatedAt, ipv.fromFallback)}`}
+          sourceLink={MARKET_SOURCES.ipv}
+          meta={ipv.fromFallback ? "Sin serie verificada disponible" : `${ipv.data.serie.length} trimestres · ${freshness(ipv.updatedAt, false)}`}
         >
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">El IPV describe cómo cambian los precios de compraventa. Una variación interanual compara con el mismo trimestre del año anterior. Q1 = enero–marzo; Q2 = abril–junio; Q3 = julio–septiembre; Q4 = octubre–diciembre.</p>
+          {ipv.fromFallback ? <Unavailable /> : (
           <Table head={["Trimestre", "Variación interanual"]}>
             {ipv.data.serie.map((q) => (
-              <Row key={q.periodo} cells={[q.periodo, `${q.variacionInteranual > 0 ? "+" : ""}${q.variacionInteranual}%`]} />
+              <Row key={q.periodo} cells={[formatMarketPeriod(q.periodo), `${q.variacionInteranual > 0 ? "+" : ""}${q.variacionInteranual}%`]} />
             ))}
           </Table>
+          )}
         </DataCard>
 
         {/* Tipos hipoteca */}
@@ -84,61 +90,52 @@ export default async function DatosPage() {
           title="Financiación · tipos hipotecarios"
           estado={bde.fromFallback ? "orientativo" : "real"}
           fuente={bde.data.fuente}
-          ubicacion="lib/market/bde.ts (Banco de España, CSV)"
-          meta={`periodo ${bde.data.periodo} · ${freshness(bde.updatedAt, bde.fromFallback)}`}
+          sourceLink={MARKET_SOURCES.rates}
+          meta={bde.fromFallback ? "Sin tipos verificados disponibles" : `${formatMarketPeriod(bde.data.periodo)} · ${freshness(bde.updatedAt, false)}`}
         >
-          <Table head={["Indicador", "Valor"]}>
-            <Row cells={["Tipo medio hipotecas vivienda", `${bde.data.tipoMedio}%`]} />
-            <Row cells={["Euríbor 12 meses", bde.data.euribor12m != null ? `${bde.data.euribor12m}%` : "—"]} />
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">Son referencias agregadas del mercado. Para comparar comprar y alquilar, introduce las condiciones que te ofrece tu banco.</p>
+          {bde.fromFallback ? <Unavailable /> : (
+          <Table head={["Indicador", "Valor", "Periodo"]}>
+            <Row cells={["Crédito vivienda · tipo medio TEDR", `${bde.data.tipoMedio}%`, bde.data.periodo]} />
+            <Row cells={["Euríbor 12 meses", bde.data.euribor12m != null ? `${bde.data.euribor12m}%` : "—", bde.data.euriborPeriodo ?? "Sin periodo individual"]} />
           </Table>
+          )}
         </DataCard>
 
         {/* Alquiler referencia */}
         <DataCard
-          title="Alquiler · referencia €/m²/mes"
+          title="Alquiler · origen y uso de la referencia"
           estado="orientativo"
-          fuente={rent.data.fuente}
-          ubicacion="lib/market/fixtures.ts (referencias manuales sin validación documental)"
-          meta={`${rent.data.zonas.length} barrios + ${rent.data.provincias.length} provincias · periodo ${rent.data.periodo}`}
+          fuente="Los valores locales son ejemplos manuales sin validación documental."
+          sourceLink={MARKET_SOURCES.rent}
+          meta="Integración de una referencia oficial pendiente"
         >
-          <Collapsible summary={`Ver ${rent.data.zonas.length} barrios + ${rent.data.provincias.length} provincias`}>
-            <Table head={["Zona", "Ámbito", "€/m²/mes", "Rango"]}>
-              {rent.data.zonas.map((z) => (
-                <Row
-                  key={`${z.zona}-${z.municipio ?? ""}`}
-                  cells={[z.zona, z.municipio ?? "—", `${z.eurM2Mes}`, z.min != null && z.max != null ? `${z.min}–${z.max}` : "—"]}
-                />
-              ))}
-              {rent.data.provincias.map((p) => (
-                <Row
-                  key={`prov-${p.provincia}`}
-                  muted
-                  cells={[p.provincia, "provincia", `${p.eurM2Mes}`, p.min != null && p.max != null ? `${p.min}–${p.max}` : "—"]}
-                />
-              ))}
-            </Table>
-          </Collapsible>
+          <div className="space-y-3 text-sm leading-relaxed text-stone-600">
+            <p><Strong>¿De dónde salía?</Strong> De una tabla de ejemplos escrita para la demo. No es una descarga de SERPAVI ni una muestra contrastada de anuncios; no puede atribuirse al Ministerio.</p>
+            <p><Strong>¿Para qué serviría?</Strong> Una referencia contrastada permitiría comparar el alquiler mensual por m² del anuncio con viviendas de un ámbito y periodo conocidos. El SERPAVI oficial utiliza información tributaria sobre arrendamientos; su metodología se enlaza arriba para consulta, pero aún no alimenta esta aplicación.</p>
+            <p><Strong>¿Qué ocurre ahora?</Strong> Las fichas muestran «sin referencia verificada». Los ejemplos no clasifican un alquiler como barato o caro y no aportan puntos a Fair ni a Opportunity. El ranking puede usar ubicación, presupuesto, trayecto y requisitos disponibles.</p>
+          </div>
         </DataCard>
 
         <section className="mt-8 rounded-xl border border-hairline bg-paper-50 p-5">
           <h2 className="font-display text-xl">Indicadores de barrio</h2>
-          <p className="mt-3 text-sm text-stone-600">Los índices manuales de seguridad y calidad de vida se han retirado: no disponemos de una fuente verificable a esa escala. No intervienen en el ranking.</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Los índices manuales de seguridad y calidad de vida se han retirado porque no disponemos de una fuente verificable a esa escala. No hay una puntuación de «barrio seguro» ni una capa de seguridad.</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">El componente <Strong>Zone</Strong> del HabitIA Score mide la proximidad a la ubicación que tú has elegido. Es una preferencia personal, no una estadística de seguridad, servicios o calidad del barrio. La referencia territorial de precio es otro dato distinto: una media del ámbito indicado en la ficha.</p>
         </section>
 
         {/* Otras fuentes no tabulares */}
         <section className="mt-12 rounded-xl border border-hairline bg-paper-50 p-6">
           <h2 className="font-display text-xl text-ink">Otras fuentes (en vivo, por petición)</h2>
           <ul className="mt-4 space-y-3 text-sm text-stone-600">
-            <li><Strong>Anuncios:</Strong> Idealista (mock coherente hasta tener clave propia) — <Code>lib/idealista/</Code></li>
-            <li><Strong>Trayecto y rutas:</Strong> OpenRouteService (real con <Code>ORS_API_KEY</Code>) — <Code>lib/commute/index.ts</Code></li>
-            <li><Strong>Geocodificación del mapa:</Strong> Nominatim / OpenStreetMap — <Code>lib/commute/index.ts</Code> y <Code>/api/geocode</Code></li>
-            <li><Strong>Persistencia:</Strong> Supabase — conversaciones e inmuebles compartidos de la demo, caché de mercado y consumo técnico. El perfil permanece en el navegador — <Code>lib/supabase/demo.ts</Code></li>
+            <li><Strong>Anuncios:</Strong> Idealista, cuando está configurado el acceso. La aplicación identifica los ejemplos de demostración y los errores del proveedor.</li>
+            <li><Strong>Trayectos:</Strong> OpenRouteService cuando está disponible. El transporte público y los respaldos se presentan como aproximaciones.</li>
+            <li><Strong>Localización del mapa:</Strong> Nominatim / OpenStreetMap. La ubicación del anuncio puede ser aproximada.</li>
+            <li><Strong>Tus datos:</Strong> el perfil y la última búsqueda se conservan en tu navegador. Las conversaciones y los favoritos de esta demo se comparten en Supabase. Las notificaciones usan una bandeja privada de este navegador y guardan una copia del perfil cuando las activas.</li>
           </ul>
         </section>
 
         <p className="mt-10 text-xs leading-relaxed text-mist">
-          Los datos de mercado se refrescan con el cron <Code>/api/cron/market</Code> y se cachean en Supabase; si la
-          caché está vacía se intenta la fuente en vivo y, si falla, se usa el respaldo local. Los indicadores de seguridad están retirados y las referencias de alquiler son ilustrativas.
+          La actualización automática consulta las fuentes de mercado y conserva el último dato verificado si una descarga falla. Si no hay una copia disponible, se intenta la fuente en vivo. Un respaldo local no se convierte en un dato oficial: los valores sin procedencia verificada se omiten de estas tablas.
         </p>
       </main>
     </div>
@@ -149,14 +146,14 @@ function DataCard({
   title,
   estado,
   fuente,
-  ubicacion,
+  sourceLink,
   meta,
   children,
 }: {
   title: string;
   estado: Estado;
   fuente: string;
-  ubicacion: string;
+  sourceLink: { label: string; href: string };
   meta: string;
   children: React.ReactNode;
 }) {
@@ -164,16 +161,14 @@ function DataCard({
     <section className="mt-8 overflow-hidden rounded-xl border border-hairline bg-paper-50">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-hairline p-5">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-display text-xl leading-tight text-ink">{title}</h2>
             <Pill estado={estado} />
           </div>
           <p className="mt-1.5 text-sm text-stone-600">{fuente}</p>
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-mist">
-            ↳ {ubicacion}
-          </p>
+          <a href={sourceLink.href} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-9 items-center text-sm font-medium text-saffron-700 underline decoration-saffron-300 underline-offset-4 hover:text-ink">{sourceLink.label} ↗</a>
         </div>
-        <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-stone">
+        <span className="max-w-full font-mono text-[10px] uppercase tracking-[0.14em] text-stone">
           {meta}
         </span>
       </header>
@@ -213,13 +208,13 @@ function Table({ head, children }: { head: string[]; children: React.ReactNode }
   );
 }
 
-function Row({ cells, muted }: { cells: string[]; muted?: boolean }) {
+function Row({ cells }: { cells: string[] }) {
   return (
     <tr className="border-b border-hairline/60 last:border-b-0">
       {cells.map((c, i) => (
         <td
           key={i}
-          className={`${i === 0 ? "py-1.5 pr-3 font-medium text-ink" : "px-3 py-1.5"} ${muted && i > 0 ? "text-mist" : "text-ink-700"}`}
+          className={i === 0 ? "py-1.5 pr-3 font-medium text-ink" : "px-3 py-1.5 text-ink-700"}
         >
           {c}
         </td>
@@ -232,10 +227,10 @@ function Pill({ estado }: { estado: Estado }) {
   const cls =
     estado === "real"
       ? "border-sage-500/30 bg-sage-50 text-sage-500"
-      : "border-saffron-300/40 bg-saffron-50 text-saffron-700";
+      : "border-amber-300 bg-amber-50 text-amber-900";
   return (
     <span className={`inline-block whitespace-nowrap rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] ${cls}`}>
-      {estado}
+      {estado === "real" ? "Fuente oficial" : "Sin verificar"}
     </span>
   );
 }
@@ -244,10 +239,8 @@ function Strong({ children }: { children: React.ReactNode }) {
   return <strong className="font-medium text-ink">{children}</strong>;
 }
 
-function Code({ children }: { children: React.ReactNode }) {
+function Unavailable() {
   return (
-    <code className="rounded bg-paper-200 px-1.5 py-0.5 font-mono text-[12px] text-ink-700">
-      {children}
-    </code>
+    <p className="rounded-lg bg-paper-200 p-3 text-sm leading-relaxed text-stone-600">No hay cifras con procedencia verificada disponibles en este momento. Puedes consultar la publicación oficial en el enlace de esta sección.</p>
   );
 }

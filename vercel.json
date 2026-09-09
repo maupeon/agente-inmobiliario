@@ -5,6 +5,9 @@
     },
     "app/api/cron/market/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/cron/recommendations/route.ts": {
+      "maxDuration": 60
     }
   },
   "crons": [

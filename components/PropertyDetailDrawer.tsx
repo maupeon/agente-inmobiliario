@@ -2,15 +2,19 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { ArrowSquareOut, Heart, X } from "@phosphor-icons/react";
-import { bandaColor, formatDiff } from "@/lib/dashboard-format";
+import { bandaColor, priceLabel, priceComparison } from "@/lib/dashboard-format";
+import { formatMarketPeriod } from "@/lib/market/presentation";
 import { cn, formatEUR, formatNumber } from "@/lib/utils";
-import type { Property, PropertyDetail, PropertyEnrichment } from "@/types";
+import type { Property, PropertyDetail, PropertyEnrichment, PersonalScoring } from "@/types";
+import { ScoreBreakdown } from "./ScoreBreakdown";
 import { CommuteCard } from "./CommuteCard";
 import { NeighborhoodCard } from "./NeighborhoodCard";
 
 export interface DetailItem {
   property: Property;
   enrichment: PropertyEnrichment | null;
+  score?: number;
+  scoring?: PersonalScoring;
 }
 
 export function PropertyDetailDrawer({
@@ -211,6 +215,7 @@ export function PropertyDetailDrawer({
             </a>
           </div>
 
+          <ScoreBreakdown score={item.score} scoring={item.scoring} />
           {val && (
             <section className="rounded-xl border border-hairline bg-paper-50 p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-saffron-700">
@@ -218,9 +223,9 @@ export function PropertyDetailDrawer({
               </p>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className="font-display text-3xl" style={{ color: bandaColor(val.banda) }}>
-                  {formatDiff(val.diferenciaPorcentual)}
+                  {priceLabel(val) ?? "Sin valoración individual"}
                 </span>
-                {val.etiqueta && <span className="text-sm text-ink-700">{val.etiqueta}</span>}
+                <span className="text-sm text-ink-700">{priceComparison(val)}</span>
               </div>
               {val.referenciaEurM2 != null && (
                 <p className="mt-1 font-mono text-[11px] text-stone">
@@ -259,7 +264,7 @@ export function PropertyDetailDrawer({
                       {formatNumber(Math.round(val.comparativa.referenciaEurM2))} €/m² · {val.comparativa.territorio}
                     </p>
                     <p className="mt-1 text-[11px] text-stone">
-                      {val.comparativa.fuente} · {val.comparativa.periodo}
+                      {val.comparativa.fuente} · {formatMarketPeriod(val.comparativa.periodo)}
                     </p>
                     <p className="mt-2 text-[12px] leading-relaxed text-stone">
                       Esta media agrega viviendas distintas y no estima el precio de este anuncio. El modelo usa oferta de 2018 y un supuesto común de evolución de precios.
@@ -271,7 +276,7 @@ export function PropertyDetailDrawer({
                   ? `Oferta 2018 · escenario ${val.nivelPrecios ?? "sin periodo"} · ${val.modeloVersion ?? "versión no identificada"}`
                   : val.referenciaEurM2 == null ? "Sin referencia verificada" : "Referencia territorial orientativa"}
               </p>
-              {val.nivel !== "modelo" && val.referenciaEurM2 != null && <p className="mt-1 text-[11px] text-stone">{val.fuente} · {val.periodo}</p>}
+              {val.nivel !== "modelo" && val.referenciaEurM2 != null && <p className="mt-1 text-[11px] text-stone">{val.fuente} · {formatMarketPeriod(val.periodo ?? "Sin periodo")}</p>}
               {val.avisoModelo && <p className="mt-2 text-xs leading-relaxed text-stone-600">{val.avisoModelo}{val.estadoModelo !== "ok" && val.referenciaEurM2 != null ? " La referencia territorial mostrada no valora esta vivienda individualmente." : ""}</p>}
             </section>
           )}

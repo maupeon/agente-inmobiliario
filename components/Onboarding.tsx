@@ -3,6 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { ArrowLeft, ArrowRight, Check } from "@phosphor-icons/react";
+import { DEFAULT_SCORE_WEIGHTS, SCORE_LABELS, scoreWeights, validScoreWeights } from "@/lib/personal-score";
 import { cn } from "@/lib/utils";
 import type {
   CommuteMode,
@@ -10,6 +11,7 @@ import type {
   Imprescindible,
   Priority,
   UserProfile,
+  ScoreWeights,
 } from "@/types";
 import type { PickedLocation } from "./LocationPicker";
 import { Logo } from "./ui/Logo";
@@ -107,6 +109,9 @@ export function Onboarding({
     initial?.prioridades ?? []
   );
 
+  const [weights, setWeights] = useState<ScoreWeights>(() => scoreWeights(initial?.scoreWeights));
+  const [weightsError, setWeightsError] = useState(false);
+  const weightTotal = weights.alpha + weights.beta + weights.gamma + weights.delta;
   const unit = operation === "venta" ? "€" : "€/mes";
   const lastStep = step === STEPS.length - 1;
 
@@ -132,6 +137,7 @@ export function Onboarding({
           }
         : undefined,
       prioridades: priorities.length ? priorities : undefined,
+      scoreWeights: weights,
       createdAt: initial?.createdAt ?? new Date().toISOString(),
     };
   }
@@ -145,6 +151,7 @@ export function Onboarding({
 
   function finish() {
     if (!requireZone()) return;
+    if (!validScoreWeights(weights)) { setWeightsError(true); setStep(3); return; }
     onComplete(buildProfile());
   }
 
@@ -344,7 +351,26 @@ export function Onboarding({
               title="¿Qué hace que una vivienda encaje?"
               subtitle="Marca tantas opciones como quieras. Podrás cambiarlas después."
             >
-              <ChoiceGroup label="Prioridades del barrio">
+              <fieldset className="rounded-2xl border border-hairline bg-paper-200/60 p-4">
+                <legend className="px-1 text-base font-semibold text-ink">Tu Score HabitIA</legend>
+                <p className="text-sm leading-relaxed text-stone-600">Reparte 100 puntos según lo que te importe. Por defecto, cada factor pesa un 25%. El resultado ordenará tus viviendas.</p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {(Object.keys(SCORE_LABELS) as Array<keyof ScoreWeights>).map((key) => (
+                    <InputField key={key} label={SCORE_LABELS[key]} htmlFor={`score-${key}`}>
+                      <input id={`score-${key}`} type="number" min={0} max={100} step={1} value={weights[key]}
+                        onChange={(event) => { setWeights({ ...weights, [key]: Number(event.target.value) }); setWeightsError(false); }}
+                        className={inputClass} aria-describedby="score-weights-help" />
+                    </InputField>
+                  ))}
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                  <p id="score-weights-help" role="status" className={cn("text-sm font-medium", validScoreWeights(weights) ? "text-saffron-700" : "text-rose-700")}>Total: {weightTotal}% · debe sumar 100%</p>
+                  <button type="button" onClick={() => { setWeights({ ...DEFAULT_SCORE_WEIGHTS }); setWeightsError(false); }} className="min-h-11 rounded-lg px-2 text-sm underline">Restablecer 25% cada uno</button>
+                </div>
+                {weightsError && <p role="alert" className="text-sm text-rose-700">Los cuatro pesos deben ser enteros entre 0 y 100 y sumar exactamente 100.</p>}
+                <p className="mt-2 text-xs leading-relaxed text-stone-600">Fair compara el precio con la estimación; Opportunity, con el intervalo. Zone mide cercanía al punto elegido y Lifestyle usa presupuesto, trayecto e imprescindibles. Si falta un dato, lo indicamos y ese factor no aporta puntos. Los precios del modelo son escenarios basados en oferta de 2018.</p>
+              </fieldset>
+              <ChoiceGroup label="Preferencias del barrio (contexto para el asistente)">
                 {PRIORITIES.map((item) => (
                   <Chip
                     key={item.key}
@@ -356,6 +382,7 @@ export function Onboarding({
                 ))}
               </ChoiceGroup>
 
+              <p className="text-xs leading-relaxed text-stone-600">Transporte, zonas verdes, vida nocturna y tranquilidad no tienen indicadores verificados para puntuar barrios. Seguridad no se muestra como índice.</p>
               <ChoiceGroup label="Imprescindibles de la vivienda">
                 {MUST.map((item) => (
                   <Chip

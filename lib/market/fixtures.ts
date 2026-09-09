@@ -6,12 +6,14 @@ import type {
 } from "./types";
 
 /**
- * Datos de respaldo plausibles (referencia cierre 2024). Se usan en dos casos:
+ * Ejemplos locales sin trazabilidad documental, para compatibilidad de la demo.
+ * No son estadísticas verificadas ni referencias válidas para puntuar precios.
+ * Pueden devolverse en dos casos:
  *  1. La cache de Supabase está vacía y todavía no se ha ejecutado el cron.
  *  2. El cron ha fallado al refrescar y queremos seguir respondiendo al usuario.
  *
- * Origen: medias publicadas por el INE (Estadística Registral Inmobiliaria)
- * y Banco de España. Son aproximadas — el cron las sustituye por el dato vivo.
+ * No atribuir estas cifras al INE, al Ministerio ni al Banco de España.
+ * `fromFallback` impide su uso como referencia de valoración.
  */
 
 export const FALLBACK_PRICE_BY_PROVINCE: InePriceByProvince = {
@@ -91,11 +93,10 @@ export const FALLBACK_IPV: IneIpvQuarterly = {
 };
 
 /**
- * Referencia de alquiler €/m²/mes. Aproximaciones plausibles (cierre 2024 /
- * inicio 2025) inspiradas en el Sistema Estatal de Índices de Precios de
- * Alquiler (MIVAU) y en portales del sector. Son orientativas — el cron las
- * sustituye cuando integremos el dataset oficial. Los barrios coinciden con
- * los que conoce el mock de Idealista para que la demo sea coherente.
+ * Ejemplos manuales de alquiler €/m²/mes para la demo. No proceden de una
+ * descarga oficial ni de una muestra documentada de anuncios. La integración
+ * de SERPAVI está pendiente; el cron actual no puede convertir estos ejemplos
+ * en referencias verificadas. Los barrios coinciden con el mock de Idealista.
  */
 export const FALLBACK_RENT_REFERENCE: RentReference = {
   periodo: "2025T1",

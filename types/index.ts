@@ -50,6 +50,26 @@ export type Imprescindible =
   | "garaje"
   | "trastero";
 
+/** Pesos personales enteros; cada uno 0–100, suma exacta de 100. */
+export interface ScoreWeights { alpha: number; beta: number; gamma: number; delta: number }
+export type ScoreComponentKey = "fair" | "opportunity" | "zone" | "lifestyle";
+export interface ScoreComponent {
+  key: ScoreComponentKey;
+  label: string;
+  weight: number;
+  /** Ausencia de evidencia se conserva como null, nunca como dato neutro. */
+  value: number | null;
+  contribution: number;
+  explanation: string;
+}
+export interface PersonalScoring {
+  weights: ScoreWeights;
+  components: ScoreComponent[];
+  /** Porcentaje de los pesos que se ha podido evaluar. */
+  coveragePercent: number;
+  explanation: string;
+}
+
 /**
  * Perfil del inquilino capturado en el onboarding. Se guarda en localStorage
  * (no hay auth) y se envía al backend para personalizar el system prompt.
@@ -81,6 +101,7 @@ export interface UserProfile {
     modo?: CommuteMode;
   };
   prioridades?: Priority[];
+  scoreWeights?: ScoreWeights;
   createdAt: string;
 }
 
@@ -342,6 +363,7 @@ export interface PropertyRecommendation {
   enrichment: PropertyEnrichment;
   /** Encaje con el perfil, 0-100. */
   score: number;
+  scoring?: PersonalScoring;
   /** Frase legible: por qué este piso encaja contigo. */
   rationale: string;
   /** Etiquetas cortas para chips ("a 9′ del trabajo", "barrio seguro"…). */
@@ -369,6 +391,10 @@ export type Nivel3 = 0 | 1 | 2;
  * los valores por defecto de Madrid (`RENT_VS_BUY_DEFAULTS`).
  */
 export interface RentVsBuyInput {
+  gastosInicialesCompra?: number;
+  gastosInicialesAlquiler?: number;
+  gestionCompraAnual?: number;
+  gestionAlquilerAnual?: number;
   // ── Comunes ──
   /** Precio de la vivienda que te plantearías comprar (€). */
   precioVivienda: number;
@@ -408,14 +434,13 @@ export interface RentVsBuyInput {
   comunidadMensual: number;
   /** Seguro de hogar anual (€). */
   seguroHogarAnual: number;
-  /** Mantenimiento como % del valor de la vivienda/año. */
+  /** Mantenimiento anual: % del precio inicial, actualizado con inflacionCostes. */
   mantenimientoPorcentaje: number;
   /** Revalorización anual de la vivienda (%). Distinta de la cartera. */
   revalorizacionViviendaAnual: number;
-  /** Inflación de los costes de tenencia (IBI/comunidad/seguro) en %. */
+  /** Inflación de gastos recurrentes: IBI, comunidad, seguros, mantenimiento y gestión (%). */
   inflacionCostes: number;
-  /** Vivienda habitual: la ganancia de la venta puede estar exenta de IRPF
-   *  (asume reinversión en otra habitual o titular mayor de 65 años). */
+  /** Consideración de vivienda habitual; no aplica por sí sola exención fiscal. */
   viviendaHabitual: boolean;
   /** Supuesto fiscal separado y desactivado por defecto. */
   exencionGananciaVenta?: boolean;
@@ -429,17 +454,17 @@ export interface RentVsBuyInput {
   // ── Personal / subjetivo ──
   /** Probabilidad de mudarte al extranjero (0=baja, 1=media, 2=alta). */
   probMudanzaExtranjero: Nivel3;
-  /** Años hasta la mudanza prevista (0 = sin mudanza). */
+  /** Legado: años hasta mudanza. Genera un aviso, sin ejecutar venta o alquiler a terceros. */
   aniosHastaMudanza: number;
-  /** Al mudarte: 0=vender, 1=alquilar a distancia (IRNR). */
+  /** Legado sin efecto financiero: no se simulan mudanzas intermedias. */
   escenarioMudanza: 0 | 1;
-  /** Destino fuera de UE/EEE (ej. Suiza): IRNR 24% sin deducir gastos. */
+  /** Legado sin efecto financiero: no se simula residencia fiscal ni IRNR. */
   paisDestinoFueraUE: boolean;
   /** Colchón de liquidez que quieres mantener (€). */
   liquidezNecesaria: number;
   /** Estabilidad laboral (0=baja, 1=media, 2=alta). */
   estabilidadLaboral: Nivel3;
-  /** Crecimiento salarial esperado (%) — el "+50% en 1-2 años" del boceto. */
+  /** Aumento salarial TOTAL esperado en 1–2 años (0–300%); solo informa avisos. */
   crecimientoSalarialEsperado: number;
   /** Ingreso anual neto (solo para avisos de esfuerzo; no entra en patrimonio). */
   ingresoAnualNeto: number;
@@ -454,7 +479,7 @@ export interface RentVsBuyYear {
   principalAnio: number;
   /** Saldo vivo de la hipoteca al cierre del año. */
   saldoVivo: number;
-  /** IBI + comunidad + seguro + mantenimiento del año. */
+  /** IBI + comunidad + seguro + mantenimiento + otros gastos de propiedad del año. */
   costesTenencia: number;
   valorVivienda: number;
   /** Valor − saldo − costes/impuestos de venta latentes. Puede ser negativo. */
@@ -470,7 +495,7 @@ export interface RentVsBuyYear {
   diferencia: number;
   aporteCompra: number;
   aporteAlquiler: number;
-  /** IRNR pagado ese año si se alquila a distancia tras mudarse. */
+  /** Legado: siempre cero; no se simula alquiler a terceros ni IRNR. */
   irnrAnio: number;
 }
 
@@ -504,7 +529,7 @@ export interface RentVsBuyResult {
   desembolsoInicialCompra: number;
   /** precio / (alquiler·12). Indicador contextual, no veredicto. */
   priceToRent: number | null;
-  /** Año (fraccionario, interpolado) en que comprar alcanza a alquilar; null si nunca. */
+  /** Primer cruce interpolado; 1 si ya gana en el primer cierre anual; null si no alcanza. */
   breakEvenAnios: number | null;
   patrimonioFinalCompra: number;
   patrimonioFinalAlquiler: number;
@@ -524,6 +549,13 @@ export interface RentVsBuyResult {
   enReales: boolean;
   avisos: RentVsBuyAviso[];
   totales: {
+    gastosInicialesCompra?: number;
+    gastosInicialesAlquiler?: number;
+    segurosAlquilerTotal?: number;
+    gestionAlquilerTotal?: number;
+    costesVentaFinal?: number;
+    impuestoVentaFinal?: number;
+    plusvaliaMunicipalFinal?: number;
     interesesTotales: number;
     tenenciaTotal: number;
     rentaTotal: number;

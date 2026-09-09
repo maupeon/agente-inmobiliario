@@ -10,7 +10,7 @@ import Map, {
   type MapRef,
 } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MODE_LABEL, bandaColor, safetyColor } from "@/lib/dashboard-format";
+import { MODE_LABEL, bandaColor, priceLabel } from "@/lib/dashboard-format";
 import { formatEUR } from "@/lib/utils";
 import type { CommuteResult, Property, PropertyEnrichment } from "@/types";
 
@@ -29,7 +29,6 @@ interface MapPanelProps {
   work?: { lat: number; lon: number; label: string } | null;
   selectedCode: string | null;
   onSelect: (code: string | null) => void;
-  showSafety: boolean;
   showTrajectory: boolean;
 }
 
@@ -38,7 +37,6 @@ export default function MapPanel({
   work,
   selectedCode,
   onSelect,
-  showSafety,
   showTrajectory,
 }: MapPanelProps) {
   const mapRef = useRef<MapRef | null>(null);
@@ -58,27 +56,6 @@ export default function MapPanel({
   );
   const selected =
     plotted.find((it) => it.property.propertyCode === selectedCode) ?? null;
-
-  const safetyData = useMemo<GeoJSON.FeatureCollection>(
-    () => ({
-      type: "FeatureCollection",
-      features: plotted.flatMap((it) => {
-        const indice = it.enrichment?.neighborhood?.seguridad.indice;
-        if (indice == null) return [];
-        return [
-          {
-            type: "Feature" as const,
-            properties: { color: safetyColor(indice) },
-            geometry: {
-              type: "Point" as const,
-              coordinates: [it.property.longitude!, it.property.latitude!],
-            },
-          },
-        ];
-      }),
-    }),
-    [plotted]
-  );
 
   const trajectory = useMemo(() => {
     const geo = selected?.enrichment?.commute?.rutaGeo;
@@ -162,12 +139,6 @@ export default function MapPanel({
     >
       <NavigationControl position="top-right" showCompass={false} />
 
-      {showSafety && safetyData.features.length > 0 && (
-        <Source id="safety" type="geojson" data={safetyData}>
-          <Layer {...SAFETY_LAYER} />
-        </Source>
-      )}
-
       {showTrajectory && trajectory && (
         <Source id="trajectory" type="geojson" data={trajectory.data}>
           <Layer {...(trajectory.aprox ? TRAJECTORY_DASHED : TRAJECTORY_SOLID)} />
@@ -239,6 +210,7 @@ export default function MapPanel({
               {formatEUR(selected.property.price)}
               {selected.property.operation === "rent" ? "/mes" : ""}
             </p>
+            <p className="mt-1 text-[11px] text-stone">{priceLabel(selected.enrichment?.valuation) ? `${priceLabel(selected.enrichment?.valuation)} frente a la estimación` : "Sin valoración individual"}</p>
             {selected.enrichment?.commute?.recomendado && (
               <p className="mt-1 text-[11px] text-ink-700">
                 {legMinutes(selected.enrichment.commute)} min{" "}
@@ -256,19 +228,6 @@ function legMinutes(c: CommuteResult): number | string {
   const leg = c.modos.find((m) => m.modo === c.recomendado);
   return leg?.minutos ?? "—";
 }
-
-const SAFETY_LAYER: LayerProps = {
-  id: "safety-fill",
-  type: "circle",
-  paint: {
-    "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 12, 14, 38],
-    "circle-color": ["get", "color"],
-    "circle-opacity": 0.16,
-    "circle-stroke-color": ["get", "color"],
-    "circle-stroke-opacity": 0.5,
-    "circle-stroke-width": 1,
-  },
-};
 
 const TRAJECTORY_SOLID: LayerProps = {
   id: "trajectory-line",

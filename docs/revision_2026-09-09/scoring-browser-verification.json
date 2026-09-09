@@ -1,0 +1,63 @@
+{
+  "date": "2026-09-09",
+  "environment": {
+    "app": "http://localhost:3017",
+    "copy": "/tmp/habitia-data-ui.OrXVwi",
+    "browser": "agent-browser habitia-ranking",
+    "idealista": "mock",
+    "model": "unconfigured; abstention expected",
+    "supabase": "unconfigured in isolated copy; expected favorites error"
+  },
+  "checks": {
+    "defaultWeights": [
+      25,
+      25,
+      25,
+      25
+    ],
+    "invalidTotal105Rejected": true,
+    "savedWeights": {
+      "alpha": 30,
+      "beta": 25,
+      "gamma": 25,
+      "delta": 20
+    },
+    "recommendRequestsOnProfileSave": 0,
+    "recommendRequestsBeforeConfirmation": 0,
+    "recommendRequestsAfterConfirmation": 1,
+    "restoredCount": 5,
+    "restoredPrice": 500000,
+    "recommendRequestsOnReload": 0,
+    "descendingScores": [
+      38,
+      38,
+      34,
+      27,
+      26
+    ],
+    "modelUnavailableComponents": {
+      "fair": null,
+      "opportunity": null,
+      "coveragePercent": 45
+    },
+    "drawerDisclosureKeyboard": true,
+    "mobileWidth": 390,
+    "horizontalOverflow": false,
+    "errorOverlay": false,
+    "budget1AfterFix": {
+      "apiItems": [],
+      "uiResults": 0,
+      "uiLastSearch": 0,
+      "restoredCount": 0,
+      "restoredStorageCount": 0,
+      "restoredPrice": 1,
+      "recommendRequestsOnReload": 0
+    }
+  },
+  "notes": [
+    "Model price labels with valid model contract covered in unit tests, not a live model request.",
+    "Budget1 exposed mock generation exceeding price cap; defensive filter added to recommender and regression test.",
+    "Snapshot empty replacement verified by storage regression and browser reload with zero recommendation requests.",
+    "A browser wait with a text selector hung; stopped only that test wait, not app server."
+  ]
+}

@@ -16,7 +16,8 @@ import type { MarketDataKey, MarketDataPayload } from "./types";
  *
  * Los datos se refrescan en un cron diario (Vercel Cron → /api/cron/market).
  * `getMarketData()` devuelve la última versión cacheada o, como respaldo,
- * los fixtures locales para que el agente nunca se quede sin datos que citar.
+ * los fixtures locales, siempre marcados como no verificados y excluidos de
+ * las valoraciones. La ausencia de datos debe explicarse, no rellenarse.
  *
  * No reintentamos refresh desde el read path: si Supabase devuelve algo
  * caducado, igual lo servimos — el cron lo arreglará en su próxima pasada.
@@ -88,6 +89,21 @@ const LIVE_FETCHERS: { [K in MarketDataKey]: () => Promise<MarketDataPayload[K]>
 const MEM_TTL_MS = 6 * 60 * 60 * 1000;
 const memCache = new Map<MarketDataKey, { at: number; data: unknown }>();
 
+/** Acota también la lectura del cuerpo: el timeout del fetch no basta en todos los runtimes. */
+async function withMarketDeadline<T>(load: () => Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      load(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("La fuente de mercado no respondió a tiempo.")), 9_000);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function wrapLive<K extends MarketDataKey>(key: K): Promise<CachedMarketData<K>> {
   const cached = memCache.get(key);
   if (cached && Date.now() - cached.at < MEM_TTL_MS) {
@@ -100,7 +116,7 @@ async function wrapLive<K extends MarketDataKey>(key: K): Promise<CachedMarketDa
     };
   }
   try {
-    const data = await LIVE_FETCHERS[key]();
+    const data = await withMarketDeadline(LIVE_FETCHERS[key]);
     memCache.set(key, { at: Date.now(), data });
     const isFallback = isFallbackData(key, data);
     return {
@@ -190,7 +206,7 @@ async function safeFetch<K extends MarketDataKey>(
   fn: () => Promise<MarketDataPayload[K]>
 ): Promise<SafeFetched<K>> {
   try {
-    const data = await fn();
+    const data = await withMarketDeadline(fn);
     if (isFallbackData(key, data)) return { ok: false, key, error: "La fuente devolvió respaldo; se conserva el último dato verificado." };
     return { ok: true, key, data };
   } catch (err) {

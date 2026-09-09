@@ -1,4 +1,5 @@
 import type { UserProfile, Property } from "@/types";
+import { DEFAULT_SCORE_WEIGHTS, validScoreWeights } from "@/lib/personal-score";
 import { ValidationError } from "@/lib/errors";
 export function isRecord(v: unknown): v is Record<string, unknown> {
   return v !== null && typeof v === "object" && !Array.isArray(v);
@@ -39,6 +40,10 @@ export function validatedProfile(value: unknown): UserProfile | null {
     if (value[key] !== undefined && !Number.isFinite(value[key])) throw new ValidationError("invalid profile number");
     if (typeof value[key] === "number") p[key] = value[key];
   }
+  if (value.scoreWeights !== undefined && !validScoreWeights(value.scoreWeights)) throw new ValidationError("invalid score weights", "Los cuatro pesos deben ser enteros de 0 a 100 y sumar 100.");
+  p.scoreWeights = validScoreWeights(value.scoreWeights) ? { ...value.scoreWeights } : { ...DEFAULT_SCORE_WEIGHTS };
+  if (["solo", "pareja", "familia", "compartido"].includes(String(value.hogar))) p.hogar = value.hogar as UserProfile["hogar"];
+  if (typeof value.mascota === "boolean") p.mascota = value.mascota;
   if (value.tipo === "pisos" || value.tipo === "casas") p.tipo = value.tipo;
   if (Array.isArray(value.prioridades)) p.prioridades = value.prioridades.filter((x) => ["seguridad", "cerca_trabajo", "vida_nocturna", "zonas_verdes", "transporte", "tranquilidad"].includes(x)).slice(0, 6);
   if (Array.isArray(value.imprescindibles)) p.imprescindibles = value.imprescindibles.filter((x) => ["ascensor", "exterior", "terraza", "aire_acondicionado", "amueblado", "garaje", "trastero"].includes(x)).slice(0, 7);

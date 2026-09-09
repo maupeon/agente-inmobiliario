@@ -7,10 +7,13 @@ import { ArrowRight, List, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { IdealistaUsageBadge } from "./IdealistaUsageBadge";
 import { Logo } from "./ui/Logo";
+import { NotificationWatcher } from "./NotificationWatcher";
 
 const LINKS = [
   { href: "/comprar-o-alquilar", label: "Comprar o alquilar" },
   { href: "/como-funciona", label: "Cómo funciona" },
+  { href: "/datos", label: "Datos y fuentes" },
+  { href: "/notificaciones", label: "Notificaciones" },
   { href: "/chat", label: "Asistente" },
 ] as const;
 
@@ -31,6 +34,7 @@ export function SiteNav() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/70 bg-paper/75 backdrop-blur-xl supports-[backdrop-filter]:bg-paper/65">
+      <NotificationWatcher />
       <nav
         aria-label="Navegación principal"
         className="mx-auto flex min-h-16 w-full max-w-[1200px] items-center justify-between gap-4 px-5 sm:px-8"
@@ -39,7 +43,7 @@ export function SiteNav() {
           <Logo variant="inline" className="text-[1.25rem]" />
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 xl:flex">
           {LINKS.map((link) => {
             const active = path === link.href || path.startsWith(`${link.href}/`);
             return (
@@ -59,7 +63,7 @@ export function SiteNav() {
         </div>
 
         <div className="flex items-center gap-2">
-          <IdealistaUsageBadge className="hidden lg:inline-flex" />
+          <IdealistaUsageBadge className="hidden 2xl:inline-flex" />
           <Link
             href="/dashboard"
             aria-current={path === "/dashboard" ? "page" : undefined}
@@ -76,7 +80,7 @@ export function SiteNav() {
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
             onClick={() => setMenuOpen((open) => !open)}
-            className="pressable grid h-11 w-11 place-items-center rounded-xl border border-hairline bg-paper-50 text-ink md:hidden"
+            className="pressable grid h-11 w-11 place-items-center rounded-xl border border-hairline bg-paper-50 text-ink xl:hidden"
           >
             {menuOpen ? <X aria-hidden size={19} weight="bold" /> : <List aria-hidden size={20} weight="bold" />}
           </button>
@@ -87,7 +91,7 @@ export function SiteNav() {
         id="mobile-navigation"
         aria-hidden={!menuOpen}
         className={cn(
-          "absolute inset-x-0 top-full origin-top border-b border-hairline bg-paper-50/95 px-5 pb-5 pt-2 shadow-lift backdrop-blur-xl transition md:hidden",
+          "absolute inset-x-0 top-full origin-top border-b border-hairline bg-paper-50/95 px-5 pb-5 pt-2 shadow-lift backdrop-blur-xl transition xl:hidden",
           menuOpen
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-2 opacity-0"
@@ -100,7 +104,6 @@ export function SiteNav() {
           {[
             { href: "/dashboard", label: "Buscar vivienda" },
             ...LINKS,
-            { href: "/datos", label: "Datos y fuentes" },
           ].map((link) => {
             const active = path === link.href || path.startsWith(`${link.href}/`);
             return (

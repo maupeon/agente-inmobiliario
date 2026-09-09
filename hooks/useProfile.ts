@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { scoreWeights } from "@/lib/personal-score";
 import type { UserProfile } from "@/types";
 
 const KEY = "habitia:profile:v1";
@@ -10,7 +11,10 @@ function readStoredProfile(): UserProfile | null {
   for (const key of STORAGE_KEYS) {
     try {
       const raw = localStorage.getItem(key);
-      if (raw) return JSON.parse(raw) as UserProfile;
+      if (raw) {
+        const parsed = JSON.parse(raw) as UserProfile;
+        if (parsed && ["alquiler", "venta"].includes(parsed.operacion)) return { ...parsed, scoreWeights: scoreWeights(parsed.scoreWeights) };
+      }
     } catch {
       // Si una entrada está corrupta, probamos la siguiente clave compatible.
     }
@@ -48,8 +52,9 @@ export function useProfile() {
   }, []);
 
   const save = useCallback((p: UserProfile) => {
-    setProfile(p);
-    writeStoredProfile(p);
+    const normalized = { ...p, scoreWeights: scoreWeights(p.scoreWeights) };
+    setProfile(normalized);
+    writeStoredProfile(normalized);
   }, []);
 
   const clear = useCallback(() => {

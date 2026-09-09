@@ -8,11 +8,9 @@ import type {
 /**
  * Referencia de alquiler €/m²/mes por barrio y provincia.
  *
- * "Real where easy": el dato vivo procedería del Sistema Estatal de Índices de
- * Precios de Alquiler (MIVAU) o de la Estadística Experimental del INE, pero no
- * exponen un JSON limpio por barrio. Mantenemos los fixtures como fuente
- * principal — igual que `fetchInePriceByProvince` — y dejamos preparado el
- * seam para sustituirlos por el dataset oficial cuando lo integremos.
+ * La descarga e integración del SERPAVI oficial no están implementadas.
+ * Este método devuelve únicamente ejemplos manuales. `market/cache` los
+ * marca siempre como fallback y `enrich` evita usarlos para valorar anuncios.
  */
 export async function fetchRentReference(): Promise<RentReference> {
   // TODO: parsear el CSV/Excel del Sistema Estatal de Índices de Alquiler.

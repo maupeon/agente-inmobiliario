@@ -26,8 +26,8 @@ const BENEFITS = [
   {
     Icon: MapTrifold,
     title: "Entenderás el día a día",
-    copy: "Consulta el barrio, los servicios y el trayecto al trabajo antes de abrir veinte pestañas.",
-    detail: "Barrio y trayectos",
+    copy: "Comprueba la ubicación y el trayecto al trabajo, con el origen y los límites de cada dato.",
+    detail: "Ubicación y trayectos",
   },
   {
     Icon: Sparkle,
@@ -124,7 +124,7 @@ export function Landing() {
                     <p className="mt-0.5 text-sm text-stone">2 hab. · 74 m²</p>
                   </div>
                   <div className="space-y-1 text-right text-xs font-medium text-stone-600">
-                    <p className="text-saffron-700">4% bajo la zona</p>
+                    <p className="text-saffron-700">Ejemplo de recomendación</p>
                     <p className="inline-flex items-center gap-1"><Clock aria-hidden size={12} /> 18 min al trabajo</p>
                   </div>
                 </div>
@@ -132,9 +132,10 @@ export function Landing() {
             </div>
 
             <div className="glass-surface absolute -right-2 top-[29%] hidden rounded-2xl px-4 py-3 text-sm sm:block lg:-right-8">
-              <p className="font-semibold text-ink">Barrio 82/100</p>
-              <p className="text-xs text-stone">Buen transporte · tranquilo</p>
+              <p className="font-semibold text-ink">Tu zona preferida</p>
+              <p className="text-xs text-stone">Elige dónde quieres vivir</p>
             </div>
+            <p className="mt-3 text-center text-xs text-stone">Ejemplo visual: anuncio y trayecto ilustrativos.</p>
           </div>
         </section>
 
@@ -275,6 +276,7 @@ export function Landing() {
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-stone-600">
             <Link href="/como-funciona" className="hover:text-ink">Cómo funciona</Link>
             <Link href="/datos" className="hover:text-ink">Datos y fuentes</Link>
+            <Link href="/notificaciones" className="hover:text-ink">Notificaciones</Link>
             <Link href="/chat" className="hover:text-ink">Asistente</Link>
           </div>
         </div>

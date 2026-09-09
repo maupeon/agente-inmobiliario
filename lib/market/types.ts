@@ -29,10 +29,12 @@ export interface BdeMortgageRates {
   /** Periodo de referencia, p. ej. "2024-12". */
   periodo: string;
   fuente: string;
-  /** TAE media ponderada de hipotecas a hogares para vivienda. */
+  /** TEDR medio ponderado de nuevas operaciones de crédito a hogares para vivienda. */
   tipoMedio: number;
   /** Euribor 12 meses (referencia común para variables). */
   euribor12m?: number;
+  /** El Euríbor puede publicarse para un mes distinto del TEDR. */
+  euriborPeriodo?: string;
 }
 
 export interface IpvQuarterPoint {

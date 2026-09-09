@@ -15,17 +15,23 @@ import {
 } from "@phosphor-icons/react";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useProfile } from "@/hooks/useProfile";
-import { readLastSearch } from "@/lib/last-search";
+import { readLastSearch, saveLastSearch, LAST_SEARCH_EVENT } from "@/lib/last-search";
 import {
   BANDA_COLOR,
   MODE_LABEL,
   bandaColor,
   formatDiff,
-  safetyColor,
+  priceLabel,
+  priceComparison,
 } from "@/lib/dashboard-format";
+import { recommendationExplanation } from "@/lib/recommend-explanation";
+import { personalScore, satisfiesMust } from "@/lib/personal-score";
+import { ScoreBreakdown } from "./ScoreBreakdown";
 import { cn, formatEUR, formatNumber } from "@/lib/utils";
 import type {
   Property,
+  SearchFilters,
+  PersonalScoring,
   PropertyEnrichment,
   PropertyRecommendation,
   PropertyValuation,
@@ -51,6 +57,8 @@ interface ViewItem {
   enrichment: PropertyEnrichment | null;
   rationale?: string;
   rank?: number;
+  score?: number;
+  scoring?: PersonalScoring;
 }
 
 interface FilterForm {
@@ -64,6 +72,7 @@ interface RecommendResponse {
   items?: PropertyRecommendation[];
   intro?: string | null;
   error?: string;
+  filters?: SearchFilters | null;
 }
 
 const EMPTY_ENRICH: Record<string, PropertyEnrichment> = {};
@@ -81,11 +90,12 @@ export function Dashboard() {
   const [skipped, setSkipped] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [lastSearch, setLastSearch] = useState<Property[]>([]);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [storageError, setStorageError] = useState(false);
   const [source, setSource] = useState<Source>("para_ti");
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [detailItem, setDetailItem] = useState<ViewItem | null>(null);
-  const [showSafety, setShowSafety] = useState(true);
   const [showTrajectory, setShowTrajectory] = useState(true);
 
   // "Para ti"
@@ -115,8 +125,28 @@ export function Dashboard() {
   const enrichRequestRef = useRef(0);
 
   useEffect(() => {
-    setLastSearch(readLastSearch().properties);
-  }, []);
+    const restore = () => {
+      const stored = readLastSearch();
+      setLastSearch(stored.properties);
+      setLastSavedAt(stored.savedAt);
+    };
+    restore();
+    const stored = readLastSearch();
+    if (!hasLaunchSearch && stored.source === "dashboard" && stored.savedAt && stored.filters) {
+      const restoredForm: FilterForm = { zona: stored.filters.zona, operacion: stored.filters.operacion,
+        precioMax: stored.filters.precioMax ? String(stored.filters.precioMax) : "",
+        habitaciones: stored.filters.habitaciones ? String(stored.filters.habitaciones) : "" };
+      setForm(restoredForm);
+      setApplied(restoredForm);
+      setRecs(stored.recommendations ?? []);
+      setHasSearched(true);
+      setSkipped(true);
+      initRef.current = true;
+    }
+    window.addEventListener(LAST_SEARCH_EVENT, restore);
+    window.addEventListener("storage", restore);
+    return () => { window.removeEventListener(LAST_SEARCH_EVENT, restore); window.removeEventListener("storage", restore); };
+  }, [hasLaunchSearch]);
 
   // Inicializa filtros desde el perfil una sola vez.
   const initRef = useRef(false);
@@ -186,8 +216,10 @@ export function Dashboard() {
         throw new Error(data.error ?? "No he podido contactar con el servicio de recomendaciones.");
       }
       if (ctrl.signal.aborted) return;
-      setRecs(data.items ?? []);
+      const resultItems = data.items ?? [];
+      setRecs(resultItems);
       setRecIntro(data.intro ?? null);
+      setStorageError(!saveLastSearch(resultItems.map((r) => r.property), { source: "dashboard", filters: data.filters, recommendations: resultItems }));
     } catch (error: unknown) {
       if (!ctrl.signal.aborted) {
         setRecError(error instanceof Error ? error.message : "No he podido contactar con el servicio de recomendaciones.");
@@ -250,18 +282,21 @@ export function Dashboard() {
   // ── Modelo de vista por fuente ──
   const items: ViewItem[] = useMemo(() => {
     if (source === "para_ti") {
-      return recs.map((r, i) => ({
-        property: r.property,
-        enrichment: r.enrichment,
-        rationale: r.rationale,
-        rank: i + 1,
-      }));
+      const matchesZone = applied.zona.trim().localeCompare(profile?.zona?.trim() ?? "", "es", { sensitivity: "base" }) === 0;
+      const scoringProfile = profile ? { ...profile, presupuestoMax: applied.precioMax ? Number(applied.precioMax) : undefined,
+        ...(matchesZone ? {} : { zonaLat: undefined, zonaLon: undefined }) } : null;
+      return recs.filter((r) => (profile?.imprescindibles ?? []).every((m) => satisfiesMust(r.property, m) !== false))
+        .map((r) => ({ property: r.property, enrichment: r.enrichment,
+        ...recommendationExplanation(r.property, r.enrichment, scoringProfile),
+        ...personalScore(r.property, r.enrichment, scoringProfile, applied.precioMax ? Number(applied.precioMax) : undefined) }))
+        .sort((a, b) => b.score - a.score).map((r, i) => ({ ...r, rank: i + 1 }));
     }
     return enrichList.map((p) => ({
       property: p,
       enrichment: enrichments[p.propertyCode] ?? null,
-    }));
-  }, [source, recs, enrichList, enrichments]);
+      ...personalScore(p, enrichments[p.propertyCode] ?? { propertyCode: p.propertyCode, valuation: null, neighborhood: null, commute: null }, profile),
+    })).sort((a, b) => b.score - a.score);
+  }, [source, recs, enrichList, enrichments, profile, applied]);
 
   useEffect(() => {
     if (!selectedCode) return;
@@ -408,16 +443,16 @@ export function Dashboard() {
               ready={loaded}
             />
             <p className="mt-2 text-xs leading-relaxed text-stone-600">
-              Entrar o cambiar filtros no consume búsquedas. Te pediremos confirmación antes de consultar Idealista.
+              Entrar o cambiar filtros no consume búsquedas. La caché de Idealista dura 24 horas; Buscar solicita una actualización confirmada y reutiliza esa caché mientras siga vigente.
             </p>
           </>
         )}
 
+        {lastSavedAt && <p className="mt-3 text-xs text-stone-600">Última búsqueda guardada en este navegador: {new Date(lastSavedAt).toLocaleString("es-ES")}. Es una instantánea; confirma la disponibilidad en el anuncio.</p>}
+        {storageError && <p role="alert" className="mt-2 text-sm text-rose-700">La búsqueda se ha mostrado, pero no ha cabido en el almacenamiento del navegador.</p>}
+        {items.length > 0 && <p className="mt-3 text-xs text-stone-600">Orden: Score HabitIA de mayor a menor. La cobertura indica qué parte de tus pesos se puede evaluar. Seguridad y calidad de barrio no tienen índices verificados.</p>}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <Toggle on={showSafety} onClick={() => setShowSafety((value) => !value)}>
-              Seguridad
-            </Toggle>
             <Toggle on={showTrajectory} onClick={() => setShowTrajectory((value) => !value)}>
               Trayecto
             </Toggle>
@@ -495,7 +530,6 @@ export function Dashboard() {
                   work={work}
                   selectedCode={selectedCode}
                   onSelect={setSelectedCode}
-                  showSafety={showSafety}
                   showTrajectory={showTrajectory}
                 />
               </div>
@@ -594,7 +628,7 @@ function SearchConfirmation({
       <p id="confirm-search-description" className="mt-4 text-sm leading-relaxed text-stone-600">
         Esta búsqueda puede consumir 1 solicitud de tu cupo mensual de Idealista,
         incluso si falla. Si hay resultados guardados vigentes, los reutilizamos
-        sin gastar cuota. En modo demo tampoco se consume cuota.
+        durante 24 horas sin gastar cuota. En modo demo tampoco se consume cuota.
       </p>
       <div className="mt-6 flex flex-wrap justify-end gap-2">
         <button type="button" onClick={cancel} className="pressable min-h-11 rounded-xl border border-hairline px-4 text-sm font-medium">
@@ -785,15 +819,15 @@ function ViewButton({
 function Legend() {
   return (
     <div className="flex flex-wrap items-center gap-3 text-xs text-stone" aria-label="Leyenda del mapa">
-      <span className="font-medium text-stone-600">Precio:</span>
+      <span className="font-medium text-stone-600">Frente a la estimación:</span>
       <span className="inline-flex items-center gap-1.5">
-        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.barato }} /> favorable
+        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.barato }} /> Barato
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.en_linea }} /> en línea
+        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.en_linea }} /> Justo
       </span>
       <span className="inline-flex items-center gap-1.5">
-        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.muy_caro }} /> alto
+        <span className="h-2 w-2 rounded-full" style={{ background: BANDA_COLOR.muy_caro }} /> Caro
       </span>
     </div>
   );
@@ -823,7 +857,6 @@ function PropertyRow({
   const { property, enrichment, rationale, rank } = item;
   const val = enrichment?.valuation ?? null;
   const commute = enrichment?.commute ?? null;
-  const safety = enrichment?.neighborhood?.seguridad ?? null;
   const leg = commute?.modos.find((m) => m.modo === commute.recomendado) ?? null;
   const noCoords = property.latitude == null || property.longitude == null;
   const op = property.operation === "rent" ? "alquiler" : "venta";
@@ -914,8 +947,9 @@ function PropertyRow({
       {val?.avisoModelo && <p className="mt-3 text-xs leading-relaxed text-stone-600">{val.nivel === "modelo" ? `Oferta 2018 · escenario ${val.nivelPrecios}. Precisión actual no validada.` : val.avisoModelo}</p>}
       {rationale && <p className="mt-3 text-sm leading-relaxed text-ink-700">{rationale}</p>}
 
-      <div className="mt-3 grid grid-cols-3 gap-2 rounded-xl bg-paper-200/75 p-3">
-        <Signal label="Precio">
+      <ScoreBreakdown score={item.score} scoring={item.scoring} />
+      <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-paper-200/75 p-3">
+        <Signal label="Precio vs. estimación">
           <PriceBadge val={val} />
         </Signal>
         <Signal label="Trayecto">
@@ -932,16 +966,6 @@ function PropertyRow({
             <span className="text-stone">Sin dato</span>
           )}
         </Signal>
-        <Signal label="Barrio">
-          {safety?.indice != null ? (
-            <span className="inline-flex items-center gap-1.5 text-ink">
-              <span className="h-2 w-2 rounded-full" style={{ background: safetyColor(safety.indice) }} />
-              {safety.indice}/100
-            </span>
-          ) : (
-            <span className="text-stone">Sin dato</span>
-          )}
-        </Signal>
       </div>
 
       {selected && (val || enrichment?.neighborhood?.resumen) && (
@@ -949,7 +973,7 @@ function PropertyRow({
           {val && (
             <p>
               La vivienda pide <strong className="text-ink">{formatEUR(property.price)}</strong>
-              {property.operation === "rent" ? "/mes" : ""}; {val.etiqueta ?? "no hay referencia comparable"}.
+              {property.operation === "rent" ? "/mes" : ""}; {priceComparison(val)}.
             </p>
           )}
           {enrichment?.neighborhood?.resumen && (
@@ -990,11 +1014,11 @@ function Signal({ label, children }: { label: string; children: React.ReactNode 
 }
 
 function PriceBadge({ val }: { val: PropertyValuation | null }) {
-  if (!val || val.nivel !== "modelo" || val.estadoModelo !== "ok" || val.fromFallback || val.diferenciaPorcentual == null) return <span className="text-stone">—</span>;
+  if (!priceLabel(val)) return <span className="text-stone">Sin valoración</span>;
   return (
-    <span className="inline-flex items-center gap-1.5" style={{ color: bandaColor(val.banda) }}>
-      <span className="h-2 w-2 rounded-full" style={{ background: bandaColor(val.banda) }} />
-      <span className="font-medium">{formatDiff(val.diferenciaPorcentual)}</span>
+    <span className="inline-flex items-center gap-1.5" style={{ color: bandaColor(val?.banda) }}>
+      <span className="h-2 w-2 rounded-full" style={{ background: bandaColor(val?.banda) }} />
+      <span className="font-medium">{priceLabel(val)} · {formatDiff(val?.diferenciaPorcentual)}</span>
     </span>
   );
 }

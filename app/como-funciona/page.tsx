@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { SiteNav } from "@/components/SiteNav";
 import { Logo } from "@/components/ui/Logo";
+import { MARKET_SOURCES } from "@/lib/market/presentation";
 
 export const metadata: Metadata = {
   title: "Cómo funciona",
@@ -13,64 +14,68 @@ export const metadata: Metadata = {
 const STEPS = [
   {
     n: "01",
-    t: "Onboarding en el mapa",
-    d: "Nos cuentas quién eres: eliges la zona y tu trabajo sobre un mapa, tu presupuesto, con quién vives y qué te importa de un barrio. Sin formularios interminables.",
+    t: "Tu perfil y tus prioridades",
+    d: "Eliges la zona, presupuesto, trabajo e imprescindibles. Repartes 100 puntos entre precio, oportunidad, zona y estilo de vida; de inicio, cada componente tiene 25.",
   },
   {
     n: "02",
     t: "Recomendación “para ti”",
-    d: "Buscamos en Idealista con tu perfil y puntuamos cada piso según tus prioridades, el presupuesto, el precio frente a la zona, el trayecto y los requisitos comprobables.",
+    d: "Buscamos candidatos con tus filtros y excluimos los incumplimientos conocidos de requisitos obligatorios. Los datos que faltan quedan pendientes de comprobar.",
   },
   {
     n: "03",
-    t: "Enriquecimiento",
-    d: "A cada candidato le calculamos tres señales: si está caro o barato para la zona, cómo de seguro es el barrio y cuánto tardas a tu trabajo (con la ruta real).",
+    t: "Datos con contexto",
+    d: "Añadimos la estimación de precio si el modelo puede calcularla, la referencia territorial disponible y el trayecto. Cada dato conserva su origen y sus límites.",
   },
   {
     n: "04",
     t: "Mapa + explicación",
-    d: "Te enseñamos los 3-5 mejores sobre el mapa, coloreados por precio, con el trayecto dibujado — y una frase de por qué encaja contigo.",
+    d: "Ordenamos hasta cinco viviendas por HabitIA Score. Puedes abrir cada ficha para ver los cuatro componentes, tus pesos, la cobertura de datos y por qué encaja.",
   },
 ];
 
 const SIGNALS = [
   {
-    t: "Precio frente a la zona",
-    d: "Comparamos el €/m² del anuncio con la referencia de la zona (alquiler) o de la provincia (compra) y te decimos cuánto se desvía.",
-    fuente: "Modelo histórico · referencia provincial si está verificada",
+    t: "α · Fair · precio",
+    d: "Compara el precio anunciado con la estimación individual del modelo. Las bandas más favorables reciben más puntos. Una media provincial no sustituye esta estimación.",
+    fuente: "25% por defecto · Sin estimación: no disponible",
   },
   {
-    t: "Seguridad del barrio",
-    d: "Los índices manuales de barrio se han retirado por falta de fuentes verificables.",
-    fuente: "Sin fuente verificada",
+    t: "β · Opportunity · margen",
+    d: "Mide el margen del precio anunciado respecto al extremo inferior del intervalo del modelo. Es una regla de puntuación, no una probabilidad de beneficio.",
+    fuente: "25% por defecto · Requiere intervalo del modelo",
   },
   {
-    t: "Trayecto al trabajo",
-    d: "Tiempo y ruta según proveedor disponible. El transporte público y los respaldos son aproximaciones.",
-    fuente: "OpenRouteService",
+    t: "γ · Zone · ubicación",
+    d: "Mide la proximidad al punto que has elegido para vivir. No califica la seguridad, los servicios o la calidad del barrio; refleja tu preferencia geográfica.",
+    fuente: "25% por defecto · Tu zona preferida",
+  },
+  {
+    t: "δ · Lifestyle · día a día",
+    d: "Combina el ajuste al presupuesto, el trayecto al trabajo y los requisitos de vivienda que se pueden comprobar. Los atributos desconocidos se indican expresamente.",
+    fuente: "25% por defecto · Datos disponibles del anuncio y ruta",
   },
 ];
 
-type Estado = "real" | "orientativo" | "infra";
-const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco: string }> = [
-  { fuente: "Idealista", aporta: "Anuncios: pisos, fotos, precio, m²", estado: "infra", refresco: "Al buscar (mock hasta tener clave propia)" },
-  { fuente: "MITMA — Valor Tasado", aporta: "Precio €/m² de compra por provincia", estado: "real", refresco: "Trimestral (cron)" },
-  { fuente: "INE — IPV (tabla 25171)", aporta: "Tendencia de precios de vivienda (%)", estado: "real", refresco: "Trimestral" },
-  { fuente: "Banco de España", aporta: "Tipo hipotecario medio + Euríbor 12m", estado: "real", refresco: "Mensual" },
-  { fuente: "OpenRouteService", aporta: "Rutas y tiempos de trayecto", estado: "real", refresco: "En vivo (con ORS_API_KEY)" },
-  { fuente: "Nominatim (OpenStreetMap)", aporta: "Geocodificación del mapa", estado: "real", refresco: "En vivo" },
-  { fuente: "Referencia de alquiler", aporta: "Sin medición verificada para valorar", estado: "orientativo", refresco: "Datos manuales solo ilustrativos" },
-  { fuente: "Indicadores de barrio", aporta: "Sin fuente verificada: retirados", estado: "orientativo", refresco: "No intervienen en el ranking" },
-  { fuente: "Supabase", aporta: "Conversaciones, favoritos y caché de mercado", estado: "infra", refresco: "Persistencia" },
+type Estado = "oficial" | "no disponible" | "proveedor";
+const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco: string; href?: string }> = [
+  { fuente: "Idealista", aporta: "Anuncios: fotos, precio, m²", estado: "proveedor", refresco: "Caché de búsqueda de hasta 24 h; demo identificada" },
+  { fuente: "MIVAU · Valor tasado", aporta: "Contexto provincial de compra, €/m²", estado: "oficial", refresco: "Publicación trimestral", href: MARKET_SOURCES.valuation.href },
+  { fuente: "INE · IPV", aporta: "Evolución de precios de vivienda (%)", estado: "oficial", refresco: "Publicación trimestral", href: MARKET_SOURCES.ipv.href },
+  { fuente: "Banco de España", aporta: "Referencias de tipos de interés", estado: "oficial", refresco: "Publicación mensual", href: MARKET_SOURCES.rates.href },
+  { fuente: "OpenRouteService", aporta: "Rutas; respaldos indicados como aproximados", estado: "proveedor", refresco: "Al calcular el trayecto" },
+  { fuente: "Nominatim / OpenStreetMap", aporta: "Búsqueda de ubicaciones", estado: "proveedor", refresco: "Al localizar una dirección" },
+  { fuente: "Referencia de alquiler", aporta: "La integración de SERPAVI está pendiente", estado: "no disponible", refresco: "Los ejemplos no se usan para valorar" },
+  { fuente: "Seguridad y calidad del barrio", aporta: "Retirados por falta de fuente verificable", estado: "no disponible", refresco: "No intervienen en el ranking" },
 ];
 
 const STACK = [
   "Next.js 14 (App Router, SSR + SSE)",
-  "Claude — Opus (chat) + Sonnet (insights)",
+  "Claude — chat y explicaciones opcionales",
   "MapLibre GL + teselas CARTO (sin clave)",
   "Supabase (Postgres) — caché y persistencia",
   "OpenRouteService — routing",
-  "INE · MITMA · Banco de España — mercado",
+  "INE · MIVAU · Banco de España — mercado",
 ];
 
 export default function ComoFuncionaPage() {
@@ -87,13 +92,13 @@ export default function ComoFuncionaPage() {
 
         <header className="mt-10 max-w-[60ch]">
           <h1 className="font-display text-display-md text-ink">
-            Del onboarding a tus 3-5 pisos, explicado.
+            De tus preferencias a tu próxima vivienda.
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-stone-600">
             <Logo variant="mark" className="text-[1.1em]" /> es un agente
-            inmobiliario que no te hace rellenar filtros: le cuentas cómo quieres
-            vivir y te devuelve los pisos que mejor encajan, sobre un mapa, con el
-            porqué de cada uno. Aquí tienes cómo está montado por dentro.
+            inmobiliario que combina tus preferencias con los datos disponibles
+            de cada vivienda. Tú decides qué pesa más; aquí puedes comprobar cómo
+            se calcula el orden y qué información sigue faltando.
           </p>
         </header>
 
@@ -115,17 +120,16 @@ export default function ComoFuncionaPage() {
         {/* Motor */}
         <Section eyebrow="El motor" title="Cómo se eligen y ordenan">
           <p className="max-w-[68ch] text-base leading-relaxed text-ink-700">
-            Pedimos varios candidatos a Idealista y los puntuamos de 0 a 100
-            combinando: <Strong>precio frente a la zona</Strong>,{" "}
-            <Strong>ajuste a tu presupuesto</Strong>, <Strong>trayecto</Strong> al
-            trabajo e <Strong>imprescindibles</Strong> comprobables. Se excluyen
-            los incumplimientos conocidos y se señalan los datos pendientes de comprobar.
-            La prioridad de cercanía refuerza el trayecto. Comparamos hasta ocho anuncios
-            recuperados y mostramos hasta cinco; no representan todo el mercado.
-            Las explicaciones son deterministas salvo que se active la narración opcional.
-            La estimación de compra usa oferta de 2018 indexada: es un escenario sin precisión actual validada.
+            El <Strong>HabitIA Score</Strong> es una suma ponderada de cuatro
+            componentes, cada uno de 0 a 100. Los pesos α, β, γ y δ también van
+            de 0 a 100 y deben sumar exactamente 100. Puedes editarlos en tu perfil;
+            por defecto son 25, 25, 25 y 25. Ordenamos de mayor a menor puntuación
+            los candidatos recuperados, que no representan todo el mercado.
           </p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-hairline bg-paper-200 p-4 font-mono text-sm text-ink" aria-label="Fórmula del HabitIA Score">
+            Score = (α × Fair + β × Opportunity + γ × Zone + δ × Lifestyle) / 100
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {SIGNALS.map((s) => (
               <div key={s.t} className="rounded-xl border border-hairline bg-paper-50 p-5">
                 <h4 className="font-display text-lg leading-tight text-ink">{s.t}</h4>
@@ -136,12 +140,44 @@ export default function ComoFuncionaPage() {
               </div>
             ))}
           </div>
+          <p className="mt-5 max-w-[72ch] text-sm leading-relaxed text-stone-600">
+            <Strong>Si falta un dato, no inventamos una puntuación.</Strong>{" "}
+            El componente queda sin dato, aporta cero y su peso no se reparte
+            entre los demás. La cobertura indica qué porcentaje de tus pesos tiene
+            datos disponibles; un score bajo puede reflejar falta de información.
+            No es una probabilidad de acierto ni una valoración financiera.
+          </p>
+        </Section>
+
+        <Section eyebrow="La comparación" title="Qué significan Barato, Justo y Caro">
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">
+            Estas etiquetas comparan el anuncio con el escenario del modelo.
+            «12% por debajo de la estimación» describe esa diferencia; no asegura
+            un ahorro real. El modelo aprende precios de oferta de Madrid de 2018
+            y su ajuste a otro periodo es un escenario indexado sin precisión actual
+            validada. Si el modelo se abstiene, no clasificamos el precio individual.
+            La media territorial, si existe, se muestra aparte con fuente y periodo.
+          </p>
+        </Section>
+
+        <Section eyebrow="Tu búsqueda" title="Cuándo cambian los resultados">
+          <div className="space-y-3 text-sm leading-relaxed text-stone-600">
+            <p>Al confirmar una búsqueda se aplica tu perfil a los candidatos disponibles. Una consulta idéntica puede reutilizar anuncios durante un máximo de 24 horas para reducir consultas al proveedor; al caducar, la siguiente búsqueda vuelve a consultarlo.</p>
+            <p>Cambiar tus pesos reordena las viviendas mostradas sin volver a consultar al proveedor. «Última búsqueda» recupera los filtros y resultados guardados, incluso si no hubo coincidencias. Su fecha describe cuándo buscaste, no garantiza que el anuncio siga disponible.</p>
+          </div>
+        </Section>
+
+        <Section eyebrow="Cada mañana" title="Tus tres viviendas del día">
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Notificaciones puedes activar una selección diaria, editar la hora y pausarla cuando quieras. La hora inicial es 07:00, zona horaria Europe/Madrid. Se eligen hasta tres viviendas según tu perfil y tu HabitIA Score; si hay menos candidatos, no se completa la selección con viviendas inventadas.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Los avisos se consultan en la bandeja de la aplicación. El aviso del navegador requiere permiso y la aplicación abierta; no se envían correos. La selección puede repetir viviendas si siguen siendo las que mejor encajan.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Al activarla autorizas una búsqueda diaria con tu perfil, respetando la caché y los límites del proveedor. Guarda los cambios en Notificaciones para actualizar ese perfil. La suscripción caduca tras 90 días sin guardar y la página muestra si el servicio está configurado.</p>
+          <Link href="/notificaciones" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-ink px-4 text-sm font-medium text-paper hover:bg-ink-700">Configurar notificaciones <ArrowRight aria-hidden size={16} /></Link>
         </Section>
 
         {/* Datos */}
         <Section eyebrow="De dónde salen los datos" title="Fuentes, con transparencia">
           <p className="mb-5 max-w-[68ch] text-sm leading-relaxed text-stone-600">
-            El tipo de fuente describe el proveedor previsto. Consulta Datos y fuentes para comprobar el periodo y la procedencia disponible. Si no hay una referencia verificada, el producto lo indica y no clasifica el precio con los datos ilustrativos.
+            «Oficial» identifica la publicación de origen, no garantiza que la última descarga haya funcionado. En <Link href="/datos" className="font-medium text-saffron-700 underline underline-offset-4">Datos y fuentes</Link> puedes comprobar el periodo y el estado disponible. Los ejemplos sin trazabilidad no se usan como referencias verificadas.
           </p>
           <div className="overflow-hidden rounded-xl border border-hairline">
             <table className="w-full border-collapse text-left text-sm">
@@ -157,7 +193,7 @@ export default function ComoFuncionaPage() {
                 {SOURCES.map((s) => (
                   <tr key={s.fuente} className="border-t border-hairline align-top">
                     <td className="px-4 py-3 font-medium text-ink">
-                      {s.fuente}
+                      {s.href ? <a href={s.href} target="_blank" rel="noopener noreferrer" className="text-saffron-700 underline underline-offset-4 hover:text-ink">{s.fuente} ↗</a> : s.fuente}
                       <span className="mt-1 block text-xs font-normal text-stone-600 sm:hidden">
                         {s.aporta}
                       </span>
@@ -187,7 +223,7 @@ export default function ComoFuncionaPage() {
             </Box>
             <div className="my-2 grid gap-2 sm:grid-cols-3">
               <SubBox>Idealista<br />(búsqueda)</SubBox>
-              <SubBox>lib/enrich<br />precio · barrio · trayecto</SubBox>
+              <SubBox>lib/enrich<br />precio · referencia territorial · trayecto</SubBox>
               <SubBox>ai-insights<br />Claude (Sonnet)</SubBox>
             </div>
             <Arrow label="lee referencias de mercado" />
@@ -195,9 +231,9 @@ export default function ComoFuncionaPage() {
               Caché de mercado · <span className="text-ink">Supabase</span>{" "}
               (+ fallback en memoria / fixtures)
             </Box>
-            <Arrow label="refresco trimestral" up />
+            <Arrow label="consulta automática de nuevas publicaciones" up />
             <Box>
-              <span className="text-ink">/api/cron/market</span> → MITMA · INE · Banco de España
+              <span className="text-ink">/api/cron/market</span> → MIVAU · INE · Banco de España
             </Box>
           </div>
 
@@ -234,9 +270,10 @@ export default function ComoFuncionaPage() {
         </div>
 
         <p className="mt-10 text-xs leading-relaxed text-mist">
-          Los indicadores de seguridad se han retirado; las referencias de alquiler son
-          orientativos (no oficiales en vivo a nivel de barrio). La IA puede
-          equivocarse: verifica los anuncios en Idealista.
+          Los indicadores de seguridad están retirados y la referencia de alquiler
+          no está integrada. Las explicaciones se generan con los datos disponibles;
+          si se usa narración con IA, puede equivocarse. Confirma precio, condiciones
+          y disponibilidad en el anuncio original.
         </p>
       </main>
     </div>
@@ -254,7 +291,7 @@ function Section({
 }) {
   return (
     <section className="mt-16">
-      <div className="mb-6 flex items-baseline justify-between gap-4 border-b border-hairline pb-3">
+      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
         <h2 className="font-display text-2xl text-ink sm:text-3xl">{title}</h2>
         <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-stone">
           {eyebrow}
@@ -271,9 +308,9 @@ function Strong({ children }: { children: React.ReactNode }) {
 
 function EstadoPill({ estado }: { estado: Estado }) {
   const map = {
-    real: { label: "real", cls: "border-sage-500/30 bg-sage-50 text-sage-500" },
-    orientativo: { label: "orientativo", cls: "border-saffron-300/40 bg-saffron-50 text-saffron-700" },
-    infra: { label: "infra", cls: "border-hairline-strong bg-paper-200 text-stone" },
+    oficial: { label: "oficial", cls: "border-sage-500/30 bg-sage-50 text-sage-500" },
+    "no disponible": { label: "no disponible", cls: "border-amber-300 bg-amber-50 text-amber-900" },
+    proveedor: { label: "proveedor", cls: "border-hairline-strong bg-paper-200 text-stone" },
   }[estado];
   return (
     <span

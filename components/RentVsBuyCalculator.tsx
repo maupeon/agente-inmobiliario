@@ -15,46 +15,31 @@ import { SensitivityHeatmap } from "./rent-vs-buy/SensitivityHeatmap";
 const field = (campo: keyof RentVsBuyInput) =>
   RENT_VS_BUY_FIELDS.find((f) => f.campo === campo)!;
 
-const SEC_PARTIDA: Array<keyof RentVsBuyInput> = [
-  "precioVivienda",
-  "alquilerMensual",
-  "capitalDisponible",
-  "horizonteAnios",
+const SEC_PARTIDA: Array<keyof RentVsBuyInput> = ["capitalDisponible", "horizonteAnios"];
+const SEC_COMPRA: Array<keyof RentVsBuyInput> = [
+  "precioVivienda", "esObraNueva", "gastosCompraPorcentaje", "gastosInicialesCompra", "revalorizacionViviendaAnual",
 ];
-const SEC_HIPOTECA: Array<keyof RentVsBuyInput> = [
-  "entradaPorcentaje",
-  "tipoInteres",
-  "plazoHipotecaAnios",
-];
-const SEC_SUPUESTOS: Array<keyof RentVsBuyInput> = [
-  "rentabilidadInversionAnual",
-  "revalorizacionViviendaAnual",
-  "subidaAlquilerAnual",
-];
-const SEC_PERSONAL: Array<keyof RentVsBuyInput> = [
-  "probMudanzaExtranjero",
-  "estabilidadLaboral",
-  "liquidezNecesaria",
-];
-
-const GRUPO_LABEL: Record<string, string> = {
-  compra: "La compra",
-  alquiler: "El alquiler",
-  comun: "Comunes",
-  personal: "Tu situación",
-};
+const SEC_HIPOTECA: Array<keyof RentVsBuyInput> = ["entradaPorcentaje", "tipoInteres", "plazoHipotecaAnios"];
+const SEC_ALQUILER: Array<keyof RentVsBuyInput> = ["alquilerMensual", "gastosInicialesAlquiler", "subidaAlquilerAnual"];
+const SEC_PERSONAL: Array<keyof RentVsBuyInput> = ["ingresoAnualNeto", "liquidezNecesaria", "estabilidadLaboral", "crecimientoSalarialEsperado"];
+const SEC_COSTES_COMPRA: Array<keyof RentVsBuyInput> = ["ibiAnual", "comunidadMensual", "seguroHogarAnual", "mantenimientoPorcentaje", "gestionCompraAnual"];
+const SEC_COSTES_ALQUILER: Array<keyof RentVsBuyInput> = ["seguroInquilinoAnual", "gestionAlquilerAnual"];
+const SEC_FISCAL: Array<keyof RentVsBuyInput> = ["gastosVentaPorcentaje", "plusvaliaMunicipalPorcentaje", "viviendaHabitual", "exencionGananciaVenta"];
 
 export function RentVsBuyCalculator() {
   const [input, setInput] = useState<RentVsBuyInput>(RENT_VS_BUY_DEFAULTS);
   const result = useMemo(() => runCompararAlquilerCompra(input), [input]);
 
   const setRaw = (k: keyof RentVsBuyInput, v: number | boolean) =>
-    setInput((s) => ({ ...s, [k]: v } as RentVsBuyInput));
+    setInput((s) => ({ ...s, [k]: v,
+      ...(k === "esObraNueva" ? { gastosCompraPorcentaje: v ? 11.5 : 10 } : {}),
+    } as RentVsBuyInput));
 
   const reset = () => setInput(RENT_VS_BUY_DEFAULTS);
 
-  const advanced = RENT_VS_BUY_FIELDS.filter((f) => f.avanzado);
-  const advByGroup = (g: string) => advanced.filter((f) => f.grupo === g);
+  const controls = (fields: Array<keyof RentVsBuyInput>) => fields.map((c) => (
+    <Control key={c} meta={field(c)} input={input} set={setRaw} />
+  ));
 
   return (
     <main className="mx-auto w-full max-w-[1200px] px-5 pb-24 pt-10 sm:px-8">
@@ -69,11 +54,16 @@ export function RentVsBuyCalculator() {
           ¿Te conviene comprar, o alquilar e invertir?
         </h1>
         <p className="mt-4 text-lg leading-relaxed text-stone-600">
-          No comparamos solo cuotas frente a renta. Simulamos, año a año, qué
-          opción te deja <strong className="font-medium text-ink">más patrimonio</strong> a
-          largo plazo —contando el coste de oportunidad de invertir tu capital,
-          la revalorización de la vivienda, los impuestos y tus planes de futuro.
+          Compara comprar hoy con alquilar hoy e invertir el ahorro disponible.
+          Las dos opciones empiezan con el mismo capital y presupuesto. Calculamos
+          qué alternativa deja <strong className="font-medium text-ink">más patrimonio</strong> al
+          cabo de los años que elijas, incluidos gastos, inversión e impuestos.
         </p>
+        <p className="mt-3 text-sm leading-relaxed text-stone-600">
+          Los valores iniciales son ejemplos editables. Usa viviendas comparables.
+          La venta final es una valoración hipotética para poder comparar; no supone que debas mudarte.
+        </p>
+        <Glossary />
       </header>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[clamp(320px,30vw,380px)_1fr] lg:items-start">
@@ -86,7 +76,7 @@ export function RentVsBuyCalculator() {
             <button
               type="button"
               onClick={reset}
-              className="font-mono text-[10px] uppercase tracking-[0.14em] text-stone transition hover:text-ink"
+              className="min-h-11 font-mono text-[10px] uppercase tracking-[0.14em] text-stone transition hover:text-ink"
             >
               Restablecer
             </button>
@@ -107,79 +97,45 @@ export function RentVsBuyCalculator() {
             </div>
           )}
 
-          <FieldSection title="Punto de partida">
-            {SEC_PARTIDA.map((c) => (
-              <Control key={c} meta={field(c)} input={input} set={setRaw} />
-            ))}
+          <FieldSection title="1. Tu punto de partida">
+            {controls(SEC_PARTIDA)}
           </FieldSection>
 
-          <FieldSection title="La hipoteca">
-            {SEC_HIPOTECA.map((c) => (
-              <Control key={c} meta={field(c)} input={input} set={setRaw} />
-            ))}
+          <FieldSection title="2. La vivienda que comprarías">
+            {controls(SEC_COMPRA)}
+            <AdvancedGroup title="Gastos anuales de ser propietario">
+              {controls(SEC_COSTES_COMPRA)}
+            </AdvancedGroup>
           </FieldSection>
 
-          <FieldSection title="Tus supuestos a largo plazo">
-            {SEC_SUPUESTOS.map((c) => (
-              <Control key={c} meta={field(c)} input={input} set={setRaw} />
-            ))}
+          <FieldSection title="3. Cómo financiarías la compra">
+            {controls(SEC_HIPOTECA)}
           </FieldSection>
 
-          <FieldSection title="Tu situación personal">
-            {SEC_PERSONAL.map((c) => (
-              <Control key={c} meta={field(c)} input={input} set={setRaw} />
-            ))}
+          <FieldSection title="4. La vivienda que alquilarías">
+            {controls(SEC_ALQUILER)}
+            <AdvancedGroup title="Seguro y otros costes del alquiler">
+              {controls(SEC_COSTES_ALQUILER)}
+            </AdvancedGroup>
           </FieldSection>
 
-          <details className="group mt-5 border-t border-hairline pt-4">
-            <summary className="cursor-pointer select-none font-mono text-[11px] uppercase tracking-[0.16em] text-saffron-700 transition hover:text-ink">
-              <span className="group-open:hidden">▸ Ajustes avanzados</span>
-              <span className="hidden group-open:inline">▾ Ocultar avanzados</span>
-            </summary>
-            <div className="mt-4 space-y-6">
-              {["compra", "alquiler", "personal", "comun"].map((g) => (
-                <div key={g}>
-                  <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-stone">
-                    {GRUPO_LABEL[g]}
-                  </p>
-                  <div className="space-y-4">
-                    {advByGroup(g).map((f) => (
-                      <Control key={String(f.campo)} meta={f} input={input} set={setRaw} />
-                    ))}
-                    {g === "personal" && (
-                      <ChoiceField
-                        label="Si te mudas, ¿qué harías?"
-                        nota="Vender implica gastos de venta; alquilar a distancia tributa por IRNR."
-                        value={input.escenarioMudanza}
-                        opciones={["Vender", "Alquilarlo a distancia"]}
-                        onChange={(n) => setRaw("escenarioMudanza", n)}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
+          <FieldSection title="5. Inversión e inflación">
+            {controls(["rentabilidadInversionAnual", "inflacionCostes"])}
+            <AdvancedGroup title="Inflación y forma de ver el patrimonio">
+              {controls(["inflacionAnual"])}
+              <ToggleField label="Patrimonio en € de hoy" nota="Descuenta la inflación general para comparar el poder de compra actual de ambas alternativas." value={input.mostrarEnReales} onChange={(b) => setRaw("mostrarEnReales", b)} />
+              <ToggleField label="Descontar impuestos de la cartera" nota="Simula liquidar ambas carteras junto a la venta hipotética. El IRPF de la vivienda sigue incluido aunque desactives esta opción." value={input.liquidarCarteraAlFinal} onChange={(b) => setRaw("liquidarCarteraAlFinal", b)} />
+            </AdvancedGroup>
+          </FieldSection>
 
-              <div>
-                <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-stone">
-                  Cómo mostrar los resultados
-                </p>
-                <div className="space-y-4">
-                  <ToggleField
-                    label="Patrimonio en € de hoy"
-                    nota="Deflacta por la inflación para comparar en poder adquisitivo actual."
-                    value={input.mostrarEnReales}
-                    onChange={(b) => setRaw("mostrarEnReales", b)}
-                  />
-                  <ToggleField
-                    label="Descontar impuestos al liquidar"
-                    nota="Aplica el impuesto del ahorro a la plusvalía de ambas carteras (comparación justa)."
-                    value={input.liquidarCarteraAlFinal}
-                    onChange={(b) => setRaw("liquidarCarteraAlFinal", b)}
-                  />
-                </div>
-              </div>
-            </div>
-          </details>
+          <AdvancedGroup title="Tu capacidad económica y tus ingresos">
+            {controls(SEC_PERSONAL)}
+          </AdvancedGroup>
+
+          <AdvancedGroup title="Fiscalidad y costes de la venta hipotética">
+            <p className="text-xs leading-relaxed text-stone-600">Se calcula el valor neto de vender al cierre de cada año. Estos ajustes no crean un escenario de mudanza, alquiler a terceros ni cambio de residencia fiscal.</p>
+            {controls(SEC_FISCAL)}
+          </AdvancedGroup>
         </div>
 
         {/* ───────── Resultados ───────── */}
@@ -273,10 +229,14 @@ function Verdict({ r }: { r: RentVsBuyResult }) {
         <KPI label="Cuota mensual" value={formatEUR(r.cuotaMensual)} />
         <KPI label="Entrada + gastos" value={formatEUR(r.desembolsoInicialCompra)} />
         <KPI
-          label="Precio / alquiler anual"
+          label="Precio / alquiler de un año"
           value={r.priceToRent != null ? `×${String(r.priceToRent).replace(".", ",")}` : "—"}
         />
       </div>
+      <p className="mt-4 text-xs leading-relaxed text-stone-600">
+        Precio / alquiler anual: {formatEUR(r.inputs.precioVivienda)} ÷ ({formatEUR(r.inputs.alquilerMensual)} × 12).
+        Son años de la renta actual equivalentes al precio, sin subidas ni gastos; no es el plazo de amortización.
+      </p>
     </section>
   );
 }
@@ -287,7 +247,7 @@ function ChartCard({ r }: { r: RentVsBuyResult }) {
       <SectionHead
         eyebrow="La película"
         title="Cómo evoluciona tu patrimonio"
-        sub="La línea de compra arranca por debajo (entrada y gastos) y, puede cruzarse más de una vez. El veredicto compara el patrimonio al horizonte elegido."
+        sub="Cada punto es el patrimonio neto al cerrar un año. Incluye lo invertido y, al comprar, el valor de la vivienda menos deuda y costes de una venta hipotética. Las curvas pueden cruzarse varias veces."
       />
       <div className="mt-6">
         <NetWorthChart
@@ -304,23 +264,14 @@ function ChartCard({ r }: { r: RentVsBuyResult }) {
 function MirrorColumns({ r }: { r: RentVsBuyResult }) {
   const N = r.inputs.horizonteAnios;
   const last = r.serie[r.serie.length - 1];
-  const valorFinal = last?.valorVivienda ?? 0;
-  const sellingCosts = Math.round(
-    (valorFinal * r.inputs.gastosVentaPorcentaje) / 100 +
-      (valorFinal > r.inputs.precioVivienda
-        ? (valorFinal * r.inputs.plusvaliaMunicipalPorcentaje) / 100
-        : 0)
-  );
-  const fondoCompra =
-    r.totales.interesesTotales + r.totales.tenenciaTotal + r.totales.gastosCompra + sellingCosts;
+  const sellingCosts = (r.totales.costesVentaFinal ?? 0) + (r.totales.plusvaliaMunicipalFinal ?? 0) + (r.totales.impuestoVentaFinal ?? 0);
+  const fondoCompra = r.totales.interesesTotales + r.totales.tenenciaTotal + r.totales.gastosCompra + (r.totales.gastosInicialesCompra ?? 0) + sellingCosts;
+  const fondoAlquiler = r.totales.rentaTotal + (r.totales.gastosInicialesAlquiler ?? 0) + (r.totales.segurosAlquilerTotal ?? 0) + (r.totales.gestionAlquilerTotal ?? 0);
+  const deflator = r.enReales ? Math.pow(1 + r.inputs.inflacionAnual / 100, N) : 1;
   const colchon = Math.max(r.inputs.capitalDisponible - r.desembolsoInicialCompra, 0);
   const aporteCompra = Math.round(r.serie.reduce((a, d) => a + d.aporteCompra, 0) / N);
   const aporteAlquiler = Math.round(r.serie.reduce((a, d) => a + d.aporteAlquiler, 0) / N);
   const ganaCompra = r.veredicto.ganador === "comprar";
-
-  const movilidadCompra = r.inputs.paisDestinoFueraUE
-    ? "Limitada · IRNR 24% si la alquilas fuera de la UE"
-    : "Limitada · gestión a distancia";
 
   const rows: Array<{ label: string; alquiler: string; compra: string; strong?: boolean }> = [
     {
@@ -330,29 +281,29 @@ function MirrorColumns({ r }: { r: RentVsBuyResult }) {
       strong: true,
     },
     {
-      label: "Fondo perdido (no vuelve)",
-      alquiler: formatEUR(r.totales.rentaTotal),
+      label: "Gastos acumulados (€ nominales)",
+      alquiler: formatEUR(fondoAlquiler),
       compra: formatEUR(fondoCompra),
     },
     {
-      label: "Lo que construyes",
-      alquiler: `${formatEUR(last?.carteraAlquiler ?? 0)} en cartera`,
-      compra: `${formatEUR(last?.equityInmo ?? 0)} en vivienda`,
+      label: `Patrimonio desglosado (${r.enReales ? "€ de hoy" : "nominal"})`,
+      alquiler: `${formatEUR((last?.carteraAlquiler ?? 0) / deflator)} en cartera`,
+      compra: `${formatEUR((last?.equityInmo ?? 0) / deflator)} en vivienda + ${formatEUR((last?.carteraCompra ?? 0) / deflator)} en cartera`,
     },
     {
-      label: "Inviertes de media / año",
+      label: "Aportación media / año (nominal)",
       alquiler: `${formatEUR(aporteAlquiler)}`,
       compra: `${formatEUR(aporteCompra)}`,
     },
     {
-      label: "Liquidez",
-      alquiler: "Casi total (cartera vendible)",
+      label: "Liquidez inicial",
+      alquiler: `${formatEUR(Math.max(r.inputs.capitalDisponible - (r.inputs.gastosInicialesAlquiler ?? 0), 0))} para invertir`,
       compra: colchon > 0 ? `${formatEUR(colchon)} de colchón` : "Casi nula",
     },
     {
       label: "Movilidad",
       alquiler: "Alta · te puedes mover",
-      compra: movilidadCompra,
+      compra: "Requiere vender o gestionar la vivienda",
     },
   ];
 
@@ -376,7 +327,7 @@ function MirrorColumns({ r }: { r: RentVsBuyResult }) {
                   !ganaCompra ? "text-saffron-700" : "text-stone"
                 )}
               >
-                Alquilar {!ganaCompra && "· gana"}
+                Alquilar {!ganaCompra && r.veredicto.banda !== "empate" && "· mayor patrimonio"}
               </th>
               <th
                 className={cn(
@@ -384,7 +335,7 @@ function MirrorColumns({ r }: { r: RentVsBuyResult }) {
                   ganaCompra ? "text-saffron-700" : "text-stone"
                 )}
               >
-                Comprar {ganaCompra && "· gana"}
+                Comprar {ganaCompra && r.veredicto.banda !== "empate" && "· mayor patrimonio"}
               </th>
             </tr>
           </thead>
@@ -425,22 +376,15 @@ function MirrorColumns({ r }: { r: RentVsBuyResult }) {
 
 function FondoPerdido({ r }: { r: RentVsBuyResult }) {
   const N = r.inputs.horizonteAnios;
-  const last = r.serie[r.serie.length - 1];
-  const valorFinal = last?.valorVivienda ?? 0;
-  const sellingCosts = Math.round(
-    (valorFinal * r.inputs.gastosVentaPorcentaje) / 100 +
-      (valorFinal > r.inputs.precioVivienda
-        ? (valorFinal * r.inputs.plusvaliaMunicipalPorcentaje) / 100
-        : 0)
-  );
+  const sellingCosts = (r.totales.costesVentaFinal ?? 0) + (r.totales.plusvaliaMunicipalFinal ?? 0) + (r.totales.impuestoVentaFinal ?? 0);
   const compraParts = [
     { label: "Intereses", value: r.totales.interesesTotales },
-    { label: "IBI, comunidad, seguro y mantenimiento", value: r.totales.tenenciaTotal },
-    { label: "Gastos de compra", value: r.totales.gastosCompra },
+    { label: "Gastos recurrentes de propiedad", value: r.totales.tenenciaTotal },
+    { label: "Compra y otros gastos iniciales", value: r.totales.gastosCompra + (r.totales.gastosInicialesCompra ?? 0) },
     { label: "Gastos de venta e impuestos", value: sellingCosts },
   ];
   const fondoCompra = compraParts.reduce((a, p) => a + p.value, 0);
-  const fondoAlquiler = r.totales.rentaTotal;
+  const fondoAlquiler = r.totales.rentaTotal + (r.totales.gastosInicialesAlquiler ?? 0) + (r.totales.segurosAlquilerTotal ?? 0) + (r.totales.gestionAlquilerTotal ?? 0);
   const max = Math.max(fondoCompra, fondoAlquiler, 1);
 
   const segColors = ["bg-ink-700", "bg-stone-500", "bg-saffron-300", "bg-clay-500"];
@@ -450,7 +394,7 @@ function FondoPerdido({ r }: { r: RentVsBuyResult }) {
       <SectionHead
         eyebrow="El mito del dinero tirado"
         title={`Dinero que no recuperas en ${N} años`}
-        sub="Comprar también tiene un fondo perdido grande (intereses, gastos e impuestos). La diferencia es que, al alquilar, tu capital sigue invertido."
+        sub="Suma de gastos nominales, sin descontar inflación. Incluye intereses y costes de una venta hipotética; la devolución del principal de la hipoteca no es un gasto perdido. Los impuestos de las carteras ya se descuentan del patrimonio y no se incluyen en estas barras."
       />
 
       <div className="mt-6 space-y-6">
@@ -458,16 +402,17 @@ function FondoPerdido({ r }: { r: RentVsBuyResult }) {
         <div>
           <div className="mb-2 flex items-baseline justify-between">
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink">Alquilar</span>
-            <span className="font-mono text-sm tabular text-ink">{formatEUR(fondoAlquiler)}</span>
           </div>
-          <div className="h-7 w-full overflow-hidden rounded-md bg-paper-300">
+          <div className="h-8 w-full rounded-md bg-paper-300">
             <div
-              className="h-full rounded-md bg-stone-500 transition-all duration-700 ease-editorial"
+              className="flex h-full min-w-fit items-center justify-end rounded-md bg-stone-600 px-2 text-paper-50 motion-safe:transition-[width] motion-safe:duration-500"
               style={{ width: `${(fondoAlquiler / max) * 100}%` }}
-            />
+            >
+              <span className="whitespace-nowrap font-mono text-xs tabular">{formatEUR(fondoAlquiler)}</span>
+            </div>
           </div>
           <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-mist">
-            Toda la renta pagada
+            Renta, seguro, otros costes e inversión inicial no recuperable
           </p>
         </div>
 
@@ -482,7 +427,7 @@ function FondoPerdido({ r }: { r: RentVsBuyResult }) {
               <div
                 key={p.label}
                 className={cn("h-full transition-all duration-700 ease-editorial", segColors[i])}
-                style={{ width: `${(p.value / fondoCompra) * 100}%` }}
+                style={{ width: `${fondoCompra > 0 ? (p.value / fondoCompra) * 100 : 0}%` }}
                 title={`${p.label}: ${formatEUR(p.value)}`}
               />
             ))}
@@ -551,7 +496,7 @@ function SensitivityCard({ input }: { input: RentVsBuyInput }) {
       <SectionHead
         eyebrow="Honestidad metodológica"
         title="El veredicto depende de tus supuestos"
-        sub="Cuánto rinda tu cartera frente a cuánto se revalorice la vivienda lo cambia todo. Aquí ves quién gana en cada combinación; tu escenario va marcado."
+        sub="Las filas cambian la rentabilidad anual de la cartera financiera. Las columnas cambian la revalorización anual de la vivienda. Cada casilla muestra cuánto patrimonio adicional tendría la opción indicada, manteniendo los demás supuestos."
       />
       <div className="mt-6">
         <SensitivityHeatmap input={input} />
@@ -573,9 +518,13 @@ function AuditDetails({ r }: { r: RentVsBuyResult }) {
     ["Rentabilidad de la cartera", `${i.rentabilidadInversionAnual}%`],
     ["Revalorización de la vivienda", `${i.revalorizacionViviendaAnual}%`],
     ["Subida del alquiler", `${i.subidaAlquilerAnual}%`],
-    ["Gastos de compra", `${i.gastosCompraPorcentaje}%${i.esObraNueva ? " · obra nueva" : ""}`],
+    ["Impuestos y trámites de compra", `${i.gastosCompraPorcentaje}%${i.esObraNueva ? " · obra nueva" : ""}`],
+    ["Otros gastos iniciales de compra", formatEUR(i.gastosInicialesCompra ?? 0)],
+    ["Otros gastos iniciales de alquiler", formatEUR(i.gastosInicialesAlquiler ?? 0)],
+    ["Gestión / costes de propiedad anuales", formatEUR(i.gestionCompraAnual ?? 0)],
+    ["Otros costes del inquilino anuales", formatEUR(i.gestionAlquilerAnual ?? 0)],
     ["Gastos de venta", `${i.gastosVentaPorcentaje}%`],
-    ["IBI · comunidad · mantenimiento", `${formatEUR(i.ibiAnual)} · ${formatEUR(i.comunidadMensual)}/mes · ${i.mantenimientoPorcentaje}%`],
+    ["IBI · comunidad · mantenimiento", `${formatEUR(i.ibiAnual)}/año · ${formatEUR(i.comunidadMensual)}/mes · ${i.mantenimientoPorcentaje}%`],
     ["Exención de ganancia simulada", i.viviendaHabitual && i.exencionGananciaVenta ? "Sí" : "No"],
     ["Inflación / costes", `${i.inflacionAnual}% · ${i.inflacionCostes}%`],
   ];
@@ -602,7 +551,8 @@ function AuditDetails({ r }: { r: RentVsBuyResult }) {
           <span>Ver tabla año a año</span>
           <span className="text-mist transition group-open:rotate-180">▾</span>
         </summary>
-        <div className="overflow-x-auto border-t border-hairline">
+        <p className="border-t border-hairline px-5 pt-4 text-xs text-stone-600">Patrimonios en {r.enReales ? "€ de hoy" : "€ nominales"}. Todas las demás columnas están en euros nominales del año correspondiente.</p>
+        <div className="overflow-x-auto">
           <table className="w-full border-collapse text-right text-xs tabular">
             <thead>
               <tr className="border-b border-hairline font-mono text-[9px] uppercase tracking-[0.08em] text-stone">
@@ -611,7 +561,7 @@ function AuditDetails({ r }: { r: RentVsBuyResult }) {
                 <th className="px-3 py-2 font-medium">Principal</th>
                 <th className="px-3 py-2 font-medium">Saldo</th>
                 <th className="px-3 py-2 font-medium">Valor casa</th>
-                <th className="px-3 py-2 font-medium">Equity</th>
+                <th className="px-3 py-2 font-medium">Vivienda neta</th>
                 <th className="px-3 py-2 font-medium">Alquiler</th>
                 <th className="px-3 py-2 font-medium">Patrim. comprar</th>
                 <th className="px-3 py-2 font-medium">Patrim. alquilar</th>
@@ -646,10 +596,51 @@ function Disclaimer() {
       resultado es muy sensible al diferencial entre la revalorización de la
       vivienda y la rentabilidad de tu cartera: pequeños cambios pueden invertir
       el veredicto. Las rentabilidades pasadas no garantizan las futuras y no se
-      modela la volatilidad. Impuestos y costes son estimaciones para Madrid
-      (ITP/IVA, IBI, plusvalía municipal e IRNR aproximados). Ajusta los valores
-      a tu caso real antes de decidir.
+      modela la volatilidad. Se mantiene la escala del ahorro del IRPF 2025 durante
+      todo el horizonte, sin otras rentas o pérdidas compensables. El coste inicial
+      excluye fianzas recuperables y valor residual de muebles. No se modelan mudanzas
+      ni cambios de residencia fiscal. Impuestos y gastos son aproximaciones editables;
+      consulta las fuentes del glosario y ajusta los valores a tu caso.
     </p>
+  );
+}
+
+function AdvancedGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <details className="group mt-5 border-t border-hairline pt-3">
+      <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium leading-snug text-ink">
+        {title}
+      </summary>
+      <div className="mt-3 space-y-4">{children}</div>
+    </details>
+  );
+}
+
+function Glossary() {
+  const items: Array<[string, string]> = [
+    ["Patrimonio neto", "Lo que conservarías al liquidar: valor de la vivienda menos deuda, gastos e impuestos de venta, más tu cartera de inversión. La entrada se convierte en vivienda; no se pierde como un gasto."],
+    ["Cartera y coste de oportunidad", "La cartera es el dinero invertido en activos financieros. Usar ahorros para comprar una vivienda impide invertir esa parte. Ambos escenarios invierten lo que sobra, a la misma rentabilidad supuesta."],
+    ["TIN, principal y cuota", "El TIN es el interés anual del préstamo, sin comisiones. La cuota devuelve principal (deuda) y paga intereses. Esta simulación usa interés fijo y amortización francesa; no representa una oferta bancaria ni calcula la TAE."],
+    ["Precio / alquiler anual", "Precio de compra dividido por doce mensualidades de una vivienda equivalente. Un valor de ×20 significa que el precio equivale a 20 años de la renta actual, sin subidas ni gastos. No es una rentabilidad ni el año de equilibrio."],
+    ["Punto de equilibrio", "Primer cierre anual o cruce interpolado en que comprar alcanza el patrimonio de alquilar. Puede cambiar después: el resultado principal siempre compara el último año elegido."],
+    ["IBI, comunidad y mantenimiento", "El IBI se introduce por año; la comunidad, por mes. El mantenimiento parte del precio de compra, multiplicado por el porcentaje elegido, y crece con la inflación de gastos. El 1% es un ejemplo del modelo, sin validación empírica: sustituye esa cifra por un presupuesto realista de reparaciones."],
+    ["Inflación y euros de hoy", "La inflación general convierte los patrimonios futuros a poder adquisitivo actual. La subida de gastos recurrentes actualiza IBI, comunidad, seguros, mantenimiento y otros costes. La vivienda y el alquiler tienen sus propias tasas separadas."],
+    ["Otros gastos iniciales y gestión", "Se pagan una vez antes de invertir el capital restante. Muebles y mudanza tienen valor residual cero en el modelo; las fianzas recuperables se excluyen. La gestoría de compraventa está dentro del porcentaje de trámites; los servicios anuales se añaden aparte para evitar duplicarlos."],
+  ];
+  return (
+    <details className="mt-5 rounded-xl border border-hairline bg-paper-50">
+      <summary className="min-h-11 cursor-pointer px-4 py-3 text-sm font-medium text-ink">Glosario, impuestos y fuentes del cálculo</summary>
+      <div className="space-y-5 border-t border-hairline p-4 text-sm leading-relaxed text-stone-600">
+        <dl className="space-y-4">
+          {items.map(([term, explanation]) => <div key={term}><dt className="font-medium text-ink">{term}</dt><dd className="mt-1">{explanation}</dd></div>)}
+        </dl>
+        <p><strong className="font-medium text-ink">Obra nueva e impuestos de compra.</strong> La primera entrega de vivienda nueva suele tributar al 10% de IVA, con supuestos especiales. La usada tributa por ITP; Madrid tiene un tipo general del 6% y posibles beneficios fiscales. El AJD depende de la operación y sus condiciones. El campo de impuestos y trámites ya contiene todos esos importes: el modelo no suma un segundo impuesto. Los ejemplos del 10% y 11,5% de gasto total no son tipos tributarios. <a className="underline underline-offset-2" href="https://sede.agenciatributaria.gob.es/Sede/iva/iva-operaciones-inmobiliarias/compro-vivienda-tengo-que-pagar-itp.html" target="_blank" rel="noreferrer">AEAT: IVA o ITP</a>; <a className="underline underline-offset-2" href="https://www.comunidad.madrid/atencion-contribuyente/transmisiones-patrimoniales-onerosas" target="_blank" rel="noreferrer">Madrid: ITP</a>; <a className="underline underline-offset-2" href="https://www.comunidad.madrid/atencion-contribuyente/actos-juridicos-documentados" target="_blank" rel="noreferrer">Madrid: AJD</a>.</p>
+        <p><strong className="font-medium text-ink">Vivienda habitual y exención.</strong> Residir en la vivienda no basta por sí solo para eliminar el IRPF de una venta. La reinversión puede dar derecho a exención, total o proporcional, si se cumplen los requisitos y plazos; existen otros supuestos, como la transmisión de la vivienda habitual por mayores de 65 años. El interruptor simula una exención total sin comprobar si te corresponde. <a className="underline underline-offset-2" href="https://sede.agenciatributaria.gob.es/Sede/vivienda-otros-inmuebles/que-ocurre-cuando-vendo-inmueble/transmision-vivienda-habitual-reinversion.html" target="_blank" rel="noreferrer">AEAT: reinversión</a>; <a className="underline underline-offset-2" href="https://sede.agenciatributaria.gob.es/Sede/ayuda/manuales-videos-folletos/manuales-practicos/irpf-2025/c11-ganancias-perdidas-patrimoniales/ganancias-excluidas-gravamen-supuestos-reinversion/transmision-vivienda-habitual-reinversion-importe/exencion.html" target="_blank" rel="noreferrer">AEAT: exenciones</a>.</p>
+        <p><strong className="font-medium text-ink">Escala fiscal usada.</strong> El modelo mantiene la escala conjunta del ahorro del IRPF 2025 (19%, 21%, 23%, 27% y 30% por tramos). Al liquidar, suma las ganancias positivas de vivienda y cartera del comprador; no incorpora otras rentas, compensación de pérdidas ni mínimos personales. La plusvalía municipal es solo una aproximación editable, porque faltan los datos del suelo y del municipio. <a className="underline underline-offset-2" href="https://sede.agenciatributaria.gob.es/static_files/Sede/Actualidad/Notas_prensa/2026/PRESENTACION_CAMPANA_DE_RENTA_Y_PATRIMONIO_2025.pdf" target="_blank" rel="noreferrer">AEAT: Renta 2025</a>.</p>
+        <p><strong className="font-medium text-ink">IBI y gastos del alquiler.</strong> El periodo del IBI es anual. En los arrendamientos de vivienda sujetos a la LAU, los costes de gestión inmobiliaria y formalización del contrato los asume el arrendador. El campo de otros costes del inquilino no debe trasladarle esos importes. <a className="underline underline-offset-2" href="https://www.boe.es/buscar/act.php?id=BOE-A-2004-4214#a75" target="_blank" rel="noreferrer">Haciendas Locales, art. 75</a>; <a className="underline underline-offset-2" href="https://www.boe.es/buscar/act.php?id=BOE-A-1994-26003#a20" target="_blank" rel="noreferrer">LAU, art. 20</a>.</p>
+        <p className="text-xs text-mist">Fuentes consultadas el 9 de septiembre de 2026. Son referencias de los supuestos actuales, no una garantía de las normas o rentabilidades futuras.</p>
+      </div>
+    </details>
   );
 }
 
@@ -658,7 +649,7 @@ function Disclaimer() {
 function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
   return (
     <div>
-      <div className="flex items-baseline justify-between gap-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-display text-2xl leading-tight text-ink sm:text-3xl">{title}</h2>
         <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.18em] text-stone">
           {eyebrow}
@@ -698,7 +689,7 @@ function Control({
   input: RentVsBuyInput;
   set: (k: keyof RentVsBuyInput, v: number | boolean) => void;
 }) {
-  const value = input[meta.campo];
+  const value = input[meta.campo] ?? RENT_VS_BUY_DEFAULTS[meta.campo] ?? 0;
   if (meta.unidad === "boolean") {
     return (
       <ToggleField
@@ -759,8 +750,10 @@ function NumberField({
       <div className="relative">
         <input
           inputMode="numeric"
+          aria-label={meta.etiqueta}
           value={value ? formatNumber(value) : ""}
-          onChange={(e) => onChange(Number(e.target.value.replace(/[^\d]/g, "")) || 0)}
+          onChange={(e) => onChange(Math.min(meta.max, Number(e.target.value.replace(/[^\d]/g, "")) || 0))}
+          onBlur={() => onChange(Math.max(meta.min, Math.min(meta.max, value)))}
           className="w-full rounded-lg border border-hairline bg-paper-50 px-3.5 py-2.5 pr-16 font-mono text-sm tabular text-ink transition placeholder:text-mist focus:border-ink/40 focus:outline-none"
           placeholder="0"
         />
@@ -768,7 +761,7 @@ function NumberField({
           {unitSuffix(meta.unidad)}
         </span>
       </div>
-      {meta.nota && <p className="mt-1 text-[11px] leading-snug text-mist">{meta.nota}</p>}
+      {meta.nota && <p className="mt-1 text-[11px] leading-snug text-stone-600">{meta.nota}</p>}
     </label>
   );
 }
@@ -804,8 +797,9 @@ function SliderField({
         step={meta.step ?? 1}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full cursor-pointer accent-saffron-500"
+        className="min-h-11 w-full cursor-pointer accent-saffron-500"
       />
+      {meta.nota && <p className="mt-1 text-[11px] leading-snug text-stone-600">{meta.nota}</p>}
     </label>
   );
 }
@@ -824,7 +818,7 @@ function ToggleField({
   return (
     <div>
       <FieldLabel label={label} nota={nota} />
-      <div className="flex gap-2">
+      <div className="flex gap-2" role="group" aria-label={label}>
         <Seg active={value} onClick={() => onChange(true)}>
           Sí
         </Seg>
@@ -832,6 +826,7 @@ function ToggleField({
           No
         </Seg>
       </div>
+      {nota && <p className="mt-1.5 text-[11px] leading-snug text-stone-600">{nota}</p>}
     </div>
   );
 }
@@ -852,13 +847,14 @@ function ChoiceField({
   return (
     <div>
       <FieldLabel label={label} nota={nota} />
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label={label}>
         {opciones.map((o, i) => (
           <Seg key={o} active={value === i} onClick={() => onChange(i)}>
             {o}
           </Seg>
         ))}
       </div>
+      {nota && <p className="mt-1.5 text-[11px] leading-snug text-stone-600">{nota}</p>}
     </div>
   );
 }
@@ -875,9 +871,10 @@ function Seg({
   return (
     <button
       type="button"
+      aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "rounded-lg border px-3 py-2 text-xs transition active:scale-[0.98]",
+        "min-h-11 rounded-lg border px-3 py-2 text-xs transition active:scale-[0.98]",
         active
           ? "border-ink bg-ink text-paper"
           : "border-hairline bg-paper-50 text-ink-700 hover:border-ink/30"

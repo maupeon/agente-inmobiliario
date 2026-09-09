@@ -25,18 +25,16 @@ export async function fetchIneIpvQuarterly(): Promise<IneIpvQuarterly> {
     if (!res.ok) throw new Error(`INE 25171 ${res.status}`);
     const json = (await res.json()) as IneSeriesPayload[];
 
-    const total = json.find((s) =>
-      s.Nombre?.toLowerCase().includes("variación anual") &&
-      s.Nombre?.toLowerCase().includes("general")
-    );
+    const total = json.find((s) => /^Nacional\.\s*General\.\s*Variación anual\./i.test(s.Nombre?.trim() ?? ""));
     if (!total?.Data?.length) throw new Error("INE 25171: serie no encontrada");
 
     const serie: IpvQuarterPoint[] = total.Data
-      .slice(-4)
       .map((d) => ({
-        periodo: formatIneQuarter(d.NombrePeriodo, d.Anyo),
+        periodo: formatIneQuarter(d.T3_Periodo ?? d.NombrePeriodo, d.Anyo),
         variacionInteranual: typeof d.Valor === "number" ? roundOne(d.Valor) : NaN,
-      }));
+      }))
+      .sort((a, b) => a.periodo.localeCompare(b.periodo))
+      .slice(-4);
 
     if (serie.length !== 4 || new Set(serie.map((d) => d.periodo)).size !== 4 || serie.some((d) => !/^\d{4}T[1-4]$/.test(d.periodo) || !Number.isFinite(d.variacionInteranual))) throw new Error("Serie trimestral incompleta o ambigua");
     return {
@@ -60,7 +58,7 @@ export async function fetchInePriceByProvince(): Promise<InePriceByProvince> {
 
 interface IneSeriesPayload {
   Nombre?: string;
-  Data?: Array<{ Anyo?: number; NombrePeriodo?: string; Valor?: number }>;
+  Data?: Array<{ Anyo?: number; T3_Periodo?: string; NombrePeriodo?: string; Valor?: number }>;
 }
 
 function formatIneQuarter(nombre: string | undefined, anyo: number | undefined): string {

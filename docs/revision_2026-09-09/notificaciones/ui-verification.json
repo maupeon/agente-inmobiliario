@@ -1,0 +1,149 @@
+{
+  "checks": [
+    "Default 07:00 Europe/Madrid, disabled until opt-in, no permission prompt",
+    "Save sends enabled, edited time, timeZone and current profile",
+    "Failed save shows error, keeps persisted time unchanged and clears success notice",
+    "Refresh preserves save error; Reintentar resends PUT and persists edited 08:45 successfully",
+    "Disabling and saving pauses subscription",
+    "Inbox renders exactly three ranked demo homes with no fabricated listing links",
+    "Three-home inbox has no page overflow at 390px",
+    "Mark read updates the visible inbox through a mocked private PATCH",
+    "No-results digest explains no compatible homes without fabricating three",
+    "Watcher emits one fake notice only after local opt-in and deduplicates repeated checks",
+    "Watcher suppresses read digests and paused selections",
+    "Private unavailable state is explicit, disables writes and has no mobile overflow",
+    "No uncaught browser errors across the tested flows"
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "method": "PUT",
+      "body": {
+        "enabled": true,
+        "time": "08:15",
+        "timeZone": "Atlantic/Canary",
+        "profile": {
+          "name": "Perfil de prueba",
+          "operacion": "alquiler",
+          "tipo": "pisos",
+          "zona": "Chamberí, Madrid",
+          "presupuestoMax": 1600,
+          "habitaciones": 2,
+          "imprescindibles": [
+            "ascensor"
+          ],
+          "prioridades": [
+            "transporte"
+          ],
+          "scoreWeights": {
+            "alpha": 30,
+            "beta": 25,
+            "gamma": 25,
+            "delta": 20
+          },
+          "createdAt": "2026-09-09T08:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "body": {
+        "enabled": true,
+        "time": "08:45",
+        "timeZone": "Atlantic/Canary",
+        "profile": {
+          "name": "Perfil de prueba",
+          "operacion": "alquiler",
+          "tipo": "pisos",
+          "zona": "Chamberí, Madrid",
+          "presupuestoMax": 1600,
+          "habitaciones": 2,
+          "imprescindibles": [
+            "ascensor"
+          ],
+          "prioridades": [
+            "transporte"
+          ],
+          "scoreWeights": {
+            "alpha": 30,
+            "beta": 25,
+            "gamma": 25,
+            "delta": 20
+          },
+          "createdAt": "2026-09-09T08:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "body": {
+        "enabled": true,
+        "time": "08:45",
+        "timeZone": "Atlantic/Canary",
+        "profile": {
+          "name": "Perfil de prueba",
+          "operacion": "alquiler",
+          "tipo": "pisos",
+          "zona": "Chamberí, Madrid",
+          "presupuestoMax": 1600,
+          "habitaciones": 2,
+          "imprescindibles": [
+            "ascensor"
+          ],
+          "prioridades": [
+            "transporte"
+          ],
+          "scoreWeights": {
+            "alpha": 30,
+            "beta": 25,
+            "gamma": 25,
+            "delta": 20
+          },
+          "createdAt": "2026-09-09T08:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "body": {
+        "enabled": false,
+        "time": "08:45",
+        "timeZone": "Atlantic/Canary",
+        "profile": {
+          "name": "Perfil de prueba",
+          "operacion": "alquiler",
+          "tipo": "pisos",
+          "zona": "Chamberí, Madrid",
+          "presupuestoMax": 1600,
+          "habitaciones": 2,
+          "imprescindibles": [
+            "ascensor"
+          ],
+          "prioridades": [
+            "transporte"
+          ],
+          "scoreWeights": {
+            "alpha": 30,
+            "beta": 25,
+            "gamma": 25,
+            "delta": 20
+          },
+          "createdAt": "2026-09-09T08:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "PATCH",
+      "body": {
+        "id": "11111111-1111-4111-8111-111111111111"
+      }
+    }
+  ],
+  "screenshots": [
+    "/tmp/habitia-notifications-inbox-desktop.png",
+    "/tmp/habitia-notifications-inbox-mobile.png",
+    "/tmp/habitia-notifications-save-error.png",
+    "/tmp/habitia-notifications-noresults-mobile.png",
+    "/tmp/habitia-notifications-private-unavailable-mobile.png"
+  ]
+}

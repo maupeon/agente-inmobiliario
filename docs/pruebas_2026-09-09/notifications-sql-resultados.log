@@ -1,0 +1,221 @@
+BEGIN
+CREATE FUNCTION
+psql:docs/pruebas_2026-09-09/notifications.sql:6: NOTICE:  PASS: Madrid summer07:00
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:7: NOTICE:  PASS: Madrid winter07:00
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:8: NOTICE:  PASS: spring DST next day
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:9: NOTICE:  PASS: autumn DST next day
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:10: NOTICE:  PASS: Canary timezone
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:11: NOTICE:  PASS: nonexistent time moves forward at DST
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:12: NOTICE:  PASS: no public profile or inbox access
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:13: NOTICE:  PASS: no public worker access
+ assert_true 
+-------------
+ 
+(1 row)
+
+ save_notification_subscription 
+--------------------------------
+ 
+(1 row)
+
+UPDATE 1
+psql:docs/pruebas_2026-09-09/notifications.sql:16: NOTICE:  PASS: claim due subscription
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:17: NOTICE:  PASS: second worker cannot double-claim
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:18: NOTICE:  PASS: wrong lease cannot deliver
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:19: NOTICE:  PASS: deliver3
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:20: NOTICE:  PASS: replay does not duplicate
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:21: NOTICE:  PASS: one digest per day
+ assert_true 
+-------------
+ 
+(1 row)
+
+ save_notification_subscription 
+--------------------------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:24: NOTICE:  PASS: schedule edit after delivery shows tomorrow
+ assert_true 
+-------------
+ 
+(1 row)
+
+ save_notification_subscription 
+--------------------------------
+ 
+(1 row)
+
+UPDATE 1
+psql:docs/pruebas_2026-09-09/notifications.sql:28: NOTICE:  PASS: same day edit does not redeliver
+ assert_true 
+-------------
+ 
+(1 row)
+
+ save_notification_subscription 
+--------------------------------
+ 
+(1 row)
+
+UPDATE 1
+psql:docs/pruebas_2026-09-09/notifications.sql:32: NOTICE:  PASS: independent visitor claim
+ assert_true 
+-------------
+ 
+(1 row)
+
+ save_notification_subscription 
+--------------------------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:34: NOTICE:  PASS: pause invalidates lease
+ assert_true 
+-------------
+ 
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:35: NOTICE:  PASS: paused visitor gets no digest
+ assert_true 
+-------------
+ 
+(1 row)
+
+ save_notification_subscription 
+--------------------------------
+ 
+(1 row)
+
+UPDATE 1
+                            owner_hash                            |                   profile                   
+------------------------------------------------------------------+---------------------------------------------
+ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc | {"zona": "Madrid", "operacion": "alquiler"}
+(1 row)
+
+ finish_notification_subscription 
+----------------------------------
+ f
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:41: NOTICE:  PASS: 15 minute retry
+ assert_true 
+-------------
+ 
+(1 row)
+
+UPDATE 1
+                            owner_hash                            |                   profile                   
+------------------------------------------------------------------+---------------------------------------------
+ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc | {"zona": "Madrid", "operacion": "alquiler"}
+(1 row)
+
+UPDATE 1
+psql:docs/pruebas_2026-09-09/notifications.sql:45: NOTICE:  PASS: crashed worker lease reclaimed
+ assert_true 
+-------------
+ 
+(1 row)
+
+ finish_notification_subscription 
+----------------------------------
+ f
+(1 row)
+
+psql:docs/pruebas_2026-09-09/notifications.sql:47: NOTICE:  PASS: third failure deferred to next day
+ assert_true 
+-------------
+ 
+(1 row)
+
+ save_notification_subscription 
+--------------------------------
+ 
+(1 row)
+
+UPDATE 1
+                            owner_hash                            |                   profile                   
+------------------------------------------------------------------+---------------------------------------------
+ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd | {"zona": "Madrid", "operacion": "alquiler"}
+(1 row)
+
+UPDATE 1
+                            owner_hash                            |                   profile                   
+------------------------------------------------------------------+---------------------------------------------
+ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd | {"zona": "Madrid", "operacion": "alquiler"}
+(1 row)
+
+UPDATE 1
+                            owner_hash                            |                   profile                   
+------------------------------------------------------------------+---------------------------------------------
+ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd | {"zona": "Madrid", "operacion": "alquiler"}
+(1 row)
+
+UPDATE 1
+psql:docs/pruebas_2026-09-09/notifications.sql:57: NOTICE:  PASS: fourth attempt blocked after three crashes
+ assert_true 
+-------------
+ 
+(1 row)
+
+ROLLBACK

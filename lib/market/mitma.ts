@@ -4,13 +4,13 @@ import type { InePriceByProvince, ProvincePrice } from "./types";
 
 /**
  * Precio €/m² de vivienda libre por provincia, fuente oficial:
- * Ministerio de Transportes y Movilidad Sostenible (MITMA) — "Valor tasado de
+ * Ministerio de Vivienda y Agenda Urbana (MIVAU) — "Valor tasado de
  * la vivienda libre". El INE no publica €/m² (solo el IPV índice), así que esta
  * es la referencia oficial en euros. El fichero `.XLS` se descarga directo y se
  * actualiza trimestralmente; ante cualquier fallo, caemos al fixture.
  */
 const MITMA_XLS_URL = "https://apps.fomento.gob.es/boletinonline2/sedal/35101000.XLS";
-const FUENTE = "MITMA — Valor tasado de vivienda libre (€/m²)";
+const FUENTE = "MIVAU — Valor tasado de vivienda libre (€/m²)";
 
 /** Filas agregadas (nacional / CCAA pluriprovincial) que NO son provincia. */
 const SKIP = new Set([

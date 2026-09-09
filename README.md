@@ -98,3 +98,22 @@ El chat tiene hasta 3 rondas, 4 herramientas y 1.600 tokens de salida por ronda.
 - `docs/auditoria_2026-09-08/cambios_app.md`: cambios y límites de verificación.
 
 La revisión global del TFM requiere la migración de demo compartida además de la migración de cuota. No activa pagos ni despliega la aplicación automáticamente. El despliegue debe coordinar app, backend y artefactos comprobados.
+
+
+## Mejoras de producto del 9 de septiembre de 2026
+
+El perfil permite distribuir 100 puntos entre Fair, Opportunity, Zone y Lifestyle (25 cada uno al empezar). El buscador ordena por ese HabitIA Score y muestra el desglose y la cobertura: un dato ausente no recibe puntos ni se sustituye por un índice inventado. Zone mide cercanía al punto elegido. El perfil y la última búsqueda guardan su estado local; restaurar o reordenar no consulta Idealista. Las etiquetas Barato, Justo y Caro se refieren únicamente a un escenario individual válido del modelo.
+
+Datos y Notificaciones están en la navegación global. Datos identifica fuente, periodo y ausencia de referencias verificadas, y muestra trimestres como Q1 2025. La calculadora separa los grupos de compra, hipoteca, alquiler y supuestos; incorpora otros gastos, gestión, glosario y un desglose de liquidación opcional. La mudanza queda como aviso cualitativo y no simula una venta anticipada.
+
+`/notificaciones` permite activar una selección diaria privada de hasta tres viviendas, inicialmente a las 07:00 Europe/Madrid, con hora y zona editables. Al guardar copia el perfil actual; cambiarlo después requiere guardar también en Notificaciones. El aviso opcional del navegador funciona con HabitIA abierta. Para instalar la migración y el cron, seguir [docs/notificaciones.md](docs/notificaciones.md). La existencia del código no significa que el cron esté activo en producción.
+
+Las respuestas completas al documento de dudas están en [docs/respuestas-dudas-mauri-v3.md](docs/respuestas-dudas-mauri-v3.md). Comprobaciones adicionales:
+
+```bash
+node docs/revision_2026-09-09/scoring-search-regression.cjs
+node scripts/test-rent-vs-buy.cjs
+node docs/pruebas_2026-09-09/notifications-api.cjs
+# La prueba SQL requiere una base local desechable con la migración aplicada:
+psql -f docs/pruebas_2026-09-09/notifications.sql
+```
