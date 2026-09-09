@@ -106,7 +106,7 @@ El perfil permite distribuir 100 puntos entre Fair, Opportunity, Zone y Lifestyl
 
 Datos y Notificaciones están en la navegación global. Datos identifica fuente, periodo y ausencia de referencias verificadas, y muestra trimestres como Q1 2025. La calculadora separa los grupos de compra, hipoteca, alquiler y supuestos; incorpora otros gastos, gestión, glosario y un desglose de liquidación opcional. La mudanza queda como aviso cualitativo y no simula una venta anticipada.
 
-`/notificaciones` permite activar una selección diaria privada de hasta tres viviendas, inicialmente a las 07:00 Europe/Madrid, con hora y zona editables. Al guardar copia el perfil actual; cambiarlo después requiere guardar también en Notificaciones. El aviso opcional del navegador funciona con HabitIA abierta. Para instalar la migración y el cron, seguir [docs/notificaciones.md](docs/notificaciones.md). La existencia del código no significa que el cron esté activo en producción.
+`/notificaciones` permite activar una selección diaria privada de hasta tres viviendas, inicialmente a las 07:00 Europe/Madrid, con hora y zona editables. Al guardar copia el perfil actual; cambiarlo después requiere guardar también en Notificaciones. El aviso opcional del navegador funciona con HabitIA abierta. La migración, la publicación en [HabitIA](https://habitiaucm.vercel.app/notificaciones) y el cron se verificaron el 9 de septiembre de 2026. Para operación, evidencia y límites, consultar [docs/notificaciones.md](docs/notificaciones.md).
 
 Las respuestas completas al documento de dudas están en [docs/respuestas-dudas-mauri-v3.md](docs/respuestas-dudas-mauri-v3.md). Comprobaciones adicionales:
 

@@ -6,6 +6,10 @@ La selección contiene como máximo tres anuncios distintos, ordenados por el mi
 
 ## Instalación
 
+Estado verificado el 9 de septiembre de 2026: migración aplicada en `ggahjicfmsbpyhequpck`, aplicación publicada en [HabitIA](https://habitiaucm.vercel.app/notificaciones) y cron `habitia-daily-recommendations` activo. Se comprobaron ejecuciones correctas del planificador y una respuesta autenticada HTTP 200 desde `pg_net` usando Vault. No había suscripciones de usuarios, por lo que esta verificación no incluyó una selección real de anuncios. Detalles en [estado-verificacion.md](revision_2026-09-09/estado-verificacion.md).
+
+Los pasos siguientes permiten instalarlo en otro entorno o comprobar la configuración existente:
+
 1. Aplicar `supabase/migrations/20260909150000_daily_notifications.sql` al proyecto de esta app. La migración es aditiva, activa RLS y restringe tablas y funciones a `service_role`.
 2. Desplegar la app con `CRON_SECRET` de al menos 24 caracteres aleatorios. El secreto solo se configura en servidor. El servicio debe tener sus variables actuales de Supabase, Idealista y valoración.
 3. Configurar `NEXT_PUBLIC_SITE_URL` con el origen HTTPS canónico de la app. Guardar en Supabase Vault `habitia_app_url` con ese origen y `habitia_cron_secret` con el mismo secreto.
