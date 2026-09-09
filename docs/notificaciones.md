@@ -6,7 +6,7 @@ La selección contiene como máximo tres anuncios distintos, ordenados por el mi
 
 ## Instalación
 
-Estado verificado el 9 de septiembre de 2026: migración aplicada en `ggahjicfmsbpyhequpck`, aplicación publicada en [HabitIA](https://habitiaucm.vercel.app/notificaciones) y cron `habitia-daily-recommendations` activo. Se comprobaron ejecuciones correctas del planificador y una respuesta autenticada HTTP 200 desde `pg_net` usando Vault. No había suscripciones de usuarios, por lo que esta verificación no incluyó una selección real de anuncios. Detalles en [estado-verificacion.md](revision_2026-09-09/estado-verificacion.md).
+Estado verificado el 9 de septiembre de 2026: migración aplicada en `ggahjicfmsbpyhequpck`, aplicación publicada en [HabitIA](https://habitiaucm.vercel.app/notificaciones) y cron `habitia-daily-recommendations` activo. Se comprobaron ejecuciones correctas del planificador y una respuesta autenticada HTTP 200 desde `pg_net` usando Vault. No había suscripciones de usuarios, por lo que esta verificación no incluyó una selección real de anuncios.
 
 Los pasos siguientes permiten instalarlo en otro entorno o comprobar la configuración existente:
 
@@ -38,8 +38,8 @@ El canal disponible es la bandeja. El aviso opcional del navegador pide permiso 
 
 ## Verificación
 
-- `node docs/pruebas_2026-09-09/notifications-api.cjs`: autorización del cron, identidad privada, filtrado por propietario, validación, origen, selección de tres únicos y errores de proveedor, sin red.
-- `psql ... -f docs/pruebas_2026-09-09/notifications.sql`: ejecutar en una base local desechable tras aplicar la migración; usa una transacción con rollback. Comprueba horario estacional, Canarias, permisos, reservas, pausas, duplicados y reintentos.
+- `node scripts/test-notifications-api.cjs`: autorización del cron, identidad privada, filtrado por propietario, validación, origen, selección de tres únicos y errores de proveedor, sin red.
+- `psql ... -f supabase/tests/notifications.sql`: ejecutar en una base local desechable tras aplicar la migración; usa una transacción con rollback. Comprueba horario estacional, Canarias, permisos, reservas, pausas, duplicados y reintentos.
 - `npm run lint`, `npx tsc --noEmit --incremental false`, `npm run build`.
 
 Fuentes de implementación: [Supabase Cron](https://supabase.com/docs/guides/cron/quickstart) y [programación con Vault y pg_net](https://supabase.com/docs/guides/functions/schedule-functions).

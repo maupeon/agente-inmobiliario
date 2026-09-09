@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const ts = require('typescript');
-const root = path.resolve(__dirname, '../..');
+const root = path.resolve(__dirname, '..');
 let checks = 0;
 function ok(name, fn) { fn(); checks++; console.log('PASS', name); }
 function loader(stubs = {}, env = {}) {

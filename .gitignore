@@ -38,3 +38,28 @@ next-env.d.ts
 # Local verification artifacts and Supabase CLI state
 /tmp/
 /supabase/.temp/
+/output/
+/docs/auditoria_*/
+/docs/revision_*/
+/docs/pruebas_*/
+/docs/respuestas-*.md
+/docs/blog-como-funciona.md
+/reverso.png
+/screenshots/
+/playwright-report/
+/test-results/
+*.log
+
+# Local assistant instructions and configuration
+.claude/
+.codex/
+.agents/
+CLAUDE*.md
+CODEX*.md
+AGENTS.md
+AGENTS.override.md
+.impeccable.md
+
+# npm is the package manager for this project
+/bun.lock
+/bun.lockb
