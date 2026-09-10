@@ -103,11 +103,11 @@ La revisión global del TFM requiere la migración de demo compartida además de
 
 ## Preferencias y selección diaria
 
-El perfil permite distribuir 100 puntos entre Fair, Opportunity, Zone y Lifestyle (25 cada uno al empezar). El buscador ordena por ese HabitIA Score y muestra el desglose y la cobertura: un dato ausente no recibe puntos ni se sustituye por un índice inventado. Zone mide cercanía al punto elegido. El perfil y la última búsqueda guardan su estado local; restaurar o reordenar no consulta Idealista. Las etiquetas Barato, Justo y Caro se refieren únicamente a un escenario individual válido del modelo.
+El perfil permite distribuir 100 puntos entre Fair, Opportunity, Zone y Lifestyle (25 cada uno al empezar). El buscador ordena por ese HabitIA Score y muestra el desglose y la cobertura: un dato ausente no recibe puntos ni se sustituye por un índice inventado. Opportunity compara revalorización de zona y ciudad; Zone mide calidad de vida del barrio. Ambos están sin datos verificables y no aportan puntos. Lifestyle puntúa exclusivamente el tiempo al trabajo. El perfil y la última búsqueda guardan su estado local; restaurar o reordenar no consulta Idealista. Las etiquetas Barato, Justo y Caro se refieren únicamente a un escenario individual válido del modelo.
 
 Datos y Notificaciones están en la navegación global. Datos identifica fuente, periodo y ausencia de referencias verificadas, y muestra trimestres como Q1 2025. La calculadora separa los grupos de compra, hipoteca, alquiler y supuestos; incorpora otros gastos, gestión, glosario y un desglose de liquidación opcional. La mudanza queda como aviso cualitativo y no simula una venta anticipada.
 
-`/notificaciones` permite activar una selección diaria privada de hasta tres viviendas, inicialmente a las 07:00 Europe/Madrid, con hora y zona editables. Al guardar copia el perfil actual; cambiarlo después requiere guardar también en Notificaciones. El aviso opcional del navegador funciona con HabitIA abierta. La migración, la publicación en [HabitIA](https://habitiaucm.vercel.app/notificaciones) y el cron se verificaron el 9 de septiembre de 2026. Para operación y límites, consultar [docs/notificaciones.md](docs/notificaciones.md).
+`/notificaciones` permite activar una selección diaria privada de hasta cinco viviendas, inicialmente a las 07:00 Europe/Madrid, con hora y zona editables. Al guardar copia el perfil actual; cambiarlo después requiere guardar también en Notificaciones. El aviso opcional del navegador funciona con HabitIA abierta. La migración, la publicación en [HabitIA](https://habitiaucm.vercel.app/notificaciones) y el cron se verificaron el 9 de septiembre de 2026. Para operación y límites, consultar [docs/notificaciones.md](docs/notificaciones.md).
 
 Comprobaciones adicionales:
 
@@ -120,3 +120,7 @@ psql -f supabase/tests/notifications.sql
 ```
 
 El repositorio conserva código, recursos usados por la app, configuración, migraciones, pruebas y documentación de operación. Las capturas, informes de revisión, exportaciones y archivos de asistentes permanecen locales y están excluidos mediante `.gitignore`.
+
+## Comentarios del 10 de septiembre de 2026
+
+Revisión del 10 de septiembre: nuevas definiciones del HabitIA Score, histórico IPV desde 2018, cinco recomendaciones diarias y presentación reorganizada con 12 escenas principales. La migración `supabase/migrations/20260910120000_five_daily_recommendations.sql` está aplicada y verificada en producción; amplía a cinco los límites de tabla y función antes del nuevo trabajador. El factor del modelo sigue versionado como escenario heredado 1,5534 para Q1 2026; leer el histórico de Datos no lo actualiza.

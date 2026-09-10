@@ -53,7 +53,7 @@ export default async function DatosPage() {
           sourceLink={MARKET_SOURCES.valuation}
           meta={price.fromFallback ? "Sin referencia verificada disponible" : `${price.data.data.length} provincias · ${formatMarketPeriod(price.data.periodo)} · ${freshness(price.updatedAt, false)}`}
         >
-          <p className="mb-4 text-sm leading-relaxed text-stone-600">Es una media de tasaciones de vivienda libre, expresada en €/m². Sirve para dar contexto territorial; no determina por sí sola cuánto vale un piso concreto ni su HabitIA Score.</p>
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">Es una media de tasaciones de vivienda libre, expresada en €/m². Se usa como contexto provincial en las consultas de mercado. No alimenta la proyección temporal del modelo ni el HabitIA Score. Las fichas de vivienda ya no muestran este bloque; aquí puedes consultar y contrastar la referencia general.</p>
           {price.fromFallback ? <Unavailable /> : (
           <Collapsible summary={`Ver las ${price.data.data.length} provincias`}>
             <Table head={["Provincia", "€/m²", "Var. anual"]}>
@@ -69,7 +69,7 @@ export default async function DatosPage() {
 
         {/* IPV */}
         <DataCard
-          title="Tendencia de precios · IPV (variación interanual)"
+          title="Evolución de precios · IPV desde 2018"
           estado={ipv.fromFallback ? "orientativo" : "real"}
           fuente={ipv.data.fuente}
           sourceLink={MARKET_SOURCES.ipv}
@@ -77,11 +77,15 @@ export default async function DatosPage() {
         >
           <p className="mb-4 text-sm leading-relaxed text-stone-600">El IPV describe cómo cambian los precios de compraventa. Una variación interanual compara con el mismo trimestre del año anterior. Q1 = enero–marzo; Q2 = abril–junio; Q3 = julio–septiembre; Q4 = octubre–diciembre.</p>
           {ipv.fromFallback ? <Unavailable /> : (
-          <Table head={["Trimestre", "Variación interanual"]}>
+          <div><p className="mb-4 text-sm leading-relaxed text-stone-600">Para indexar se compara el nivel del índice con su media de 2018: precio estimado de 2018 × índice del trimestre / índice medio de 2018. No se suman tasas interanuales. Esta serie nacional aporta contexto; el servicio usa el factor de su artefacto versionado y no se actualiza al abrir esta página. El IPV autonómico de Madrid es el ámbito del escenario del modelo.</p>
+          {ipv.data.serie.at(-1)?.periodo.slice(0, 4) !== String(new Date().getFullYear()) && <p className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Último trimestre recibido: {formatMarketPeriod(ipv.data.serie.at(-1)?.periodo ?? "sin periodo")}. Los trimestres posteriores todavía no están en esta descarga; no se interpolan ni se presentan como observados.</p>}
+          <Collapsible summary={`Ver histórico desde 2018 · ${ipv.data.serie.length} trimestres`}><Table head={["Trimestre", "Nivel del índice", "Variación interanual", "Factor vs. media 2018"]}>
             {ipv.data.serie.map((q) => (
-              <Row key={q.periodo} cells={[formatMarketPeriod(q.periodo), `${q.variacionInteranual > 0 ? "+" : ""}${q.variacionInteranual}%`]} />
+              <Row key={q.periodo} cells={[formatMarketPeriod(q.periodo), q.indice == null ? "—" : formatNumber(q.indice), `${q.variacionInteranual > 0 ? "+" : ""}${q.variacionInteranual}%`, q.indice != null && ipv.data.base2018 ? `${(q.indice / ipv.data.base2018).toFixed(3)}×` : "—"]} />
             ))}
-          </Table>
+          </Table></Collapsible>
+          {ipv.data.madridSegundaMano && <div className="mt-5"><Collapsible summary="Ver histórico de Madrid · vivienda de segunda mano"><Table head={["Trimestre", "Nivel del índice", "Factor vs. media 2018"]}>{ipv.data.madridSegundaMano.serie.map((q) => <Row key={q.periodo} cells={[formatMarketPeriod(q.periodo), formatNumber(q.indice), `${(q.indice / ipv.data.madridSegundaMano!.base2018).toFixed(3)}×`]} />)}</Table></Collapsible><p className="mt-3 text-xs leading-relaxed text-stone-600">Ámbito autonómico, no barrio ni ciudad. El factor mostrado usa la media de 2018 de esta misma serie. No sustituye automáticamente el escenario heredado del artefacto.</p></div>}
+          </div>
           )}
         </DataCard>
 
@@ -113,14 +117,14 @@ export default async function DatosPage() {
           <div className="space-y-3 text-sm leading-relaxed text-stone-600">
             <p><Strong>¿De dónde salía?</Strong> De una tabla de ejemplos escrita para la demo. No es una descarga de SERPAVI ni una muestra contrastada de anuncios; no puede atribuirse al Ministerio.</p>
             <p><Strong>¿Para qué serviría?</Strong> Una referencia contrastada permitiría comparar el alquiler mensual por m² del anuncio con viviendas de un ámbito y periodo conocidos. El SERPAVI oficial utiliza información tributaria sobre arrendamientos; su metodología se enlaza arriba para consulta, pero aún no alimenta esta aplicación.</p>
-            <p><Strong>¿Qué ocurre ahora?</Strong> Las fichas muestran «sin referencia verificada». Los ejemplos no clasifican un alquiler como barato o caro y no aportan puntos a Fair ni a Opportunity. El ranking puede usar ubicación, presupuesto, trayecto y requisitos disponibles.</p>
+            <p><Strong>¿Qué ocurre ahora?</Strong> Las fichas muestran «sin referencia verificada». Los ejemplos no clasifican un alquiler como barato o caro y no aportan puntos a Fair ni a Opportunity. El ranking puede usar el tiempo al trabajo; presupuesto, ubicación e imprescindibles se aplican como filtros. Fair de alquiler, Opportunity y Zone quedan sin puntuación cuando no hay evidencia.</p>
           </div>
         </DataCard>
 
         <section className="mt-8 rounded-xl border border-hairline bg-paper-50 p-5">
           <h2 className="font-display text-xl">Indicadores de barrio</h2>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">Los índices manuales de seguridad y calidad de vida se han retirado porque no disponemos de una fuente verificable a esa escala. No hay una puntuación de «barrio seguro» ni una capa de seguridad.</p>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">El componente <Strong>Zone</Strong> del HabitIA Score mide la proximidad a la ubicación que tú has elegido. Es una preferencia personal, no una estadística de seguridad, servicios o calidad del barrio. La referencia territorial de precio es otro dato distinto: una media del ámbito indicado en la ficha.</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">El componente <Strong>Zone</Strong> del HabitIA Score representa la calidad de vida en el barrio. Sigue visible en el desglose como «sin datos» hasta disponer de indicadores verificables y una metodología de combinación. <Strong>Opportunity</Strong> compara revalorización de zona y ciudad y también está pendiente de series comparables. Ninguno se sustituye por cercanía, medias provinciales o índices manuales.</p>
         </section>
 
         {/* Otras fuentes no tabulares */}

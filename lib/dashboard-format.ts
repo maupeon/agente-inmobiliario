@@ -12,7 +12,7 @@ type Banda = NonNullable<PropertyValuation["banda"]>;
 export const BANDA_COLOR: Record<Banda, string> = {
   barato: "#2F7A43",
   ajustado: "#6E8B2E",
-  en_linea: "#2D7C59",
+  en_linea: "#B86A0A",
   caro: "#B5532A",
   muy_caro: "#9F2F2D",
 };

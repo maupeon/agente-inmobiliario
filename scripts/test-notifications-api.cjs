@@ -51,7 +51,7 @@ async function main() {
   const db={from:()=>({select:()=>({limit:async()=>({error:null})})}),rpc:async(name,args)=>{dbCalls++;if(name==='claim_notification_subscription')return {data:claim?[{owner_hash:'a'.repeat(64),profile:{zona:'Madrid',operacion:'alquiler'}}]:[],error:null}; completes.push(args);return {data:true,error:null};}};
   const worker=loader({
     '@/lib/notifications/server':{validCronAuthorization:()=>allow,PRIVATE_HEADERS:{'Cache-Control':'private, no-store'},notificationDb:()=>db},
-    '@/lib/recommend':{recommend:async(input)=>{recommendations++;assert.equal(input.narrate,false);if(fail)throw Error('secret provider details');return {items:[{property:{propertyCode:'a'},score:40},{property:{propertyCode:'b'},score:90},{property:{propertyCode:'a'},score:40},{property:{propertyCode:'c'},score:80},{property:{propertyCode:'d'},score:70}]};}},
+    '@/lib/recommend':{recommend:async(input)=>{recommendations++;assert.equal(input.narrate,false);if(fail)throw Error('secret provider details');return {items:[{property:{propertyCode:'a'},score:40},{property:{propertyCode:'b'},score:90},{property:{propertyCode:'a'},score:40},{property:{propertyCode:'c'},score:80},{property:{propertyCode:'d'},score:70},{property:{propertyCode:'e'},score:60},{property:{propertyCode:'f'},score:50}]};}},
   },{NEXT_PUBLIC_SUPABASE_URL:'https://abcdefghijklmnopqrst.supabase.co'})('app/api/cron/recommendations/route.ts');
   allow=false;const denied=await worker.GET(new Request('https://habitia.test'));
   ok('unauthorized cron performs no database or provider work',()=>{assert.equal(denied.status,401);assert.equal(dbCalls,0);});
@@ -61,7 +61,7 @@ async function main() {
   claim=false;const empty=await worker.GET(new Request('https://habitia.test'));
   ok('no due profile performs no search',()=>{assert.equal(empty.status,200);assert.equal(recommendations,0);});
   claim=true;const run=await worker.GET(new Request('https://habitia.test'));
-  ok('worker selects exactly top3 distinct properties and disables narration',()=>{assert.equal(run.status,200);assert.equal(recommendations,1);assert.equal(completes[0].p_items.map(x=>x.property.propertyCode).join(','),'b,c,d');assert.equal(completes[0].p_error,null);});
+  ok('worker selects exactly top5 distinct properties and disables narration',()=>{assert.equal(run.status,200);assert.equal(recommendations,1);assert.equal(completes[0].p_items.map(x=>x.property.propertyCode).join(','),'b,c,d,e,f');assert.equal(completes[0].p_error,null);});
   fail=true;const failure=await worker.GET(new Request('https://habitia.test'));
   ok('failed provider gets a safe retry result without fabricated selection',()=>{assert.equal(failure.status,503);assert.equal(completes[1].p_items.length,0);assert(!completes[1].p_error.includes('secret'));});
   let ownerFilters=[];

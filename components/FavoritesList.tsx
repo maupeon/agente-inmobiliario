@@ -20,7 +20,7 @@ export function FavoritesList({
   }
 
   return (
-    <ul className="space-y-2">
+    <div><p className="mb-3 text-xs leading-relaxed text-stone-600">Copias guardadas: pueden permanecer aquí aunque el anuncio se retire. Comprueba la disponibilidad en Idealista.</p><ul className="space-y-2">
       {favorites.slice(0, 8).map((p) => (
         <li
           key={p.propertyCode}
@@ -69,6 +69,6 @@ export function FavoritesList({
           <Heart size={12} weight="fill" className="mt-0.5 text-saffron-700" />
         </li>
       ))}
-    </ul>
+    </ul></div>
   );
 }

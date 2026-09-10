@@ -46,11 +46,10 @@ async function main() {
     assert.equal(result.scoring.coveragePercent, 0);
     assert(result.scoring.components.every(c => c.value === null && c.contribution === 0));
   });
-  check('zone is observable proximity, independent of invented neighborhood index', () => {
-    const result = personalScore(property, {...empty, neighborhood: {seguridad:{indice:100}}}, profile);
-    assert.equal(result.score,25); assert.equal(result.scoring.coveragePercent,25);
-    assert.equal(result.scoring.components.find(c=>c.key==='zone').value,100);
-    assert.equal(personalScore({...property,latitude:41}, empty, profile).score,0);
+  check('Zone stays unavailable: proximity and manual indices cannot stand in for quality of life', () => {
+    const result = personalScore(property, {...empty, neighborhood: {seguridad:{indice:100},calidadVida:{indice:100}}}, profile);
+    assert.equal(result.score,0); assert.equal(result.scoring.coveragePercent,0);
+    assert.equal(result.scoring.components.find(c=>c.key==='zone').value,null);
   });
   check('fallback and invalid model state cannot award Fair/Opportunity', () => {
     for (const changed of [{fromFallback:true},{estadoModelo:'no_disponible'},{nivel:'provincia'},{modeloVersion:undefined}]) {
@@ -58,11 +57,23 @@ async function main() {
       assert.equal(result.score,0); assert.equal(result.scoring.coveragePercent,0);
     }
   });
-  check('Opportunity margin anchors and bounds are transparent', () => {
+  check('Opportunity never uses the price margin as relative zone appreciation', () => {
     const p = {...profile,scoreWeights:{alpha:0,beta:100,gamma:0,delta:0}};
-    assert.equal(personalScore(property,model,p).score,50);
-    assert.equal(personalScore({...property,price:90000},model,p).score,70);
-    assert.equal(personalScore({...property,price:200000},model,p).score,0);
+    for (const price of [100000,90000,200000]) {
+      const r=personalScore({...property,price},model,p);
+      assert.equal(r.score,0); assert.equal(r.scoring.coveragePercent,0);
+      assert.equal(r.scoring.components.find(c=>c.key==='opportunity').value,null);
+    }
+  });
+  check('Lifestyle scores only work travel time, including bounds and missing values', () => {
+    const p={...profile,trabajo:{direccion:'Trabajo',modo:'bici'},presupuestoMax:200000,imprescindibles:['ascensor'],scoreWeights:{alpha:0,beta:0,gamma:0,delta:100}};
+    const travel=minutes=>({...empty,commute:{recomendado:'bici',proveedor:'estimacion',modos:[{modo:'bici',minutos:minutes}]}});
+    for(const [minutes,expected] of [[0,100],[10,100],[20,81],[60,5],[90,5],[null,0],[-1,0],[NaN,0]]) {
+      assert.equal(personalScore(property,travel(minutes),p).score,expected);
+    }
+    assert.equal(personalScore({...property,hasLift:true},empty,p).score,0);
+    const r=personalScore(property,{...model,commute:travel(20).commute},{...p,scoreWeights:{alpha:25,beta:25,gamma:25,delta:25}});
+    assert.equal(r.score,45); assert.equal(r.scoring.coveragePercent,50);
   });
   check('absent feature stays unknown, explicit negative fails requirement', () => {
     assert.equal(satisfiesMust({...property,features:['Exterior']},'terraza'),null);

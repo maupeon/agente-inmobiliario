@@ -216,7 +216,7 @@ export function PropertyDetailDrawer({
           </div>
 
           <ScoreBreakdown score={item.score} scoring={item.scoring} />
-          {val && (
+          {val?.nivel === "modelo" && (
             <section className="rounded-xl border border-hairline bg-paper-50 p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-saffron-700">
                 {val.nivel === "modelo" ? "Precio frente a la estimación" : "Referencia territorial"}
@@ -252,25 +252,6 @@ export function PropertyDetailDrawer({
                   Por debajo del intervalo estimado
                 </p>
               )}
-              {/* La media territorial se muestra como contexto, no como una
-                  segunda clasificación del precio individual. */}
-              {val.nivel === "modelo" &&
-                val.comparativa?.referenciaEurM2 != null && (
-                  <div className="mt-4 rounded-lg border border-hairline bg-paper-200/60 p-3">
-                    <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-mist">
-                      Contexto territorial
-                    </p>
-                    <p className="mt-1 font-mono text-[11px] text-stone">
-                      {formatNumber(Math.round(val.comparativa.referenciaEurM2))} €/m² · {val.comparativa.territorio}
-                    </p>
-                    <p className="mt-1 text-[11px] text-stone">
-                      {val.comparativa.fuente} · {formatMarketPeriod(val.comparativa.periodo)}
-                    </p>
-                    <p className="mt-2 text-[12px] leading-relaxed text-stone">
-                      Esta media agrega viviendas distintas y no estima el precio de este anuncio. El modelo usa oferta de 2018 y un supuesto común de evolución de precios.
-                    </p>
-                  </div>
-                )}
               <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-mist">
                 {val.nivel === "modelo"
                   ? `Oferta 2018 · escenario ${val.nivelPrecios ?? "sin periodo"} · ${val.modeloVersion ?? "versión no identificada"}`
@@ -280,6 +261,8 @@ export function PropertyDetailDrawer({
               {val.avisoModelo && <p className="mt-2 text-xs leading-relaxed text-stone-600">{val.avisoModelo}{val.estadoModelo !== "ok" && val.referenciaEurM2 != null ? " La referencia territorial mostrada no valora esta vivienda individualmente." : ""}</p>}
             </section>
           )}
+
+          {val?.nivel !== "modelo" && <p className="rounded-xl border border-hairline p-5 text-sm text-stone-600">Sin estimación individual disponible. {val?.avisoModelo} Las referencias generales de mercado se pueden consultar en <a href="/datos" className="underline">Datos</a>.</p>}
 
           {p.operation === "sale" && <MortgageMini price={p.price} />}
 

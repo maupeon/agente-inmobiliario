@@ -42,11 +42,17 @@ export interface IpvQuarterPoint {
   periodo: string;
   /** Variación interanual del IPV en porcentaje. */
   variacionInteranual: number;
+  /** Nivel del índice, misma serie y base del INE. No es un porcentaje. */
+  indice?: number;
 }
 
 export interface IneIpvQuarterly {
   fuente: string;
-  /** Últimos 4-8 trimestres en orden cronológico (más antiguo primero). */
+  schemaVersion?: 2;
+  /** Índice medio de los cuatro trimestres de 2018. */
+  base2018?: number;
+  madridSegundaMano?: { base2018: number; serie: Array<{ periodo: string; indice: number }> };
+  /** Desde Q1 2018 hasta el último trimestre recibido, en orden cronológico. */
   serie: IpvQuarterPoint[];
 }
 

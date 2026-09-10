@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       const health = await db.from("notification_subscriptions").select("owner_hash", { head: true }).limit(0);
       if (health.error) throw new Error("notification schema unavailable");
       const projectRef = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").hostname.split(".")[0];
-      return Response.json({ ok: true, mode: "check", projectRef, workerVersion: "2026-09-09-v1" }, { headers: PRIVATE_HEADERS });
+      return Response.json({ ok: true, mode: "check", projectRef, workerVersion: "2026-09-10-v2" }, { headers: PRIVATE_HEADERS });
     }
     const lease = randomUUID();
     const claim = await db.rpc("claim_notification_subscription", { p_lease: lease });
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       const profile = validatedProfile(row.profile);
       if (!profile?.zona) throw new Error("profile missing");
       const result = await recommend({ profile, narrate: false });
-      items = result.items.filter((item, index, all) => all.findIndex((x) => x.property.propertyCode === item.property.propertyCode) === index).sort((a, b) => b.score - a.score).slice(0, 3);
+      items = result.items.filter((item, index, all) => all.findIndex((x) => x.property.propertyCode === item.property.propertyCode) === index).sort((a, b) => b.score - a.score).slice(0, 5);
     } catch (error) {
       // Keep private profile, provider payloads and credentials out of cron logs.
       console.error("[notifications] recommendation failed", error instanceof AppError ? error.code : "provider_error");

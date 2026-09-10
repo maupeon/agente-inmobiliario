@@ -96,7 +96,7 @@ export function NotificationCenter() {
     <SiteNav />
     <main className="relative z-10 mx-auto max-w-5xl px-5 pb-24 pt-10 sm:px-8">
       <p className="text-sm font-semibold uppercase tracking-widest text-forest-700">A tu ritmo</p>
-      <h1 className="mt-3 text-4xl font-semibold tracking-tight text-ink sm:text-5xl">Tus tres viviendas del día</h1>
+      <h1 className="mt-3 text-4xl font-semibold tracking-tight text-ink sm:text-5xl">Tus cinco viviendas del día</h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed text-stone-600">Una selección ordenada por tu HabitIA Score, con tus preferencias y tu presupuesto. Tú eliges a qué hora encontrarla aquí.</p>
       <div className="mt-9 grid items-start gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
         <section aria-labelledby="notification-settings" className="rounded-3xl border border-hairline bg-paper-50 p-6 shadow-nudge">
@@ -137,7 +137,7 @@ export function NotificationCenter() {
           <div className="mt-5 space-y-7">{state?.digests.map((digest) => <article key={digest.id} className="rounded-3xl border border-hairline bg-paper-50 p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">{new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${digest.local_date}T12:00:00Z`))}</h3>{!digest.read_at && <button type="button" onClick={() => markRead(digest.id)} className="min-h-11 text-sm font-medium text-forest-700">Marcar como leída</button>}</div>
             {digest.items.length === 0 ? <p className="mt-4 leading-relaxed text-stone-600">Hoy no encontramos viviendas que cumplan tus filtros. Puedes ampliar la zona o ajustar tu presupuesto y guardar de nuevo tu perfil.</p> : <>
-              <p className="mt-1 text-sm text-stone-500">{digest.items.length === 3 ? "Las tres con mayor encaje entre las candidatas encontradas." : `Encontramos ${digest.items.length} ${digest.items.length === 1 ? "vivienda compatible" : "viviendas compatibles"}. Mostramos solo las disponibles.`}</p>
+              <p className="mt-1 text-sm text-stone-500">{digest.items.length === 5 ? "Las cinco con mayor encaje entre las candidatas encontradas." : `Encontramos ${digest.items.length} ${digest.items.length === 1 ? "vivienda compatible" : "viviendas compatibles"}. Mostramos solo las disponibles.`}</p>
               <ol className="mt-5 divide-y divide-hairline">{digest.items.map((item) => <li key={item.property.propertyCode} className="py-5 first:pt-0 last:pb-0">
                 <div className="flex items-start justify-between gap-4"><div className="min-w-0"><h4 className="break-words font-semibold leading-snug">{item.property.title || item.property.address || "Vivienda"}</h4><p className="mt-1 text-sm text-stone-500">{[item.property.district, item.property.municipality, item.property.province].filter(Boolean).filter((s, i, a) => a.indexOf(s) === i).join(" · ") || "Ubicación no indicada"}</p></div><span className="shrink-0 rounded-lg bg-forest-50 px-2 py-1 text-sm font-semibold text-forest-800">{item.score}/100</span></div>
                 <p className="mt-3 text-xl font-semibold tabular-nums">{formatEUR(item.property.price)}{item.property.operation === "rent" && <span className="text-sm font-normal text-stone-500"> / mes</span>}</p>

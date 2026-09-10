@@ -443,13 +443,9 @@ function FondoPerdido({ r }: { r: RentVsBuyResult }) {
           <div className="mb-2 flex items-baseline justify-between">
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink">Alquilar</span>
           </div>
-          <div className="h-8 w-full rounded-md bg-paper-300">
-            <div
-              className="flex h-full min-w-fit items-center justify-end rounded-md bg-stone-600 px-2 text-paper-50 motion-safe:transition-[width] motion-safe:duration-500"
-              style={{ width: `${(fondoAlquiler / max) * 100}%` }}
-            >
-              <span className="whitespace-nowrap font-mono text-xs tabular">{formatEUR(fondoAlquiler)}</span>
-            </div>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="h-8 rounded-md bg-paper-300"><div className="h-full rounded-md bg-stone-600 motion-safe:transition-[width] motion-safe:duration-500" style={{ width: `${(fondoAlquiler / max) * 100}%` }} /></div>
+            <span className="min-w-[7rem] text-right font-mono text-sm tabular text-ink" aria-label="Total de gastos de alquilar">{formatEUR(fondoAlquiler)}</span>
           </div>
           <p className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.1em] text-mist">
             Renta, seguro, otros costes e inversión inicial no recuperable
@@ -460,9 +456,9 @@ function FondoPerdido({ r }: { r: RentVsBuyResult }) {
         <div>
           <div className="mb-2 flex items-baseline justify-between">
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink">Comprar</span>
-            <span className="font-mono text-sm tabular text-ink">{formatEUR(fondoCompra)}</span>
+
           </div>
-          <div className="flex h-7 w-full overflow-hidden rounded-md bg-paper-300" style={{ width: `${(fondoCompra / max) * 100}%` }}>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><div className="h-8 rounded-md bg-paper-300"><div className="flex h-8 overflow-hidden rounded-md bg-paper-300" style={{ width: `${(fondoCompra / max) * 100}%` }}>
             {compraParts.map((p, i) => (
               <div
                 key={p.label}
@@ -472,6 +468,7 @@ function FondoPerdido({ r }: { r: RentVsBuyResult }) {
               />
             ))}
           </div>
+          </div><span className="min-w-[7rem] text-right font-mono text-sm tabular text-ink" aria-label="Total de gastos de comprar">{formatEUR(fondoCompra)}</span></div>
           <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5">
             {compraParts.map((p, i) => (
               <span key={p.label} className="inline-flex items-center gap-1.5 font-mono text-[10px] text-stone">

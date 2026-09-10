@@ -16,7 +16,18 @@ update public.notification_subscriptions set next_run_at = now()-interval '1 min
 select pg_temp.assert_true((select count(*)=1 from public.claim_notification_subscription('11111111-1111-4111-8111-111111111111')), 'claim due subscription');
 select pg_temp.assert_true((select count(*)=0 from public.claim_notification_subscription('22222222-2222-4222-8222-222222222222')), 'second worker cannot double-claim');
 select pg_temp.assert_true(not public.finish_notification_subscription(repeat('a',64),'22222222-2222-4222-8222-222222222222','[]'), 'wrong lease cannot deliver');
-select pg_temp.assert_true(public.finish_notification_subscription(repeat('a',64),'11111111-1111-4111-8111-111111111111','[{"score":90},{"score":80},{"score":70}]'), 'deliver3');
+-- Six entries must fail before insertion; the lease remains usable for five.
+do $$
+begin
+  begin
+    perform public.finish_notification_subscription(repeat('a',64),'11111111-1111-4111-8111-111111111111','[{},{},{},{},{},{}]');
+    raise exception 'FAIL: accepted six recommendations';
+  exception when others then
+    if sqlerrm <> 'Invalid digest' then raise; end if;
+  end;
+end;
+$$;
+select pg_temp.assert_true(public.finish_notification_subscription(repeat('a',64),'11111111-1111-4111-8111-111111111111','[{"score":90},{"score":80},{"score":70},{"score":60},{"score":50}]'), 'deliver5');
 select pg_temp.assert_true(not public.finish_notification_subscription(repeat('a',64),'11111111-1111-4111-8111-111111111111','[]'), 'replay does not duplicate');
 select pg_temp.assert_true((select count(*)=1 from public.recommendation_digests where owner_hash=repeat('a',64)), 'one digest per day');
 -- Changing today's delivery hour after it already ran schedules tomorrow.

@@ -2,7 +2,7 @@
 
 La app incorpora `/notificaciones`, una bandeja por navegador y un horario editable. Empieza desactivada y propone las 07:00 de España peninsular; se pueden elegir Canarias u otras zonas. Guardar y activar autoriza una búsqueda diaria, copia el perfil actual al servidor y mantiene los mismos límites de caché y cuota que el buscador. Las preferencias de perfil modificadas después deben guardarse en Notificaciones.
 
-La selección contiene como máximo tres anuncios distintos, ordenados por el mismo HabitIA Score. No completa con viviendas ficticias cuando faltan candidatos. El resultado vacío se conserva como tal; un error no se presenta como búsqueda sin resultados. Las peticiones diarias no utilizan la narración adicional del LLM. Los anuncios pueden proceder de la caché de 24 horas y los escenarios demo están identificados.
+La selección contiene como máximo cinco anuncios distintos, ordenados por el mismo HabitIA Score. No completa con viviendas ficticias cuando faltan candidatos. El resultado vacío se conserva como tal; un error no se presenta como búsqueda sin resultados. Las peticiones diarias no utilizan la narración adicional del LLM. Los anuncios pueden proceder de la caché de 24 horas y los escenarios demo están identificados.
 
 ## Instalación
 
@@ -16,7 +16,7 @@ Los pasos siguientes permiten instalarlo en otro entorno o comprobar la configur
 4. Aplicar `supabase/setup/notifications-cron.sql`. Crea un único trabajo `habitia-daily-recommendations` que revisa cada minuto si existe alguna suscripción pendiente. Solo entonces solicita el proceso protegido de la app.
 5. Verificar en Cron History y en la bandeja de una suscripción de prueba. No dar por operativo el envío únicamente porque la migración se haya aplicado.
 
-El instalador `node scripts/setup-notifications.mjs --check`, `--migrate` y `--activate-cron` permite ejecutar esos pasos con la sesión administrativa de Supabase CLI en macOS o con `SUPABASE_ACCESS_TOKEN` en el entorno. Verifica que el proyecto coincide con `NEXT_PUBLIC_SUPABASE_URL`, no muestra credenciales y rechaza activar cron si el endpoint desplegado no está listo o utiliza otro proyecto Supabase. La comprobación autenticada `?check=1` solo verifica disponibilidad e identidad del proyecto: no reserva trabajo ni consulta proveedores. La clave `service_role` de la app no concede acceso a la API administrativa.
+El instalador `node scripts/setup-notifications.mjs --check`, `--migrate`, `--upgrade-five` y `--activate-cron` permite ejecutar esos pasos con la sesión administrativa de Supabase CLI en macOS o con `SUPABASE_ACCESS_TOKEN` en el entorno. Verifica que el proyecto coincide con `NEXT_PUBLIC_SUPABASE_URL`, no muestra credenciales y rechaza activar cron si el endpoint desplegado no está listo o utiliza otro proyecto Supabase. La comprobación autenticada `?check=1` solo verifica disponibilidad e identidad del proyecto: no reserva trabajo ni consulta proveedores. La clave `service_role` de la app no concede acceso a la API administrativa.
 
 La migración no se ha registrado como versión aplicada en el historial de Supabase CLI: al usar la API administrativa se verifica el esquema directamente. Si se adopta `supabase db push`, registrar primero las migraciones históricas aplicadas con el procedimiento habitual de Supabase, sin repetir cambios a ciegas.
 
@@ -38,8 +38,12 @@ El canal disponible es la bandeja. El aviso opcional del navegador pide permiso 
 
 ## Verificación
 
-- `node scripts/test-notifications-api.cjs`: autorización del cron, identidad privada, filtrado por propietario, validación, origen, selección de tres únicos y errores de proveedor, sin red.
+- `node scripts/test-notifications-api.cjs`: autorización del cron, identidad privada, filtrado por propietario, validación, origen, selección de cinco únicos y errores de proveedor, sin red.
 - `psql ... -f supabase/tests/notifications.sql`: ejecutar en una base local desechable tras aplicar la migración; usa una transacción con rollback. Comprueba horario estacional, Canarias, permisos, reservas, pausas, duplicados y reintentos.
 - `npm run lint`, `npx tsc --noEmit --incremental false`, `npm run build`.
 
 Fuentes de implementación: [Supabase Cron](https://supabase.com/docs/guides/cron/quickstart) y [programación con Vault y pg_net](https://supabase.com/docs/guides/functions/schedule-functions).
+
+## Revisión del 10 de septiembre de 2026
+
+El trabajador y la interfaz admiten hasta cinco viviendas. Aplicar `supabase/migrations/20260910120000_five_daily_recommendations.sql` **antes** de desplegar este trabajador; amplía tanto la restricción de tabla como la validación de la función de entrega. Las reservas, permisos y tres reintentos diarios se conservan. La migración de cinco viviendas se aplicó el 10 de septiembre de 2026 a `ggahjicfmsbpyhequpck`. La comprobación remota confirmó el límite de cinco tanto en tabla como en función y el acceso exclusivo del trabajador mediante `service_role`. El instalador aplica ambas migraciones con `--migrate`; para instalaciones existentes, `--upgrade-five` aplica únicamente esta ampliación. Los avisos anteriores conservan su selección histórica.

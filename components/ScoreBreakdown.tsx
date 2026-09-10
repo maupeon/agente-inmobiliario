@@ -5,7 +5,7 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
   return (
     <details className="mt-3 rounded-xl border border-hairline bg-paper-50 p-3 text-sm">
       <summary className="min-h-11 cursor-pointer leading-relaxed text-ink">
-        <strong>Score HabitIA: {scoring.coveragePercent ? `${score ?? 0}/100` : "sin datos"}</strong>
+        <strong>HabitIA Score: {scoring.coveragePercent ? `${score ?? 0}/100` : "sin datos"}</strong>
         <span className="ml-2 text-xs font-normal text-stone-600">Cobertura de pesos {scoring.coveragePercent}% · ver desglose</span>
       </summary>
       <p className="mt-2 text-xs leading-relaxed text-stone-600">{scoring.explanation}</p>

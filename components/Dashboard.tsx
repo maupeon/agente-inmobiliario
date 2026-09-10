@@ -288,7 +288,7 @@ export function Dashboard() {
       return recs.filter((r) => (profile?.imprescindibles ?? []).every((m) => satisfiesMust(r.property, m) !== false))
         .map((r) => ({ property: r.property, enrichment: r.enrichment,
         ...recommendationExplanation(r.property, r.enrichment, scoringProfile),
-        ...personalScore(r.property, r.enrichment, scoringProfile, applied.precioMax ? Number(applied.precioMax) : undefined) }))
+        ...personalScore(r.property, r.enrichment, scoringProfile) }))
         .sort((a, b) => b.score - a.score).map((r, i) => ({ ...r, rank: i + 1 }));
     }
     return enrichList.map((p) => ({
@@ -383,7 +383,7 @@ export function Dashboard() {
             <div
               role="tablist"
               aria-label="Colección de viviendas"
-              className="flex min-w-0 gap-1 overflow-x-auto rounded-xl bg-paper-200 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="flex min-w-0 flex-wrap gap-1 rounded-xl bg-paper-200 p-1"
             >
               {(["para_ti", "favoritos", "busqueda"] as Source[]).map((item) => {
                 const active = source === item;
@@ -448,9 +448,10 @@ export function Dashboard() {
           </>
         )}
 
+        {source === "favoritos" && <p className="mt-3 text-sm leading-relaxed text-stone-600">Los guardados son copias del anuncio. Si desaparece de Idealista, el favorito permanece hasta que lo quites; no verificamos automáticamente su disponibilidad. Abre el anuncio para comprobarla.</p>}
         {lastSavedAt && <p className="mt-3 text-xs text-stone-600">Última búsqueda guardada en este navegador: {new Date(lastSavedAt).toLocaleString("es-ES")}. Es una instantánea; confirma la disponibilidad en el anuncio.</p>}
         {storageError && <p role="alert" className="mt-2 text-sm text-rose-700">La búsqueda se ha mostrado, pero no ha cabido en el almacenamiento del navegador.</p>}
-        {items.length > 0 && <p className="mt-3 text-xs text-stone-600">Orden: Score HabitIA de mayor a menor. La cobertura indica qué parte de tus pesos se puede evaluar. Seguridad y calidad de barrio no tienen índices verificados.</p>}
+        {items.length > 0 && <p className="mt-3 text-xs text-stone-600">Orden: HabitIA Score de mayor a menor. La cobertura indica qué parte de tus pesos se puede evaluar. Opportunity y Zone están pendientes de datos verificables.</p>}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <Toggle on={showTrajectory} onClick={() => setShowTrajectory((value) => !value)}>

@@ -1,5 +1,5 @@
 /** Scoped Supabase setup; never prints credentials or profile contents.
- * node scripts/setup-notifications.mjs --check | --migrate | --activate-cron
+ * node scripts/setup-notifications.mjs --check | --migrate | --upgrade-five | --activate-cron
  * Uses SUPABASE_ACCESS_TOKEN or the existing macOS Supabase CLI keyring entry.
  */
 import fs from 'node:fs';
@@ -12,7 +12,7 @@ try { for (const line of fs.readFileSync('.env.local', 'utf8').split('\n')) {
 } } catch { /* CI uses environment */ }
 const config = { ...local, ...process.env };
 const action = process.argv[2] ?? '--check';
-if (!['--check', '--migrate', '--activate-cron'].includes(action)) throw Error('Use --check, --migrate or --activate-cron');
+if (!['--check', '--migrate', '--upgrade-five', '--activate-cron'].includes(action)) throw Error('Use --check, --migrate, --upgrade-five or --activate-cron');
 let token = config.SUPABASE_ACCESS_TOKEN;
 if (!token && process.platform === 'darwin') {
   for (const account of ['supabase', 'access-token']) {
@@ -42,6 +42,10 @@ if (action === '--migrate') {
   await query(`begin;\n${sql}\ncommit;`);
   console.log('Notification schema applied. No subscription has been enabled.');
 }
+if (action === '--migrate' || action === '--upgrade-five') {
+  await query(fs.readFileSync('supabase/migrations/20260910120000_five_daily_recommendations.sql', 'utf8'));
+  console.log('Five-recommendation migration applied.');
+}
 if (action === '--activate-cron') {
   const origin = new URL(config.NEXT_PUBLIC_SITE_URL ?? '');
   if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || origin.hash || origin.username || origin.password) throw Error('NEXT_PUBLIC_SITE_URL must be the canonical HTTPS application origin.');
@@ -50,7 +54,7 @@ if (action === '--activate-cron') {
   // Refuse to install a dispatcher against an old/missing app route.
   const readiness = await fetch(`${origin.origin}/api/cron/recommendations?check=1`, { headers: { Authorization: `Bearer ${secret}` }, signal: AbortSignal.timeout(65_000) });
   const state = await readiness.json().catch(() => null);
-  if (!readiness.ok || state?.ok !== true || state.mode !== 'check' || state.projectRef !== project || state.workerVersion !== '2026-09-09-v1') throw Error(`Deploy and verify the notification route first (HTTP${readiness.status}). Cron was not changed.`);
+  if (!readiness.ok || state?.ok !== true || state.mode !== 'check' || state.projectRef !== project || state.workerVersion !== '2026-09-10-v2') throw Error(`Deploy and verify the notification route first (HTTP${readiness.status}). Cron was not changed.`);
   const literal = (value) => "'" + value.replaceAll("'", "''") + "'";
   for (const [name, value] of [['habitia_app_url', origin.origin], ['habitia_cron_secret', secret]]) {
     await query(`do $setup$ declare sid uuid; begin select id into sid from vault.secrets where name=${literal(name)}; if sid is null then perform vault.create_secret(${literal(value)},${literal(name)}); else perform vault.update_secret(sid,${literal(value)}); end if; end $setup$;`);
@@ -61,6 +65,10 @@ if (action === '--activate-cron') {
 }
 const verification = await query("select to_regclass('public.notification_subscriptions') is not null as subscriptions, to_regclass('public.recommendation_digests') is not null as digests, has_function_privilege('anon','public.claim_notification_subscription(uuid)','execute') as public_worker_access;", true).catch(() => null);
 console.log('Schema verification:', JSON.stringify(verification));
+const capacity = await query("select pg_get_constraintdef(oid) as digest_constraint from pg_constraint where conrelid = 'public.recommendation_digests'::regclass and conname = 'recommendation_digests_items_check';", true);
+console.log('Digest capacity:', JSON.stringify(capacity));
+const worker = await query("select position('jsonb_array_length(p_items) > 5' in pg_get_functiondef('public.finish_notification_subscription(text,uuid,jsonb,text)'::regprocedure)) > 0 as accepts_five, has_function_privilege('service_role','public.finish_notification_subscription(text,uuid,jsonb,text)','execute') as service_access, has_function_privilege('anon','public.finish_notification_subscription(text,uuid,jsonb,text)','execute') as anon_access, has_function_privilege('authenticated','public.finish_notification_subscription(text,uuid,jsonb,text)','execute') as authenticated_access;", true);
+console.log('Worker verification:', JSON.stringify(worker));
 
 }
 main().catch((error) => { console.error(error instanceof Error ? error.message : "Notification setup failed."); process.exitCode = 1; });

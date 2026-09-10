@@ -88,7 +88,7 @@ export async function recommend(input: RecommendInput): Promise<RecommendResult>
         commute: null,
         neighborhood: null,
       };
-    const { score, scoring } = personalScore(p, enrichment, effectiveProfile, precioMax);
+    const { score, scoring } = personalScore(p, enrichment, effectiveProfile);
     const { highlights, rationale } = recommendationExplanation(p, enrichment, effectiveProfile);
     return { property: p, enrichment, score, scoring, highlights, rationale };
   });

@@ -15,7 +15,7 @@ const STEPS = [
   {
     n: "01",
     t: "Tu perfil y tus prioridades",
-    d: "Eliges la zona, presupuesto, trabajo e imprescindibles. Repartes 100 puntos entre precio, oportunidad, zona y estilo de vida; de inicio, cada componente tiene 25.",
+    d: "Eliges la zona, presupuesto, trabajo e imprescindibles. Repartes 100 puntos entre precio, inversión, calidad de vida y tiempo al trabajo; de inicio, cada componente tiene 25. Puedes descartar uno dándole peso 0.",
   },
   {
     n: "02",
@@ -41,19 +41,19 @@ const SIGNALS = [
     fuente: "25% por defecto · Sin estimación: no disponible",
   },
   {
-    t: "β · Opportunity · margen",
-    d: "Mide el margen del precio anunciado respecto al extremo inferior del intervalo del modelo. Es una regla de puntuación, no una probabilidad de beneficio.",
-    fuente: "25% por defecto · Requiere intervalo del modelo",
+    t: "β · Opportunity · inversión",
+    d: "Compara la revalorización de la zona con la media de la ciudad en un mismo periodo. Necesita series comparables; hoy no está disponible y no aporta puntos. No predice la rentabilidad futura.",
+    fuente: "25% por defecto · Pendiente de series de zona y ciudad",
   },
   {
-    t: "γ · Zone · ubicación",
-    d: "Mide la proximidad al punto que has elegido para vivir. No califica la seguridad, los servicios o la calidad del barrio; refleja tu preferencia geográfica.",
-    fuente: "25% por defecto · Tu zona preferida",
+    t: "γ · Zone · calidad de vida",
+    d: "Describe la calidad de vida en el barrio. Faltan indicadores verificables y una metodología para combinarlos: hoy está sin datos y no aporta puntos. No se sustituye por la distancia al punto elegido.",
+    fuente: "25% por defecto · Indicadores de barrio pendientes",
   },
   {
-    t: "δ · Lifestyle · día a día",
-    d: "Combina el ajuste al presupuesto, el trayecto al trabajo y los requisitos de vivienda que se pueden comprobar. Los atributos desconocidos se indican expresamente.",
-    fuente: "25% por defecto · Datos disponibles del anuncio y ruta",
+    t: "δ · Lifestyle · tiempo al trabajo",
+    d: "Puntúa el tiempo de trayecto al trabajo en tu modo de transporte: 100 puntos hasta 10 minutos, descenso de 1,9 puntos por minuto y 5 puntos desde 60 minutos. Las aproximaciones se identifican. Presupuesto e imprescindibles se aplican como filtros.",
+    fuente: "25% por defecto · Necesita trabajo y tiempo de ruta",
   },
 ];
 
@@ -168,7 +168,7 @@ export default function ComoFuncionaPage() {
         </Section>
 
         <Section eyebrow="Cada mañana" title="Tus tres viviendas del día">
-          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Notificaciones puedes activar una selección diaria, editar la hora y pausarla cuando quieras. La hora inicial es 07:00, zona horaria Europe/Madrid. Se eligen hasta tres viviendas según tu perfil y tu HabitIA Score; si hay menos candidatos, no se completa la selección con viviendas inventadas.</p>
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Notificaciones puedes activar una selección diaria, editar la hora y pausarla cuando quieras. La hora inicial es 07:00, zona horaria Europe/Madrid. Se eligen hasta cinco viviendas según tu perfil y tu HabitIA Score; si hay menos candidatos, no se completa la selección con viviendas inventadas.</p>
           <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Los avisos se consultan en la bandeja de la aplicación. El aviso del navegador requiere permiso y la aplicación abierta; no se envían correos. La selección puede repetir viviendas si siguen siendo las que mejor encajan.</p>
           <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Al activarla autorizas una búsqueda diaria con tu perfil, respetando la caché y los límites del proveedor. Guarda los cambios en Notificaciones para actualizar ese perfil. La suscripción caduca tras 90 días sin guardar y la página muestra si el servicio está configurado.</p>
           <Link href="/notificaciones" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-ink px-4 text-sm font-medium text-paper hover:bg-ink-700">Configurar notificaciones <ArrowRight aria-hidden size={16} /></Link>

@@ -25,14 +25,13 @@ async function run() {
   assert.equal(parseBdeSeries(`${codes}\n"AGO 2026",99,"",2.954`, 'DN_1TI2T0002'), null);
 
   const fallback = { fuente: 'fallback', serie: [] };
+  const years = Array.from({length: 9},(_,i)=>2018+i);
+  const points = years.flatMap(y=>Array.from({length: y===2026 ? 2 : 4},(_,i)=>({T3_Periodo:`T${i+1}`,Anyo:y,Valor:12.2}))).reverse();
   const payload = [
-    { Nombre: 'Andalucía. General. Variación anual. ', Data: [] },
-    { Nombre: 'Nacional. General. Variación anual. ', Data: [
-      { T3_Periodo: 'T4', Anyo: 2025, Valor: 12.9 },
-      { T3_Periodo: 'T3', Anyo: 2025, Valor: 12.8 },
-      { T3_Periodo: 'T2', Anyo: 2025, Valor: 12.7 },
-      { T3_Periodo: 'T1', Anyo: 2025, Valor: 12.2 },
-    ] },
+    {Nombre:'Andalucía. General. Variación anual. ',Data:[]},
+    {Nombre:'Nacional. General. Variación anual. ',Data:points},
+    {Nombre:'Nacional. General. Índice. ',Data:points.map((p,i)=>({...p,Valor:200-i}))},
+    {Nombre:'Madrid, Comunidad de. Vivienda segunda mano. Índice. ',Data:points.map((p,i)=>({...p,Valor:220-i}))},
   ];
   const { fetchIneIpvQuarterly } = load('lib/market/ine.ts', {
     require: (id) => id === './fixtures' ? { FALLBACK_IPV: fallback } : {},
@@ -40,10 +39,18 @@ async function run() {
     console: { warn() {} },
   });
   const ipv = await fetchIneIpvQuarterly();
-  assert.equal(JSON.stringify(ipv.serie.map((item) => item.periodo)), JSON.stringify(['2025T1', '2025T2', '2025T3', '2025T4']));
-  assert.equal(ipv.serie[0].variacionInteranual, 12.2);
+  assert.equal(ipv.serie.length,34);
+  assert.equal(ipv.serie[0].periodo,'2018T1');
+  assert.equal(ipv.serie.at(-1).periodo,'2026T2');
+  assert.equal(ipv.serie[0].variacionInteranual,12.2);
+  assert.equal(ipv.base2018,168.5);
+  assert.equal(ipv.madridSegundaMano.base2018,188.5);
+  assert.equal(ipv.madridSegundaMano.serie.at(-1).periodo,"2026T2");
   payload[1].Data[0].T3_Periodo = 'invalid';
-  assert.equal(await fetchIneIpvQuarterly(), fallback);
+  assert.equal(await fetchIneIpvQuarterly(),fallback);
+  payload[1].Data[0].T3_Periodo = 'T2';
+  payload[2].Data.pop();
+  assert.equal(await fetchIneIpvQuarterly(),fallback);
   const { formatMarketPeriod } = load('lib/market/presentation.ts');
   assert.equal(formatMarketPeriod('2025T1'), 'Q1 2025');
   assert.equal(formatMarketPeriod('2026Q4'), 'Q4 2026');
