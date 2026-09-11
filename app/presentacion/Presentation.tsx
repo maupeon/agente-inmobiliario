@@ -498,7 +498,7 @@ export function Presentation() {
                 <p className={styles.openingByline}>
                   Mauricio Peón García · João Paulo Nogueira Cunha · Manuel Macedo Púlido
                   <br />
-                  Aldo Mauricio Ress Villets · Tomás Pérales Lara
+                  Aldo Mauricio Ress Villets · Tomás Perales Lara
                 </p>
               </div>
               <p className={styles.advanceHint}>→ o clic para avanzar · ← para volver · I diapositivas · F pantalla completa · H controles</p>
