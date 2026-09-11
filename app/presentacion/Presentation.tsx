@@ -15,6 +15,7 @@ import {
   Pause,
   Play,
   Timer,
+  List,
   X,
 } from "@phosphor-icons/react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -286,6 +287,8 @@ export function Presentation() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [chromeVisible, setChromeVisible] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const slidePanelRef = useRef<HTMLDialogElement>(null);
+  const slidePanelTriggerRef = useRef<HTMLButtonElement>(null);
   const shortcutRef = useRef({ key: "", at: 0 });
   const {
     elapsed,
@@ -298,7 +301,10 @@ export function Presentation() {
   const goTo = useCallback(
     (index: number, showComplete = false) => {
       const next = Math.max(0, Math.min(SCENES.length - 1, index));
-      if (next === active) return;
+      if (next === active) {
+        if (showComplete) setBuild(sceneBuilds(next).length);
+        return;
+      }
       setBuild(showComplete ? sceneBuilds(next).length : 0);
       setActive(next);
       if (!started) {
@@ -351,6 +357,15 @@ export function Presentation() {
     else void document.documentElement.requestFullscreen();
   }, []);
 
+  const openSlidePanel = useCallback(() => {
+    const panel = slidePanelRef.current;
+    if (!panel || panel.open) return;
+    panel.showModal();
+    const current = panel.querySelector<HTMLButtonElement>('[aria-current="step"]');
+    current?.focus({ preventScroll: true });
+    current?.scrollIntoView({ block: "nearest" });
+  }, []);
+
   useEffect(() => {
     if (active !== 9) videoRef.current?.pause();
     else { const video = videoRef.current; if (video) { video.currentTime = 0; void video.play().catch(() => {}); } }
@@ -359,6 +374,7 @@ export function Presentation() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat) return;
+      if (slidePanelRef.current?.open) return;
       const target = event.target as HTMLElement | null;
       const isEditable = target?.closest("input, textarea, select, [contenteditable='true']");
       const shortcut = event.key.toLowerCase();
@@ -375,6 +391,12 @@ export function Presentation() {
         return;
       }
       if (isEditable || event.metaKey || event.ctrlKey || event.altKey) return;
+
+      if (shortcut === "i") {
+        event.preventDefault();
+        openSlidePanel();
+        return;
+      }
 
       if (event.key === " " && target?.closest("button, a")) return;
 
@@ -408,7 +430,7 @@ export function Presentation() {
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [active, begin, goTo, next, notesOpen, previous, started, toggleFullscreen, togglePause]);
+  }, [active, begin, goTo, next, notesOpen, openSlidePanel, previous, started, toggleFullscreen, togglePause]);
 
   const remaining = TOTAL_SECONDS - elapsed;
   const progress = Math.min(100, (elapsed / TOTAL_SECONDS) * 100);
@@ -467,7 +489,7 @@ export function Presentation() {
                   Aldo Mauricio Ress Villets · Tomás Pérales Lara
                 </p>
               </div>
-              <p className={styles.advanceHint}>→ o clic para avanzar · ← para volver · F pantalla completa · H controles</p>
+              <p className={styles.advanceHint}>→ o clic para avanzar · ← para volver · I diapositivas · F pantalla completa · H controles</p>
             </div>
           </section>
         </SceneShell>
@@ -670,6 +692,61 @@ export function Presentation() {
           </section>
         </SceneShell>
       </div>
+
+      <button
+        ref={slidePanelTriggerRef}
+        type="button"
+        className={styles.slidePanelTrigger}
+        onClick={openSlidePanel}
+        aria-haspopup="dialog"
+        aria-controls="slide-navigation"
+        title="Ver diapositivas (I)"
+      >
+        <List aria-hidden /> Diapositivas <span>{active + 1}/{SCENES.length}</span>
+      </button>
+
+      <dialog
+        ref={slidePanelRef}
+        id="slide-navigation"
+        className={styles.slidePanel}
+        aria-labelledby="slide-navigation-title"
+        onClose={() => slidePanelTriggerRef.current?.focus({ preventScroll: true })}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) {
+            const bounds = event.currentTarget.getBoundingClientRect();
+            if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) {
+              event.currentTarget.close();
+            }
+          }
+        }}
+      >
+        <div className={styles.slidePanelHeader}>
+          <div><h2 id="slide-navigation-title">Diapositivas</h2><p>Elige dónde continuar.</p></div>
+          <button type="button" onClick={() => slidePanelRef.current?.close()} aria-label="Cerrar panel de diapositivas"><X aria-hidden /></button>
+        </div>
+        <nav className={styles.slidePanelList} aria-label="Índice de diapositivas">
+          {[{ label: "Presentación", start: 0, end: MAIN_SCENE_COUNT }, { label: "Anexos para preguntas", start: MAIN_SCENE_COUNT, end: SCENES.length }].map((group) => (
+            <section key={group.label}>
+              <h3>{group.label}</h3>
+              <ol start={group.start + 1}>
+                {SCENES.slice(group.start, group.end).map((scene, offset) => {
+                  const index = group.start + offset;
+                  return <li key={scene.title}>
+                    <button type="button" aria-current={index === active ? "step" : undefined} onClick={() => {
+                      goTo(index, true);
+                      slidePanelRef.current?.close();
+                    }}>
+                      <span className={styles.slidePanelNumber}>{String(index + 1).padStart(2, "0")}</span>
+                      <span><small>{scene.kicker}</small><strong>{scene.title}</strong></span>
+                      {index === active && <Check aria-label="Diapositiva actual" />}
+                    </button>
+                  </li>;
+                })}
+              </ol>
+            </section>
+          ))}
+        </nav>
+      </dialog>
 
       <header
         className={`${styles.topChrome} ${chromeVisible ? "" : styles.chromeHidden}`}
