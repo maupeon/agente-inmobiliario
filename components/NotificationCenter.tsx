@@ -7,6 +7,7 @@ import { SiteNav } from "./SiteNav";
 import { useProfile } from "@/hooks/useProfile";
 import { DEFAULT_NOTIFICATION_TIME, DEFAULT_NOTIFICATION_ZONE } from "@/lib/notifications/types";
 import type { NotificationState } from "@/lib/notifications/types";
+import { digestTitle } from "@/lib/notifications/presentation";
 import { formatEUR } from "@/lib/utils";
 
 const BROWSER_KEY = "habitia:browser-notifications";
@@ -135,7 +136,7 @@ export function NotificationCenter() {
           {message && <p role="status" className="mt-4 rounded-xl bg-forest-50 p-4 text-sm text-forest-800">{message}</p>}
           {!pending && state && state.digests.length === 0 && <div className="mt-5 rounded-3xl border border-dashed border-stone-300 p-8"><Bell aria-hidden size={32} className="text-stone-400" /><h3 className="mt-4 text-lg font-semibold">La próxima puede estar aquí</h3><p className="mt-2 text-base leading-relaxed text-stone-600">{state.settings.enabled ? "Tu primera selección llegará en el horario guardado. Mientras tanto, puedes explorar viviendas en el buscador." : "Activa la selección diaria y guarda tu horario para recibir las viviendas que mejor encajan contigo."}</p><Link href="/dashboard" className="mt-4 inline-flex min-h-11 items-center gap-2 font-medium text-forest-700">Explorar viviendas <ArrowRight aria-hidden size={17} /></Link></div>}
           <div className="mt-5 space-y-7">{state?.digests.map((digest) => <article key={digest.id} className="rounded-3xl border border-hairline bg-paper-50 p-5 sm:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">{new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${digest.local_date}T12:00:00Z`))}</h3>{!digest.read_at && <button type="button" onClick={() => markRead(digest.id)} className="min-h-11 text-sm font-medium text-forest-700">Marcar como leída</button>}</div>
+            <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">{digestTitle(digest)}</h3>{!digest.read_at && <button type="button" onClick={() => markRead(digest.id)} className="min-h-11 text-sm font-medium text-forest-700">Marcar como leída</button>}</div>
             {digest.items.length === 0 ? <p className="mt-4 leading-relaxed text-stone-600">Hoy no encontramos viviendas que cumplan tus filtros. Puedes ampliar la zona o ajustar tu presupuesto y guardar de nuevo tu perfil.</p> : <>
               <p className="mt-1 text-sm text-stone-500">{digest.items.length === 5 ? "Las cinco con mayor encaje entre las candidatas encontradas." : `Encontramos ${digest.items.length} ${digest.items.length === 1 ? "vivienda compatible" : "viviendas compatibles"}. Mostramos solo las disponibles.`}</p>
               <ol className="mt-5 divide-y divide-hairline">{digest.items.map((item) => <li key={item.property.propertyCode} className="py-5 first:pt-0 last:pb-0">

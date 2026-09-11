@@ -1,3 +1,4 @@
+import context from "@/lib/neighborhood/madrid-context.json";
 import madrid from "@/lib/neighborhood/madrid-official.json";
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/SiteNav";
@@ -107,22 +108,49 @@ export default async function DatosPage() {
           )}
         </DataCard>
 
-        {/* Alquiler referencia */}
         <DataCard
-          title="Alquiler · origen y uso de la referencia"
+          title="Alquiler · qué datos usamos hoy"
           estado="orientativo"
-          fuente="Los valores locales son ejemplos manuales sin validación documental."
+          fuente="Renta del anuncio; referencia independiente pendiente."
           sourceLink={MARKET_SOURCES.rent}
-          meta="Integración de una referencia oficial pendiente"
+          meta="No aporta puntos al Score"
         >
           <div className="space-y-3 text-sm leading-relaxed text-stone-600">
-            <p><Strong>¿De dónde salía?</Strong> De una tabla de ejemplos escrita para la demo. No es una descarga de SERPAVI ni una muestra contrastada de anuncios; no puede atribuirse al Ministerio.</p>
-            <p><Strong>¿Para qué serviría?</Strong> Una referencia contrastada permitiría comparar el alquiler mensual por m² del anuncio con viviendas de un ámbito y periodo conocidos. El SERPAVI oficial utiliza información tributaria sobre arrendamientos; su metodología se enlaza arriba para consulta, pero aún no alimenta esta aplicación.</p>
-            <p><Strong>¿Qué ocurre ahora?</Strong> Las fichas muestran «sin referencia verificada». Los ejemplos no clasifican un alquiler como barato o caro y no aportan puntos a Fair ni a Opportunity. El ranking puede usar el tiempo al trabajo; presupuesto, ubicación e imprescindibles se aplican como filtros. Fair de alquiler, Opportunity y Zone quedan sin puntuación cuando no hay evidencia.</p>
+            <p>El precio de alquiler que ves es el del anuncio. Para saber cómo se compara con el mercado necesitamos una referencia de viviendas comparables, con zona y periodo conocidos.</p>
+            <p>Esa referencia todavía no está integrada. Este bloque explica la fuente prevista; no calcula una renta ni clasifica el anuncio como barato o caro. Fair de alquiler permanece sin dato. La metodología de SERPAVI se enlaza para consulta.</p>
           </div>
         </DataCard>
 
+        <section aria-labelledby="neighborhood-data-title" className="mt-12">
+          <h2 id="neighborhood-data-title" className="font-display text-2xl text-ink">El entorno de la vivienda</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Zonas verdes y seguridad vuelven a tener su espacio con datos municipales. Cada tabla indica si describe un distrito o un barrio. Son referencias de contexto y todavía no se convierten en puntos de Zone.</p>
+        </section>
+        <DataCard title="Zonas verdes · superficie por distrito" estado="real" fuente={context.zonasVerdes.fuente} sourceLink={{ label: "Descargar datos originales (CSV)", href: context.zonasVerdes.download }} meta="21 distritos · 2025 · consulta 11 septiembre 2026">
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.zonasVerdes.nota} Es superficie total, no proximidad a tu vivienda ni un índice de calidad de vida.</p>
+          <Collapsible summary="Ver zonas verdes de los 21 distritos">
+            <Table head={["Distrito", "Zonas verdes (m²)"]}>
+              {context.zonasVerdes.distritos.map(d => <Row key={d.code} cells={[d.distrito, formatNumber(d.superficieM2)]} />)}
+            </Table>
+          </Collapsible>
+        </DataCard>
+        <DataCard title="Seguridad · actuaciones de Policía Municipal" estado="real" fuente={context.seguridad.fuente} sourceLink={{ label: "Descargar publicación original (XLSX)", href: context.seguridad.download }} meta="21 distritos · mayo 2026 · consulta 11 septiembre 2026">
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.seguridad.nota} No se trasladan estas cifras a cada barrio ni se utilizan para ordenar viviendas.</p>
+          <Collapsible summary="Ver actuaciones por distrito y categoría">
+            <Table head={["Distrito", "Personas", "Patrimonio", "Tenencia de armas", "Tenencia de drogas", "Consumo de drogas"]}>
+              {context.seguridad.distritos.map(d => <Row key={d.code} cells={[d.distrito, ...d.actuaciones.map(v => formatNumber(v))]} />)}
+              <Row cells={["Sin distrito asignado", ...context.seguridad.sinDistrito.map(v => formatNumber(v))]} />
+              <Row cells={["Total publicado", ...context.seguridad.totales.map(v => formatNumber(v))]} />
+            </Table>
+            <p className="mt-3 text-xs leading-relaxed text-stone-600">Todas las columnas cuentan actuaciones. «Personas» y «Patrimonio» son actuaciones relacionadas con esas materias; no recuentos de víctimas ni tasas por habitante.</p>
+          </Collapsible>
+        </DataCard>
+        <section className="mt-8 rounded-xl border border-hairline bg-paper-50 p-5" aria-labelledby="other-neighborhood-indicators">
+          <h3 id="other-neighborhood-indicators" className="font-display text-xl text-ink">Transporte, servicios, vida nocturna y tranquilidad</h3>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">El transporte se evalúa mediante el tiempo al trabajo en las fichas. Los índices de barrio de transporte, servicios, vida nocturna y tranquilidad todavía no tienen una medición verificada integrada. Las antiguas puntuaciones manuales no se muestran como datos reales.</p>
+        </section>
+
         <DataCard title="Barrios de Madrid · superficie, población y densidad" estado="real" fuente={madrid.fuente} sourceLink={{ label: "Ayuntamiento de Madrid · tabla original (XLSX)", href: madrid.url }} meta="131 barrios · 1 enero 2026 · consulta 11 septiembre 2026">
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">Población y superficie describen el territorio. Complementan las referencias de zonas verdes y seguridad; no las sustituyen ni indican si un barrio es mejor para vivir.</p>
           <Collapsible summary="Ver los 131 barrios · datos territoriales, sin puntuación de calidad de vida">
             <Table head={["Barrio", "Distrito", "Superficie (ha)", "Población", "Densidad (hab./ha)"]}>
               {madrid.barrios.map((b) => <Row key={b.code} cells={[b.barrio, b.distrito, formatNumber(b.superficieHa), formatNumber(b.poblacion), formatNumber(b.densidadHabHa)]} />)}

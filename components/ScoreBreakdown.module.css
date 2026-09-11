@@ -1,0 +1,14 @@
+.root { container-type: inline-size; margin-top: .75rem; padding: .9rem; border: 1px solid #dce4de; border-radius: 16px; background: #fbfdf9; color: #17211d; font-size: .875rem; }
+.heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .35rem .75rem; }
+.heading > span { color: #52645a; font-size: .7rem; }
+.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 1rem 0; gap: 1rem .75rem; }
+.metric { display: flex; flex-direction: column; min-width: 0; }
+.metric dt { order: 2; font-size: .8rem; font-weight: 600; }
+.metric dt span { display: block; margin-top: .2rem; color: #52645a; font-size: .65rem; font-weight: 400; }
+.metric dd { order: 1; margin: 0 0 .3rem; color: #176547; font-size: 1.9rem; font-weight: 650; letter-spacing: -.04em; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.metric dd small { margin-left: .2rem; font-size: .65rem; font-weight: 400; letter-spacing: 0; }
+.metric .missing { color: #68736d; }
+.details { border-top: 1px solid #dce4de; padding-top: .45rem; }
+.details summary { display: list-item; min-height: 44px; align-content: center; cursor: pointer; color: #52645a; font-size: .75rem; }
+.details summary:focus-visible { outline: 2px solid #176547; outline-offset: 3px; border-radius: 4px; }
+@container (min-width: 340px) { .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

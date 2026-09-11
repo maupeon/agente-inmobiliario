@@ -262,7 +262,6 @@ export function PropertyDetailDrawer({
             </section>
           )}
 
-          {val?.nivel !== "modelo" && <p className="rounded-xl border border-hairline p-5 text-sm text-stone-600">Valoración no disponible. {val?.avisoModelo} Las referencias generales de mercado se pueden consultar en <a href="/datos" className="underline">Datos</a>.</p>}
 
           {p.operation === "sale" && <MortgageMini price={p.price} />}
 

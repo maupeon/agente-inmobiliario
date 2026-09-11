@@ -1,0 +1,383 @@
+{
+  "consultado": "2026-09-11",
+  "zonasVerdes": {
+    "periodo": "2025",
+    "ambito": "Distrito",
+    "fuente": "Ayuntamiento de Madrid · Superficie de parques y zonas verdes de distrito",
+    "url": "https://datos.madrid.es/dataset/300266-0-arbolado-superficie",
+    "download": "https://datos.madrid.es/dataset/300266-0-arbolado-superficie/resource/300266-33-arbolado-superficie/download/300266-33-arbolado-superficie.csv",
+    "sha256": "ef6db42cb7e85d8137af664d80c418b939293e50266d8874cda794b38f4a6a01",
+    "nota": "Superficie de mantenimiento municipal incluida en el fichero de zonas verdes de distrito. Los parques históricos, singulares y forestales se publican en otro fichero; no se incluyen aquí.",
+    "distritos": [
+      {
+        "code": "01",
+        "distrito": "Centro",
+        "superficieM2": 296640.47
+      },
+      {
+        "code": "02",
+        "distrito": "Arganzuela",
+        "superficieM2": 913614.95
+      },
+      {
+        "code": "03",
+        "distrito": "Retiro",
+        "superficieM2": 366849.39
+      },
+      {
+        "code": "04",
+        "distrito": "Salamanca",
+        "superficieM2": 348912.97
+      },
+      {
+        "code": "05",
+        "distrito": "Chamartín",
+        "superficieM2": 556323.56
+      },
+      {
+        "code": "06",
+        "distrito": "Tetuán",
+        "superficieM2": 619530.41
+      },
+      {
+        "code": "07",
+        "distrito": "Chamberí",
+        "superficieM2": 98418.95
+      },
+      {
+        "code": "08",
+        "distrito": "Fuencarral-El Pardo",
+        "superficieM2": 3717351.69
+      },
+      {
+        "code": "09",
+        "distrito": "Moncloa-Aravaca",
+        "superficieM2": 1913960.1
+      },
+      {
+        "code": "10",
+        "distrito": "Latina",
+        "superficieM2": 2608444.77
+      },
+      {
+        "code": "11",
+        "distrito": "Carabanchel",
+        "superficieM2": 2414260.97
+      },
+      {
+        "code": "12",
+        "distrito": "Usera",
+        "superficieM2": 1645061.7
+      },
+      {
+        "code": "13",
+        "distrito": "Puente de Vallecas",
+        "superficieM2": 2781632.66
+      },
+      {
+        "code": "14",
+        "distrito": "Moratalaz",
+        "superficieM2": 1158420.24
+      },
+      {
+        "code": "15",
+        "distrito": "Ciudad Lineal",
+        "superficieM2": 1279131.28
+      },
+      {
+        "code": "16",
+        "distrito": "Hortaleza",
+        "superficieM2": 2969629.51
+      },
+      {
+        "code": "17",
+        "distrito": "Villaverde",
+        "superficieM2": 2147536.31
+      },
+      {
+        "code": "18",
+        "distrito": "Villa de Vallecas",
+        "superficieM2": 2980663.33
+      },
+      {
+        "code": "19",
+        "distrito": "Vicálvaro",
+        "superficieM2": 2044263.27
+      },
+      {
+        "code": "20",
+        "distrito": "San Blas-Canillejas",
+        "superficieM2": 1730940.0
+      },
+      {
+        "code": "21",
+        "distrito": "Barajas",
+        "superficieM2": 913933.27
+      }
+    ]
+  },
+  "seguridad": {
+    "periodo": "2026-05",
+    "ambito": "Distrito",
+    "fuente": "Ayuntamiento de Madrid · Policía Municipal · Seguridad ciudadana",
+    "url": "https://datos.madrid.es/dataset/212616-0-policia-estadisticas",
+    "download": "https://datos.madrid.es/dataset/212616-0-policia-estadisticas/resource/212616-149-policia-estadisticas/download/212616-149-policia-estadisticas.xlsx",
+    "sha256": "b604c8035e66bdb7e64f762077c6708cdc2660c10d71927d11cce44d6e5e65f5",
+    "hoja": "SEGURIDAD",
+    "columnas": [
+      "RELACIONADAS CON LAS PERSONAS",
+      "RELACIONADAS CON EL PATRIMONIO",
+      "POR TENENCIA DE ARMAS",
+      "POR TENENCIA DE DROGAS",
+      "POR CONSUMO DE DROGAS"
+    ],
+    "nota": "Recuentos de actuaciones de Policía Municipal, no todos los delitos ni una tasa de criminalidad. No miden por sí solos el riesgo individual ni la seguridad relativa del distrito.",
+    "distritos": [
+      {
+        "code": "01",
+        "distrito": "Centro",
+        "actuaciones": [
+          16,
+          130,
+          46,
+          186,
+          10
+        ]
+      },
+      {
+        "code": "02",
+        "distrito": "Arganzuela",
+        "actuaciones": [
+          4,
+          9,
+          0,
+          23,
+          4
+        ]
+      },
+      {
+        "code": "03",
+        "distrito": "Retiro",
+        "actuaciones": [
+          4,
+          9,
+          0,
+          4,
+          2
+        ]
+      },
+      {
+        "code": "04",
+        "distrito": "Salamanca",
+        "actuaciones": [
+          9,
+          16,
+          1,
+          3,
+          0
+        ]
+      },
+      {
+        "code": "05",
+        "distrito": "Chamartín",
+        "actuaciones": [
+          5,
+          11,
+          2,
+          42,
+          16
+        ]
+      },
+      {
+        "code": "06",
+        "distrito": "Tetuán",
+        "actuaciones": [
+          3,
+          6,
+          7,
+          11,
+          0
+        ]
+      },
+      {
+        "code": "07",
+        "distrito": "Chamberí",
+        "actuaciones": [
+          2,
+          5,
+          1,
+          18,
+          0
+        ]
+      },
+      {
+        "code": "08",
+        "distrito": "Fuencarral-El Pardo",
+        "actuaciones": [
+          9,
+          13,
+          9,
+          45,
+          10
+        ]
+      },
+      {
+        "code": "09",
+        "distrito": "Moncloa-Aravaca",
+        "actuaciones": [
+          10,
+          19,
+          1,
+          23,
+          0
+        ]
+      },
+      {
+        "code": "10",
+        "distrito": "Latina",
+        "actuaciones": [
+          12,
+          10,
+          6,
+          20,
+          1
+        ]
+      },
+      {
+        "code": "11",
+        "distrito": "Carabanchel",
+        "actuaciones": [
+          13,
+          16,
+          12,
+          71,
+          2
+        ]
+      },
+      {
+        "code": "12",
+        "distrito": "Usera",
+        "actuaciones": [
+          8,
+          6,
+          3,
+          30,
+          2
+        ]
+      },
+      {
+        "code": "13",
+        "distrito": "Puente de Vallecas",
+        "actuaciones": [
+          27,
+          42,
+          14,
+          59,
+          22
+        ]
+      },
+      {
+        "code": "14",
+        "distrito": "Moratalaz",
+        "actuaciones": [
+          2,
+          19,
+          3,
+          3,
+          0
+        ]
+      },
+      {
+        "code": "15",
+        "distrito": "Ciudad Lineal",
+        "actuaciones": [
+          9,
+          9,
+          4,
+          29,
+          0
+        ]
+      },
+      {
+        "code": "16",
+        "distrito": "Hortaleza",
+        "actuaciones": [
+          6,
+          6,
+          3,
+          29,
+          5
+        ]
+      },
+      {
+        "code": "17",
+        "distrito": "Villaverde",
+        "actuaciones": [
+          7,
+          5,
+          1,
+          10,
+          0
+        ]
+      },
+      {
+        "code": "18",
+        "distrito": "Villa de Vallecas",
+        "actuaciones": [
+          7,
+          14,
+          5,
+          20,
+          0
+        ]
+      },
+      {
+        "code": "19",
+        "distrito": "Vicálvaro",
+        "actuaciones": [
+          4,
+          6,
+          0,
+          4,
+          1
+        ]
+      },
+      {
+        "code": "20",
+        "distrito": "San Blas-Canillejas",
+        "actuaciones": [
+          13,
+          22,
+          6,
+          29,
+          0
+        ]
+      },
+      {
+        "code": "21",
+        "distrito": "Barajas",
+        "actuaciones": [
+          6,
+          6,
+          1,
+          9,
+          1
+        ]
+      }
+    ],
+    "sinDistrito": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "totales": [
+      176,
+      379,
+      125,
+      668,
+      76
+    ]
+  }
+}

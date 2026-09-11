@@ -1,5 +1,6 @@
 "use client";
 import { useEffect } from "react";
+import { digestTitle } from "@/lib/notifications/presentation";
 import type { NotificationState } from "@/lib/notifications/types";
 const BROWSER_KEY = "habitia:browser-notifications";
 const SEEN_KEY = "habitia:last-notified-digest";
@@ -18,7 +19,7 @@ export function NotificationWatcher() {
         const digest = state.digests[0];
         if (!state.settings.enabled || !digest || digest.read_at || localStorage.getItem(SEEN_KEY) === digest.id) return;
         localStorage.setItem(SEEN_KEY, digest.id);
-        const notification = new Notification("Tu selección de HabitIA está lista", { body: digest.items.length ? `${digest.items.length} viviendas afines a tu perfil te esperan en Notificaciones.` : "Consulta el resultado de tu búsqueda diaria.", tag: `habitia-${digest.id}`, icon: "/icon.svg" });
+        const notification = new Notification(digestTitle(digest), { body: digest.items.length ? `${digest.items.length} viviendas afines a tu perfil te esperan en Notificaciones.` : "Consulta el resultado de tu búsqueda diaria.", tag: `habitia-${digest.id}`, icon: "/icon.svg" });
         notification.onclick = () => { window.focus(); window.location.assign("/notificaciones"); notification.close(); };
       } catch { /* Optional OS notification: the durable inbox remains available. */ }
     }
