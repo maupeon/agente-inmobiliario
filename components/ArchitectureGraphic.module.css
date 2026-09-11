@@ -1,0 +1,7 @@
+.figure, .slide { margin: 0; width: 100%; }
+.link { display: block; border-radius: 12px; overflow: hidden; }
+.link:focus-visible { outline: 3px solid #176547; outline-offset: 4px; }
+.image { display: block; width: 100%; height: auto; }
+.caption { margin-top: 10px; color: #626d65; font-size: 12px; line-height: 1.5; }
+.slide .image { max-height: 79vh; object-fit: contain; }
+.slide .caption { text-align: center; }

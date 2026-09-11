@@ -6,10 +6,7 @@ import {
   ArrowsOut,
   ShieldCheck,
   Lightbulb,
-  Eye,
-  Database,
   Check,
-  ChartLineUp,
   NotePencil,
   Pause,
   Play,
@@ -21,6 +18,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { MotionPreferenceProvider, DataPartition, ModelEvidence, UncertaintyEvidence, ScopeEvidence, ExplanationEvidence } from "./ResultsVisuals";
 import { PricingMethod, ScoreMethod } from "./PresentationMethods";
 import { results, formatCount } from "./results-contract";
+import { ArchitectureGraphic } from "@/components/ArchitectureGraphic";
 import { Logo } from "@/components/ui/Logo";
 import styles from "./presentation.module.css";
 
@@ -160,7 +158,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Anexo · Arquitectura",
     "title": "Arquitectura del producto",
     "target": 561,
-    "note": "Panel y chat usan el backend Next.js y sus herramientas compartidas. Para venta, el backend envía características a POST /valorar: Python y FastAPI cargan LightGBM con el pipeline de 25 variables ya entrenado. El servicio devuelve precio, intervalo calibrado, estado, versión y SHAP opcional. No se entrena durante la búsqueda. El código compara anuncio y estimación para Fair y utiliza el tiempo al trabajo para Lifestyle; Opportunity y Zone siguen pendientes. Claude interpreta y explica, no sustituye al modelo de precio. El escenario indexado de oferta de 2018 no tiene validación actual en 2026. SSE permite respuesta progresiva. La demo del TFM guarda un historial y unos favoritos globales en Supabase, compartidos entre visitantes. El perfil se configura en el navegador; al activar Notificaciones se guarda una copia en Supabase para preparar la selección diaria. La bandeja se identifica mediante una cookie propia de ese navegador, sin cuenta de usuario. Si una fuente falla o falta soporte, se informa y se evita presentar respaldo ilustrativo como evidencia."
+    "note": "El usuario puede buscar viviendas, conversar, comparar compra y alquiler, guardar favoritos y activar selecciones diarias. La web y el backend Next.js se alojan en Vercel; el servicio Python en Fly.io; la persistencia PostgreSQL en Supabase; Claude se consume por la API de Anthropic. Supabase programa la selección diaria y Vercel la actualización de mercado. Panel y chat usan el backend Next.js y sus herramientas compartidas. Para venta, el backend envía características a POST /valorar: Python y FastAPI cargan LightGBM con el pipeline de 25 variables ya entrenado. El servicio devuelve precio, intervalo calibrado, estado, versión y SHAP opcional. No se entrena durante la búsqueda. El código compara anuncio y estimación para Fair y utiliza el tiempo al trabajo para Lifestyle; Opportunity y Zone siguen pendientes. Claude interpreta y explica, no sustituye al modelo de precio. El escenario indexado de oferta de 2018 no tiene validación actual en 2026. SSE permite respuesta progresiva. La demo del TFM guarda un historial y unos favoritos globales en Supabase, compartidos entre visitantes. El perfil se configura en el navegador; al activar Notificaciones se guarda una copia en Supabase para preparar la selección diaria. La bandeja se identifica mediante una cookie propia de ese navegador, sin cuenta de usuario. Si una fuente falla o falta soporte, se informa y se evita presentar respaldo ilustrativo como evidencia."
   },
   {
     "kicker": "Anexo · Precio y encaje",
@@ -676,16 +674,7 @@ export function Presentation() {
 
         <SceneShell index={19} active={active} state={sceneState(19)} label={SCENES[19].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
-            <SceneHeader kicker="Arquitectura · del modelo al producto" title="El modelo calcula. La plataforma conecta." />
-            <p className={styles.questionHero}>Panel y chat → backend compartido</p>
-            <ol className={styles.productChain}>
-              <li><Database aria-hidden /><span>01 · Datos</span><p>Idealista aporta anuncios. El backend añade referencias y tiempo al trabajo.</p></li>
-              <li><ChartLineUp aria-hidden /><span>02 · Modelo</span><p>Python + FastAPI sirve LightGBM: 25 variables → precio, intervalo calibrado y SHAP opcional.</p></li>
-              <li><ShieldCheck aria-hidden /><span>03 · Score</span><p>Anuncio frente a estimación → Fair. Trayecto → Lifestyle. El código aplica pesos y cobertura.</p></li>
-              <li><Eye aria-hidden /><span>04 · Respuesta</span><p>Tarjetas y mapa. Claude interpreta preguntas, llama herramientas y explica resultados.</p></li>
-            </ol>
-            <p className={styles.takeaway}>Supabase guarda cachés e historial. <strong>Las tareas diarias preparan hasta cinco recomendaciones.</strong></p>
-            <p className={styles.architectureScope}>Entrenamiento fuera de la búsqueda · oferta de venta de 2018, escenario indexado sin validación actual · Opportunity y Zone pendientes.</p>
+            <ArchitectureGraphic presentation />
           </section>
         </SceneShell>
 
