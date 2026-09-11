@@ -20,6 +20,7 @@ import {
 } from "@phosphor-icons/react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { MotionPreferenceProvider, DataPartition, ModelEvidence, UncertaintyEvidence, ScopeEvidence, ExplanationEvidence } from "./ResultsVisuals";
+import { PricingMethod, ScoreMethod } from "./PresentationMethods";
 import { results, formatCount } from "./results-contract";
 import { Logo } from "@/components/ui/Logo";
 import styles from "./presentation.module.css";
@@ -52,7 +53,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Problema",
     "title": "Decidir vivienda pesa cada vez más",
     "target": 65,
-    "note": "INE Q2 2026: +12,2% general y +12,9% segunda mano, redondeados a 12% y 13%. Explicar el trabajo de comparar; no afirmar ahorro medido."
+    "note": "Fotocasa Research, Experiencia en alquiler en 2025: el 43% de los inquilinos efectivos necesitó más de dos meses para encontrar vivienda de alquiler. España; artículo del 12 de agosto de 2025. No es una media de tiempo ni un dato de compra. HabitIA busca reducir el esfuerzo; el ahorro todavía no se ha medido."
   },
   {
     "kicker": "Oportunidad",
@@ -86,9 +87,9 @@ const SCENES: SceneDefinition[] = [
   },
   {
     "kicker": "Modelo de pricing",
-    "title": "2018 y escenario temporal",
+    "title": "El valor estimado según sus características",
     "target": 360,
-    "note": "LightGBM de oferta 2018, 25 variables y factor heredado 1,5534 para Q1 2026. Histórico INE separado de la actualización del artefacto. No existe modelo operativo de alquiler: se utiliza la renta del anuncio y se declara la ausencia de valoración."
+    "note": "LightGBM estima oferta de venta de 2018, no precios de cierre ni un valor verdadero. 25 variables. Métricas de evaluación exterior agrupada del modelo habitIA-oferta-2018-v2; MAE y MdAPE no son RMSE ni R². Compra: el artefacto utiliza el factor heredado 1,5534 para Q1 2026. El cociente IPV exige misma serie, ámbito y base. Indexar no reentrena ni valida en 2026. Alquiler: la fórmula de rentabilidad del distrito es una propuesta, pendiente de una fuente verificada y de implementación; hoy se usa la renta del anuncio. El modelo final de Tomás todavía no existe."
   },
   {
     "kicker": "Comprar vs. alquilar",
@@ -100,7 +101,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Demo",
     "title": "La plataforma en acción",
     "target": 521,
-    "note": "Vídeo de 106 segundos: se elimina también el tramo 1:41–1:43. Capturas de la aplicación y datos de ejemplo; la historia conserva el audio de João."
+    "note": "Vídeo de 106 segundos con audio de João y capturas con datos de ejemplo. Arranca al entrar; sus controles permiten pausar, buscar un segundo y ampliar a pantalla completa. Al regresar conserva el punto alcanzado. Actualizar las capturas cuando la plataforma y el modelo estén finalizados."
   },
   {
     "kicker": "Roadmap",
@@ -118,7 +119,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Anexo · HabitIA Score",
     "title": "Desglose del cálculo del HabitIA Score",
     "target": 561,
-    "note": "Ejemplo ilustrativo de cobertura 50%: Fair 100, Lifestyle 81 a 20 minutos. Opportunity y Zone sin datos. Pesos 25 cada uno. Suma 45,25, redondeada a 45."
+    "note": "Dos vistas: cálculo actual y propuesta v12 tomada de la captura del documento. Actual: Fair por bandas, Lifestyle por minutos; Opportunity y Zone pendientes de fuentes. Cobertura es la suma de pesos con dato. Ejemplo 25/25/25/25: Fair 100, Lifestyle 81, Score 45 y cobertura 50%. La v12 propone percentiles; no está implementada. Hay que fijar normalización, empates y población de referencia; no ajustar el score con el test reservado para evaluar el modelo. Zone requiere indicadores comparables normalizados y fuente. Lifestyle se refiere al trayecto al trabajo."
   },
   {
     "kicker": "Anexo · Datos",
@@ -289,6 +290,7 @@ export function Presentation() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const slidePanelRef = useRef<HTMLDialogElement>(null);
   const slidePanelTriggerRef = useRef<HTMLButtonElement>(null);
+  const previousSceneRef = useRef(active);
   const shortcutRef = useRef({ key: "", at: 0 });
   const {
     elapsed,
@@ -334,6 +336,8 @@ export function Presentation() {
   }, [active, build, goTo]);
 
   useLayoutEffect(() => {
+    const changedScene = previousSceneRef.current !== active;
+    previousSceneRef.current = active;
     const blocks = sceneBuilds(active);
     blocks.forEach((element, index) => {
       const hidden = index >= build;
@@ -342,7 +346,9 @@ export function Presentation() {
       element.setAttribute("aria-hidden", String(hidden));
       element.inert = hidden;
     });
-    if (build > 0 && window.matchMedia("(max-width: 700px)").matches) {
+    if (changedScene) {
+      document.querySelector(`[data-scene="${active}"] section`)?.scrollTo({ top: 0 });
+    } else if (build > 0 && window.matchMedia("(max-width: 700px)").matches) {
       blocks[build - 1]?.scrollIntoView({ block: "nearest" });
     }
   }, [active, build]);
@@ -367,8 +373,14 @@ export function Presentation() {
   }, []);
 
   useEffect(() => {
-    if (active !== 9) videoRef.current?.pause();
-    else { const video = videoRef.current; if (video) { video.currentTime = 0; void video.play().catch(() => {}); } }
+    const video = videoRef.current;
+    if (!video) return;
+    if (active !== 9) {
+      video.pause();
+      return;
+    }
+    void video.play().catch(() => {});
+    return () => video.pause();
   }, [active]);
 
   useEffect(() => {
@@ -390,7 +402,7 @@ export function Presentation() {
         setNotesOpen(false);
         return;
       }
-      if (isEditable || event.metaKey || event.ctrlKey || event.altKey) return;
+      if (isEditable || target?.closest("video") || event.metaKey || event.ctrlKey || event.altKey) return;
 
       if (shortcut === "i") {
         event.preventDefault();
@@ -460,7 +472,7 @@ export function Presentation() {
       </div>
 
       <div className={styles.sceneStack} aria-live="polite" onClick={(event) => {
-        if ((event.target as HTMLElement).closest("button, input, select, textarea")) return;
+        if ((event.target as HTMLElement).closest("button, a, input, select, textarea, video, [data-presentation-interactive]")) return;
         event.preventDefault();
         next();
       }}>
@@ -499,7 +511,7 @@ export function Presentation() {
             <SceneHeader kicker="El problema" title="Buscar agota. Decidir exige contexto." />
 
             <div className={styles.problemLayout}>
-              <div className={styles.editorialLead}><span className={styles.overline}>La oportunidad</span><h3>Más anuncios.<br /><em>Menos claridad.</em></h3><p>La información existe. Falta conectarla con la vida de quien busca.</p><div className={styles.problemMetrics}><span><strong>+12%</strong> vivienda</span><span><strong>+13%</strong> segunda mano</span><small>INE · España · Q2 2026 · variación anual (12,2% y 12,9%)</small></div></div>
+              <div className={styles.editorialLead}><span className={styles.overline}>La oportunidad</span><h3>Más anuncios.<br /><em>Menos claridad.</em></h3><p>La información existe. Falta conectarla con la vida de quien busca.</p><div className={styles.problemMetrics}><span><strong>43%</strong> de los inquilinos tardó <b>más de dos meses</b><br />en encontrar vivienda de alquiler</span><small><a href="https://www.fotocasa.es/fotocasa-life/alquiler/tiempo-medio-para-alquilar-vivienda-en-espana-2025/" target="_blank" rel="noreferrer">Fotocasa Research · Experiencia en alquiler en 2025</a><br />España · inquilinos que consiguieron alquilar</small></div></div>
               <div className={styles.editorialRows}>
                 {[
                   ["01", "Oferta fragmentada", "Saltar entre portales, repetir filtros y comparar anuncios."],
@@ -513,11 +525,11 @@ export function Presentation() {
         </SceneShell>
 
         <SceneShell index={2} active={active} state={sceneState(2)} label={SCENES[2].title}>
-<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Oportunidad · estudio de mercado" title="Conectar lo que hoy consultamos por separado." /><div className={styles.marketTable}><table><thead><tr><th>Soluciones revisadas</th><th>Qué aportan</th><th>Nuestra oportunidad</th></tr></thead><tbody><tr><td><a href="https://www.idealista.com/info/aviso-via-mail?tipo=sms" target="_blank" rel="noreferrer">Idealista</a> · <a href="https://www.fotocasa.es/es" target="_blank" rel="noreferrer">Fotocasa</a></td><td>Búsqueda de compra y alquiler, filtros y alertas</td><td>Priorizar por preferencias explícitas</td></tr><tr><td><a href="https://www.idealista.com/tools/centrodeayuda/articulos/estimar-el-precio-de-un-inmueble/" target="_blank" rel="noreferrer">Herramientas de valoración</a></td><td>Estimación y comparables del inmueble</td><td>Conectar precio, trayecto y explicación</td></tr><tr><td><a href="https://www.ocu.org/vivienda-y-energia/comprar-vender-alquilar/consejos/alquilar-o-comprar/" target="_blank" rel="noreferrer">Comparación económica</a></td><td>Costes y alternativas de inversión</td><td>Integrar la decisión patrimonial en la búsqueda</td></tr></tbody></table></div><p className={styles.takeaway}>El hueco que exploramos: <strong>búsqueda, ranking, conversación y patrimonio en un mismo recorrido.</strong></p><p className={styles.finePrint}>Revisión de funciones públicas · septiembre 2026. Propuesta de integración; no acredita exclusividad frente a todo el mercado.</p></section>
+<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Oportunidad · estudio de mercado" title="Conectar lo que hoy consultamos por separado." /><div className={styles.marketTable}><table><thead><tr><th>Soluciones revisadas</th><th>Qué aportan</th><th>Nuestra oportunidad</th></tr></thead><tbody><tr><td><a href="https://www.idealista.com/info/aviso-via-mail?tipo=sms" target="_blank" rel="noreferrer">Idealista</a> · <a href="https://www.fotocasa.es/es" target="_blank" rel="noreferrer">Fotocasa</a></td><td>Búsqueda de compra y alquiler, filtros y alertas</td><td>Priorizar por preferencias explícitas</td></tr><tr><td><a href="https://www.idealista.com/tools/centrodeayuda/articulos/estimar-el-precio-de-un-inmueble/" target="_blank" rel="noreferrer">Herramientas de valoración</a></td><td>Estimación y comparables del inmueble</td><td>Conectar precio, trayecto y explicación</td></tr><tr><td><a href="https://www.ocu.org/vivienda-y-energia/comprar-vender-alquilar/consejos/alquilar-o-comprar/" target="_blank" rel="noreferrer">Comparación económica</a></td><td>Costes y alternativas de inversión</td><td>Integrar la decisión patrimonial en la búsqueda</td></tr></tbody></table></div><p className={styles.takeaway}>El hueco que exploramos: <strong>búsqueda, ranking, conversación y patrimonio en un mismo recorrido.</strong></p></section>
         </SceneShell>
 
         <SceneShell index={3} active={active} state={sceneState(3)} label={SCENES[3].title}>
-<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Solución" title="De repetir búsquedas a entender tus opciones." /><div data-build-group className={styles.journeyRows}><article><span>Hoy</span><ol><li>Repetir filtros</li><li>Abrir muchos anuncios</li><li>Comparar a mano</li><li>Calcular gastos aparte</li><li>Decidir con dudas</li></ol></article><article><span>Con HabitIA</span><ol><li>Definir tu perfil</li><li>Recibir hasta 5 viviendas</li><li>Entender el encaje</li><li>Simular tu patrimonio</li><li>Decidir con contexto</li></ol></article></div><div className={styles.promiseRow}><strong>¿Resultado? Ahorra tiempo y esfuerzo al encontrar tu piso</strong></div><p className={styles.finePrint}>Objetivos de experiencia; el ahorro de tiempo y la utilidad se medirán con usuarios.</p></section>
+<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Solución" title="De repetir búsquedas a entender tus opciones." /><div data-build-group className={styles.journeyRows}><article><span>Hoy</span><ol><li>Repetir filtros</li><li>Abrir muchos anuncios</li><li>Comparar a mano</li><li>Calcular gastos aparte</li><li>Decidir con dudas</li></ol></article><article><span>Con HabitIA</span><ol><li>Definir tu perfil</li><li>Recibir hasta 5 viviendas</li><li>Entender el encaje</li><li>Simular tu patrimonio</li><li>Decidir con contexto</li></ol></article></div><div className={styles.promiseRow}><strong>Nuestro objetivo: ahorrar tiempo y esfuerzo al encontrar tu piso</strong></div></section>
         </SceneShell>
 
         <SceneShell index={4} active={active} state={sceneState(4)} label={SCENES[4].title}>
@@ -525,15 +537,28 @@ export function Presentation() {
         </SceneShell>
 
         <SceneShell index={5} active={active} state={sceneState(5)} label={SCENES[5].title}>
-<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Metodología · del máster al producto" title="Una técnica para cada paso." /><div data-build-group className={styles.methodGrid}><article><span>01</span><h3>Recoger</h3><p>Anuncios históricos y fuentes de contexto.</p><small>Python · SQL · Linux / Git</small></article><article><span>02</span><h3>Explorar</h3><p>Calidad, duplicados, ausencias y distribución.</p><small>Estadística · Minería de datos</small></article><article><span>03</span><h3>Modelar</h3><p>Ridge, LightGBM, validación agrupada, intervalos y SHAP.</p><small>Machine Learning · Data science</small></article><article><span>04</span><h3>Construir y desplegar</h3><p>Servicio Python, interfaz y persistencia.</p><small>Productivización · Visualización · BI</small></article><article><span>05</span><h3>Conversar</h3><p>Interpretar preguntas y conectar herramientas.</p><small>NLP · Modelos generativos</small></article><article><span>06</span><h3>Automatizar</h3><p>Selección diaria, caché, cuota y reintentos.</p><small>SQL · Ingeniería de workflows</small></article></div><p className={styles.finePrint}>Validación por activo, calibración separada y comparación con Ridge y referencia territorial. Datos de 2018: evaluación retrospectiva, sin validación contemporánea.</p></section>
+<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Metodología · del máster al producto" title="Una técnica para cada paso." /><div data-build-group className={styles.methodGrid}><article><span>01</span><h3>Recoger</h3><p>Anuncios históricos y fuentes de contexto.</p><small>Python · SQL · Linux / Git</small></article><article><span>02</span><h3>Explorar</h3><p>Calidad, duplicados, ausencias y distribución.</p><small>Estadística · Minería de datos</small></article><article><span>03</span><h3>Modelar</h3><p>Ridge, LightGBM, validación agrupada, intervalos y SHAP.</p><small>Machine Learning · Data science</small></article><article><span>04</span><h3>Construir y desplegar</h3><p>Servicio Python, interfaz y persistencia.</p><small>Productivización · Visualización · BI</small></article><article><span>05</span><h3>Conversar</h3><p>Interpretar preguntas y conectar herramientas.</p><small>NLP · Modelos generativos</small></article><article><span>06</span><h3>Automatizar</h3><p>Selección diaria, caché, cuota y reintentos.</p><small>SQL · Ingeniería de workflows</small></article></div></section>
         </SceneShell>
 
         <SceneShell index={6} active={active} state={sceneState(6)} label={SCENES[6].title}>
-<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Motor de decisión" title="Filtrar, calcular y ordenar." /><div className={styles.scoreFormula}>HabitIA Score = (α × Fair + β × Opportunity + γ × Zone + δ × Lifestyle) / 100</div><div data-build-group className={styles.scoreComponents}><article><h3>Fair · precio</h3><p>Oferta frente a la estimación individual válida. Bandas: 100 / 85 / 62 / 32 / 12 puntos.</p></article><article><h3>Opportunity · inversión</h3><p>Revalorización de la zona frente a la media de la ciudad. Sin series comparables: sin datos.</p></article><article><h3>Zone · calidad de vida</h3><p>Indicadores del barrio y una metodología verificable. Pendiente de datos; sin puntuación.</p></article><article><h3>Lifestyle · tiempo al trabajo</h3><p>100 puntos hasta 10 min; −1,9 por minuto hasta 5 puntos desde 60 min. Ruta en el modo elegido.</p></article></div><p className={styles.finePrint}>Pesos de 0 a 100 que suman 100. Los factores sin datos no aportan puntos; su peso no se redistribuye. La cobertura acompaña siempre al score.</p></section>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
+            <SceneHeader kicker="Motor de decisión" title="Filtrar, calcular y ordenar." />
+            <div className={styles.scoreFormula}>HabitIA Score = (α × Fair + β × Opportunity + γ × Zone + δ × Lifestyle) / 100</div>
+            <div data-build-group className={styles.scoreComponents}>
+              <article><h3>Fair · precio</h3><p>Cómo de justo es el precio al comparar su valor estimado con la oferta.</p></article>
+              <article><h3>Opportunity · inversión</h3><p>Revalorización de la zona frente a la media de la ciudad.</p></article>
+              <article><h3>Zone · calidad de vida</h3><p>Indicadores del barrio. Fuente y metodología pendientes de integrar.</p></article>
+              <article><h3>Lifestyle · tiempo al trabajo</h3><p>La distancia que de verdad importa al trabajo: la temporal.</p></article>
+            </div>
+            <p className={styles.scoreCoverage}><strong>Datos disponibles para tus preferencias.</strong> Eso mide la cobertura: con pesos iguales y dos factores disponibles, es del 50%. Hoy Opportunity y Zone no aportan puntos.</p>
+          </section>
         </SceneShell>
 
         <SceneShell index={7} active={active} state={sceneState(7)} label={SCENES[7].title}>
-<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Modelo de pricing" title="De la oferta de 2018 al escenario temporal." /><div data-build-group className={styles.pricingSteps}><article><span>01 · Cómo aprende el modelo</span><h3>LightGBM · 25 variables</h3><p>Anuncios de venta de 2018 → limpieza y exploración → comparación con Ridge y referencia territorial → validación por activo → intervalos calibrados y SHAP.</p></article><article><span>02 · Compra y alquiler en 2026</span><div data-build-group className={styles.comparisonGrid}><div><h3>Compra</h3><p>Estimación 2018 × 1,5534. Escenario Q1 2026 del artefacto, con referencia declarada al IPV de Madrid de segunda mano.</p></div><div><h3>Alquiler</h3><p>Renta mensual del anuncio actual. La valoración del alquiler está pendiente de un modelo o una referencia verificable.</p></div></div></article></div><p className={styles.takeaway}>Indexar cambia el nivel del precio. <strong>No equivale a reentrenar ni validar el modelo en 2026.</strong></p><p className={styles.finePrint}>La página Datos muestra el histórico IPV desde 2018 hasta el último trimestre recibido. Sustituir el factor del artefacto requiere verificar serie, base y periodo.</p></section>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.pricingScene}`}>
+            <SceneHeader kicker="Modelo de pricing" title="El valor estimado del inmueble, según sus características." />
+            <PricingMethod />
+          </section>
         </SceneShell>
 
         <SceneShell index={8} active={active} state={sceneState(8)} label={SCENES[8].title}>
@@ -542,8 +567,8 @@ export function Presentation() {
 
         <SceneShell index={9} active={active} state={sceneState(9)} label={SCENES[9].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.demoScene}`}>
-            <SceneHeader kicker="Demo · historia y recorrido de la plataforma" title="Así se convierte una búsqueda en una decisión." />
-            <div className={styles.demoPlayer}><video ref={videoRef} playsInline preload="metadata" poster="/presentacion/demo-poster.jpg"><source src="/presentacion/habitia-demo.mp4" type="video/mp4" /><track kind="captions" src="/presentacion/demo-captions.vtt" srcLang="es" label="Español" />Tu navegador no puede reproducir el vídeo.</video></div>
+            <SceneHeader kicker="Demo · HabitIA en acción" title="De la búsqueda a la decisión." />
+            <div className={styles.demoPlayer}><video ref={videoRef} controls aria-label="Demostración de HabitIA" playsInline preload="metadata" poster="/presentacion/demo-poster.jpg" onPlay={(event) => { if (active !== 9) event.currentTarget.pause(); }}><source src="/presentacion/habitia-demo.mp4" type="video/mp4" /><track kind="captions" src="/presentacion/demo-captions.vtt" srcLang="es" label="Español" />Tu navegador no puede reproducir el vídeo.</video></div>
             <div className={styles.demoActions}><span>João: historia conceptual · Aplicación actual con datos de ejemplo</span></div>
           </section>
         </SceneShell>
@@ -567,7 +592,10 @@ export function Presentation() {
 
 
         <SceneShell index={12} active={active} state={sceneState(12)} label={SCENES[12].title}>
-<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Anexo · HabitIA Score" title="Cómo se calcula, punto por punto." /><div className={styles.scoreFormula}>HabitIA Score = (α × Fair + β × Opportunity + γ × Zone + δ × Lifestyle) / 100</div><div className={styles.scoreComponents}><article><h3>Fair · precio</h3><p>Oferta frente a la estimación individual válida. Bandas: 100 / 85 / 62 / 32 / 12 puntos.</p></article><article><h3>Opportunity · inversión</h3><p>Revalorización de la zona frente a la media de la ciudad. Sin series comparables: sin datos.</p></article><article><h3>Zone · calidad de vida</h3><p>Indicadores del barrio y una metodología verificable. Pendiente de datos; sin puntuación.</p></article><article><h3>Lifestyle · tiempo al trabajo</h3><p>100 puntos hasta 10 min; −1,9 por minuto hasta 5 puntos desde 60 min. Ruta en el modo elegido.</p></article></div><div className={styles.workedExample}><strong>Ejemplo ilustrativo · pesos 25 / 25 / 25 / 25</strong><p>Fair 100 · Opportunity sin datos · Zone sin datos · Lifestyle 81 (20 min)</p><p>(25 × 100 + 25 × 0 + 25 × 0 + 25 × 81) / 100 = 45,25 → <strong>45/100 · cobertura 50%</strong></p></div><p className={styles.finePrint}>Peso 0 descarta el componente; los demás deben sumar 100. Se redondea el resultado final. Una cobertura baja limita lo que representa la cifra.</p></section>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.scoreMethodScene}`}>
+            <SceneHeader kicker="Anexo · HabitIA Score" title="Cómo se calcula cada componente." />
+            <ScoreMethod />
+          </section>
         </SceneShell>
 
         <SceneShell index={13} active={active} state={sceneState(13)} label={SCENES[13].title}>

@@ -2755,3 +2755,61 @@
   .slidePanelTrigger { left: 12px; bottom: max(12px, env(safe-area-inset-bottom)); }
   .presentation:has(.controls:not(.chromeHidden)) .slidePanelTrigger { bottom: 88px; }
 }
+
+/* Revisión v4: explicación del método y demostración legible en proyección. */
+.scoreCoverage { margin: 1rem 0 0; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: clamp(.95rem, 1.2vw, 1.25rem); line-height: 1.5; max-width: 85ch; }
+.scoreCoverage strong { color: var(--green); }
+.problemMetrics a { text-decoration: underline; text-underline-offset: 3px; }
+.pricingScene .sceneHeader h2 { font-size: clamp(2rem, 3.4vw, 3.8rem); max-width: 40ch; }
+.pricingMethod { display: grid; gap: clamp(1rem, 2.5vh, 2rem); margin-top: 1.2rem; }
+.methodHeading { display: flex; align-items: baseline; gap: 12px; margin: 0 0 .8rem; color: var(--green); font-size: .85rem; font-weight: 500; }
+.methodHeading span { color: var(--ink); font-size: clamp(1.05rem, 1.5vw, 1.6rem); font-weight: 600; }
+.pricingFlow { display: grid; grid-template-columns: 1fr 1.1fr 1.1fr; gap: 2rem; }
+.pricingFlow article, .macroFlow article { border-top: 1px solid var(--line); padding-top: .75rem; }
+.methodLabel { color: var(--green); font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
+.pricingMethod h4 { font-size: clamp(1rem, 1.4vw, 1.5rem); font-weight: 600; line-height: 1.25; margin: .5rem 0; }
+.pricingMethod p { font-size: clamp(.9rem, 1.05vw, 1.15rem); line-height: 1.45; color: var(--ink-soft); margin: .5rem 0; }
+.pricingMethod small { display: block; color: var(--stone); font-size: clamp(.75rem, .88vw, .95rem); line-height: 1.4; }
+.pricingMetrics { display: flex; gap: 1.5rem; margin: .7rem 0; }
+.pricingMetrics dt { font-size: .75rem; color: var(--stone); }
+.pricingMetrics dd { margin: 0; color: var(--green); font-size: clamp(1.35rem, 2.2vw, 2.4rem); font-variant-numeric: tabular-nums; letter-spacing: -.04em; }
+.macroFlow { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.pricingMethod .methodEquation, .methodEquation { color: var(--green); font-weight: 550; }
+.proposalLabel { display: inline-block; vertical-align: middle; margin-left: .4rem; padding: .2rem .5rem; border-radius: 4px; background: var(--green-light); color: var(--green); font-size: .7rem; font-weight: 500; }
+.scoreMethodScene .sceneHeader h2 { font-size: clamp(2rem, 3.4vw, 3.8rem); }
+.methodSwitcher { display: flex; gap: .4rem; margin: 1rem 0; }
+.methodSwitcher button { min-height: 40px; padding: .5rem .9rem; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.methodSwitcher button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: var(--paper); }
+.scoreMethod > .methodEquation { font-size: clamp(1rem, 1.5vw, 1.6rem); margin: .5rem 0; line-height: 1.4; }
+.methodWeights { font-size: .8rem; color: var(--stone); margin: 0 0 .8rem; }
+.scoreMethodRows { margin: 0; }
+.scoreMethodRows > div { display: grid; grid-template-columns: minmax(150px, .26fr) 1fr; gap: 1.3rem; padding: .7rem 0; border-top: 1px solid var(--line); }
+.scoreMethodRows dt { color: var(--green); font-size: 1.1rem; font-weight: 600; }
+.scoreMethodRows dt small { display: block; margin-top: .25rem; font-size: .75rem; color: var(--stone); font-weight: 400; }
+.scoreMethodRows dd { margin: 0; }
+.scoreMethodRows strong { font-size: clamp(.9rem, 1.15vw, 1.2rem); font-weight: 500; }
+.scoreMethodRows p { margin: .2rem 0 0; color: var(--stone); font-size: .8rem; line-height: 1.4; }
+.methodStatus { color: var(--ink-soft); font-size: .85rem; line-height: 1.45; padding: .65rem .8rem; margin: .7rem 0 0; background: var(--green-pale); }
+.demoScene { display: flex; flex-direction: column; padding: 1.5rem clamp(1rem, 3vw, 3rem) 4.5rem; }
+.demoScene .sceneHeader { flex-shrink: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: .6rem; }
+.demoScene .sceneHeader h2 { max-width: none; font-size: clamp(1.2rem, 2vw, 2rem); }
+.demoScene .kicker { margin: 0; }
+.demoPlayer { flex: 1; min-height: 0; width: 100%; max-width: none; aspect-ratio: auto; margin-top: .75rem; border-radius: .5rem; }
+.demoScene .demoActions { flex-shrink: 0; margin-top: .5rem; }
+.presentation:has(.topChrome:not(.chromeHidden)) .demoScene { padding-top: 5.5rem; }
+@media (max-width: 900px) {
+  .pricingFlow, .macroFlow { grid-template-columns: 1fr; gap: 1rem; }
+  .scoreMethodRows > div { grid-template-columns: 1fr; gap: .5rem; }
+  .demoScene .sceneHeader { display: block; }
+  .demoScene .sceneHeader h2 { margin-top: .35rem; }
+}
+@media (max-height: 760px) and (min-width: 901px) {
+  .pricingScene, .scoreMethodScene { padding-top: 2rem; padding-bottom: 4.5rem; }
+  .presentation:has(.topChrome:not(.chromeHidden)) .pricingScene,
+  .presentation:has(.topChrome:not(.chromeHidden)) .scoreMethodScene { padding-top: 5.6rem; }
+  .pricingMethod { gap: 1rem; margin-top: .8rem; }
+  .scoreMethodRows > div { padding: .5rem 0; }
+}
+@media (max-width: 700px) {
+  .demoPlayer { flex: none; aspect-ratio: 16 / 9; height: auto; }
+}

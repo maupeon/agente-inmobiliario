@@ -163,7 +163,7 @@ export const ExplanationEvidence = memo(function ExplanationEvidence({ active }:
     <p className={s.chartToolbar}>Importancia SHAP relativa del modelo revisado; promedio de magnitudes en los grupos exteriores.</p>
     {blocks.length ? <><div className={s.rows}>{blocks.map(({name,value})=><ChartBar key={name} name={name} value={value} max={max} active={active}/>)}</div><div className={s.alignedAxis}><Axis max={max} step={max / 5} label=" %"/></div></> : <div className={s.insight}><div><strong>Explicaciones globales pendientes del experimento.</strong><p>No se reutilizan aquí las importancias del modelo anterior.</p></div></div>}
     <div className={s.insight}><span className={s.insightMark} aria-hidden>↳</span><div><strong>Explicar el cálculo no equivale a demostrar causalidad.</strong><p>Las atribuciones usan la escala logarítmica. El servicio también puede mostrar las tres contribuciones más grandes de un anuncio concreto.</p></div></div>
-    <p className={s.source}>Hasta seis variables principales y resto agrupado; normalización de SHAP absoluto medio. No son porcentajes del precio.</p>
+    <p className={s.source}>Modelo vigente: {data.model_id}. Hasta seis variables principales y resto agrupado; normalización de SHAP absoluto medio. No son porcentajes del precio.</p>
   </div>;
 });
 
