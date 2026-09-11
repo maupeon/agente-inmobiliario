@@ -41,7 +41,7 @@ interface SceneDefinition {
   note: string;
 }
 
-const MAIN_SCENE_COUNT = 12;
+const MAIN_SCENE_COUNT = 13;
 const SCENES: SceneDefinition[] = [
   {
     "kicker": "Portada",
@@ -72,6 +72,12 @@ const SCENES: SceneDefinition[] = [
     "title": "Todo el recorrido en HabitIA",
     "target": 195,
     "note": "Compra y alquiler, top cinco, chatbot, automatización diaria y comparación de todo el patrimonio. Cinco es un máximo cuando existen candidatos compatibles."
+  },
+  {
+    "kicker": "Aplicación del máster",
+    "title": "22 asignaturas",
+    "target": 220,
+    "note": "No intentamos marcar veintidós casillas. Organizamos lo aprendido en cuatro capas: ingeniería, modelización, IA y producto. También justificamos qué no usar: 94.000 filas tabulares no necesitaban Spark, una RNN ni deep learning; y la persistencia relacional favorecía PostgreSQL frente a NoSQL."
   },
   {
     "kicker": "Metodología",
@@ -162,12 +168,6 @@ const SCENES: SceneDefinition[] = [
     "title": "Precio confianza y encaje",
     "target": 561,
     "note": "El comprador solo ve el promedio de una zona, aunque dos pisos del mismo barrio puedan ser radicalmente distintos. HabitIA responde tres preguntas: qué precio cabe esperar, cuánto puede variar y qué vivienda encaja con la persona. La estimación usa el modelo, el rango expresa la incertidumbre y el Score ordena según las preferencias. Son tres conceptos distintos."
-  },
-  {
-    "kicker": "Anexo · Asignaturas",
-    "title": "22 asignaturas",
-    "target": 561,
-    "note": "No intentamos marcar veintidós casillas. Organizamos lo aprendido en cuatro capas: ingeniería, modelización, IA y producto. También justificamos qué no usar: 94.000 filas tabulares no necesitaban Spark, una RNN ni deep learning; y la persistencia relacional favorecía PostgreSQL frente a NoSQL."
   },
   {
     "kicker": "Anexo · Lectura económica",
@@ -273,7 +273,7 @@ function usePresentationTimer() {
 }
 
 function sceneBuilds(index: number): HTMLElement[] {
-  if ([0, 9, 11].includes(index)) return [];
+  if ([0, 10, 12].includes(index)) return [];
   const scene = document.querySelector(`[data-scene="${index}"] section`);
   return Array.from(scene?.children ?? []).slice(1).flatMap((element) =>
     element.hasAttribute("data-build-group") ? Array.from(element.children) : [element]
@@ -375,7 +375,7 @@ export function Presentation() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    if (active !== 9) {
+    if (active !== 10) {
       video.pause();
       return;
     }
@@ -537,126 +537,6 @@ export function Presentation() {
         </SceneShell>
 
         <SceneShell index={5} active={active} state={sceneState(5)} label={SCENES[5].title}>
-<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Metodología · del máster al producto" title="Una técnica para cada paso." /><div data-build-group className={styles.methodGrid}><article><span>01</span><h3>Recoger</h3><p>Anuncios históricos y fuentes de contexto.</p><small>Python · SQL · Linux / Git</small></article><article><span>02</span><h3>Explorar</h3><p>Calidad, duplicados, ausencias y distribución.</p><small>Estadística · Minería de datos</small></article><article><span>03</span><h3>Modelar</h3><p>Ridge, LightGBM, validación agrupada, intervalos y SHAP.</p><small>Machine Learning · Data science</small></article><article><span>04</span><h3>Construir y desplegar</h3><p>Servicio Python, interfaz y persistencia.</p><small>Productivización · Visualización · BI</small></article><article><span>05</span><h3>Conversar</h3><p>Interpretar preguntas y conectar herramientas.</p><small>NLP · Modelos generativos</small></article><article><span>06</span><h3>Automatizar</h3><p>Selección diaria, caché, cuota y reintentos.</p><small>SQL · Ingeniería de workflows</small></article></div></section>
-        </SceneShell>
-
-        <SceneShell index={6} active={active} state={sceneState(6)} label={SCENES[6].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
-            <SceneHeader kicker="Motor de decisión" title="Filtrar, calcular y ordenar." />
-            <div className={styles.scoreFormula}>HabitIA Score = (α × Fair + β × Opportunity + γ × Zone + δ × Lifestyle) / 100</div>
-            <div data-build-group className={styles.scoreComponents}>
-              <article><h3>Fair · precio</h3><p>Cómo de justo es el precio al comparar su valor estimado con la oferta.</p></article>
-              <article><h3>Opportunity · inversión</h3><p>Revalorización de la zona frente a la media de la ciudad.</p></article>
-              <article><h3>Zone · calidad de vida</h3><p>Indicadores del barrio. Fuente y metodología pendientes de integrar.</p></article>
-              <article><h3>Lifestyle · tiempo al trabajo</h3><p>La distancia que de verdad importa al trabajo: la temporal.</p></article>
-            </div>
-            <p className={styles.scoreCoverage}><strong>Datos disponibles para tus preferencias.</strong> Eso mide la cobertura: con pesos iguales y dos factores disponibles, es del 50%. Hoy Opportunity y Zone no aportan puntos.</p>
-          </section>
-        </SceneShell>
-
-        <SceneShell index={7} active={active} state={sceneState(7)} label={SCENES[7].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.pricingScene}`}>
-            <SceneHeader kicker="Modelo de pricing" title="El valor estimado del inmueble, según sus características." />
-            <PricingMethod />
-          </section>
-        </SceneShell>
-
-        <SceneShell index={8} active={active} state={sceneState(8)} label={SCENES[8].title}>
-<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Comprar vs. alquilar" title="La cuota es solo una parte de la comparación." /><div data-build-group className={styles.comparisonGrid}><article><span className={styles.overline}>Comparación básica</span><h3>Precio, renta e hipoteca</h3><p>Precio de compra y entrada.<br />Alquiler mensual.<br />Tipo y plazo de la hipoteca.<br />Horizonte de la comparación.</p></article><article><span className={styles.overline}>Qué añade HabitIA</span><h3>Todo el patrimonio</h3><p>Gastos a fondo perdido: compra, mantenimiento, comunidad, IBI y seguros.<br />Revalorización del capital que puede permanecer invertido.<br />Tus perspectivas, saltos laborales, mudanzas dentro y fuera del país.</p></article></div><p className={styles.takeaway}>Compara <strong>patrimonio neto, año de equilibrio y sensibilidad</strong> con supuestos editables.</p><p className={styles.finePrint}>Las mudanzas y los cambios laborales orientan tu decisión; no se simulan automáticamente como flujos económicos.</p></section>
-        </SceneShell>
-
-        <SceneShell index={9} active={active} state={sceneState(9)} label={SCENES[9].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.demoScene}`}>
-            <SceneHeader kicker="Demo · HabitIA en acción" title="De la búsqueda a la decisión." />
-            <div className={styles.demoPlayer}><video ref={videoRef} controls aria-label="Demostración de HabitIA" playsInline preload="metadata" poster="/presentacion/demo-poster.jpg" onPlay={(event) => { if (active !== 9) event.currentTarget.pause(); }}><source src="/presentacion/habitia-demo.mp4" type="video/mp4" /><track kind="captions" src="/presentacion/demo-captions.vtt" srcLang="es" label="Español" />Tu navegador no puede reproducir el vídeo.</video></div>
-            <div className={styles.demoActions}><span>João: historia conceptual · Aplicación actual con datos de ejemplo</span></div>
-          </section>
-        </SceneShell>
-
-        <SceneShell index={10} active={active} state={sceneState(10)} label={SCENES[10].title}>
-          <section className={styles.sceneCanvas}>
-            <SceneHeader kicker="Roadmap" title="Demostrar. Validar. Escalar." />
-
-            <div data-build-group className={styles.roadmapGrid}>
-              <article><span className={styles.statusPill}>Prototipo disponible</span><h3>Demostrar<br />inteligencia.</h3><ul><li>Idealista + fuentes de contexto</li><li>Scoring, valoración y chatbot</li><li>Comprar vs. alquilar</li><li>Selección diaria · hasta cinco viviendas</li></ul></article>
-              <article><span className={styles.overline}>Siguiente · MVP</span><h3>Desplegar<br />HabitIA</h3><ul><li>Medir utilidad y tiempo ahorrado</li><li>Integración multiportal</li><li>Validar con usuarios reales</li></ul></article>
-              <article><span className={styles.overline}>Visión</span><h3>Escalar<br />el producto.</h3><ul><li>Predicción de la revalorización</li><li>Visita virtual de 2D a 3D</li><li>Más ciudades</li><li>Testear B2C y B2B</li></ul></article>
-            </div>
-            <p className={styles.finePrint}>Hoja de ruta propuesta, sin fechas comprometidas. La expansión requiere nuevos datos y validación local.</p>
-          </section>
-        </SceneShell>
-
-        <SceneShell index={11} active={active} state={sceneState(11)} label={SCENES[11].title}>
-<section className={`${styles.sceneCanvas} ${styles.simpleClosing}`}><Logo variant="inline" className={styles.finalLogo} /><h2>La herramienta que echábamos en falta</h2><p>Acierta · Fácil · Rápido</p></section>
-        </SceneShell>
-
-
-        <SceneShell index={12} active={active} state={sceneState(12)} label={SCENES[12].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.scoreMethodScene}`}>
-            <SceneHeader kicker="Anexo · HabitIA Score" title="Cómo se calcula cada componente." />
-            <ScoreMethod />
-          </section>
-        </SceneShell>
-
-        <SceneShell index={13} active={active} state={sceneState(13)} label={SCENES[13].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
-            <SceneHeader kicker="01 · Preparar los datos" title="De los anuncios a un protocolo trazable." />
-            <DataPartition active={active === 13} />
-          </section>
-        </SceneShell>
-
-        <SceneShell index={14} active={active} state={sceneState(14)} label={SCENES[14].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
-            <SceneHeader kicker="02 · Evaluación retrospectiva" title="Aprender, calibrar y evaluar por separado." />
-            <div className={styles.examSplit}><article><span>Evaluación agrupada</span><strong>3 × 3</strong><p>Tres grupos exteriores y selección en tres grupos internos.</p></article><div className={styles.examDivider}><ShieldCheck aria-hidden /><span>Separación<br />por activo</span></div><article><span>Artefacto conservado</span><strong>{formatCount(results.sample.test)}</strong><p>Registros reservados en su partición fija histórica.</p></article></div>
-            <div className={styles.validationChecks}><span><Check aria-hidden /> Estadísticas ajustadas solo donde corresponde</span><span><Check aria-hidden /> Calibración separada por activo</span><span><Check aria-hidden /> Mismo transformador en el servicio</span></div>
-            <p className={styles.takeaway}><strong>El histórico ya fue explorado.</strong> La revisión mejora el protocolo; no crea datos externos nuevos.</p>
-          </section>
-        </SceneShell>
-
-        <SceneShell index={15} active={active} state={sceneState(15)} label={SCENES[15].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
-            <SceneHeader kicker="03 · Elegir el modelo" title="Del barrio a cada vivienda." />
-            <ModelEvidence active={active === 15} />
-          </section>
-        </SceneShell>
-
-        <SceneShell index={16} active={active} state={sceneState(16)} label={SCENES[16].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
-            <SceneHeader kicker="04 · Expresar la incertidumbre" title="Un precio estimado necesita un margen." />
-            <UncertaintyEvidence active={active === 16} />
-          </section>
-        </SceneShell>
-
-        <SceneShell index={17} active={active} state={sceneState(17)} label={SCENES[17].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
-            <SceneHeader kicker="05 · Conocer los límites" title="¿Hasta dónde llega la precisión?" />
-            <ScopeEvidence active={active === 17} />
-          </section>
-        </SceneShell>
-
-        <SceneShell index={18} active={active} state={sceneState(18)} label={SCENES[18].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
-            <SceneHeader kicker="Del modelo al producto" title="Una pregunta activa toda la cadena." />
-            <blockquote className={styles.questionHero}>«¿Qué pisos encajan conmigo<br />y por qué?»</blockquote>
-            <ol className={styles.productChain}><li><Sparkle aria-hidden /><span>Entender</span><p>El agente interpreta tu petición.</p></li><li><Database aria-hidden /><span>Consultar</span><p>Obtiene viviendas y contexto.</p></li><li><ChartLineUp aria-hidden /><span>Comparar</span><p>Valora y ordena las opciones.</p></li><li><Eye aria-hidden /><span>Explicar</span><p>Devuelve razones comprensibles.</p></li></ol>
-            <p className={styles.takeaway}>La IA conecta las herramientas. <strong>Los datos sostienen la respuesta.</strong></p>
-          </section>
-        </SceneShell>
-
-        <SceneShell index={19} active={active} state={sceneState(19)} label={SCENES[19].title}>
-          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
-            <SceneHeader kicker="Anexo · las tres preguntas" title="Precio, confianza y encaje son preguntas distintas." />
-            <div className={styles.scopeCards}>
-              <article><span>01 · Precio</span><h3>¿Cuánto cabe esperar?</h3><p>El modelo estima el precio a partir de las características y la localización.</p><strong className={styles.answerLabel}>Estimación</strong></article>
-              <article><span>02 · Confianza</span><h3>¿Cuánto puede variar?</h3><p>El intervalo expresa el margen de incertidumbre de esa valoración.</p><strong className={styles.answerLabel}>Rango</strong></article>
-              <article><span>03 · Encaje</span><h3>¿Tiene sentido para ti?</h3><p>El ranking combina las preferencias, el precio y el contexto del usuario.</p><strong className={styles.answerLabel}>Prioridad</strong></article>
-            </div>
-            <div className={styles.lesson}><Lightbulb aria-hidden /><p><strong>Una media de barrio no responde las tres.</strong> HabitIA conecta la valoración con las circunstancias de quien busca.</p></div>
-          </section>
-        </SceneShell>
-
-        <SceneShell index={20} active={active} state={sceneState(20)} label={SCENES[20].title}>
           <section className={`${styles.sceneCanvas} ${styles.curriculumScene}`}>
             <SceneHeader kicker="Criterio 1 · aplicación del máster" title="22 asignaturas. Una sola cadena de decisión." />
             <div className={styles.curriculumGrid}>
@@ -691,6 +571,126 @@ export function Presentation() {
                 Spark, RNN o deep learning; PostgreSQL encajaba mejor que NoSQL.
               </p>
             </div>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={6} active={active} state={sceneState(6)} label={SCENES[6].title}>
+<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Metodología · del máster al producto" title="Una técnica para cada paso." /><div data-build-group className={styles.methodGrid}><article><span>01</span><h3>Recoger</h3><p>Anuncios históricos y fuentes de contexto.</p><small>Python · SQL · Linux / Git</small></article><article><span>02</span><h3>Explorar</h3><p>Calidad, duplicados, ausencias y distribución.</p><small>Estadística · Minería de datos</small></article><article><span>03</span><h3>Modelar</h3><p>Ridge, LightGBM, validación agrupada, intervalos y SHAP.</p><small>Machine Learning · Data science</small></article><article><span>04</span><h3>Construir y desplegar</h3><p>Servicio Python, interfaz y persistencia.</p><small>Productivización · Visualización · BI</small></article><article><span>05</span><h3>Conversar</h3><p>Interpretar preguntas y conectar herramientas.</p><small>NLP · Modelos generativos</small></article><article><span>06</span><h3>Automatizar</h3><p>Selección diaria, caché, cuota y reintentos.</p><small>SQL · Ingeniería de workflows</small></article></div></section>
+        </SceneShell>
+
+        <SceneShell index={7} active={active} state={sceneState(7)} label={SCENES[7].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
+            <SceneHeader kicker="Motor de decisión" title="Filtrar, calcular y ordenar." />
+            <div className={styles.scoreFormula}>HabitIA Score = (α × Fair + β × Opportunity + γ × Zone + δ × Lifestyle) / 100</div>
+            <div data-build-group className={styles.scoreComponents}>
+              <article><h3>Fair · precio</h3><p>Cómo de justo es el precio al comparar su valor estimado con la oferta.</p></article>
+              <article><h3>Opportunity · inversión</h3><p>Revalorización de la zona frente a la media de la ciudad.</p></article>
+              <article><h3>Zone · calidad de vida</h3><p>Indicadores del barrio. Fuente y metodología pendientes de integrar.</p></article>
+              <article><h3>Lifestyle · tiempo al trabajo</h3><p>La distancia que de verdad importa al trabajo: la temporal.</p></article>
+            </div>
+            <p className={styles.scoreCoverage}><strong>Datos disponibles para tus preferencias.</strong> Eso mide la cobertura: con pesos iguales y dos factores disponibles, es del 50%. Hoy Opportunity y Zone no aportan puntos.</p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={8} active={active} state={sceneState(8)} label={SCENES[8].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.pricingScene}`}>
+            <SceneHeader kicker="Modelo de pricing" title="El valor estimado del inmueble, según sus características." />
+            <PricingMethod />
+          </section>
+        </SceneShell>
+
+        <SceneShell index={9} active={active} state={sceneState(9)} label={SCENES[9].title}>
+<section className={`${styles.sceneCanvas} ${styles.clearScene}`}><SceneHeader kicker="Comprar vs. alquilar" title="La cuota es solo una parte de la comparación." /><div data-build-group className={styles.comparisonGrid}><article><span className={styles.overline}>Comparación básica</span><h3>Precio, renta e hipoteca</h3><p>Precio de compra y entrada.<br />Alquiler mensual.<br />Tipo y plazo de la hipoteca.<br />Horizonte de la comparación.</p></article><article><span className={styles.overline}>Qué añade HabitIA</span><h3>Todo el patrimonio</h3><p>Gastos a fondo perdido: compra, mantenimiento, comunidad, IBI y seguros.<br />Revalorización del capital que puede permanecer invertido.<br />Tus perspectivas, saltos laborales, mudanzas dentro y fuera del país.</p></article></div><p className={styles.takeaway}>Compara <strong>patrimonio neto, año de equilibrio y sensibilidad</strong> con supuestos editables.</p><p className={styles.finePrint}>Las mudanzas y los cambios laborales orientan tu decisión; no se simulan automáticamente como flujos económicos.</p></section>
+        </SceneShell>
+
+        <SceneShell index={10} active={active} state={sceneState(10)} label={SCENES[10].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.demoScene}`}>
+            <SceneHeader kicker="Demo · HabitIA en acción" title="De la búsqueda a la decisión." />
+            <div className={styles.demoPlayer}><video ref={videoRef} controls aria-label="Demostración de HabitIA" playsInline preload="metadata" poster="/presentacion/demo-poster.jpg" onPlay={(event) => { if (active !== 10) event.currentTarget.pause(); }}><source src="/presentacion/habitia-demo.mp4" type="video/mp4" /><track kind="captions" src="/presentacion/demo-captions.vtt" srcLang="es" label="Español" />Tu navegador no puede reproducir el vídeo.</video></div>
+            <div className={styles.demoActions}><span>João: historia conceptual · Aplicación actual con datos de ejemplo</span></div>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={11} active={active} state={sceneState(11)} label={SCENES[11].title}>
+          <section className={styles.sceneCanvas}>
+            <SceneHeader kicker="Roadmap" title="Demostrar. Validar. Escalar." />
+
+            <div data-build-group className={styles.roadmapGrid}>
+              <article><span className={styles.statusPill}>Prototipo disponible</span><h3>Demostrar<br />inteligencia.</h3><ul><li>Idealista + fuentes de contexto</li><li>Scoring, valoración y chatbot</li><li>Comprar vs. alquilar</li><li>Selección diaria · hasta cinco viviendas</li></ul></article>
+              <article><span className={styles.overline}>Siguiente · MVP</span><h3>Desplegar<br />HabitIA</h3><ul><li>Medir utilidad y tiempo ahorrado</li><li>Integración multiportal</li><li>Validar con usuarios reales</li></ul></article>
+              <article><span className={styles.overline}>Visión</span><h3>Escalar<br />el producto.</h3><ul><li>Predicción de la revalorización</li><li>Visita virtual de 2D a 3D</li><li>Más ciudades</li><li>Testear B2C y B2B</li></ul></article>
+            </div>
+            <p className={styles.finePrint}>Hoja de ruta propuesta, sin fechas comprometidas. La expansión requiere nuevos datos y validación local.</p>
+          </section>
+        </SceneShell>
+
+
+        <SceneShell index={12} active={active} state={sceneState(12)} label={SCENES[12].title}>
+<section className={`${styles.sceneCanvas} ${styles.simpleClosing}`}><Logo variant="inline" className={styles.finalLogo} /><h2>La herramienta que echábamos en falta</h2><p>Acierta · Fácil · Rápido</p></section>
+        </SceneShell>
+
+        <SceneShell index={13} active={active} state={sceneState(13)} label={SCENES[13].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.scoreMethodScene}`}>
+            <SceneHeader kicker="Anexo · HabitIA Score" title="Cómo se calcula cada componente." />
+            <ScoreMethod />
+          </section>
+        </SceneShell>
+
+        <SceneShell index={14} active={active} state={sceneState(14)} label={SCENES[14].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
+            <SceneHeader kicker="01 · Preparar los datos" title="De los anuncios a un protocolo trazable." />
+            <DataPartition active={active === 14} />
+          </section>
+        </SceneShell>
+
+        <SceneShell index={15} active={active} state={sceneState(15)} label={SCENES[15].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
+            <SceneHeader kicker="02 · Evaluación retrospectiva" title="Aprender, calibrar y evaluar por separado." />
+            <div className={styles.examSplit}><article><span>Evaluación agrupada</span><strong>3 × 3</strong><p>Tres grupos exteriores y selección en tres grupos internos.</p></article><div className={styles.examDivider}><ShieldCheck aria-hidden /><span>Separación<br />por activo</span></div><article><span>Artefacto conservado</span><strong>{formatCount(results.sample.test)}</strong><p>Registros reservados en su partición fija histórica.</p></article></div>
+            <div className={styles.validationChecks}><span><Check aria-hidden /> Estadísticas ajustadas solo donde corresponde</span><span><Check aria-hidden /> Calibración separada por activo</span><span><Check aria-hidden /> Mismo transformador en el servicio</span></div>
+            <p className={styles.takeaway}><strong>El histórico ya fue explorado.</strong> La revisión mejora el protocolo; no crea datos externos nuevos.</p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={16} active={active} state={sceneState(16)} label={SCENES[16].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
+            <SceneHeader kicker="03 · Elegir el modelo" title="Del barrio a cada vivienda." />
+            <ModelEvidence active={active === 16} />
+          </section>
+        </SceneShell>
+
+        <SceneShell index={17} active={active} state={sceneState(17)} label={SCENES[17].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
+            <SceneHeader kicker="04 · Expresar la incertidumbre" title="Un precio estimado necesita un margen." />
+            <UncertaintyEvidence active={active === 17} />
+          </section>
+        </SceneShell>
+
+        <SceneShell index={18} active={active} state={sceneState(18)} label={SCENES[18].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.visualScene}`}>
+            <SceneHeader kicker="05 · Conocer los límites" title="¿Hasta dónde llega la precisión?" />
+            <ScopeEvidence active={active === 18} />
+          </section>
+        </SceneShell>
+
+        <SceneShell index={19} active={active} state={sceneState(19)} label={SCENES[19].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
+            <SceneHeader kicker="Del modelo al producto" title="Una pregunta activa toda la cadena." />
+            <blockquote className={styles.questionHero}>«¿Qué pisos encajan conmigo<br />y por qué?»</blockquote>
+            <ol className={styles.productChain}><li><Sparkle aria-hidden /><span>Entender</span><p>El agente interpreta tu petición.</p></li><li><Database aria-hidden /><span>Consultar</span><p>Obtiene viviendas y contexto.</p></li><li><ChartLineUp aria-hidden /><span>Comparar</span><p>Valora y ordena las opciones.</p></li><li><Eye aria-hidden /><span>Explicar</span><p>Devuelve razones comprensibles.</p></li></ol>
+            <p className={styles.takeaway}>La IA conecta las herramientas. <strong>Los datos sostienen la respuesta.</strong></p>
+          </section>
+        </SceneShell>
+
+        <SceneShell index={20} active={active} state={sceneState(20)} label={SCENES[20].title}>
+          <section className={`${styles.sceneCanvas} ${styles.clearScene}`}>
+            <SceneHeader kicker="Anexo · las tres preguntas" title="Precio, confianza y encaje son preguntas distintas." />
+            <div className={styles.scopeCards}>
+              <article><span>01 · Precio</span><h3>¿Cuánto cabe esperar?</h3><p>El modelo estima el precio a partir de las características y la localización.</p><strong className={styles.answerLabel}>Estimación</strong></article>
+              <article><span>02 · Confianza</span><h3>¿Cuánto puede variar?</h3><p>El intervalo expresa el margen de incertidumbre de esa valoración.</p><strong className={styles.answerLabel}>Rango</strong></article>
+              <article><span>03 · Encaje</span><h3>¿Tiene sentido para ti?</h3><p>El ranking combina las preferencias, el precio y el contexto del usuario.</p><strong className={styles.answerLabel}>Prioridad</strong></article>
+            </div>
+            <div className={styles.lesson}><Lightbulb aria-hidden /><p><strong>Una media de barrio no responde las tres.</strong> HabitIA conecta la valoración con las circunstancias de quien busca.</p></div>
           </section>
         </SceneShell>
 
