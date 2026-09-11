@@ -567,8 +567,10 @@ export function Presentation() {
                 <span><i className={styles.legendDecision} /> Decisión técnica justificada</span>
               </div>
               <p>
-                <strong>No usar también es método.</strong> Datos tabulares y 94k filas no justificaban
-                Spark, RNN o deep learning; PostgreSQL encajaba mejor que NoSQL.
+                <strong>SQL frente a NoSQL.</strong> Datos estructurados y relacionados: PostgreSQL
+                facilita consultas e integridad y admite JSON flexible. NoSQL no aportaba una ventaja
+                concreta. <strong>No usar también es método.</strong> Datos tabulares y 94k filas no
+                justificaban Spark, RNN o deep learning.
               </p>
             </div>
           </section>
