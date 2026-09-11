@@ -64,7 +64,7 @@ export async function getMarketData<K extends MarketDataKey>(
     return wrapLive(key);
   }
   if (!data) return wrapLive(key);
-  if (key === "ine_ipv_quarterly" && data.data?.schemaVersion !== 2) return wrapLive(key);
+  if (key === "ine_ipv_quarterly" && data.data?.schemaVersion !== 3) return wrapLive(key);
 
   return {
     key,

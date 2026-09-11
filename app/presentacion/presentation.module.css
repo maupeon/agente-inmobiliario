@@ -2666,3 +2666,35 @@
   .journeyRows ol { grid-template-columns:1fr; gap:1rem; }.promiseRow { gap:1rem; }
   .marketTable th,.marketTable td { padding:.7rem; }.sourceNote { font-size:.75rem; }
 }
+
+/* Each advance reveals one speaking block without changing the layout. */
+.buildBlock { transition: opacity 240ms ease-out, transform 240ms ease-out; }
+.buildHidden { opacity: 0 !important; transform: translateY(12px); pointer-events: none; }
+.pricingSteps { grid-template-columns: 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+.pricingSteps > article { border-top: 1px solid var(--line); padding-top: 1rem; }
+.pricingSteps h3 { margin: .6rem 0; }
+.pricingSteps .comparisonGrid { margin-top: .5rem; }
+.journeyRows li { position: relative; }
+.journeyRows li:not(:last-child)::after { content: '→'; position: absolute; right: -1.35rem; top: 0; color: var(--green); }
+.valueGrid { grid-template-columns: repeat(6, 1fr); }
+.valueGrid article { grid-column: span 2; }
+.valueGrid article:nth-child(4) { grid-column: 2 / span 2; }
+.valueGrid article:nth-child(5) { grid-column: 4 / span 2; }
+.promiseRow strong { font-size: clamp(1.4rem, 2.3vw, 2.7rem); }
+@media (max-width: 700px) {
+ .valueGrid { grid-template-columns: 1fr; }
+ .valueGrid article, .valueGrid article:nth-child(4), .valueGrid article:nth-child(5) { grid-column: auto; }
+ .journeyRows li:not(:last-child)::after { content: '↓'; right: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .buildBlock { transition: none; } .buildHidden { transform: none; } }
+.presentation[data-motion="reduced"] .buildBlock { transition: none; transform: none; }
+
+.problemMetrics { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-top: 1.5rem; }
+.problemMetrics span { font-size: 1rem; color: var(--stone); }
+.problemMetrics strong { font-size: clamp(2rem, 4vw, 4rem); color: var(--green); display: block; }
+.problemMetrics small { width: 100%; font-size: .75rem; color: var(--stone); }
+
+.presentation .chromeHidden { opacity: 0 !important; pointer-events: none; }
+.advanceHint { margin: 2rem 0 0; font-size: .8rem; color: inherit; opacity: .7; }
+
+.journeyRows ol { list-style: none; padding: 0; margin-left: 0; }

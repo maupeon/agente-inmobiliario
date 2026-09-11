@@ -1,0 +1,1057 @@
+{
+  "periodo": "2026-01-01",
+  "fuente": "Ayuntamiento de Madrid · Subdirección General de Estadística",
+  "url": "https://www.madrid.es/UnidadesDescentralizadas/UDCEstadistica/Nuevaweb/Territorio%2C%20Clima%20y%20Medio%20Ambiente/Territorio/Datos%20geogr%C3%A1ficos%20y%20administrativos/N110326.xlsx",
+  "consultado": "2026-09-11",
+  "sha256": "7e90fc39e300478dbe2b3ba9b8adc8c127a66247629d5dd12cde4e96ceffe391",
+  "barrios": [
+    {
+      "code": "011",
+      "barrio": "Palacio",
+      "distrito": "Centro",
+      "superficieHa": 146.99,
+      "densidadHabHa": 159.26,
+      "poblacion": 23410
+    },
+    {
+      "code": "012",
+      "barrio": "Embajadores",
+      "distrito": "Centro",
+      "superficieHa": 103.37,
+      "densidadHabHa": 465.16,
+      "poblacion": 48085
+    },
+    {
+      "code": "013",
+      "barrio": "Cortes",
+      "distrito": "Centro",
+      "superficieHa": 59.19,
+      "densidadHabHa": 181.46,
+      "poblacion": 10740
+    },
+    {
+      "code": "014",
+      "barrio": "Justicia",
+      "distrito": "Centro",
+      "superficieHa": 73.94,
+      "densidadHabHa": 245.33,
+      "poblacion": 18140
+    },
+    {
+      "code": "015",
+      "barrio": "Universidad",
+      "distrito": "Centro",
+      "superficieHa": 94.8,
+      "densidadHabHa": 351.53,
+      "poblacion": 33326
+    },
+    {
+      "code": "016",
+      "barrio": "Sol",
+      "distrito": "Centro",
+      "superficieHa": 44.53,
+      "densidadHabHa": 181.88,
+      "poblacion": 8099
+    },
+    {
+      "code": "021",
+      "barrio": "Imperial",
+      "distrito": "Arganzuela",
+      "superficieHa": 96.77,
+      "densidadHabHa": 251.25,
+      "poblacion": 24313
+    },
+    {
+      "code": "022",
+      "barrio": "Acacias",
+      "distrito": "Arganzuela",
+      "superficieHa": 107.34,
+      "densidadHabHa": 336.01,
+      "poblacion": 36069
+    },
+    {
+      "code": "023",
+      "barrio": "Chopera",
+      "distrito": "Arganzuela",
+      "superficieHa": 56.78,
+      "densidadHabHa": 358.69,
+      "poblacion": 20366
+    },
+    {
+      "code": "024",
+      "barrio": "Legazpi",
+      "distrito": "Arganzuela",
+      "superficieHa": 141.45,
+      "densidadHabHa": 140.8,
+      "poblacion": 19916
+    },
+    {
+      "code": "025",
+      "barrio": "Delicias",
+      "distrito": "Arganzuela",
+      "superficieHa": 105.47,
+      "densidadHabHa": 276.96,
+      "poblacion": 29210
+    },
+    {
+      "code": "026",
+      "barrio": "Palos de la Frontera",
+      "distrito": "Arganzuela",
+      "superficieHa": 64.84,
+      "densidadHabHa": 396.91,
+      "poblacion": 25737
+    },
+    {
+      "code": "027",
+      "barrio": "Atocha",
+      "distrito": "Arganzuela",
+      "superficieHa": 73.57,
+      "densidadHabHa": 39.95,
+      "poblacion": 2939
+    },
+    {
+      "code": "031",
+      "barrio": "Pacífico",
+      "distrito": "Retiro",
+      "superficieHa": 75.83,
+      "densidadHabHa": 446.26,
+      "poblacion": 33838
+    },
+    {
+      "code": "032",
+      "barrio": "Adelfas",
+      "distrito": "Retiro",
+      "superficieHa": 64.08,
+      "densidadHabHa": 294.82,
+      "poblacion": 18892
+    },
+    {
+      "code": "033",
+      "barrio": "Estrella",
+      "distrito": "Retiro",
+      "superficieHa": 102.55,
+      "densidadHabHa": 221.27,
+      "poblacion": 22692
+    },
+    {
+      "code": "034",
+      "barrio": "Ibiza",
+      "distrito": "Retiro",
+      "superficieHa": 49.2,
+      "densidadHabHa": 438.83,
+      "poblacion": 21589
+    },
+    {
+      "code": "035",
+      "barrio": "Los Jerónimos",
+      "distrito": "Retiro",
+      "superficieHa": 190.64,
+      "densidadHabHa": 35.53,
+      "poblacion": 6774
+    },
+    {
+      "code": "036",
+      "barrio": "Niño Jesús",
+      "distrito": "Retiro",
+      "superficieHa": 64.33,
+      "densidadHabHa": 234.39,
+      "poblacion": 15078
+    },
+    {
+      "code": "041",
+      "barrio": "Recoletos",
+      "distrito": "Salamanca",
+      "superficieHa": 87.31,
+      "densidadHabHa": 174.35,
+      "poblacion": 15223
+    },
+    {
+      "code": "042",
+      "barrio": "Goya",
+      "distrito": "Salamanca",
+      "superficieHa": 77.03,
+      "densidadHabHa": 384.62,
+      "poblacion": 29627
+    },
+    {
+      "code": "043",
+      "barrio": "Fuente del Berro",
+      "distrito": "Salamanca",
+      "superficieHa": 85.26,
+      "densidadHabHa": 251.73,
+      "poblacion": 21462
+    },
+    {
+      "code": "044",
+      "barrio": "Guindalera",
+      "distrito": "Salamanca",
+      "superficieHa": 160.28,
+      "densidadHabHa": 268.52,
+      "poblacion": 43038
+    },
+    {
+      "code": "045",
+      "barrio": "Lista",
+      "distrito": "Salamanca",
+      "superficieHa": 52.02,
+      "densidadHabHa": 405.76,
+      "poblacion": 21108
+    },
+    {
+      "code": "046",
+      "barrio": "Castellana",
+      "distrito": "Salamanca",
+      "superficieHa": 77.34,
+      "densidadHabHa": 217.2,
+      "poblacion": 16798
+    },
+    {
+      "code": "051",
+      "barrio": "El Viso",
+      "distrito": "Chamartín",
+      "superficieHa": 170.92,
+      "densidadHabHa": 101.6,
+      "poblacion": 17366
+    },
+    {
+      "code": "052",
+      "barrio": "Prosperidad",
+      "distrito": "Chamartín",
+      "superficieHa": 104.01,
+      "densidadHabHa": 354.88,
+      "poblacion": 36910
+    },
+    {
+      "code": "053",
+      "barrio": "Ciudad Jardín",
+      "distrito": "Chamartín",
+      "superficieHa": 76.23,
+      "densidadHabHa": 246.71,
+      "poblacion": 18807
+    },
+    {
+      "code": "054",
+      "barrio": "Hispanoamérica",
+      "distrito": "Chamartín",
+      "superficieHa": 171.25,
+      "densidadHabHa": 186.95,
+      "poblacion": 32016
+    },
+    {
+      "code": "055",
+      "barrio": "Nueva España",
+      "distrito": "Chamartín",
+      "superficieHa": 179.01,
+      "densidadHabHa": 141.9,
+      "poblacion": 25402
+    },
+    {
+      "code": "056",
+      "barrio": "Castilla",
+      "distrito": "Chamartín",
+      "superficieHa": 216.13,
+      "densidadHabHa": 81.4,
+      "poblacion": 17592
+    },
+    {
+      "code": "061",
+      "barrio": "Bellas Vistas",
+      "distrito": "Tetuán",
+      "superficieHa": 71.52,
+      "densidadHabHa": 429.98,
+      "poblacion": 30751
+    },
+    {
+      "code": "062",
+      "barrio": "Cuatro Caminos",
+      "distrito": "Tetuán",
+      "superficieHa": 118.5,
+      "densidadHabHa": 302.0,
+      "poblacion": 35788
+    },
+    {
+      "code": "063",
+      "barrio": "Castillejos",
+      "distrito": "Tetuán",
+      "superficieHa": 70.47,
+      "densidadHabHa": 300.69,
+      "poblacion": 21189
+    },
+    {
+      "code": "064",
+      "barrio": "Almenara",
+      "distrito": "Tetuán",
+      "superficieHa": 99.94,
+      "densidadHabHa": 242.86,
+      "poblacion": 24271
+    },
+    {
+      "code": "065",
+      "barrio": "Valdeacederas",
+      "distrito": "Tetuán",
+      "superficieHa": 116.34,
+      "densidadHabHa": 246.18,
+      "poblacion": 28641
+    },
+    {
+      "code": "066",
+      "barrio": "Berruguete",
+      "distrito": "Tetuán",
+      "superficieHa": 60.71,
+      "densidadHabHa": 447.0,
+      "poblacion": 27136
+    },
+    {
+      "code": "071",
+      "barrio": "Gaztambide",
+      "distrito": "Chamberí",
+      "superficieHa": 50.65,
+      "densidadHabHa": 467.34,
+      "poblacion": 23670
+    },
+    {
+      "code": "072",
+      "barrio": "Arapiles",
+      "distrito": "Chamberí",
+      "superficieHa": 57.82,
+      "densidadHabHa": 430.33,
+      "poblacion": 24883
+    },
+    {
+      "code": "073",
+      "barrio": "Trafalgar",
+      "distrito": "Chamberí",
+      "superficieHa": 61.19,
+      "densidadHabHa": 410.44,
+      "poblacion": 25114
+    },
+    {
+      "code": "074",
+      "barrio": "Almagro",
+      "distrito": "Chamberí",
+      "superficieHa": 93.79,
+      "densidadHabHa": 206.88,
+      "poblacion": 19404
+    },
+    {
+      "code": "075",
+      "barrio": "Ríos Rosas",
+      "distrito": "Chamberí",
+      "superficieHa": 97.54,
+      "densidadHabHa": 287.72,
+      "poblacion": 28065
+    },
+    {
+      "code": "076",
+      "barrio": "Vallehermoso",
+      "distrito": "Chamberí",
+      "superficieHa": 106.92,
+      "densidadHabHa": 190.66,
+      "poblacion": 20386
+    },
+    {
+      "code": "081",
+      "barrio": "El Pardo",
+      "distrito": "Fuencarral-El Pardo",
+      "superficieHa": 18758.32,
+      "densidadHabHa": 0.19,
+      "poblacion": 3472
+    },
+    {
+      "code": "082",
+      "barrio": "Fuentelarreina",
+      "distrito": "Fuencarral-El Pardo",
+      "superficieHa": 138.26,
+      "densidadHabHa": 25.8,
+      "poblacion": 3567
+    },
+    {
+      "code": "083",
+      "barrio": "Peñagrande",
+      "distrito": "Fuencarral-El Pardo",
+      "superficieHa": 288.73,
+      "densidadHabHa": 156.27,
+      "poblacion": 45120
+    },
+    {
+      "code": "084",
+      "barrio": "Pilar",
+      "distrito": "Fuencarral-El Pardo",
+      "superficieHa": 136.32,
+      "densidadHabHa": 342.27,
+      "poblacion": 46659
+    },
+    {
+      "code": "085",
+      "barrio": "La Paz",
+      "distrito": "Fuencarral-El Pardo",
+      "superficieHa": 215.48,
+      "densidadHabHa": 147.74,
+      "poblacion": 31835
+    },
+    {
+      "code": "086",
+      "barrio": "Valverde",
+      "distrito": "Fuencarral-El Pardo",
+      "superficieHa": 898.12,
+      "densidadHabHa": 75.42,
+      "poblacion": 67737
+    },
+    {
+      "code": "087",
+      "barrio": "Mirasierra",
+      "distrito": "Fuencarral-El Pardo",
+      "superficieHa": 699.28,
+      "densidadHabHa": 54.22,
+      "poblacion": 37918
+    },
+    {
+      "code": "088",
+      "barrio": "El Goloso",
+      "distrito": "Fuencarral-El Pardo",
+      "superficieHa": 2649.31,
+      "densidadHabHa": 7.45,
+      "poblacion": 19729
+    },
+    {
+      "code": "091",
+      "barrio": "Casa de Campo",
+      "distrito": "Moncloa-Aravaca",
+      "superficieHa": 1747.6,
+      "densidadHabHa": 7.74,
+      "poblacion": 13530
+    },
+    {
+      "code": "092",
+      "barrio": "Argüelles",
+      "distrito": "Moncloa-Aravaca",
+      "superficieHa": 75.75,
+      "densidadHabHa": 327.41,
+      "poblacion": 24802
+    },
+    {
+      "code": "093",
+      "barrio": "Ciudad Universitaria",
+      "distrito": "Moncloa-Aravaca",
+      "superficieHa": 1425.09,
+      "densidadHabHa": 11.98,
+      "poblacion": 17077
+    },
+    {
+      "code": "094",
+      "barrio": "Valdezarza",
+      "distrito": "Moncloa-Aravaca",
+      "superficieHa": 139.75,
+      "densidadHabHa": 227.55,
+      "poblacion": 31799
+    },
+    {
+      "code": "095",
+      "barrio": "Valdemarín",
+      "distrito": "Moncloa-Aravaca",
+      "superficieHa": 330.25,
+      "densidadHabHa": 23.33,
+      "poblacion": 7705
+    },
+    {
+      "code": "096",
+      "barrio": "El Plantío",
+      "distrito": "Moncloa-Aravaca",
+      "superficieHa": 355.39,
+      "densidadHabHa": 8.89,
+      "poblacion": 3161
+    },
+    {
+      "code": "097",
+      "barrio": "Aravaca",
+      "distrito": "Moncloa-Aravaca",
+      "superficieHa": 584.88,
+      "densidadHabHa": 48.19,
+      "poblacion": 28183
+    },
+    {
+      "code": "101",
+      "barrio": "Los Cármenes",
+      "distrito": "Latina",
+      "superficieHa": 129.2,
+      "densidadHabHa": 143.67,
+      "poblacion": 18562
+    },
+    {
+      "code": "102",
+      "barrio": "Puerta del Ángel",
+      "distrito": "Latina",
+      "superficieHa": 137.53,
+      "densidadHabHa": 333.41,
+      "poblacion": 45854
+    },
+    {
+      "code": "103",
+      "barrio": "Lucero",
+      "distrito": "Latina",
+      "superficieHa": 167.9,
+      "densidadHabHa": 227.22,
+      "poblacion": 38150
+    },
+    {
+      "code": "104",
+      "barrio": "Aluche",
+      "distrito": "Latina",
+      "superficieHa": 284.98,
+      "densidadHabHa": 240.54,
+      "poblacion": 68548
+    },
+    {
+      "code": "105",
+      "barrio": "Campamento",
+      "distrito": "Latina",
+      "superficieHa": 917.48,
+      "densidadHabHa": 22.61,
+      "poblacion": 20742
+    },
+    {
+      "code": "106",
+      "barrio": "Cuatro Vientos",
+      "distrito": "Latina",
+      "superficieHa": 542.99,
+      "densidadHabHa": 13.0,
+      "poblacion": 7057
+    },
+    {
+      "code": "107",
+      "barrio": "Águilas",
+      "distrito": "Latina",
+      "superficieHa": 360.96,
+      "densidadHabHa": 144.69,
+      "poblacion": 52226
+    },
+    {
+      "code": "111",
+      "barrio": "Comillas",
+      "distrito": "Carabanchel",
+      "superficieHa": 66.61,
+      "densidadHabHa": 360.44,
+      "poblacion": 24009
+    },
+    {
+      "code": "112",
+      "barrio": "Opañel",
+      "distrito": "Carabanchel",
+      "superficieHa": 110.73,
+      "densidadHabHa": 323.7,
+      "poblacion": 35843
+    },
+    {
+      "code": "113",
+      "barrio": "San Isidro",
+      "distrito": "Carabanchel",
+      "superficieHa": 189.93,
+      "densidadHabHa": 224.06,
+      "poblacion": 42556
+    },
+    {
+      "code": "114",
+      "barrio": "Vista Alegre",
+      "distrito": "Carabanchel",
+      "superficieHa": 158.92,
+      "densidadHabHa": 317.54,
+      "poblacion": 50465
+    },
+    {
+      "code": "115",
+      "barrio": "Puerta Bonita",
+      "distrito": "Carabanchel",
+      "superficieHa": 160.86,
+      "densidadHabHa": 244.12,
+      "poblacion": 39269
+    },
+    {
+      "code": "116",
+      "barrio": "Buenavista",
+      "distrito": "Carabanchel",
+      "superficieHa": 561.32,
+      "densidadHabHa": 93.57,
+      "poblacion": 52523
+    },
+    {
+      "code": "117",
+      "barrio": "Abrantes",
+      "distrito": "Carabanchel",
+      "superficieHa": 156.46,
+      "densidadHabHa": 213.64,
+      "poblacion": 33425
+    },
+    {
+      "code": "121",
+      "barrio": "Orcasitas",
+      "distrito": "Usera",
+      "superficieHa": 135.64,
+      "densidadHabHa": 174.56,
+      "poblacion": 23677
+    },
+    {
+      "code": "122",
+      "barrio": "Orcasur",
+      "distrito": "Usera",
+      "superficieHa": 138.74,
+      "densidadHabHa": 108.38,
+      "poblacion": 15036
+    },
+    {
+      "code": "123",
+      "barrio": "San Fermín",
+      "distrito": "Usera",
+      "superficieHa": 147.54,
+      "densidadHabHa": 167.45,
+      "poblacion": 24705
+    },
+    {
+      "code": "124",
+      "barrio": "Almendrales",
+      "distrito": "Usera",
+      "superficieHa": 78.01,
+      "densidadHabHa": 317.9,
+      "poblacion": 24801
+    },
+    {
+      "code": "125",
+      "barrio": "Moscardó",
+      "distrito": "Usera",
+      "superficieHa": 90.88,
+      "densidadHabHa": 317.72,
+      "poblacion": 28874
+    },
+    {
+      "code": "126",
+      "barrio": "Zofío",
+      "distrito": "Usera",
+      "superficieHa": 77.4,
+      "densidadHabHa": 200.61,
+      "poblacion": 15528
+    },
+    {
+      "code": "127",
+      "barrio": "Pradolongo",
+      "distrito": "Usera",
+      "superficieHa": 109.57,
+      "densidadHabHa": 185.42,
+      "poblacion": 20316
+    },
+    {
+      "code": "131",
+      "barrio": "Entrevías",
+      "distrito": "Puente de Vallecas",
+      "superficieHa": 597.19,
+      "densidadHabHa": 63.25,
+      "poblacion": 37773
+    },
+    {
+      "code": "132",
+      "barrio": "San Diego",
+      "distrito": "Puente de Vallecas",
+      "superficieHa": 106.99,
+      "densidadHabHa": 479.97,
+      "poblacion": 51351
+    },
+    {
+      "code": "133",
+      "barrio": "Palomeras Bajas",
+      "distrito": "Puente de Vallecas",
+      "superficieHa": 172.39,
+      "densidadHabHa": 243.94,
+      "poblacion": 42052
+    },
+    {
+      "code": "134",
+      "barrio": "Palomeras Sureste",
+      "distrito": "Puente de Vallecas",
+      "superficieHa": 310.86,
+      "densidadHabHa": 144.19,
+      "poblacion": 44822
+    },
+    {
+      "code": "135",
+      "barrio": "Portazgo",
+      "distrito": "Puente de Vallecas",
+      "superficieHa": 124.53,
+      "densidadHabHa": 243.71,
+      "poblacion": 30348
+    },
+    {
+      "code": "136",
+      "barrio": "Numancia",
+      "distrito": "Puente de Vallecas",
+      "superficieHa": 184.91,
+      "densidadHabHa": 278.94,
+      "poblacion": 51578
+    },
+    {
+      "code": "141",
+      "barrio": "Pavones",
+      "distrito": "Moratalaz",
+      "superficieHa": 100.97,
+      "densidadHabHa": 90.24,
+      "poblacion": 9111
+    },
+    {
+      "code": "142",
+      "barrio": "Horcajo",
+      "distrito": "Moratalaz",
+      "superficieHa": 74.59,
+      "densidadHabHa": 85.5,
+      "poblacion": 6378
+    },
+    {
+      "code": "143",
+      "barrio": "Marroquina",
+      "distrito": "Moratalaz",
+      "superficieHa": 179.01,
+      "densidadHabHa": 146.02,
+      "poblacion": 26140
+    },
+    {
+      "code": "144",
+      "barrio": "Media Legua",
+      "distrito": "Moratalaz",
+      "superficieHa": 99.9,
+      "densidadHabHa": 176.34,
+      "poblacion": 17616
+    },
+    {
+      "code": "145",
+      "barrio": "Fontarrón",
+      "distrito": "Moratalaz",
+      "superficieHa": 96.46,
+      "densidadHabHa": 186.17,
+      "poblacion": 17957
+    },
+    {
+      "code": "146",
+      "barrio": "Vinateros",
+      "distrito": "Moratalaz",
+      "superficieHa": 59.39,
+      "densidadHabHa": 289.65,
+      "poblacion": 17203
+    },
+    {
+      "code": "151",
+      "barrio": "Ventas",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 319.8,
+      "densidadHabHa": 163.84,
+      "poblacion": 52396
+    },
+    {
+      "code": "152",
+      "barrio": "Pueblo Nuevo",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 231.92,
+      "densidadHabHa": 282.62,
+      "poblacion": 65545
+    },
+    {
+      "code": "153",
+      "barrio": "Quintana",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 72.31,
+      "densidadHabHa": 369.95,
+      "poblacion": 26752
+    },
+    {
+      "code": "154",
+      "barrio": "La Concepción",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 88.59,
+      "densidadHabHa": 252.7,
+      "poblacion": 22387
+    },
+    {
+      "code": "155",
+      "barrio": "San Pascual",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 105.27,
+      "densidadHabHa": 181.82,
+      "poblacion": 19141
+    },
+    {
+      "code": "156",
+      "barrio": "San Juan Bautista",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 101.08,
+      "densidadHabHa": 130.93,
+      "poblacion": 13235
+    },
+    {
+      "code": "157",
+      "barrio": "Colina",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 55.97,
+      "densidadHabHa": 121.71,
+      "poblacion": 6812
+    },
+    {
+      "code": "158",
+      "barrio": "Atalaya",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 24.89,
+      "densidadHabHa": 67.9,
+      "poblacion": 1690
+    },
+    {
+      "code": "159",
+      "barrio": "Costillares",
+      "distrito": "Ciudad Lineal",
+      "superficieHa": 142.72,
+      "densidadHabHa": 156.78,
+      "poblacion": 22376
+    },
+    {
+      "code": "161",
+      "barrio": "Palomas",
+      "distrito": "Hortaleza",
+      "superficieHa": 106.88,
+      "densidadHabHa": 66.6,
+      "poblacion": 7118
+    },
+    {
+      "code": "162",
+      "barrio": "Piovera",
+      "distrito": "Hortaleza",
+      "superficieHa": 313.97,
+      "densidadHabHa": 48.95,
+      "poblacion": 15368
+    },
+    {
+      "code": "163",
+      "barrio": "Canillas",
+      "distrito": "Hortaleza",
+      "superficieHa": 252.25,
+      "densidadHabHa": 160.53,
+      "poblacion": 40494
+    },
+    {
+      "code": "164",
+      "barrio": "Pinar del Rey",
+      "distrito": "Hortaleza",
+      "superficieHa": 266.48,
+      "densidadHabHa": 200.61,
+      "poblacion": 53458
+    },
+    {
+      "code": "165",
+      "barrio": "Apóstol Santiago",
+      "distrito": "Hortaleza",
+      "superficieHa": 120.51,
+      "densidadHabHa": 130.3,
+      "poblacion": 15702
+    },
+    {
+      "code": "166",
+      "barrio": "Valdefuentes",
+      "distrito": "Hortaleza",
+      "superficieHa": 1702.32,
+      "densidadHabHa": 45.25,
+      "poblacion": 77038
+    },
+    {
+      "code": "171",
+      "barrio": "Villaverde Alto, Casco Histórico de Villaverde",
+      "distrito": "Villaverde",
+      "superficieHa": 925.4,
+      "densidadHabHa": 56.1,
+      "poblacion": 51913
+    },
+    {
+      "code": "172",
+      "barrio": "San Cristóbal",
+      "distrito": "Villaverde",
+      "superficieHa": 108.25,
+      "densidadHabHa": 182.28,
+      "poblacion": 19732
+    },
+    {
+      "code": "173",
+      "barrio": "Butarque",
+      "distrito": "Villaverde",
+      "superficieHa": 638.18,
+      "densidadHabHa": 36.34,
+      "poblacion": 23193
+    },
+    {
+      "code": "174",
+      "barrio": "Los Rosales",
+      "distrito": "Villaverde",
+      "superficieHa": 154.07,
+      "densidadHabHa": 256.07,
+      "poblacion": 39454
+    },
+    {
+      "code": "175",
+      "barrio": "Ángeles",
+      "distrito": "Villaverde",
+      "superficieHa": 193.53,
+      "densidadHabHa": 197.69,
+      "poblacion": 38259
+    },
+    {
+      "code": "181",
+      "barrio": "Casco Histórico de Vallecas",
+      "distrito": "Villa de Vallecas",
+      "superficieHa": 4303.24,
+      "densidadHabHa": 10.11,
+      "poblacion": 43518
+    },
+    {
+      "code": "182",
+      "barrio": "Santa Eugenia",
+      "distrito": "Villa de Vallecas",
+      "superficieHa": 208.02,
+      "densidadHabHa": 114.98,
+      "poblacion": 23919
+    },
+    {
+      "code": "183",
+      "barrio": "Ensanche de Vallecas",
+      "distrito": "Villa de Vallecas",
+      "superficieHa": 634.11,
+      "densidadHabHa": 94.82,
+      "poblacion": 60129
+    },
+    {
+      "code": "191",
+      "barrio": "Casco Histórico de Vicálvaro",
+      "distrito": "Vicálvaro",
+      "superficieHa": 2149.68,
+      "densidadHabHa": 17.57,
+      "poblacion": 37777
+    },
+    {
+      "code": "192",
+      "barrio": "Valdebernardo",
+      "distrito": "Vicálvaro",
+      "superficieHa": 255.51,
+      "densidadHabHa": 67.55,
+      "poblacion": 17260
+    },
+    {
+      "code": "193",
+      "barrio": "Valderrivas",
+      "distrito": "Vicálvaro",
+      "superficieHa": 64.31,
+      "densidadHabHa": 277.99,
+      "poblacion": 17878
+    },
+    {
+      "code": "194",
+      "barrio": "El Cañaveral",
+      "distrito": "Vicálvaro",
+      "superficieHa": 1056.77,
+      "densidadHabHa": 23.6,
+      "poblacion": 24945
+    },
+    {
+      "code": "201",
+      "barrio": "Simancas",
+      "distrito": "San Blas-Canillejas",
+      "superficieHa": 227.63,
+      "densidadHabHa": 134.49,
+      "poblacion": 30614
+    },
+    {
+      "code": "202",
+      "barrio": "Hellín",
+      "distrito": "San Blas-Canillejas",
+      "superficieHa": 55.06,
+      "densidadHabHa": 186.58,
+      "poblacion": 10272
+    },
+    {
+      "code": "203",
+      "barrio": "Amposta",
+      "distrito": "San Blas-Canillejas",
+      "superficieHa": 37.03,
+      "densidadHabHa": 279.51,
+      "poblacion": 10349
+    },
+    {
+      "code": "204",
+      "barrio": "Arcos",
+      "distrito": "San Blas-Canillejas",
+      "superficieHa": 130.52,
+      "densidadHabHa": 201.57,
+      "poblacion": 26309
+    },
+    {
+      "code": "205",
+      "barrio": "Rosas",
+      "distrito": "San Blas-Canillejas",
+      "superficieHa": 929.37,
+      "densidadHabHa": 32.71,
+      "poblacion": 30400
+    },
+    {
+      "code": "206",
+      "barrio": "Rejas",
+      "distrito": "San Blas-Canillejas",
+      "superficieHa": 501.6,
+      "densidadHabHa": 37.05,
+      "poblacion": 18584
+    },
+    {
+      "code": "207",
+      "barrio": "Canillejas",
+      "distrito": "San Blas-Canillejas",
+      "superficieHa": 159.77,
+      "densidadHabHa": 190.39,
+      "poblacion": 30418
+    },
+    {
+      "code": "208",
+      "barrio": "El Salvador",
+      "distrito": "San Blas-Canillejas",
+      "superficieHa": 188.01,
+      "densidadHabHa": 61.59,
+      "poblacion": 11580
+    },
+    {
+      "code": "211",
+      "barrio": "Alameda de Osuna",
+      "distrito": "Barajas",
+      "superficieHa": 203.13,
+      "densidadHabHa": 98.57,
+      "poblacion": 20023
+    },
+    {
+      "code": "212",
+      "barrio": "Aeropuerto",
+      "distrito": "Barajas",
+      "superficieHa": 2966.47,
+      "densidadHabHa": 0.65,
+      "poblacion": 1928
+    },
+    {
+      "code": "213",
+      "barrio": "Casco Histórico de Barajas",
+      "distrito": "Barajas",
+      "superficieHa": 54.94,
+      "densidadHabHa": 156.54,
+      "poblacion": 8600
+    },
+    {
+      "code": "214",
+      "barrio": "Timón",
+      "distrito": "Barajas",
+      "superficieHa": 479.84,
+      "densidadHabHa": 25.84,
+      "poblacion": 12401
+    },
+    {
+      "code": "215",
+      "barrio": "Corralejos",
+      "distrito": "Barajas",
+      "superficieHa": 467.25,
+      "densidadHabHa": 16.4,
+      "poblacion": 7661
+    }
+  ]
+}

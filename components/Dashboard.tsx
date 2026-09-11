@@ -18,10 +18,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { readLastSearch, saveLastSearch, LAST_SEARCH_EVENT } from "@/lib/last-search";
 import {
   BANDA_COLOR,
-  MODE_LABEL,
-  bandaColor,
-  formatDiff,
-  priceLabel,
   priceComparison,
 } from "@/lib/dashboard-format";
 import { recommendationExplanation } from "@/lib/recommend-explanation";
@@ -34,7 +30,6 @@ import type {
   PersonalScoring,
   PropertyEnrichment,
   PropertyRecommendation,
-  PropertyValuation,
   UserProfile,
 } from "@/types";
 import { SiteNav } from "./SiteNav";
@@ -451,6 +446,7 @@ export function Dashboard() {
         {source === "favoritos" && <p className="mt-3 text-sm leading-relaxed text-stone-600">Los guardados son copias del anuncio. Si desaparece de Idealista, el favorito permanece hasta que lo quites; no verificamos automáticamente su disponibilidad. Abre el anuncio para comprobarla.</p>}
         {lastSavedAt && <p className="mt-3 text-xs text-stone-600">Última búsqueda guardada en este navegador: {new Date(lastSavedAt).toLocaleString("es-ES")}. Es una instantánea; confirma la disponibilidad en el anuncio.</p>}
         {storageError && <p role="alert" className="mt-2 text-sm text-rose-700">La búsqueda se ha mostrado, pero no ha cabido en el almacenamiento del navegador.</p>}
+        {source === "favoritos" && items.length > 0 && <p className="mt-3 text-xs text-stone-600">Son copias guardadas: aunque Idealista retire un anuncio, seguirá aquí hasta que lo quites. La disponibilidad no se comprueba automáticamente.</p>}
         {items.length > 0 && <p className="mt-3 text-xs text-stone-600">Orden: HabitIA Score de mayor a menor. La cobertura indica qué parte de tus pesos se puede evaluar. Opportunity y Zone están pendientes de datos verificables.</p>}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -550,7 +546,6 @@ export function Dashboard() {
                   key={item.property.propertyCode}
                   item={item}
                   selected={item.property.propertyCode === selectedCode}
-                  hasWork={!!work}
                   isFavorite={favs.isFavorite(item.property.propertyCode)}
                   onSelect={() =>
                     setSelectedCode(
@@ -841,7 +836,6 @@ function eurM2Label(v: number, op: "alquiler" | "venta"): string {
 function PropertyRow({
   item,
   selected,
-  hasWork,
   isFavorite,
   onSelect,
   onToggleFavorite,
@@ -849,7 +843,6 @@ function PropertyRow({
 }: {
   item: ViewItem;
   selected: boolean;
-  hasWork: boolean;
   isFavorite: boolean;
   onSelect: () => void;
   onToggleFavorite: () => void;
@@ -857,8 +850,6 @@ function PropertyRow({
 }) {
   const { property, enrichment, rationale, rank } = item;
   const val = enrichment?.valuation ?? null;
-  const commute = enrichment?.commute ?? null;
-  const leg = commute?.modos.find((m) => m.modo === commute.recomendado) ?? null;
   const noCoords = property.latitude == null || property.longitude == null;
   const op = property.operation === "rent" ? "alquiler" : "venta";
 
@@ -949,25 +940,6 @@ function PropertyRow({
       {rationale && <p className="mt-3 text-sm leading-relaxed text-ink-700">{rationale}</p>}
 
       <ScoreBreakdown score={item.score} scoring={item.scoring} />
-      <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-paper-200/75 p-3">
-        <Signal label="Precio vs. estimación">
-          <PriceBadge val={val} />
-        </Signal>
-        <Signal label="Trayecto">
-          {!hasWork ? (
-            <span className="text-stone">Sin configurar</span>
-          ) : leg?.minutos != null ? (
-            <span className="text-ink">
-              {leg.minutos} min{" "}
-              <span className="text-stone">
-                {commute?.recomendado ? MODE_LABEL[commute.recomendado] : ""}
-              </span>
-            </span>
-          ) : (
-            <span className="text-stone">Sin dato</span>
-          )}
-        </Signal>
-      </div>
 
       {selected && (val || enrichment?.neighborhood?.resumen) && (
         <div className="mt-3 space-y-1.5 border-t border-hairline pt-3 text-sm leading-relaxed text-ink-700">
@@ -1002,25 +974,6 @@ function PropertyRow({
         </a>
       </div>
     </article>
-  );
-}
-
-function Signal({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <p className="text-[11px] font-medium text-stone">{label}</p>
-      <p className="mt-1 text-xs font-medium sm:text-sm">{children}</p>
-    </div>
-  );
-}
-
-function PriceBadge({ val }: { val: PropertyValuation | null }) {
-  if (!priceLabel(val)) return <span className="text-stone">Sin valoración</span>;
-  return (
-    <span className="inline-flex items-center gap-1.5" style={{ color: bandaColor(val?.banda) }}>
-      <span className="h-2 w-2 rounded-full" style={{ background: bandaColor(val?.banda) }} />
-      <span className="font-medium">{priceLabel(val)} · {formatDiff(val?.diferenciaPorcentual)}</span>
-    </span>
   );
 }
 

@@ -48,7 +48,7 @@ export interface IpvQuarterPoint {
 
 export interface IneIpvQuarterly {
   fuente: string;
-  schemaVersion?: 2;
+  schemaVersion?: 2 | 3;
   /** Índice medio de los cuatro trimestres de 2018. */
   base2018?: number;
   madridSegundaMano?: { base2018: number; serie: Array<{ periodo: string; indice: number }> };

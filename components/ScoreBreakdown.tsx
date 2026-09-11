@@ -6,9 +6,10 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
     <details className="mt-3 rounded-xl border border-hairline bg-paper-50 p-3 text-sm">
       <summary className="min-h-11 cursor-pointer leading-relaxed text-ink">
         <strong>HabitIA Score: {scoring.coveragePercent ? `${score ?? 0}/100` : "sin datos"}</strong>
-        <span className="ml-2 text-xs font-normal text-stone-600">Cobertura de pesos {scoring.coveragePercent}% · ver desglose</span>
+        <span className="ml-2 text-xs font-normal text-stone-600">Ver los cuatro componentes</span>
       </summary>
       <p className="mt-2 text-xs leading-relaxed text-stone-600">{scoring.explanation}</p>
+      <p className="mt-2 text-xs text-stone-600">Podemos evaluar el {scoring.coveragePercent}% de tus prioridades ponderadas. Los criterios sin datos no suman puntos y sus pesos no se reparten entre los demás.</p>
       <dl className="mt-3 space-y-3">
         {scoring.components.map((c) => (
           <div key={c.key}>

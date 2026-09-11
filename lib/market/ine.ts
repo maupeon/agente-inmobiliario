@@ -13,20 +13,20 @@ import type { IneIpvQuarterly, InePriceByProvince, IpvQuarterPoint } from "./typ
 const INE_BASE = "https://servicios.ine.es/wstempus/js/ES";
 
 /**
- * Tabla 25171: IPV trimestral, variación anual, vivienda libre, total nacional.
+ * Tabla 79563: IPV trimestral, variación anual, vivienda libre, total nacional.
  * Devolvemos el histórico desde 2018 y niveles de la misma serie para indexación.
  */
 export async function fetchIneIpvQuarterly(): Promise<IneIpvQuarterly> {
   try {
-    const res = await fetch(`${INE_BASE}/DATOS_TABLA/25171?nult=${Math.max(40, (new Date().getFullYear() - 2018 + 1) * 4)}&tip=AM`, {
+    const res = await fetch(`${INE_BASE}/DATOS_TABLA/79563?nult=${Math.max(40, (new Date().getFullYear() - 2018 + 1) * 4)}&tip=AM`, {
       headers: { accept: "application/json" },
       cache: "no-store", signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) throw new Error(`INE 25171 ${res.status}`);
+    if (!res.ok) throw new Error(`INE 79563 ${res.status}`);
     const json = (await res.json()) as IneSeriesPayload[];
 
     const total = json.find((s) => /^Nacional\.\s*General\.\s*Variación anual\./i.test(s.Nombre?.trim() ?? ""));
-    if (!total?.Data?.length) throw new Error("INE 25171: serie no encontrada");
+    if (!total?.Data?.length) throw new Error("INE 79563: serie no encontrada");
 
     const indices = json.filter((s) => /^Nacional\.\s*General\.\s*Índice\./i.test(s.Nombre?.trim() ?? ""));
     if (indices.length !== 1) throw new Error("Índice nacional ausente o ambiguo");
@@ -60,9 +60,9 @@ export async function fetchIneIpvQuarterly(): Promise<IneIpvQuarterly> {
     const madridBase = madridSerie.filter((d) => d.periodo.startsWith("2018T"));
     return {
       madridSegundaMano: { base2018: madridBase.reduce((sum, d) => sum + d.indice, 0) / 4, serie: madridSerie },
-      schemaVersion: 2,
+      schemaVersion: 3,
       base2018: base.reduce((sum, d) => sum + d.indice!, 0) / 4,
-      fuente: "INE — Índice de Precios de la Vivienda (tabla 25171)",
+      fuente: "INE — IPV base 2025 (tabla 79563)",
       serie,
     };
   } catch (err) {

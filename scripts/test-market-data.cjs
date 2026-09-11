@@ -35,10 +35,11 @@ async function run() {
   ];
   const { fetchIneIpvQuarterly } = load('lib/market/ine.ts', {
     require: (id) => id === './fixtures' ? { FALLBACK_IPV: fallback } : {},
-    fetch: async () => ({ ok: true, json: async () => payload }),
+    fetch: async (url) => { assert.match(url, /DATOS_TABLA\/79563\?/); return { ok: true, json: async () => payload }; },
     console: { warn() {} },
   });
   const ipv = await fetchIneIpvQuarterly();
+  assert.equal(ipv.schemaVersion,3);
   assert.equal(ipv.serie.length,34);
   assert.equal(ipv.serie[0].periodo,'2018T1');
   assert.equal(ipv.serie.at(-1).periodo,'2026T2');

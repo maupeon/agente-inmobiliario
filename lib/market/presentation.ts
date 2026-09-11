@@ -12,8 +12,8 @@ export const MARKET_SOURCES = {
     download: "https://apps.fomento.gob.es/boletinonline2/sedal/35101000.XLS",
   },
   ipv: {
-    label: "INE · Índice de Precios de Vivienda (tabla 25171)",
-    href: "https://www.ine.es/jaxiT3/Tabla.htm?t=25171",
+    label: "INE · Índice de Precios de Vivienda (tabla 79563)",
+    href: "https://www.ine.es/jaxiT3/Tabla.htm?t=79563",
   },
   rates: {
     label: "Banco de España · Estadísticas de tipos de interés",

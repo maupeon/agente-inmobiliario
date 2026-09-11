@@ -1,3 +1,4 @@
+import madrid from "@/lib/neighborhood/madrid-official.json";
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/SiteNav";
 import { getMarketData } from "@/lib/market/cache";
@@ -69,7 +70,7 @@ export default async function DatosPage() {
 
         {/* IPV */}
         <DataCard
-          title="Evolución de precios · IPV desde 2018"
+          title="Evolución de precios · IPV 2018–2026 · base 2025"
           estado={ipv.fromFallback ? "orientativo" : "real"}
           fuente={ipv.data.fuente}
           sourceLink={MARKET_SOURCES.ipv}
@@ -121,11 +122,13 @@ export default async function DatosPage() {
           </div>
         </DataCard>
 
-        <section className="mt-8 rounded-xl border border-hairline bg-paper-50 p-5">
-          <h2 className="font-display text-xl">Indicadores de barrio</h2>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">Los índices manuales de seguridad y calidad de vida se han retirado porque no disponemos de una fuente verificable a esa escala. No hay una puntuación de «barrio seguro» ni una capa de seguridad.</p>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">El componente <Strong>Zone</Strong> del HabitIA Score representa la calidad de vida en el barrio. Sigue visible en el desglose como «sin datos» hasta disponer de indicadores verificables y una metodología de combinación. <Strong>Opportunity</Strong> compara revalorización de zona y ciudad y también está pendiente de series comparables. Ninguno se sustituye por cercanía, medias provinciales o índices manuales.</p>
-        </section>
+        <DataCard title="Barrios de Madrid · superficie, población y densidad" estado="real" fuente={madrid.fuente} sourceLink={{ label: "Ayuntamiento de Madrid · tabla original (XLSX)", href: madrid.url }} meta="131 barrios · 1 enero 2026 · consulta 11 septiembre 2026">
+          <Collapsible summary="Ver los 131 barrios · datos territoriales, sin puntuación de calidad de vida">
+            <Table head={["Barrio", "Distrito", "Superficie (ha)", "Población", "Densidad (hab./ha)"]}>
+              {madrid.barrios.map((b) => <Row key={b.code} cells={[b.barrio, b.distrito, formatNumber(b.superficieHa), formatNumber(b.poblacion), formatNumber(b.densidadHabHa)]} />)}
+            </Table>
+          </Collapsible>
+        </DataCard>
 
         {/* Otras fuentes no tabulares */}
         <section className="mt-12 rounded-xl border border-hairline bg-paper-50 p-6">
