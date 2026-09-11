@@ -147,6 +147,7 @@ export default async function DatosPage() {
           title="Alquiler · qué datos usamos hoy"
           estado="orientativo"
           fuente="Renta del anuncio; referencia independiente pendiente."
+          officialPage="https://serpavi.mivau.gob.es/"
           sourceLink={MARKET_SOURCES.rent}
           meta="No aporta puntos al Score"
         >
@@ -160,7 +161,7 @@ export default async function DatosPage() {
           <h2 id="neighborhood-data-title" className="font-display text-2xl text-ink">El entorno de la vivienda</h2>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">Zonas verdes y seguridad vuelven a tener su espacio con datos municipales. Cada tabla indica si describe un distrito o un barrio. Son referencias de contexto y todavía no se convierten en puntos de Zone.</p>
         </section>
-        <DataCard title="Zonas verdes · superficie por distrito" estado="real" fuente={context.zonasVerdes.fuente} sourceLink={{ label: "Descargar datos originales (CSV)", href: context.zonasVerdes.download }} meta="21 distritos · 2025 · consulta 11 septiembre 2026">
+        <DataCard title="Zonas verdes · superficie por distrito" estado="real" fuente={context.zonasVerdes.fuente} officialPage={context.zonasVerdes.url} sourceLink={{ label: "Descargar datos originales (CSV)", href: context.zonasVerdes.download }} meta="21 distritos · 2025 · consulta 11 septiembre 2026">
           <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.zonasVerdes.nota} Es superficie total, no proximidad a tu vivienda ni un índice de calidad de vida.</p>
           <Collapsible summary="Ver zonas verdes de los 21 distritos">
             <Table head={["Distrito", "Zonas verdes (m²)"]}>
@@ -168,7 +169,7 @@ export default async function DatosPage() {
             </Table>
           </Collapsible>
         </DataCard>
-        <DataCard title="Seguridad · actuaciones de Policía Municipal" estado="real" fuente={context.seguridad.fuente} sourceLink={{ label: "Descargar publicación original (XLSX)", href: context.seguridad.download }} meta="21 distritos · mayo 2026 · consulta 11 septiembre 2026">
+        <DataCard title="Seguridad · actuaciones de Policía Municipal" estado="real" fuente={context.seguridad.fuente} officialPage={context.seguridad.url} sourceLink={{ label: "Descargar publicación original (XLSX)", href: context.seguridad.download }} meta="21 distritos · mayo 2026 · consulta 11 septiembre 2026">
           <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.seguridad.nota} No se trasladan estas cifras a cada barrio ni se utilizan para ordenar viviendas.</p>
           <Collapsible summary="Ver actuaciones por distrito y categoría">
             <Table head={["Distrito", "Personas", "Patrimonio", "Tenencia de armas", "Tenencia de drogas", "Consumo de drogas"]}>
@@ -181,7 +182,7 @@ export default async function DatosPage() {
         </DataCard>
         <UrbanSources />
 
-        <DataCard title="Barrios de Madrid · superficie, población y densidad" estado="real" fuente={madrid.fuente} sourceLink={{ label: "Ayuntamiento de Madrid · tabla original (XLSX)", href: madrid.url }} meta="131 barrios · 1 enero 2026 · consulta 11 septiembre 2026">
+        <DataCard title="Barrios de Madrid · superficie, población y densidad" estado="real" fuente={madrid.fuente} officialPage={madrid.pageUrl} sourceLink={{ label: "Ayuntamiento de Madrid · tabla original (XLSX)", href: madrid.url }} meta="131 barrios · 1 enero 2026 · consulta 11 septiembre 2026">
           <p className="mb-4 text-sm leading-relaxed text-stone-600">Población y superficie describen el territorio. Complementan las referencias de zonas verdes y seguridad; no las sustituyen ni indican si un barrio es mejor para vivir.</p>
           <Collapsible summary="Ver los 131 barrios · datos territoriales, sin puntuación de calidad de vida">
             <Table head={["Barrio", "Distrito", "Superficie (ha)", "Población", "Densidad (hab./ha)"]}>
@@ -214,6 +215,7 @@ function DataCard({
   estado,
   fuente,
   sourceLink,
+  officialPage,
   meta,
   children,
 }: {
@@ -221,6 +223,7 @@ function DataCard({
   estado: Estado;
   fuente: string;
   sourceLink: { label: string; href: string };
+  officialPage?: string;
   meta: string;
   children: React.ReactNode;
 }) {
@@ -233,7 +236,10 @@ function DataCard({
             <Pill estado={estado} />
           </div>
           <p className="mt-1.5 text-sm text-stone-600">{fuente}</p>
+          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+          {officialPage && <a href={officialPage} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm font-medium text-saffron-700 underline underline-offset-4 hover:text-ink">Página oficial de la fuente ↗</a>}
           <a href={sourceLink.href} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-9 items-center text-sm font-medium text-saffron-700 underline decoration-saffron-300 underline-offset-4 hover:text-ink">{sourceLink.label} ↗</a>
+          </div>
         </div>
         <span className="max-w-full font-mono text-[10px] uppercase tracking-[0.14em] text-stone">
           {meta}
