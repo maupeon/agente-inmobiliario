@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowsOut,
-  Sparkle,
   ShieldCheck,
   Lightbulb,
   Eye,
