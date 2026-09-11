@@ -75,6 +75,8 @@ const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco:
 const STACK = [
   "Next.js 14 (App Router, SSR + SSE)",
   "Claude — chat y explicaciones opcionales",
+  "Python + FastAPI — servicio de valoración",
+  "LightGBM — estimación de precio e intervalos calibrados",
   "MapLibre GL + teselas CARTO (sin clave)",
   "Supabase (Postgres) — caché y persistencia",
   "OpenRouteService — routing",
@@ -228,26 +230,27 @@ export default function ComoFuncionaPage() {
         {/* Arquitectura */}
         <Section eyebrow="La arquitectura" title="Qué habla con qué">
           <div className="rounded-xl border border-hairline bg-paper-50 p-6 font-mono text-[11px] leading-relaxed text-ink-700 sm:p-8">
-            <Box>Navegador · Next.js + React (panel, mapa MapLibre)</Box>
-            <Arrow label="perfil + filtros" />
-            <Box>
-              <span className="text-ink">/api/recommend</span> → lib/recommend
-              (buscar · puntuar · narrar)
-            </Box>
-            <div className="my-2 grid gap-2 sm:grid-cols-3">
-              <SubBox>Idealista<br />(búsqueda)</SubBox>
-              <SubBox>lib/enrich<br />servicio Python de valoración · referencia territorial · trayecto</SubBox>
-              <SubBox>ai-insights<br />Claude (Sonnet)</SubBox>
+            <Box>Panel y chat · Next.js + React · mapa MapLibre</Box>
+            <Arrow label="preferencias, filtros y preguntas" />
+            <Box>Backend Next.js · búsqueda, herramientas del chat y enriquecimiento compartido</Box>
+            <div className="my-3 grid gap-3 sm:grid-cols-3">
+              <SubBox>Idealista<br />Anuncios y características de las viviendas</SubBox>
+              <SubBox>Trayectos<br />OpenRouteService o estimación identificada</SubBox>
+              <SubBox>Referencias de mercado<br />Fuentes con fecha y ámbito</SubBox>
             </div>
-            <Arrow label="lee referencias de mercado" />
-            <Box>
-              Caché de mercado · <span className="text-ink">Supabase</span>{" "}
-              (+ fallback en memoria / fixtures)
-            </Box>
-            <Arrow label="consulta automática de nuevas publicaciones" up />
-            <Box>
-              <span className="text-ink">/api/cron/market</span> → MIVAU · INE · Banco de España
-            </Box>
+            <Arrow label="características de venta → POST /valorar" />
+            <Box><strong>Servicio Python · FastAPI + LightGBM</strong><br />Pipeline de 25 variables y modelo entrenado de oferta de 2018<br />Precio estimado · intervalo calibrado · SHAP opcional · estado de valoración</Box>
+            <Arrow label="respuesta al backend · escenario indexado explícito" />
+            <Box><strong>HabitIA Score · cálculo en código</strong><br />Precio del anuncio frente a estimación → Fair<br />Tiempo al trabajo → Lifestyle<br />Opportunity y Zone pendientes · pesos y cobertura visibles</Box>
+            <Arrow label="resultados y datos disponibles" />
+            <Box>Tarjetas y mapa · Claude interpreta peticiones y puede redactar explicaciones</Box>
+
+          </div>
+
+          <div className="mt-5 space-y-3 text-sm leading-relaxed text-stone-600">
+            <p><Strong>El modelo ya está entrenado.</Strong> La preparación del histórico, el ajuste y la calibración se realizan fuera de la búsqueda. El servicio carga el artefacto evaluado; consultar una vivienda no vuelve a entrenarlo. El escenario indexado no acredita precisión actual en 2026.</p>
+            <p><Strong>Cada pieza tiene una función.</Strong> LightGBM estima el precio; la calibración añade el intervalo; el código calcula Fair y el resto del score disponible. Claude conecta herramientas y explica sus resultados. Si el servicio se abstiene o falla, Fair queda sin dato. El modelo de venta no se aplica al alquiler.</p>
+            <p><Strong>Persistencia y tareas diarias.</Strong> Supabase (PostgreSQL) guarda cachés, favoritos, historial y suscripciones. Las tareas programadas actualizan referencias de mercado y preparan hasta cinco recomendaciones diarias para las suscripciones activas. Los datos urbanos de «Datos y fuentes» son copias fechadas y no alimentan automáticamente Zone.</p>
           </div>
 
           <div className="mt-6">
