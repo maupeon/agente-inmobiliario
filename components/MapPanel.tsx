@@ -4,13 +4,13 @@ import Map, {
   Layer,
   Marker,
   NavigationControl,
-  Popup,
   Source,
   type LayerProps,
   type MapRef,
 } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MODE_LABEL, bandaColor, priceLabel } from "@/lib/dashboard-format";
+import { MODE_LABEL, bandaColor } from "@/lib/dashboard-format";
+import styles from "./MapPanel.module.css";
 import { formatEUR } from "@/lib/utils";
 import type { CommuteResult, Property, PropertyEnrichment } from "@/types";
 
@@ -40,6 +40,7 @@ export default function MapPanel({
   showTrajectory,
 }: MapPanelProps) {
   const mapRef = useRef<MapRef | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
@@ -116,33 +117,40 @@ export default function MapPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [codesKey, work?.lat, work?.lon]);
 
-  // Centra en el piso seleccionado.
+  // El encuadre incluye todo el trayecto y deja espacio para la ficha flotante.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !selected) return;
-    map.flyTo({
-      center: [selected.property.longitude!, selected.property.latitude!],
-      zoom: Math.max(map.getZoom(), 13),
-      duration: reduceMotion ? 0 : 500,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCode]);
+    if (!map || !loaded || !selected) return;
+    map.stop();
+    const coords = showTrajectory && trajectory
+      ? (trajectory.data.geometry as GeoJSON.LineString).coordinates : [];
+    const points = [[selected.property.longitude!, selected.property.latitude!], ...coords];
+    if (showTrajectory && trajectory && work) points.push([work.lon, work.lat]);
+    if (points.length > 1) {
+      map.fitBounds([
+        [Math.min(...points.map(p => p[0])), Math.min(...points.map(p => p[1]))],
+        [Math.max(...points.map(p => p[0])), Math.max(...points.map(p => p[1]))],
+      ], { padding: { top: 85, bottom: 270, left: 60, right: 60 }, maxZoom: 14.5, duration: reduceMotion ? 0 : 650 });
+    } else {
+      map.easeTo({ center: points[0] as [number, number], zoom: Math.max(map.getZoom(), 13),
+        offset: [0, -65], duration: reduceMotion ? 0 : 450 });
+    }
+  }, [selected, showTrajectory, trajectory, work, reduceMotion, loaded]);
 
   return (
+    <div className={styles.root} data-has-selection={!!selected}>
     <Map
       ref={mapRef}
       initialViewState={initialViewState}
       mapStyle={MAP_STYLE}
-      onLoad={fitToData}
+      onLoad={() => { setLoaded(true); fitToData(); }}
       onClick={() => onSelect(null)}
       style={{ width: "100%", height: "100%" }}
     >
       <NavigationControl position="top-right" showCompass={false} />
 
       {showTrajectory && trajectory && (
-        <Source id="trajectory" type="geojson" data={trajectory.data}>
-          <Layer {...(trajectory.aprox ? TRAJECTORY_DASHED : TRAJECTORY_SOLID)} />
-        </Source>
+        <AnimatedRoute key={selectedCode} trajectory={trajectory} reduceMotion={reduceMotion} />
       )}
 
       {plotted.map((it) => {
@@ -156,6 +164,7 @@ export default function MapPanel({
             longitude={it.property.longitude!}
             latitude={it.property.latitude!}
             anchor="center"
+            style={{ zIndex: isSel ? 3 : 1 }}
             onClick={(e) => {
               e.originalEvent.stopPropagation();
               onSelect(isSel ? null : code);
@@ -163,22 +172,14 @@ export default function MapPanel({
           >
             <button
               type="button"
-              aria-label={it.property.title}
+              aria-label={`${it.property.title}, ${formatEUR(it.property.price)}`}
               aria-pressed={isSel}
-              className="grid h-11 w-11 cursor-pointer place-items-center rounded-full"
+              className={styles.pin}
+              data-selected={isSel}
+              style={{ "--pin-color": color } as React.CSSProperties}
             >
-              <span
-                aria-hidden
-                className="block rounded-full border-2 border-paper-50 transition-all"
-                style={{
-                  width: isSel ? 22 : 16,
-                  height: isSel ? 22 : 16,
-                  background: color,
-                  boxShadow: isSel
-                    ? `0 0 0 4px ${color}33, 0 1px 3px rgba(0,0,0,0.35)`
-                    : "0 1px 3px rgba(0,0,0,0.35)",
-                }}
-              />
+              <span className={styles.pinDot} aria-hidden />
+              <span className={styles.pinPrice}>{formatEUR(it.property.price)}{it.property.operation === "rent" ? "/mes" : ""}</span>
             </button>
           </Marker>
         );
@@ -186,42 +187,64 @@ export default function MapPanel({
 
       {work && (
         <Marker longitude={work.lon} latitude={work.lat} anchor="center">
-          <div className="flex min-h-8 items-center gap-1.5 rounded-lg border border-ink bg-ink px-2 text-xs font-medium text-paper shadow">
+          <div className={styles.work} title={work.label}>
             <span className="text-saffron-300">◆</span> Trabajo
           </div>
         </Marker>
       )}
 
-      {selected && (
-        <Popup
-          longitude={selected.property.longitude!}
-          latitude={selected.property.latitude!}
-          anchor="bottom"
-          offset={18}
-          closeButton={false}
-          closeOnClick={false}
-          maxWidth="240px"
-        >
-          <div className="font-sans">
-            <p className="font-display text-sm leading-tight text-ink">
-              {selected.property.title}
-            </p>
-            <p className="mt-0.5 font-mono text-[11px] text-stone">
-              {formatEUR(selected.property.price)}
-              {selected.property.operation === "rent" ? "/mes" : ""}
-            </p>
-            <p className="mt-1 text-[11px] text-stone">{priceLabel(selected.enrichment?.valuation) ? `${priceLabel(selected.enrichment?.valuation)} frente a la estimación` : "Sin valoración individual"}</p>
-            {selected.enrichment?.commute?.recomendado && (
-              <p className="mt-1 text-[11px] text-ink-700">
-                {legMinutes(selected.enrichment.commute)} min{" "}
-                {MODE_LABEL[selected.enrichment.commute.recomendado]} al trabajo
-              </p>
-            )}
-          </div>
-        </Popup>
-      )}
     </Map>
+    <div className={styles.toolbar}>
+      <div className={styles.mapLabel}><span className={styles.eyebrow}>EXPLORA MADRID</span><strong>{plotted.length} viviendas en el mapa</strong></div>
+      <button className={styles.overview} onClick={() => { onSelect(null); fitToData(); }} aria-label="Ver todas las viviendas en el mapa">↗ <span>Ver todo</span></button>
+    </div>
+    {selected ? (
+      <section className={styles.card} aria-label="Vivienda seleccionada" aria-live="polite">
+        <div className={styles.cardHeader}>
+          <div><span className={styles.eyebrow}>VIVIENDA SELECCIONADA</span><h3>{selected.property.title}</h3></div>
+          <button className={styles.close} onClick={() => onSelect(null)} aria-label="Cerrar vivienda seleccionada">×</button>
+        </div>
+        <div className={styles.details}><strong>{formatEUR(selected.property.price)}{selected.property.operation === "rent" ? "/mes" : ""}</strong><span>{selected.property.size} m² · {selected.property.rooms ?? "—"} hab.</span></div>
+        <div className={styles.commute}>
+          <span className={styles.routeIcon} aria-hidden>↗</span>
+          <div><strong>{selected.enrichment?.commute?.recomendado ? `${legMinutes(selected.enrichment.commute)} min ${MODE_LABEL[selected.enrichment.commute.recomendado]} al trabajo` : work ? "Trayecto no disponible" : "Añade tu trabajo para comparar trayectos"}</strong>
+          <p>{showTrajectory && trajectory ? trajectory.aprox ? "Conexión aproximada · no representa las calles del recorrido" : "Recorrido al trabajo" : !showTrajectory && trajectory ? "Trayecto oculto en el mapa" : "Selecciona otra vivienda para comparar"}</p></div>
+        </div>
+      </section>
+    ) : <div className={styles.hint}>Selecciona un precio para explorar la vivienda{work ? " y su trayecto" : ""}</div>}
+    </div>
   );
+}
+
+/** Revelado por distancia: una ruta con pocos vértices tampoco aparece de golpe. */
+function AnimatedRoute({ trajectory, reduceMotion }: { trajectory: { aprox: boolean; data: GeoJSON.Feature }; reduceMotion: boolean }) {
+  const [data, setData] = useState(trajectory.data);
+  useEffect(() => {
+    if (reduceMotion) { setData(trajectory.data); return; }
+    const points = (trajectory.data.geometry as GeoJSON.LineString).coordinates;
+    const lengths = points.slice(1).map((p, i) => Math.hypot((p[0] - points[i][0]) * Math.cos(p[1] * Math.PI / 180), p[1] - points[i][1]));
+    const total = lengths.reduce((a, b) => a + b, 0);
+    let frame = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - start) / 1100);
+      let remaining = total * (1 - Math.pow(1 - progress, 3));
+      const coordinates = [points[0]];
+      for (let i = 0; i < lengths.length; i++) {
+        if (remaining >= lengths[i]) { coordinates.push(points[i + 1]); remaining -= lengths[i]; }
+        else { const t = lengths[i] ? remaining / lengths[i] : 1; coordinates.push(points[i].map((v, j) => v + (points[i + 1][j] - v) * t)); break; }
+      }
+      if (coordinates.length < 2) coordinates.push(points[0]);
+      setData({ ...trajectory.data, geometry: { type: "LineString", coordinates } });
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    };
+    tick(start);
+    return () => cancelAnimationFrame(frame);
+  }, [trajectory, reduceMotion]);
+  return <Source id="trajectory" type="geojson" data={data}>
+    <Layer id="trajectory-halo" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#ffffff", "line-width": 9, "line-opacity": .85 }} />
+    <Layer {...(trajectory.aprox ? TRAJECTORY_DASHED : TRAJECTORY_SOLID)} />
+  </Source>;
 }
 
 function legMinutes(c: CommuteResult): number | string {
