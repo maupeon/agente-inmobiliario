@@ -1,4 +1,5 @@
 import context from "@/lib/neighborhood/madrid-context.json";
+import modelResults from "@/app/presentacion/results-data.json";
 import madrid from "@/lib/neighborhood/madrid-official.json";
 import type { Metadata } from "next";
 import { SiteNav } from "@/components/SiteNav";
@@ -40,12 +41,45 @@ export default async function DatosPage() {
         <header className="mt-10 max-w-[62ch]">
           <h1 className="font-display text-display-md text-ink">De dónde sale cada dato</h1>
           <p className="mt-4 text-lg leading-relaxed text-stone-600">
-            Consulta las referencias de mercado y abre su publicación original.
+            Consulta los datos del modelo, las referencias de mercado y las fuentes del entorno.
             La fecha de consulta indica cuándo recuperamos el dato; el periodo
             indica qué momento describe. Si solo hay ejemplos o una copia sin
             procedencia verificada, lo señalamos y no mostramos sus cifras como referencia.
           </p>
         </header>
+
+        <section id="datos-modelo" className="mt-8 overflow-hidden rounded-xl border border-hairline bg-paper-50">
+          <header className="border-b border-hairline p-5">
+            <h2 className="font-display text-xl leading-tight text-ink">Datos utilizados para el modelo de precio</h2>
+            <p className="mt-1.5 text-sm text-stone-600">Idealista18 · anuncios de venta de Madrid · cuatro trimestres de 2018</p>
+            <p className="mt-2 break-words font-mono text-[10px] uppercase tracking-[0.14em] text-stone">LightGBM · {modelResults.model_id} · revisión del 8 de septiembre de 2026</p>
+          </header>
+          <div className="space-y-5 p-5 text-sm leading-relaxed text-stone-600">
+            <p>La fuente histórica declarada es <Strong>Idealista18</Strong>, descrita por Rey-Blanco, Arbués, López y Páez (2024). El modelo aprende el <Strong>precio anunciado de venta</Strong>, no el precio de cierre. Este conjunto histórico es distinto de los anuncios que recupera la búsqueda actual.</p>
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              <a href="https://doi.org/10.1177/23998083241242844" target="_blank" rel="noopener noreferrer" className="text-saffron-700 underline underline-offset-4">Artículo de la fuente ↗</a>
+              <a href="https://paezha.github.io/idealista18/reference/Madrid_Sale.html" target="_blank" rel="noopener noreferrer" className="text-saffron-700 underline underline-offset-4">Datos y diccionario de Madrid ↗</a>
+              <a href="https://paezha.github.io/idealista18/LICENSE.html" target="_blank" rel="noopener noreferrer" className="text-saffron-700 underline underline-offset-4">Licencia ODbL ↗</a>
+            </div>
+            <Table head={["Etapa de la revisión local", "Registros"]}>
+              <Row cells={["Fichero enriquecido recibido", formatNumber(modelResults.sample.input)]} />
+              <Row cells={["Tras fusionar duplicados de enriquecimiento", "94.815"]} />
+              <Row cells={["Elegibles para el modelo", formatNumber(modelResults.sample.eligible)]} />
+              <Row cells={["Ajuste del modelo conservado", formatNumber(modelResults.sample.fit)]} />
+              <Row cells={["Calibración de sus intervalos", formatNumber(modelResults.sample.calibration)]} />
+              <Row cells={["Evaluación de ese modelo", formatNumber(modelResults.sample.test)]} />
+            </Table>
+            <p>Los conteos corresponden al fichero local auditado. Las filas pueden representar anuncios del mismo inmueble; las particiones mantienen cada identificador de activo en un solo bloque. Los registros de calibración y evaluación no se usan para ajustar el modelo conservado. La evaluación es retrospectiva: el histórico ya había sido explorado.</p>
+            <p><Strong>{modelResults.n_features} variables de entrada.</Strong> Características de la vivienda y su localización, indicadores de datos ausentes, variables derivadas y categorías territoriales. El precio anunciado es el objetivo; precio por m², alquiler, rentabilidad y variables catastrales no son entradas del modelo principal.</p>
+            <Collapsible summary="Procedencia y límites del histórico">
+              <div className="space-y-3">
+                <p>Los precios y las coordenadas de la fuente están perturbados por anonimización. La ubicación aprendida es aproximada. El fichero recibido incorpora enriquecimientos cuyo proceso original no se pudo reconstruir por completo; las capas de alquiler y Catastro sin disponibilidad histórica acreditada se excluyen del modelo principal.</p>
+                <p>El diccionario público muestra conteos incompatibles entre su cabecera y su descripción final. Aquí se publican los conteos comprobados en la revisión local, sin equiparar las filas recibidas a viviendas únicas.</p>
+                <p>El ajuste temporal mediante IPV es un escenario indexado: no reentrena el modelo ni demuestra su precisión en 2026. Este histórico no valida precios de cierre, alquileres, ahorro ni rentabilidad futura.</p>
+              </div>
+            </Collapsible>
+          </div>
+        </section>
 
         {/* Precio €/m² compra por provincia */}
         <DataCard
