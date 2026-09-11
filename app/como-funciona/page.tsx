@@ -222,7 +222,7 @@ export default function ComoFuncionaPage() {
 
         <Section eyebrow="El entorno" title="Datos de distrito, sin inventar un índice de barrio">
           <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Datos y fuentes puedes consultar población, superficie y densidad por barrio, además de zonas verdes y actuaciones policiales por distrito. La superficie verde publicada no mide proximidad a una vivienda y excluye los parques históricos, singulares y forestales del fichero separado. Las actuaciones policiales no equivalen a todos los delitos ni a una tasa de criminalidad.</p>
-          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Estos datos aportan contexto, pero no se atribuyen a cada barrio ni se convierten en un Zone Score. Los índices de servicios, vida nocturna y tranquilidad siguen pendientes. En alquiler usamos la renta del anuncio; la referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Estos datos aportan contexto, pero no se atribuyen a cada barrio ni se convierten en un Zone Score. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito, y acceso al mapa de ruido de tráfico de 2021. Son referencias fechadas, no índices de calidad de vida ni mediciones para cada anuncio. En alquiler usamos la renta del anuncio; la referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
         </Section>
 
         {/* Arquitectura */}

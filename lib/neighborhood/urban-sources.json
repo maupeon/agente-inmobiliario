@@ -1,0 +1,3174 @@
+{
+  "consultado": "2026-09-11",
+  "locales": {
+    "fuente": "Ayuntamiento de Madrid · Censo de locales y actividades",
+    "url": "https://datos.madrid.es/dataset/200085-0-censo-locales",
+    "download": "https://datos.madrid.es/dataset/200085-0-censo-locales/resource/200085-5-censo-locales/download/200085_20260911_053809.csv",
+    "sha256": "ec707a4e81cb08b28ca156e6a967b10870589762078ac6c729bc4b03b4d5487e",
+    "fechaDatos": "2026-09-10",
+    "filasLeidas": 225615,
+    "localesAbiertosSinDistrito": 1,
+    "licencia": "CC BY 4.0",
+    "epigrafes": {
+      "472401": "COMERCIO AL POR MENOR DE PAN Y PRODUCTOS DE PANADERIA Y BOLLERIA CON OBRADOR",
+      "472403": "COMERCIO AL POR MENOR DE PASTELERIA, CONFITERIA, REPOSTERIA CON OBRADOR-BARRA DEGUSTACION",
+      "472206": "COMERCIO AL POR MENOR DE AVES, HUEVOS Y CAZA SIN OBRADOR",
+      "563002": "BAR ESPECIAL SIN ACTUACIONES",
+      "472904": "COMERCIO AL POR MENOR DE HELADOS SIN OBRADOR",
+      "472407": "ESTABLECIMIENTOS DE VENTA DE PLATOS PREPARADOS CON OBRADOR",
+      "472911": "OTRO COMERCIO AL POR MENOR DE PRODUCTOS ALIMENTICIOS (PERECEDEROS Y NO PERECEDEROS) CON VENDEDOR N.C.O.P.",
+      "472201": "COMERCIO AL POR MENOR DE CARNICERIA",
+      "472202": "COMERCIO AL POR MENOR DE CHARCUTERIA",
+      "472302": "COMERCIO AL POR MENOR DE PESCADOS Y MARISCOS SIN OBRADOR",
+      "472404": "COMERCIO AL POR MENOR DE  PASTELERIA, CONFITERIA, REPOSTERIA CON OBRADOR-SIN BARRA DEGUSTACION",
+      "471104": "COMERCIO AL POR MENOR DE PRODUCTOS ALIMENTICIOS NO PERECEDEROS ENVASADOS",
+      "472102": "COMERCIO AL POR MENOR DE FRUTAS Y HORTALIZAS SIN OBRADOR",
+      "471101": "COMERCIO AL POR MENOR EN ESTABLECIMIENTOS NO ESPECIALIZADOS, CON PREDOMINIO EN PRODUCTOS ALIMENTICIOS, BEBIDAS Y TABACO (AUTOSERVICIO)",
+      "471103": "TIENDA DE CONVENIENCIA (24H)",
+      "472910": "COMERCIO AL POR MENOR DE CAFE, INFUSIONES Y CHOCOLATE",
+      "472402": "COMERCIO AL POR MENOR DE PAN Y PRODUCTOS DE PANADERIA Y BOLLERIA SIN OBRADOR",
+      "472204": "COMERCIO AL POR MENOR DE CARNICERIA-SALCHICHERIA",
+      "472907": "COMERCIO AL POR MENOR DE FRUTOS SECOS Y VARIANTES",
+      "472902": "COMERCIO AL POR MENOR DE HELADOS CON OBRADOR CON BARRA DE DEGUSTACION",
+      "472901": "COMERCIO AL POR MENOR DE PRODUCTOS DE HERBOLARIO",
+      "471102": "COMERCIO AL POR MENOR EN ESTABLECIMIENTOS NO ESPECIALIZADOS, CON PREDOMINIO EN PRODUCTOS ALIMENTICIOS, BEBIDAS Y TABACO (GRANDES SUPERFICIES)",
+      "472906": "COMERCIO AL POR MENOR DE GOLOSINAS",
+      "472101": "COMERCIO AL POR MENOR DE FRUTAS Y HORTALIZAS CON OBRADOR",
+      "472908": "COMERCIO AL POR MENOR DE MASAS Y PATATAS FRITAS, CHURRERIA CON OBRADOR",
+      "563007": "CAFE ESPECTACULO",
+      "477301": "FARMACIA",
+      "472203": "COMERCIO AL POR MENOR DE CARNICERIA-CHARCUTERIA",
+      "472205": "COMERCIO AL POR MENOR DE AVES, HUEVOS Y CAZA CON OBRADOR",
+      "472905": "COMERCIO AL POR MENOR DE CONGELADOS",
+      "932006": "DISCOTECAS Y SALAS DE BAILE",
+      "472405": "COMERCIO AL POR MENOR DE PASTELERIA, CONFITERIA, REPOSTERIA SIN OBRADOR",
+      "472406": "ESTABLECIMIENTOS DE VENTA DE PLATOS PREPARADOS SIN OBRADOR",
+      "931008": "ACTIVIDADES DE LOS GIMNASIOS",
+      "472903": "COMERCIO AL POR MENOR DE HELADOS CON OBRADOR SIN BARRA DE DEGUSTACION",
+      "472301": "COMERCIO AL POR MENOR DE PESCADOS Y MARISCOS CON OBRADOR (INCLUYE COCCION)",
+      "932004": "SALAS DE FIESTA CON RESTAURACION",
+      "472501": "COMERCIO AL POR MENOR DE LECHE, PRODUCTOS LACTEOS Y BEBIDAS REFRESCANTES",
+      "472502": "COMERCIO AL POR MENOR DE VINOS Y ALCOHOLES (BODEGA) SIN CONSUMO",
+      "472207": "COMERCIO AL POR MENOR DE CASQUERIA",
+      "563003": "BAR ESPECIAL CON ACTUACIONES",
+      "472303": "COMERCIO AL POR MENOR DE BACALAO Y SALAZONES",
+      "932005": "SALAS DE FIESTA SIN RESTAURACION",
+      "472909": "COMERCIO AL POR MENOR DE MASAS Y PATATAS FRITAS, CHURRERIA SIN OBRADOR"
+    },
+    "distritos": [
+      {
+        "code": "01",
+        "nombre": "Centro",
+        "alimentacion": 1520,
+        "farmacias": 105,
+        "gimnasios": 53,
+        "ocio": 340
+      },
+      {
+        "code": "02",
+        "nombre": "Arganzuela",
+        "alimentacion": 575,
+        "farmacias": 80,
+        "gimnasios": 53,
+        "ocio": 36
+      },
+      {
+        "code": "03",
+        "nombre": "Retiro",
+        "alimentacion": 404,
+        "farmacias": 67,
+        "gimnasios": 55,
+        "ocio": 17
+      },
+      {
+        "code": "04",
+        "nombre": "Salamanca",
+        "alimentacion": 711,
+        "farmacias": 111,
+        "gimnasios": 100,
+        "ocio": 72
+      },
+      {
+        "code": "05",
+        "nombre": "Chamartín",
+        "alimentacion": 657,
+        "farmacias": 117,
+        "gimnasios": 70,
+        "ocio": 74
+      },
+      {
+        "code": "06",
+        "nombre": "Tetuán",
+        "alimentacion": 819,
+        "farmacias": 97,
+        "gimnasios": 69,
+        "ocio": 84
+      },
+      {
+        "code": "07",
+        "nombre": "Chamberí",
+        "alimentacion": 841,
+        "farmacias": 115,
+        "gimnasios": 79,
+        "ocio": 123
+      },
+      {
+        "code": "08",
+        "nombre": "Fuencarral-El Pardo",
+        "alimentacion": 506,
+        "farmacias": 123,
+        "gimnasios": 67,
+        "ocio": 31
+      },
+      {
+        "code": "09",
+        "nombre": "Moncloa-Aravaca",
+        "alimentacion": 445,
+        "farmacias": 73,
+        "gimnasios": 36,
+        "ocio": 28
+      },
+      {
+        "code": "10",
+        "nombre": "Latina",
+        "alimentacion": 925,
+        "farmacias": 142,
+        "gimnasios": 39,
+        "ocio": 56
+      },
+      {
+        "code": "11",
+        "nombre": "Carabanchel",
+        "alimentacion": 1060,
+        "farmacias": 136,
+        "gimnasios": 47,
+        "ocio": 75
+      },
+      {
+        "code": "12",
+        "nombre": "Usera",
+        "alimentacion": 546,
+        "farmacias": 66,
+        "gimnasios": 10,
+        "ocio": 47
+      },
+      {
+        "code": "13",
+        "nombre": "Puente de Vallecas",
+        "alimentacion": 785,
+        "farmacias": 114,
+        "gimnasios": 28,
+        "ocio": 46
+      },
+      {
+        "code": "14",
+        "nombre": "Moratalaz",
+        "alimentacion": 240,
+        "farmacias": 56,
+        "gimnasios": 15,
+        "ocio": 28
+      },
+      {
+        "code": "15",
+        "nombre": "Ciudad Lineal",
+        "alimentacion": 760,
+        "farmacias": 126,
+        "gimnasios": 67,
+        "ocio": 65
+      },
+      {
+        "code": "16",
+        "nombre": "Hortaleza",
+        "alimentacion": 440,
+        "farmacias": 85,
+        "gimnasios": 61,
+        "ocio": 26
+      },
+      {
+        "code": "17",
+        "nombre": "Villaverde",
+        "alimentacion": 504,
+        "farmacias": 67,
+        "gimnasios": 28,
+        "ocio": 43
+      },
+      {
+        "code": "18",
+        "nombre": "Villa de Vallecas",
+        "alimentacion": 307,
+        "farmacias": 46,
+        "gimnasios": 25,
+        "ocio": 15
+      },
+      {
+        "code": "19",
+        "nombre": "Vicálvaro",
+        "alimentacion": 185,
+        "farmacias": 31,
+        "gimnasios": 25,
+        "ocio": 6
+      },
+      {
+        "code": "20",
+        "nombre": "San Blas-Canillejas",
+        "alimentacion": 400,
+        "farmacias": 79,
+        "gimnasios": 46,
+        "ocio": 29
+      },
+      {
+        "code": "21",
+        "nombre": "Barajas",
+        "alimentacion": 148,
+        "farmacias": 30,
+        "gimnasios": 19,
+        "ocio": 14
+      }
+    ]
+  },
+  "metro": {
+    "fuente": "Consorcio Regional de Transportes de Madrid",
+    "url": "https://www.arcgis.com/home/item.html?id=0a6c45e7bdd94679b67a2ae662c8838b",
+    "download": "https://services5.arcgis.com/UxADft6QPcvFyDU1/arcgis/rest/services/M4_Red/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&outSR=4326&returnGeometry=true&resultRecordCount=1000",
+    "sha256": "dcd038097de0a310aa3908e9200e495c0e3e2cc7bc65251d41321d59d7971837",
+    "licencia": "https://crtm.es/licencia-de-uso/",
+    "estaciones": [
+      {
+        "id": "4_207",
+        "nombre": "ABRANTES",
+        "lineas": "11",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.380833614731245,
+        "lon": -3.7279002491217077,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_92",
+        "nombre": "ACACIAS",
+        "lineas": "3, 5",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.40387164372991,
+        "lon": -3.7066410860751864,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_285",
+        "nombre": "AEROPUERTO T-4",
+        "lineas": "8",
+        "municipio": "079",
+        "distrito": "21",
+        "lat": 40.491766772325995,
+        "lon": -3.593245597213427,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_159",
+        "nombre": "AEROPUERTO T1-T2-T3",
+        "lineas": "8",
+        "municipio": "079",
+        "distrito": "21",
+        "lat": 40.4686442368363,
+        "lon": -3.569538255943205,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_252",
+        "nombre": "ALAMEDA DE OSUNA",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "21",
+        "lat": 40.45778862852046,
+        "lon": -3.5875209290434937,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_211",
+        "nombre": "ALCORCON CENTRAL",
+        "lineas": "12",
+        "municipio": "007",
+        "distrito": "01",
+        "lat": 40.350084340279416,
+        "lon": -3.8317786206319795,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_66",
+        "nombre": "ALFONSO XIII",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.44824838816102,
+        "lon": -3.6679061529956103,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_267",
+        "nombre": "ALMENDRALES",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "12",
+        "lat": 40.38409352717396,
+        "lon": -3.697881397655217,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_143",
+        "nombre": "ALONSO CANO",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.43837537611044,
+        "lon": -3.6992456432372576,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_225",
+        "nombre": "ALONSO DE MENDOZA",
+        "lineas": "12",
+        "municipio": "065",
+        "distrito": "03",
+        "lat": 40.300813961926536,
+        "lon": -3.7366369717124623,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_195",
+        "nombre": "ALONSO MARTINEZ",
+        "lineas": "4, 5, 10",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.42852602883,
+        "lon": -3.6964318860038867,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_57",
+        "nombre": "ALONSO MARTINEZ",
+        "lineas": "4, 5, 10",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.42772011333865,
+        "lon": -3.6959386952332616,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_85",
+        "nombre": "ALONSO MARTINEZ",
+        "lineas": "4, 5, 10",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.42828258137045,
+        "lon": -3.6950229019466976,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_323",
+        "nombre": "ALSACIA",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.41829269464442,
+        "lon": -3.6235060015486664,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_129",
+        "nombre": "ALTO DE EXTREMADURA",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.40992601698508,
+        "lon": -3.7389361815722615,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_23",
+        "nombre": "ALTO DEL ARENAL",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "13",
+        "lat": 40.38977101214874,
+        "lon": -3.6452165490428263,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_100",
+        "nombre": "ALUCHE",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.38562861956385,
+        "lon": -3.76080381070444,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_5",
+        "nombre": "ALVARADO",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.450331975994324,
+        "lon": -3.7033142092757845,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_14",
+        "nombre": "ANTON MARTIN",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.41246356569,
+        "lon": -3.6993729633448895,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_149",
+        "nombre": "ANTONIO MACHADO",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.47021772039073,
+        "lon": -3.7176948552412226,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_186",
+        "nombre": "ARGANDA DEL REY",
+        "lineas": "9",
+        "municipio": "014",
+        "distrito": "01",
+        "lat": 40.303669277437,
+        "lon": -3.447518960780649,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_259",
+        "nombre": "ARGANZUELA-PLANETARIO",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.39310270492071,
+        "lon": -3.688640347447094,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_126",
+        "nombre": "ARGÜELLES",
+        "lineas": "3, 4, 6",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.430531839640196,
+        "lon": -3.7159561654441755,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_52",
+        "nombre": "ARGÜELLES",
+        "lineas": "3, 4, 6",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.43066093022461,
+        "lon": -3.715962651094834,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_54",
+        "nombre": "ARGÜELLES",
+        "lineas": "3, 4, 6",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.430598358763966,
+        "lon": -3.7159568697272873,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_223",
+        "nombre": "ARROYO CULEBRO",
+        "lineas": "12",
+        "municipio": "065",
+        "distrito": "03",
+        "lat": 40.28874176914942,
+        "lon": -3.7568233566673848,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_153",
+        "nombre": "ARROYOFRESNO",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.49089826566541,
+        "lon": -3.7260354006891747,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_177",
+        "nombre": "ARTILLEROS",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "14",
+        "lat": 40.4052238336675,
+        "lon": -3.641812337774728,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_68",
+        "nombre": "ARTURO SORIA",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.4558324918715,
+        "lon": -3.656181218097823,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_136",
+        "nombre": "ASCAO",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.4302055301581,
+        "lon": -3.64105571498423,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_16",
+        "nombre": "ATOCHA",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.406586814542514,
+        "lon": -3.689378110765852,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_118",
+        "nombre": "AVENIDA DE AMERICA",
+        "lineas": "4, 6, 7, 9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.43803528785048,
+        "lon": -3.676583431725225,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_141",
+        "nombre": "AVENIDA DE AMERICA",
+        "lineas": "4, 6, 7, 9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.43803561557426,
+        "lon": -3.676527279518791,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_170",
+        "nombre": "AVENIDA DE AMERICA",
+        "lineas": "4, 6, 7, 9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.43803832871194,
+        "lon": -3.6764711524000466,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_64",
+        "nombre": "AVENIDA DE AMERICA",
+        "lineas": "4, 6, 7, 9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.43803257738159,
+        "lon": -3.6766395553262643,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_324",
+        "nombre": "AVENIDA DE GUADALAJARA",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.42239358382272,
+        "lon": -3.6120646096811457,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_151",
+        "nombre": "AVENIDA DE LA ILUSTRACION",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.48010261154569,
+        "lon": -3.7183982522186554,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_67",
+        "nombre": "AVENIDA DE LA PAZ",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.453542634899286,
+        "lon": -3.6611819996826074,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_257",
+        "nombre": "AVIACION ESPAÑOLA",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.38363943761124,
+        "lon": -3.7839229464393767,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_262",
+        "nombre": "BAMBU",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.47681536116508,
+        "lon": -3.6763674414711556,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_33",
+        "nombre": "BANCO DE ESPAÑA",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.4192197861148,
+        "lon": -3.6949651055813844,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_160",
+        "nombre": "BARAJAS",
+        "lineas": "8",
+        "municipio": "079",
+        "distrito": "21",
+        "lat": 40.475774163830884,
+        "lon": -3.5825279097963674,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_138",
+        "nombre": "BARRIO DE LA CONCEPCION",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.439099399993054,
+        "lon": -3.6520040012947503,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_162",
+        "nombre": "BARRIO DEL PILAR",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.47688906880558,
+        "lon": -3.703164503841757,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_287",
+        "nombre": "BARRIO DEL PUERTO",
+        "lineas": "7",
+        "municipio": "049",
+        "distrito": "01",
+        "lat": 40.42249687009597,
+        "lon": -3.5691884702656647,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_200",
+        "nombre": "BATAN",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.40786020840237,
+        "lon": -3.7531099371759526,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_282",
+        "nombre": "BAUNATAL",
+        "lineas": "10",
+        "municipio": "134",
+        "distrito": "01",
+        "lat": 40.55442303864528,
+        "lon": -3.6351257020391796,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_188",
+        "nombre": "BEGOÑA",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.48041293210537,
+        "lon": -3.6858496955790008,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_56",
+        "nombre": "BILBAO",
+        "lineas": "1, 4",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.42885030444197,
+        "lon": -3.7011381755651382,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_9",
+        "nombre": "BILBAO",
+        "lineas": "1, 4",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.42905602410363,
+        "lon": -3.7021820657784166,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_22",
+        "nombre": "BUENOS AIRES",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "13",
+        "lat": 40.39156287721576,
+        "lon": -3.6539061229836958,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_49",
+        "nombre": "CALLAO",
+        "lineas": "3, 5",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.420136495085096,
+        "lon": -3.7056612368434116,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_88",
+        "nombre": "CALLAO",
+        "lineas": "3, 5",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.42008325439652,
+        "lon": -3.705664776700521,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_102",
+        "nombre": "CAMPAMENTO",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.39480775740209,
+        "lon": -3.768128136787409,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_144",
+        "nombre": "CANAL",
+        "lineas": "2, 7",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.43870250794506,
+        "lon": -3.704888988656737,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_41",
+        "nombre": "CANAL",
+        "lineas": "2, 7",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.43841299799997,
+        "lon": -3.704334573354305,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_70",
+        "nombre": "CANILLAS",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.463810536980176,
+        "lon": -3.6355954639810872,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_74",
+        "nombre": "CANILLEJAS",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.449420844365704,
+        "lon": -3.608160323120323,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_98",
+        "nombre": "CARABANCHEL",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.38782701996798,
+        "lon": -3.744870521041383,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_255",
+        "nombre": "CARABANCHEL ALTO",
+        "lineas": "11",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.3720024216854,
+        "lon": -3.751906344267269,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_105",
+        "nombre": "CARPETANA",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.39270189946354,
+        "lon": -3.740993676713557,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_140",
+        "nombre": "CARTAGENA",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.43933749524513,
+        "lon": -3.672151601329782,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_103",
+        "nombre": "CASA DE CAMPO",
+        "lineas": "5, 10",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.403242270835875,
+        "lon": -3.761013667626499,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_201",
+        "nombre": "CASA DE CAMPO",
+        "lineas": "5, 10",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.40320794801885,
+        "lon": -3.761013281083767,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_233",
+        "nombre": "CASA DEL RELOJ",
+        "lineas": "12",
+        "municipio": "074",
+        "distrito": "02",
+        "lat": 40.32660272138423,
+        "lon": -3.75942499130863,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_189",
+        "nombre": "CHAMARTIN",
+        "lineas": "1, 10",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.472103124612666,
+        "lon": -3.6825908805499754,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_261",
+        "nombre": "CHAMARTIN",
+        "lineas": "1, 10",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.47202586532047,
+        "lon": -3.6825900026698135,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_86",
+        "nombre": "CHUECA",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.422933178079816,
+        "lon": -3.6976165924437825,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_270",
+        "nombre": "CIUDAD DE LOS ANGELES",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "17",
+        "lat": 40.359585428137,
+        "lon": -3.6936264441706634,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_77",
+        "nombre": "CIUDAD LINEAL",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.4380484084201,
+        "lon": -3.638157588345499,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_124",
+        "nombre": "CIUDAD UNIVERSITARIA",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.44356467694622,
+        "lon": -3.726784810097875,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_156",
+        "nombre": "COLOMBIA",
+        "lineas": "8, 9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.456339068325185,
+        "lon": -3.6768242867748153,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_167",
+        "nombre": "COLOMBIA",
+        "lineas": "8, 9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.45748975041236,
+        "lon": -3.6769390594028932,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_58",
+        "nombre": "COLON",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.42541918213737,
+        "lon": -3.6910073925714295,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_202",
+        "nombre": "COLONIA JARDIN",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.396975426434246,
+        "lon": -3.774616256196163,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_168",
+        "nombre": "CONCHA ESPINA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.451448432622364,
+        "lon": -3.677380122875907,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_113",
+        "nombre": "CONDE DE CASAL",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "03",
+        "lat": 40.40696795047538,
+        "lon": -3.670408067233978,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_27",
+        "nombre": "CONGOSTO",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "18",
+        "lat": 40.37238237036666,
+        "lon": -3.6188413501245416,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_224",
+        "nombre": "CONSERVATORIO",
+        "lineas": "12",
+        "municipio": "065",
+        "distrito": "03",
+        "lat": 40.29324384631658,
+        "lon": -3.7457610404433783,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_288",
+        "nombre": "COSLADA CENTRAL",
+        "lineas": "7",
+        "municipio": "049",
+        "distrito": "01",
+        "lat": 40.42373620597773,
+        "lon": -3.5611923494996556,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_169",
+        "nombre": "CRUZ DEL RAYO",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.44426588110329,
+        "lon": -3.6782141096710466,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_121",
+        "nombre": "CUATRO CAMINOS",
+        "lineas": "1, 2, 6",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.44697459690457,
+        "lon": -3.703868699286015,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_42",
+        "nombre": "CUATRO CAMINOS",
+        "lineas": "1, 2, 6",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.446974274859556,
+        "lon": -3.7039217350429934,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_6",
+        "nombre": "CUATRO CAMINOS",
+        "lineas": "1, 2, 6",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.44697395278304,
+        "lon": -3.703974771978261,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_203",
+        "nombre": "CUATRO VIENTOS",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.37770688876972,
+        "lon": -3.7915151998735666,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_191",
+        "nombre": "CUZCO",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.45842141927867,
+        "lon": -3.689850751213803,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_44",
+        "nombre": "DELICIAS",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.39990477855439,
+        "lon": -3.694199616036338,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_117",
+        "nombre": "DIEGO DE LEON",
+        "lineas": "4, 5, 6",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.432947682446056,
+        "lon": -3.6729385667724195,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_63",
+        "nombre": "DIEGO DE LEON",
+        "lineas": "4, 5, 6",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.43467946439266,
+        "lon": -3.6749527300771714,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_82",
+        "nombre": "DIEGO DE LEON",
+        "lineas": "4, 5, 6",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.43235319427283,
+        "lon": -3.674261712530584,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_165",
+        "nombre": "DUQUE DE PASTRANA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.467625851508785,
+        "lon": -3.6791705524779017,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_230",
+        "nombre": "EL BERCIAL",
+        "lineas": "12",
+        "municipio": "065",
+        "distrito": "03",
+        "lat": 40.329072367482894,
+        "lon": -3.7296331804893366,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_253",
+        "nombre": "EL CAPRICHO",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "21",
+        "lat": 40.453468332704944,
+        "lon": -3.5940116576957872,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_80",
+        "nombre": "EL CARMEN",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.43189329209465,
+        "lon": -3.6575725472596625,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_231",
+        "nombre": "EL CARRASCAL",
+        "lineas": "12",
+        "municipio": "074",
+        "distrito": "05",
+        "lat": 40.33663824377751,
+        "lon": -3.7401848829148365,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_228",
+        "nombre": "EL CASAR",
+        "lineas": "3, 12",
+        "municipio": "065",
+        "distrito": "02",
+        "lat": 40.31862315788545,
+        "lon": -3.7098540423000594,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_349",
+        "nombre": "EL CASAR",
+        "lineas": "3, 12",
+        "municipio": "065",
+        "distrito": "04",
+        "lat": 40.31855769562624,
+        "lon": -3.7095030115688323,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_46",
+        "nombre": "EMBAJADORES",
+        "lineas": "3, 5",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.405127271162534,
+        "lon": -3.70268049977228,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_101",
+        "nombre": "EMPALME",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.39057255783158,
+        "lon": -3.765347875572339,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_69",
+        "nombre": "ESPERANZA",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.45944729719177,
+        "lon": -3.645817180039627,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_15",
+        "nombre": "ESTACION DEL ARTE",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.40885159837552,
+        "lon": -3.692487271050582,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_286",
+        "nombre": "ESTADIO METROPOLITANO",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.433395940599304,
+        "lon": -3.6001679359390213,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_4",
+        "nombre": "ESTRECHO",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.45428802582823,
+        "lon": -3.7030229599498505,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_175",
+        "nombre": "ESTRELLA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "14",
+        "lat": 40.41147221920649,
+        "lon": -3.6617852707606366,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_99",
+        "nombre": "EUGENIA DE MONTIJO",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.38438579717573,
+        "lon": -3.7512111847828216,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_158",
+        "nombre": "FERIA DE MADRID",
+        "lineas": "8",
+        "municipio": "079",
+        "distrito": "21",
+        "lat": 40.46389315131333,
+        "lon": -3.6162046822415186,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_147",
+        "nombre": "FRANCOS RODRIGUEZ",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.45648182077827,
+        "lon": -3.712386672198295,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_187",
+        "nombre": "FUENCARRAL",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.495085162407655,
+        "lon": -3.692831231006568,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_221",
+        "nombre": "FUENLABRADA CENTRAL",
+        "lineas": "12",
+        "municipio": "058",
+        "distrito": "04",
+        "lat": 40.2826757751405,
+        "lon": -3.7989069007820175,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_135",
+        "nombre": "GARCIA NOBLEJAS",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.428423190545146,
+        "lon": -3.633299465727318,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_226",
+        "nombre": "GETAFE CENTRAL",
+        "lineas": "12",
+        "municipio": "065",
+        "distrito": "03",
+        "lat": 40.30992790904166,
+        "lon": -3.734025028929001,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_30",
+        "nombre": "GOYA",
+        "lineas": "2, 4",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.4245483896706,
+        "lon": -3.675910176185961,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_61",
+        "nombre": "GOYA",
+        "lineas": "2, 4",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.424805404817974,
+        "lon": -3.6768461429074466,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_11",
+        "nombre": "GRAN VIA",
+        "lineas": "1, 5",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.420008279509474,
+        "lon": -3.701804154062708,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_87",
+        "nombre": "GRAN VIA",
+        "lineas": "1, 5",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.419986617735724,
+        "lon": -3.701803930135661,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_142",
+        "nombre": "GREGORIO MARAÑON",
+        "lineas": "7, 10",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.43825099442897,
+        "lon": -3.6914828621190114,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_194",
+        "nombre": "GREGORIO MARAÑON",
+        "lineas": "7, 10",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.43753407332082,
+        "lon": -3.691267602842976,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_122",
+        "nombre": "GUZMAN EL BUENO",
+        "lineas": "6, 7",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.44636607914371,
+        "lon": -3.7122940370605675,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_146",
+        "nombre": "GUZMAN EL BUENO",
+        "lineas": "6, 7",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.446328896938624,
+        "lon": -3.712293644526187,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_292",
+        "nombre": "HENARES",
+        "lineas": "7",
+        "municipio": "130",
+        "distrito": "01",
+        "lat": 40.41776948524124,
+        "lon": -3.5271783527904157,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_161",
+        "nombre": "HERRERA ORIA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.48466278015302,
+        "lon": -3.70751021303079,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_264",
+        "nombre": "HORTALEZA",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.47537171795902,
+        "lon": -3.6525726113410113,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_268",
+        "nombre": "HOSPITAL 12 DE OCTUBRE",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "12",
+        "lat": 40.375031361291015,
+        "lon": -3.6958546924445588,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_219",
+        "nombre": "HOSPITAL DE FUENLABRADA",
+        "lineas": "12",
+        "municipio": "058",
+        "distrito": "07",
+        "lat": 40.28575548587764,
+        "lon": -3.816416808685618,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_216",
+        "nombre": "HOSPITAL DE MOSTOLES",
+        "lineas": "12",
+        "municipio": "092",
+        "distrito": "04",
+        "lat": 40.316524281645606,
+        "lon": -3.874712477719213,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_296",
+        "nombre": "HOSPITAL DEL HENARES",
+        "lineas": "7",
+        "municipio": "049",
+        "distrito": "02",
+        "lat": 40.41761001821852,
+        "lon": -3.5345349720982124,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_284",
+        "nombre": "HOSPITAL INFANTA SOFIA",
+        "lineas": "10",
+        "municipio": "134",
+        "distrito": "01",
+        "lat": 40.559769448196086,
+        "lon": -3.6114547338421925,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_234",
+        "nombre": "HOSPITAL SEVERO OCHOA",
+        "lineas": "12",
+        "municipio": "074",
+        "distrito": "01",
+        "lat": 40.32177027008829,
+        "lon": -3.7679730473046176,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_173",
+        "nombre": "IBIZA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "03",
+        "lat": 40.41839121058978,
+        "lon": -3.6785751055264586,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_8",
+        "nombre": "IGLESIA",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.434923478284944,
+        "lon": -3.698979992348473,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_145",
+        "nombre": "ISLAS FILIPINAS",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.43906820663266,
+        "lon": -3.7137286447993536,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_291",
+        "nombre": "JARAMA",
+        "lineas": "7",
+        "municipio": "130",
+        "distrito": "01",
+        "lat": 40.42295480433805,
+        "lon": -3.5254937648988705,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_204",
+        "nombre": "JOAQUIN VILUMBRALES",
+        "lineas": "10",
+        "municipio": "007",
+        "distrito": "02",
+        "lat": 40.349848097734004,
+        "lon": -3.8072012843672822,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_227",
+        "nombre": "JUAN DE LA CIERVA",
+        "lineas": "12",
+        "municipio": "065",
+        "distrito": "04",
+        "lat": 40.31180236485632,
+        "lon": -3.722240122704442,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_232",
+        "nombre": "JULIAN BESTEIRO",
+        "lineas": "12",
+        "municipio": "074",
+        "distrito": "04",
+        "lat": 40.33474910783056,
+        "lon": -3.7526589509919104,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_322",
+        "nombre": "LA ALMUDENA",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.42361329068056,
+        "lon": -3.6391423303625725,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_260",
+        "nombre": "LA ELIPA",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.426617234977186,
+        "lon": -3.6505189139028626,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_305",
+        "nombre": "LA FORTUNA",
+        "lineas": "11",
+        "municipio": "074",
+        "distrito": "06",
+        "lat": 40.357953128926525,
+        "lon": -3.7778258498960042,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_293",
+        "nombre": "LA GAVIA",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "18",
+        "lat": 40.37019166319747,
+        "lon": -3.613463483075256,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_278",
+        "nombre": "LA GRANJA",
+        "lineas": "10",
+        "municipio": "006",
+        "distrito": "01",
+        "lat": 40.52759962236235,
+        "lon": -3.658592087138037,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_90",
+        "nombre": "LA LATINA",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.41128032868688,
+        "lon": -3.708160868519015,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_279",
+        "nombre": "LA MORALEJA",
+        "lineas": "10",
+        "municipio": "006",
+        "distrito": "01",
+        "lat": 40.53195564734653,
+        "lon": -3.635559522713986,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_256",
+        "nombre": "LA PESETA",
+        "lineas": "11",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.36422401181158,
+        "lon": -3.756902710588123,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_185",
+        "nombre": "LA POVEDA",
+        "lineas": "9",
+        "municipio": "014",
+        "distrito": "01",
+        "lat": 40.31901573079284,
+        "lon": -3.477447350588455,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_289",
+        "nombre": "LA RAMBLA",
+        "lineas": "7",
+        "municipio": "049",
+        "distrito": "02",
+        "lat": 40.42514348413913,
+        "lon": -3.5479238333382477,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_152",
+        "nombre": "LACOMA",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.485015026073626,
+        "lon": -3.723045541550223,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_199",
+        "nombre": "LAGO",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.416414110991504,
+        "lon": -3.7356310593736235,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_104",
+        "nombre": "LAGUNA",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.39922962471062,
+        "lon": -3.744288718056632,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_132",
+        "nombre": "LAS MUSAS",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.432988127939815,
+        "lon": -3.607879514276323,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_325",
+        "nombre": "LAS ROSAS",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.42374843104424,
+        "lon": -3.6033055955674373,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_294",
+        "nombre": "LAS SUERTES",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "18",
+        "lat": 40.36322802476594,
+        "lon": -3.5995326897288193,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_276",
+        "nombre": "LAS TABLAS",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.50833012106391,
+        "lon": -3.6694425832834607,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_47",
+        "nombre": "LAVAPIES",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.40851094285593,
+        "lon": -3.7009041232004773,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_235",
+        "nombre": "LEGANES CENTRAL",
+        "lineas": "12",
+        "municipio": "074",
+        "distrito": "01",
+        "lat": 40.32898523094555,
+        "lon": -3.771536996688428,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_110",
+        "nombre": "LEGAZPI",
+        "lineas": "3, 6",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.39115775794032,
+        "lon": -3.69505136534669,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_43",
+        "nombre": "LEGAZPI",
+        "lineas": "3, 6",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.391154999510235,
+        "lon": -3.695113687596018,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_62",
+        "nombre": "LISTA",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.429168520255786,
+        "lon": -3.675409822278686,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_218",
+        "nombre": "LORANCA",
+        "lineas": "12",
+        "municipio": "058",
+        "distrito": "09",
+        "lat": 40.29681266405529,
+        "lon": -3.837683457120192,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_229",
+        "nombre": "LOS ESPARTALES",
+        "lineas": "12",
+        "municipio": "065",
+        "distrito": "02",
+        "lat": 40.32422701493734,
+        "lon": -3.7181978645243983,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_130",
+        "nombre": "LUCERO",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.405099650652225,
+        "lon": -3.745336959451509,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_265",
+        "nombre": "MANOTERAS",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.476874226693596,
+        "lon": -3.6628954758911214,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_116",
+        "nombre": "MANUEL BECERRA",
+        "lineas": "2, 6",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.42790447983754,
+        "lon": -3.6692051807116384,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_29",
+        "nombre": "MANUEL BECERRA",
+        "lineas": "2, 6",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.42790417380744,
+        "lon": -3.669258203049727,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_281",
+        "nombre": "MANUEL DE FALLA",
+        "lineas": "10",
+        "municipio": "006",
+        "distrito": "01",
+        "lat": 40.55047998089715,
+        "lon": -3.6468794495056858,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_217",
+        "nombre": "MANUELA MALASAÑA",
+        "lineas": "12",
+        "municipio": "092",
+        "distrito": "04",
+        "lat": 40.30903005583646,
+        "lon": -3.8640211972261507,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_157",
+        "nombre": "MAR DE CRISTAL",
+        "lineas": "4, 8",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.469383787188725,
+        "lon": -3.6383202232204686,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_71",
+        "nombre": "MAR DE CRISTAL",
+        "lineas": "4, 8",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.46942603388481,
+        "lon": -3.638322673402993,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_280",
+        "nombre": "MARQUES DE LA VALDAVIA",
+        "lineas": "10",
+        "municipio": "006",
+        "distrito": "01",
+        "lat": 40.54102356213352,
+        "lon": -3.637384941176687,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_94",
+        "nombre": "MARQUES DE VADILLO",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.397356290324495,
+        "lon": -3.7159600765140515,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_111",
+        "nombre": "MENDEZ ALVARO",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.39537559939098,
+        "lon": -3.6781415070830423,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_17",
+        "nombre": "MENENDEZ PELAYO",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "03",
+        "lat": 40.40445054323726,
+        "lon": -3.6809758559146917,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_24",
+        "nombre": "MIGUEL HERNANDEZ",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "13",
+        "lat": 40.38731574705667,
+        "lon": -3.6395099006306384,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_326",
+        "nombre": "MIRASIERRA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.491097784867534,
+        "lon": -3.7163444822992076,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_125",
+        "nombre": "MONCLOA",
+        "lineas": "3, 6",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.43496631087177,
+        "lon": -3.719450010688234,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_53",
+        "nombre": "MONCLOA",
+        "lineas": "3, 6",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.43502351519558,
+        "lon": -3.719450619240696,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_275",
+        "nombre": "MONTECARMELO",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.505252159110974,
+        "lon": -3.6957506950563808,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_214",
+        "nombre": "MOSTOLES CENTRAL",
+        "lineas": "12",
+        "municipio": "092",
+        "distrito": "02",
+        "lat": 40.32850021833154,
+        "lon": -3.863542175638656,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_38",
+        "nombre": "NOVICIADO",
+        "lineas": "2, 3, 10",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.424842233578424,
+        "lon": -3.7074190426136306,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_20",
+        "nombre": "NUEVA NUMANCIA",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "13",
+        "lat": 40.39553816215716,
+        "lon": -3.6641417014856694,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_120",
+        "nombre": "NUEVOS MINISTERIOS",
+        "lineas": "6, 8, 10",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.446621215182525,
+        "lon": -3.6924064585114573,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_155",
+        "nombre": "NUEVOS MINISTERIOS",
+        "lineas": "6, 8, 10",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.446552669988414,
+        "lon": -3.692405592344977,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_193",
+        "nombre": "NUEVOS MINISTERIOS",
+        "lineas": "6, 8, 10",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.44658546516346,
+        "lon": -3.6924060916320443,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_171",
+        "nombre": "NUÑEZ DE BALBOA",
+        "lineas": "5, 9",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.43012982126571,
+        "lon": -3.6793637194556172,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_83",
+        "nombre": "NUÑEZ DE BALBOA",
+        "lineas": "5, 9",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.43278060804376,
+        "lon": -3.6825799144836044,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_115",
+        "nombre": "O'DONNELL",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.42288842464461,
+        "lon": -3.6685951462919535,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_107",
+        "nombre": "OPAÑEL",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.38690440425559,
+        "lon": -3.723133621163613,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_237",
+        "nombre": "OPERA",
+        "lineas": "2, 5, R",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.41809376445387,
+        "lon": -3.7092805966893105,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_36",
+        "nombre": "OPERA",
+        "lineas": "2, 5, R",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.418092919493105,
+        "lon": -3.7094186087196794,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_89",
+        "nombre": "OPERA",
+        "lineas": "2, 5, R",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.41809334199409,
+        "lon": -3.7093496027052257,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_106",
+        "nombre": "OPORTO",
+        "lineas": "5, 6",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.388467519483676,
+        "lon": -3.731264112878039,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_96",
+        "nombre": "OPORTO",
+        "lineas": "5, 6",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.38846476309323,
+        "lon": -3.7313233124150336,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_112",
+        "nombre": "PACIFICO",
+        "lineas": "1, 6",
+        "municipio": "079",
+        "distrito": "03",
+        "lat": 40.402071738555954,
+        "lon": -3.6738560384118877,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_18",
+        "nombre": "PACIFICO",
+        "lineas": "1, 6",
+        "municipio": "079",
+        "distrito": "03",
+        "lat": 40.40126178904823,
+        "lon": -3.67513655621334,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_345",
+        "nombre": "PACO DE LUCIA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.499707984968154,
+        "lon": -3.7091273522790242,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_45",
+        "nombre": "PALOS DE LA FRONTERA",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.40307228397831,
+        "lon": -3.6942326840798296,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_208",
+        "nombre": "PAN BENDITO",
+        "lineas": "11",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.37586863665673,
+        "lon": -3.7341688565304656,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_139",
+        "nombre": "PARQUE DE LAS AVENIDAS",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.43944760234025,
+        "lon": -3.6629705808692217,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_222",
+        "nombre": "PARQUE DE LOS ESTADOS",
+        "lineas": "12",
+        "municipio": "058",
+        "distrito": "02",
+        "lat": 40.28683580053262,
+        "lon": -3.786974043457501,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_73",
+        "nombre": "PARQUE DE SANTA MARIA",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.47711429389674,
+        "lon": -3.6452420021656278,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_220",
+        "nombre": "PARQUE EUROPA",
+        "lineas": "12",
+        "municipio": "058",
+        "distrito": "07",
+        "lat": 40.28517569649551,
+        "lon": -3.8063229922835395,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_210",
+        "nombre": "PARQUE LISBOA",
+        "lineas": "12",
+        "municipio": "007",
+        "distrito": "02",
+        "lat": 40.34968728152219,
+        "lon": -3.8211957325521553,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_212",
+        "nombre": "PARQUE OESTE",
+        "lineas": "12",
+        "municipio": "007",
+        "distrito": "01",
+        "lat": 40.345894380413725,
+        "lon": -3.849338616599969,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_178",
+        "nombre": "PAVONES",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "14",
+        "lat": 40.40051154957267,
+        "lon": -3.635122556293407,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_150",
+        "nombre": "PEÑAGRANDE",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.47592352024965,
+        "lon": -3.715824157912478,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_263",
+        "nombre": "PINAR DE CHAMARTIN",
+        "lineas": "1, 4",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.48013997815096,
+        "lon": -3.666804481448275,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_266",
+        "nombre": "PINAR DE CHAMARTIN",
+        "lineas": "1, 4",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.48013848447957,
+        "lon": -3.6667610675346913,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_258",
+        "nombre": "PINAR DEL REY",
+        "lineas": "8",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.46800136207379,
+        "lon": -3.6486683605201167,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_166",
+        "nombre": "PIO XII",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.46300276051131,
+        "lon": -3.67579015001895,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_93",
+        "nombre": "PIRAMIDES",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "02",
+        "lat": 40.40259816545889,
+        "lon": -3.7113771228123165,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_154",
+        "nombre": "PITIS",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.49510584237574,
+        "lon": -3.7258912329080798,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_1",
+        "nombre": "PLAZA DE CASTILLA",
+        "lineas": "1, 9, 10",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.46689603731065,
+        "lon": -3.689169587035836,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_164",
+        "nombre": "PLAZA DE CASTILLA",
+        "lineas": "1, 9, 10",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.46689629239304,
+        "lon": -3.6891266532024405,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_190",
+        "nombre": "PLAZA DE CASTILLA",
+        "lineas": "1, 9, 10",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.46689653414191,
+        "lon": -3.6890861043280827,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_197",
+        "nombre": "PLAZA DE ESPAÑA",
+        "lineas": "2, 3, 10",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.4240868846098,
+        "lon": -3.7096987115977367,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_50",
+        "nombre": "PLAZA DE ESPAÑA",
+        "lineas": "2, 3, 10",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.42341602795806,
+        "lon": -3.711197037580092,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_108",
+        "nombre": "PLAZA ELIPTICA",
+        "lineas": "6, 11",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.38460005540756,
+        "lon": -3.7183705578119546,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_206",
+        "nombre": "PLAZA ELIPTICA",
+        "lineas": "6, 11",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.384600790382066,
+        "lon": -3.718252093606752,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_21",
+        "nombre": "PORTAZGO",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "13",
+        "lat": 40.3926605600882,
+        "lon": -3.65867771418254,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_215",
+        "nombre": "PRADILLO",
+        "lineas": "12",
+        "municipio": "092",
+        "distrito": "04",
+        "lat": 40.32167696474467,
+        "lon": -3.864889402970309,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_172",
+        "nombre": "PRINCIPE DE VERGARA",
+        "lineas": "2, 9",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.42417595482102,
+        "lon": -3.6802398689995695,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_31",
+        "nombre": "PRINCIPE DE VERGARA",
+        "lineas": "2, 9",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.422944861760726,
+        "lon": -3.680122681043693,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_127",
+        "nombre": "PRINCIPE PIO",
+        "lineas": "6, 10, R",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.42106884438364,
+        "lon": -3.7203235591422588,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_198",
+        "nombre": "PRINCIPE PIO",
+        "lineas": "6, 10, R",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.42103069046502,
+        "lon": -3.7203262700195014,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_238",
+        "nombre": "PRINCIPE PIO",
+        "lineas": "6, 10, R",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.420994937799975,
+        "lon": -3.7203258886629875,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_65",
+        "nombre": "PROSPERIDAD",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.444188974144545,
+        "lon": -3.674818902992059,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_137",
+        "nombre": "PUEBLO NUEVO",
+        "lineas": "5, 7",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.43565851549913,
+        "lon": -3.6428229372521685,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_78",
+        "nombre": "PUEBLO NUEVO",
+        "lineas": "5, 7",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.43569283899227,
+        "lon": -3.64282326413925,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_19",
+        "nombre": "PUENTE DE VALLECAS",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "13",
+        "lat": 40.39819215100294,
+        "lon": -3.669058999478586,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_182",
+        "nombre": "PUERTA DE ARGANDA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "19",
+        "lat": 40.40131578216117,
+        "lon": -3.5959753029479633,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_91",
+        "nombre": "PUERTA DE TOLEDO",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.40703575446187,
+        "lon": -3.711046450767629,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_128",
+        "nombre": "PUERTA DEL ANGEL",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "10",
+        "lat": 40.41389889439627,
+        "lon": -3.7272404518154256,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_205",
+        "nombre": "PUERTA DEL SUR",
+        "lineas": "10, 12",
+        "municipio": "007",
+        "distrito": "02",
+        "lat": 40.3452428742768,
+        "lon": -3.8121107350474532,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_209",
+        "nombre": "PUERTA DEL SUR",
+        "lineas": "10, 12",
+        "municipio": "007",
+        "distrito": "02",
+        "lat": 40.34543086550063,
+        "lon": -3.8124891797456804,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_40",
+        "nombre": "QUEVEDO",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.433217315157556,
+        "lon": -3.704332861250257,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_79",
+        "nombre": "QUINTANA",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "15",
+        "lat": 40.43358494164949,
+        "lon": -3.6473622420983225,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_119",
+        "nombre": "REPUBLICA ARGENTINA",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.44379456449,
+        "lon": -3.6840618670570504,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_32",
+        "nombre": "RETIRO",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "03",
+        "lat": 40.42030671752325,
+        "lon": -3.686244719177841,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_283",
+        "nombre": "REYES CATOLICOS",
+        "lineas": "10",
+        "municipio": "134",
+        "distrito": "01",
+        "lat": 40.55037483366552,
+        "lon": -3.6233994104420226,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_7",
+        "nombre": "RIOS ROSAS",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.44197535635587,
+        "lon": -3.701328481177294,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_300",
+        "nombre": "RIVAS FUTURA",
+        "lineas": "9",
+        "municipio": "123",
+        "distrito": "01",
+        "lat": 40.34134215405359,
+        "lon": -3.5247890122718806,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_183",
+        "nombre": "RIVAS URBANIZACIONES",
+        "lineas": "9",
+        "municipio": "123",
+        "distrito": "01",
+        "lat": 40.366771502577514,
+        "lon": -3.5472758067455525,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_184",
+        "nombre": "RIVAS VACIAMADRID",
+        "lineas": "9",
+        "municipio": "123",
+        "distrito": "01",
+        "lat": 40.32837092189286,
+        "lon": -3.5205975209537232,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_277",
+        "nombre": "RONDA DE LA COMUNICACION",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.51553464717745,
+        "lon": -3.6627651035032445,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_84",
+        "nombre": "RUBEN DARIO",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.43315793720963,
+        "lon": -3.689541598575491,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_114",
+        "nombre": "SAINZ DE BARANDA",
+        "lineas": "6, 9",
+        "municipio": "079",
+        "distrito": "03",
+        "lat": 40.41506853886662,
+        "lon": -3.669514139418049,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_174",
+        "nombre": "SAINZ DE BARANDA",
+        "lineas": "6, 9",
+        "municipio": "079",
+        "distrito": "03",
+        "lat": 40.4150284968071,
+        "lon": -3.6695137437026353,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_39",
+        "nombre": "SAN BERNARDO",
+        "lineas": "2, 4",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.430012762660795,
+        "lon": -3.7055699332510224,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_55",
+        "nombre": "SAN BERNARDO",
+        "lineas": "2, 4",
+        "municipio": "079",
+        "distrito": "07",
+        "lat": 40.429662461610036,
+        "lon": -3.705673788588775,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_133",
+        "nombre": "SAN BLAS",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.427991906767446,
+        "lon": -3.6154690762577584,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_181",
+        "nombre": "SAN CIPRIANO",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "19",
+        "lat": 40.40381175745944,
+        "lon": -3.6023940495699014,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_272",
+        "nombre": "SAN CRISTOBAL",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "17",
+        "lat": 40.34154193600964,
+        "lon": -3.6931802991863165,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_269",
+        "nombre": "SAN FERMIN-ORCASUR",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "12",
+        "lat": 40.36999093055091,
+        "lon": -3.6941764145036964,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_290",
+        "nombre": "SAN FERNANDO",
+        "lineas": "7",
+        "municipio": "130",
+        "distrito": "01",
+        "lat": 40.42441224966061,
+        "lon": -3.5354145225517146,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_254",
+        "nombre": "SAN FRANCISCO",
+        "lineas": "11",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.37359884105576,
+        "lon": -3.739102929190019,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_72",
+        "nombre": "SAN LORENZO",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "16",
+        "lat": 40.47447073958695,
+        "lon": -3.639577276564596,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_236",
+        "nombre": "SAN NICASIO",
+        "lineas": "12",
+        "municipio": "074",
+        "distrito": "03",
+        "lat": 40.33616314789595,
+        "lon": -3.775873625300736,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_192",
+        "nombre": "SANTIAGO BERNABEU",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "05",
+        "lat": 40.45158917952577,
+        "lon": -3.6903793467348454,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_37",
+        "nombre": "SANTO DOMINGO",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.42131540813318,
+        "lon": -3.707955276656987,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_59",
+        "nombre": "SERRANO",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.42543215941902,
+        "lon": -3.6866304363833353,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_34",
+        "nombre": "SEVILLA",
+        "lineas": "2",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.41805074812411,
+        "lon": -3.699251138040337,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_25",
+        "nombre": "SIERRA DE GUADALUPE",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "13",
+        "lat": 40.3821642503006,
+        "lon": -3.6247174701487794,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_134",
+        "nombre": "SIMANCAS",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.4279923730252,
+        "lon": -3.625721672941209,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_12",
+        "nombre": "SOL",
+        "lineas": "1, 2, 3",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.41687606089402,
+        "lon": -3.703261648575282,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_35",
+        "nombre": "SOL",
+        "lineas": "1, 2, 3",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.4168474580948,
+        "lon": -3.7032613507552123,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_48",
+        "nombre": "SOL",
+        "lineas": "1, 2, 3",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.41681647165373,
+        "lon": -3.7032610281165037,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_76",
+        "nombre": "SUANZES",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.44085124307767,
+        "lon": -3.6268397441771407,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_347",
+        "nombre": "Sin nombre en el catálogo",
+        "lineas": "Sin información",
+        "municipio": "079",
+        "distrito": null,
+        "lat": 40.48328146040042,
+        "lon": -3.608697678727756,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_348",
+        "nombre": "Sin nombre en el catálogo",
+        "lineas": "Sin información",
+        "municipio": "079",
+        "distrito": null,
+        "lat": 40.48328146040042,
+        "lon": -3.608697678727756,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_3",
+        "nombre": "TETUAN",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.46055188266481,
+        "lon": -3.698249893972328,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_13",
+        "nombre": "TIRSO DE MOLINA",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.412348094110165,
+        "lon": -3.704655268799714,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_75",
+        "nombre": "TORRE ARIAS",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "20",
+        "lat": 40.443743296414574,
+        "lon": -3.616994705938824,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_274",
+        "nombre": "TRES OLIVOS",
+        "lineas": "10",
+        "municipio": "079",
+        "distrito": "08",
+        "lat": 40.50120462748204,
+        "lon": -3.6952024504667387,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_10",
+        "nombre": "TRIBUNAL",
+        "lineas": "1, 10",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.42618539559021,
+        "lon": -3.70109984950459,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_196",
+        "nombre": "TRIBUNAL",
+        "lineas": "1, 10",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.42599519678041,
+        "lon": -3.7020777488360026,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_213",
+        "nombre": "UNIVERSIDAD REY JUAN CARLOS",
+        "lineas": "12",
+        "municipio": "092",
+        "distrito": "02",
+        "lat": 40.335122976598605,
+        "lon": -3.8721796064244822,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_95",
+        "nombre": "URGEL",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.39335176845625,
+        "lon": -3.7236048242936626,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_109",
+        "nombre": "USERA",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "12",
+        "lat": 40.38709669326968,
+        "lon": -3.706895642789324,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_2",
+        "nombre": "VALDEACEDERAS",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.46442417859868,
+        "lon": -3.6950620375087544,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_179",
+        "nombre": "VALDEBERNARDO",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "19",
+        "lat": 40.40004712961799,
+        "lon": -3.6215591598085286,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_295",
+        "nombre": "VALDECARROS",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "18",
+        "lat": 40.360068133185166,
+        "lon": -3.59316035499877,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_148",
+        "nombre": "VALDEZARZA",
+        "lineas": "7",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.46482353283605,
+        "lon": -3.715972126851418,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_60",
+        "nombre": "VELAZQUEZ",
+        "lineas": "4",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.425032550864806,
+        "lon": -3.6829181480861983,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_28",
+        "nombre": "VENTAS",
+        "lineas": "2, 5",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.430884498813434,
+        "lon": -3.6636588664575465,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_81",
+        "nombre": "VENTAS",
+        "lineas": "2, 5",
+        "municipio": "079",
+        "distrito": "04",
+        "lat": 40.430884803194914,
+        "lon": -3.6636058417273496,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_163",
+        "nombre": "VENTILLA",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "06",
+        "lat": 40.46943537698728,
+        "lon": -3.6958833297651754,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_51",
+        "nombre": "VENTURA RODRIGUEZ",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "01",
+        "lat": 40.42708736443108,
+        "lon": -3.713413096705454,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_180",
+        "nombre": "VICALVARO",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "19",
+        "lat": 40.404215916403444,
+        "lon": -3.6088588260062022,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_123",
+        "nombre": "VICENTE ALEIXANDRE",
+        "lineas": "6",
+        "municipio": "079",
+        "distrito": "09",
+        "lat": 40.44643639934855,
+        "lon": -3.719426711968892,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_26",
+        "nombre": "VILLA DE VALLECAS",
+        "lineas": "1",
+        "municipio": "079",
+        "distrito": "18",
+        "lat": 40.379598611419055,
+        "lon": -3.621296484882349,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_273",
+        "nombre": "VILLAVERDE ALTO",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "17",
+        "lat": 40.34122865689154,
+        "lon": -3.7119902708686725,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_271",
+        "nombre": "VILLAVERDE BAJO CRUCE",
+        "lineas": "3",
+        "municipio": "079",
+        "distrito": "17",
+        "lat": 40.35089476396152,
+        "lon": -3.6926489418134363,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_176",
+        "nombre": "VINATEROS",
+        "lineas": "9",
+        "municipio": "079",
+        "distrito": "14",
+        "lat": 40.41023992779957,
+        "lon": -3.6527342071047637,
+        "fecha": "20260529"
+      },
+      {
+        "id": "4_97",
+        "nombre": "VISTA ALEGRE",
+        "lineas": "5",
+        "municipio": "079",
+        "distrito": "11",
+        "lat": 40.38884702575721,
+        "lon": -3.7398245500065785,
+        "fecha": "20260529"
+      }
+    ]
+  },
+  "ruido": {
+    "fuente": "Ayuntamiento de Madrid · Mapa Estratégico del Ruido 2021",
+    "periodo": "2021",
+    "url": "https://servpub.madrid.es/IDEAM_WBGEOPORTAL/dataset.iam?id=470b89af-5d64-41d3-8bdb-2fe6badd0364",
+    "download": "https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/MEDIO_AMBIENTE/INFORMACION_ACUSTICA/Mapa_Estrategico_Ruido_2021/MER2021.zip"
+  }
+}

@@ -1,3 +1,4 @@
+import { UrbanSources } from "./UrbanSources";
 import context from "@/lib/neighborhood/madrid-context.json";
 import modelResults from "@/app/presentacion/results-data.json";
 import madrid from "@/lib/neighborhood/madrid-official.json";
@@ -178,10 +179,7 @@ export default async function DatosPage() {
             <p className="mt-3 text-xs leading-relaxed text-stone-600">Todas las columnas cuentan actuaciones. «Personas» y «Patrimonio» son actuaciones relacionadas con esas materias; no recuentos de víctimas ni tasas por habitante.</p>
           </Collapsible>
         </DataCard>
-        <section className="mt-8 rounded-xl border border-hairline bg-paper-50 p-5" aria-labelledby="other-neighborhood-indicators">
-          <h3 id="other-neighborhood-indicators" className="font-display text-xl text-ink">Transporte, servicios, vida nocturna y tranquilidad</h3>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">El transporte se evalúa mediante el tiempo al trabajo en las fichas. Los índices de barrio de transporte, servicios, vida nocturna y tranquilidad todavía no tienen una medición verificada integrada. Las antiguas puntuaciones manuales no se muestran como datos reales.</p>
-        </section>
+        <UrbanSources />
 
         <DataCard title="Barrios de Madrid · superficie, población y densidad" estado="real" fuente={madrid.fuente} sourceLink={{ label: "Ayuntamiento de Madrid · tabla original (XLSX)", href: madrid.url }} meta="131 barrios · 1 enero 2026 · consulta 11 septiembre 2026">
           <p className="mb-4 text-sm leading-relaxed text-stone-600">Población y superficie describen el territorio. Complementan las referencias de zonas verdes y seguridad; no las sustituyen ni indican si un barrio es mejor para vivir.</p>
