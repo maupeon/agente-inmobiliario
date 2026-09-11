@@ -213,6 +213,7 @@ export function Dashboard() {
       if (ctrl.signal.aborted) return;
       const resultItems = data.items ?? [];
       setRecs(resultItems);
+      setEnrichCache({ key: JSON.stringify(searchProfile?.trabajo ?? null), map: Object.fromEntries(resultItems.map(r => [r.property.propertyCode, r.enrichment])) });
       setRecIntro(data.intro ?? null);
       setStorageError(!saveLastSearch(resultItems.map((r) => r.property), { source: "dashboard", filters: data.filters, recommendations: resultItems }));
     } catch (error: unknown) {
@@ -225,20 +226,16 @@ export function Dashboard() {
     }
   }
 
-  // ── Favoritos / búsqueda: enriquece lo que falta ──
+  // ── Actualiza los datos de las viviendas cuando cambia el destino o modo ──
   const enrichList = useMemo(
-    () => (source === "favoritos" ? favs.favorites : source === "busqueda" ? lastSearch : []),
-    [source, favs.favorites, lastSearch]
+    () => (source === "favoritos" ? favs.favorites : source === "busqueda" ? lastSearch : recs.map(r => r.property)),
+    [source, favs.favorites, lastSearch, recs]
   );
   const enrichListKey = enrichList.map((p) => p.propertyCode).join(",");
   const enrichments = enrichCache.key === enrichProfileKey ? enrichCache.map : EMPTY_ENRICH;
 
   useEffect(() => {
     const requestId = ++enrichRequestRef.current;
-    if (source === "para_ti") {
-      setEnriching(false);
-      return;
-    }
     const base = enrichCache.key === enrichProfileKey ? enrichCache.map : {};
     const missing = enrichList.filter((p) => !base[p.propertyCode]).slice(0, 24);
     if (missing.length === 0) {
@@ -281,9 +278,12 @@ export function Dashboard() {
       const scoringProfile = profile ? { ...profile, presupuestoMax: applied.precioMax ? Number(applied.precioMax) : undefined,
         ...(matchesZone ? {} : { zonaLat: undefined, zonaLon: undefined }) } : null;
       return recs.filter((r) => (profile?.imprescindibles ?? []).every((m) => satisfiesMust(r.property, m) !== false))
-        .map((r) => ({ property: r.property, enrichment: r.enrichment,
-        ...recommendationExplanation(r.property, r.enrichment, scoringProfile),
-        ...personalScore(r.property, r.enrichment, scoringProfile) }))
+        .map((r) => {
+          const enrichment = enrichments[r.property.propertyCode] ?? { ...r.enrichment, commute: null };
+          return { property: r.property, enrichment,
+            ...recommendationExplanation(r.property, enrichment, scoringProfile),
+            ...personalScore(r.property, enrichment, scoringProfile) };
+        })
         .sort((a, b) => b.score - a.score).map((r, i) => ({ ...r, rank: i + 1 }));
     }
     return enrichList.map((p) => ({
@@ -339,7 +339,7 @@ export function Dashboard() {
     favoritos: favs.favorites.length,
     busqueda: lastSearch.length,
   };
-  const busy = source === "para_ti" ? recLoading : enriching;
+  const busy = recLoading || enriching;
   const displayedFilters = hasSearched ? applied : form;
   const operationLabel = displayedFilters.operacion === "venta" ? "Comprar" : "Alquilar";
   const heading =
