@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { SiteNav } from "@/components/SiteNav";
 import { Logo } from "@/components/ui/Logo";
+import districtContext from "@/lib/neighborhood/madrid-context.json";
 import { MARKET_SOURCES } from "@/lib/market/presentation";
 
 export const metadata: Metadata = {
@@ -30,7 +31,7 @@ const STEPS = [
   {
     n: "04",
     t: "Mapa + explicación",
-    d: "Ordenamos hasta cinco viviendas por HabitIA Score. Puedes abrir cada ficha para ver los cuatro componentes, tus pesos, la cobertura de datos y por qué encaja.",
+    d: "Ordenamos hasta cinco viviendas por HabitIA Score. Las tarjetas muestran los cuatro subscores y la cobertura de datos. Despliega el cálculo para consultar tus pesos y la aportación de cada factor; abre la ficha para explorar la vivienda.",
   },
 ];
 
@@ -66,7 +67,9 @@ const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco:
   { fuente: "OpenRouteService", aporta: "Rutas; respaldos indicados como aproximados", estado: "proveedor", refresco: "Al calcular el trayecto" },
   { fuente: "Nominatim / OpenStreetMap", aporta: "Búsqueda de ubicaciones", estado: "proveedor", refresco: "Al localizar una dirección" },
   { fuente: "Referencia de alquiler", aporta: "La integración de SERPAVI está pendiente", estado: "no disponible", refresco: "Los ejemplos no se usan para valorar" },
-  { fuente: "Seguridad y calidad del barrio", aporta: "Retirados por falta de fuente verificable", estado: "no disponible", refresco: "No intervienen en el ranking" },
+  { fuente: "Ayuntamiento de Madrid · Zonas verdes", aporta: "Superficie municipal de zonas verdes por distrito", estado: "oficial", refresco: `Instantánea de ${districtContext.zonasVerdes.periodo}`, href: districtContext.zonasVerdes.url },
+  { fuente: "Policía Municipal de Madrid", aporta: "Actuaciones por distrito; no son una tasa de criminalidad", estado: "oficial", refresco: `Instantánea de ${districtContext.seguridad.periodo}`, href: districtContext.seguridad.url },
+  { fuente: "Zone · calidad del barrio", aporta: "Índice pendiente de indicadores comparables y metodología", estado: "no disponible", refresco: "Los datos de distrito no calculan Zone" },
 ];
 
 const STACK = [
@@ -167,9 +170,14 @@ export default function ComoFuncionaPage() {
           </div>
         </Section>
 
-        <Section eyebrow="Cada mañana" title="Tus tres viviendas del día">
+        <Section eyebrow="Tus favoritos" title="Qué ocurre con los anuncios guardados">
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">Los favoritos conservan una copia del anuncio. Si desaparece de Idealista, permanece guardado hasta que lo quites; no comprobamos automáticamente su disponibilidad. Abre el anuncio original para confirmarla.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Esta es una demo compartida del TFM: los favoritos y el historial de búsquedas se comparten entre visitantes. Tu perfil se configura en el navegador; la bandeja de notificaciones se identifica mediante una cookie de ese navegador.</p>
+        </Section>
+
+        <Section eyebrow="Cada mañana" title="Hasta cinco viviendas al día">
           <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Notificaciones puedes activar una selección diaria, editar la hora y pausarla cuando quieras. La hora inicial es 07:00, zona horaria Europe/Madrid. Se eligen hasta cinco viviendas según tu perfil y tu HabitIA Score; si hay menos candidatos, no se completa la selección con viviendas inventadas.</p>
-          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Los avisos se consultan en la bandeja de la aplicación. El aviso del navegador requiere permiso y la aplicación abierta; no se envían correos. La selección puede repetir viviendas si siguen siendo las que mejor encajan.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Cada selección muestra su fecha y el número real de viviendas: «Tu nuevo top 5 del día…». Los avisos se consultan en la bandeja de la aplicación. El aviso del navegador requiere permiso y la aplicación abierta; no se envían correos. La selección puede repetir viviendas si siguen siendo las que mejor encajan.</p>
           <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Al activarla autorizas una búsqueda diaria con tu perfil, respetando la caché y los límites del proveedor. Guarda los cambios en Notificaciones para actualizar ese perfil. La suscripción caduca tras 90 días sin guardar y la página muestra si el servicio está configurado.</p>
           <Link href="/notificaciones" className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-ink px-4 text-sm font-medium text-paper hover:bg-ink-700">Configurar notificaciones <ArrowRight aria-hidden size={16} /></Link>
         </Section>
@@ -212,6 +220,11 @@ export default function ComoFuncionaPage() {
           </div>
         </Section>
 
+        <Section eyebrow="El entorno" title="Datos de distrito, sin inventar un índice de barrio">
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Datos y fuentes puedes consultar población, superficie y densidad por barrio, además de zonas verdes y actuaciones policiales por distrito. La superficie verde publicada no mide proximidad a una vivienda y excluye los parques históricos, singulares y forestales del fichero separado. Las actuaciones policiales no equivalen a todos los delitos ni a una tasa de criminalidad.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Estos datos aportan contexto, pero no se atribuyen a cada barrio ni se convierten en un Zone Score. Los índices de servicios, vida nocturna y tranquilidad siguen pendientes. En alquiler usamos la renta del anuncio; la referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
+        </Section>
+
         {/* Arquitectura */}
         <Section eyebrow="La arquitectura" title="Qué habla con qué">
           <div className="rounded-xl border border-hairline bg-paper-50 p-6 font-mono text-[11px] leading-relaxed text-ink-700 sm:p-8">
@@ -223,7 +236,7 @@ export default function ComoFuncionaPage() {
             </Box>
             <div className="my-2 grid gap-2 sm:grid-cols-3">
               <SubBox>Idealista<br />(búsqueda)</SubBox>
-              <SubBox>lib/enrich<br />precio · referencia territorial · trayecto</SubBox>
+              <SubBox>lib/enrich<br />servicio Python de valoración · referencia territorial · trayecto</SubBox>
               <SubBox>ai-insights<br />Claude (Sonnet)</SubBox>
             </div>
             <Arrow label="lee referencias de mercado" />
@@ -270,8 +283,7 @@ export default function ComoFuncionaPage() {
         </div>
 
         <p className="mt-10 text-xs leading-relaxed text-mist">
-          Los indicadores de seguridad están retirados y la referencia de alquiler
-          no está integrada. Las explicaciones se generan con los datos disponibles;
+          El índice Zone y la referencia independiente de alquiler siguen pendientes. Las explicaciones se generan con los datos disponibles;
           si se usa narración con IA, puede equivocarse. Confirma precio, condiciones
           y disponibilidad en el anuncio original.
         </p>
