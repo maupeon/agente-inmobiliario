@@ -6,7 +6,7 @@ El modelo Python **no forma parte de este repositorio**. La aplicación contiene
 
 ## Qué necesitas
 
-Una instalación operativa del servicio v2 y sus artefactos compatibles. En la entrega de la memoria, sus instrucciones están en `memoria/servicio/README.md`; el contrato HTTP se implementa en `memoria/servicio/api.py`. Sigue allí la instalación de Python y del modelo. Clonar únicamente esta aplicación no instala ese servicio.
+Una instalación operativa del servicio v2 y sus artefactos compatibles. Sus instrucciones están en [habitia-tfm/servicio/README.md](https://github.com/maupeon/habitia-tfm/blob/main/servicio/README.md); el contrato HTTP se implementa en `servicio/api.py` de ese repositorio académico. El ZIP del modelo se obtiene de su release privada. Sigue allí la instalación de Python y del modelo. Clonar únicamente esta aplicación no instala ese servicio.
 
 Una vez arrancado, configura en `.env.local`:
 
