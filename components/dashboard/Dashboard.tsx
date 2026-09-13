@@ -369,7 +369,7 @@ export function Dashboard() {
             </h1>
             <p className="mt-2 max-w-[64ch] text-sm leading-relaxed text-stone-600 sm:text-base">
               {source === "para_ti"
-                ? "Compara las opciones por precio, zona y trayecto. Los indicadores son orientativos; confirma siempre la disponibilidad en el anuncio."
+                ? "Busca en Madrid capital y compara las opciones por precio, zona y trayecto. Los indicadores son orientativos; confirma siempre la disponibilidad en el anuncio."
                 : "Vuelve a tus viviendas y compáralas con el mismo contexto."}
             </p>
           </div>
@@ -684,7 +684,7 @@ function FilterBar({
         </div>
       </fieldset>
 
-      <Field label="Zona o ciudad" htmlFor="search-zone">
+      <Field label="Barrio o dirección de Madrid" htmlFor="search-zone">
         <input
           id="search-zone"
           value={form.zona}

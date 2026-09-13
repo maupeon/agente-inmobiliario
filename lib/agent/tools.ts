@@ -70,13 +70,13 @@ export const TOOL_DEFINITIONS = [
   {
     name: "buscar_propiedades",
     description:
-      "Busca propiedades inmobiliarias en Idealista según los criterios del usuario. Úsala cuando alguien quiera encontrar pisos, casas, locales u otros inmuebles. Si no tienes zona o presupuesto y son razonables para la búsqueda, pídeselos al usuario antes de llamar a esta herramienta.",
+      "Busca propiedades inmobiliarias en Idealista exclusivamente en Madrid capital, según los criterios del usuario. Úsala cuando alguien quiera encontrar pisos, casas, locales u otros inmuebles. Si no tienes zona o presupuesto y son razonables para la búsqueda, pídeselos al usuario antes de llamar a esta herramienta.",
     input_schema: {
       type: "object",
       properties: {
         zona: {
           type: "string",
-          description: "Ciudad, barrio o dirección. Ej: 'Chamberí Madrid', 'Barcelona centro', 'Triana Sevilla'.",
+          description: "Barrio o dirección de Madrid capital. Ej: 'Chamberí, Madrid', 'Retiro', 'Gran Vía 28, Madrid'. Otras ciudades y municipios no están disponibles.",
         },
         operacion: {
           type: "string",
@@ -148,7 +148,7 @@ export const TOOL_DEFINITIONS = [
         provincia: {
           type: "string",
           description:
-            "Provincia donde está la propiedad. Ej: 'Madrid', 'Barcelona', 'Vizcaya', 'Las Palmas'.",
+            "Provincia de la vivienda: Madrid. La búsqueda del proyecto cubre Madrid capital.",
         },
         precioM2: {
           type: "number",
@@ -172,7 +172,7 @@ export const TOOL_DEFINITIONS = [
       properties: {
         zona: {
           type: "string",
-          description: "Barrio o zona del piso. Ej: 'Malasaña', 'Eixample Barcelona'.",
+          description: "Barrio o zona del piso. Ej: 'Malasaña, Madrid', 'Chamberí, Madrid'.",
         },
         provincia: {
           type: "string",
@@ -221,7 +221,7 @@ export const TOOL_DEFINITIONS = [
       properties: {
         zona: {
           type: "string",
-          description: "Barrio o zona a consultar. Ej: 'Lavapiés', 'Gràcia Barcelona'.",
+          description: "Barrio o zona a consultar. Ej: 'Lavapiés, Madrid', 'Retiro, Madrid'.",
         },
         provincia: {
           type: "string",

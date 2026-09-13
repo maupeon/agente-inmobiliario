@@ -41,12 +41,12 @@ const SUGGESTIONS: Array<{ label: string; prompt: string; tone?: "primary" | "mu
     tone: "primary",
   },
   {
-    label: "Alquiler en Eixample, hasta 1.400 € al mes",
-    prompt: "Quiero alquilar un piso en el Eixample de Barcelona, máximo 1.400 € al mes.",
+    label: "Alquiler en Chamberí, hasta 1.400 € al mes",
+    prompt: "Quiero alquilar un piso en Chamberí, Madrid, máximo 1.400 € al mes.",
   },
   {
-    label: "Casa con jardín cerca de Sevilla",
-    prompt: "Estoy buscando una casa con jardín en los alrededores de Sevilla, presupuesto 280.000 €.",
+    label: "Piso con terraza en Retiro",
+    prompt: "Estoy buscando un piso con terraza en Retiro, Madrid, presupuesto 450.000 €.",
   },
   {
     label: "Cuota de un piso de 320.000 € a 30 años",
@@ -102,7 +102,7 @@ export function EmptyState({
               Editar perfil
             </button>
           ) : (
-            <span className="hidden sm:inline">IA conversacional · mercado español</span>
+            <span className="hidden sm:inline">IA conversacional · Madrid capital</span>
           )}
           <span className="tabular text-stone">№ 001</span>
         </div>

@@ -1,5 +1,8 @@
 import { NextRequest } from "next/server";
 import { geocodeAddress, reverseGeocode } from "@/lib/commute";
+import { resolveMadridLocation } from "@/lib/search-location";
+import { isMadridPoint, MADRID_SCOPE_MESSAGE } from "@/lib/search-scope";
+import { handleError } from "@/lib/errors";
 
 export const runtime = "nodejs";
 
@@ -14,10 +17,12 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const latRaw = searchParams.get("lat");
   const lonRaw = searchParams.get("lon");
+  const madridOnly = searchParams.get("scope") === "madrid";
 
   if (latRaw != null && lonRaw != null) {
     const lat = Number.parseFloat(latRaw);
     const lon = Number.parseFloat(lonRaw);
+    if (madridOnly && !isMadridPoint(lat, lon)) return Response.json({ result: null, error: MADRID_SCOPE_MESSAGE }, { status: 400 });
     if (Number.isNaN(lat) || Number.isNaN(lon)) {
       return Response.json({ result: null });
     }
@@ -27,6 +32,11 @@ export async function GET(req: NextRequest) {
 
   const q = searchParams.get("q")?.trim();
   if (!q) return Response.json({ result: null });
-  const result = await geocodeAddress(q);
-  return Response.json({ result });
+  try {
+    const result = madridOnly ? await resolveMadridLocation(q) : await geocodeAddress(q);
+    return Response.json({ result });
+  } catch (error) {
+    const friendly = handleError(error);
+    return Response.json({ result: null, error: friendly.userMessage }, { status: friendly.status });
+  }
 }

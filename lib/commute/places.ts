@@ -41,6 +41,12 @@ const PLACES: Record<string, GeoPoint> = {
   zaragoza: { lat: 41.6488, lon: -0.8891 },
 };
 
+export function lookupMadridPlace(name: string): GeoPoint | null {
+  const norm = normalize(name);
+  const key = norm === "madrid" || norm.endsWith(" madrid") ? norm : `${norm} madrid`;
+  return PLACES[key] ?? null;
+}
+
 export function lookupPlace(name: string): GeoPoint | null {
   const norm = normalize(name);
   if (PLACES[norm]) return PLACES[norm];

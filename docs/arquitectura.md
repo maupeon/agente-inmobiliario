@@ -90,3 +90,9 @@ El historial lista las últimas 50 conversaciones y hasta 200 mensajes por conve
 | `/api/cron/recommendations` | GET | Procesar una suscripción pendiente |
 
 Los cuerpos y validaciones concretos están en los correspondientes `route.ts` y en `types/index.ts`. Las API pertenecen al prototipo web; no se presentan como un servicio público independiente con cuentas o SLA.
+
+## Ámbito geográfico de búsqueda
+
+La versión actual busca viviendas en Madrid capital. `search-location.ts` valida texto, centro y radio antes de acceder a la caché, autenticación o cuota de Idealista, también en modo demo. No se admiten `locationId` opacos. `search-scope.ts` comprueba el límite derivado de los 131 barrios del paquete XGBoost y filtra los anuncios retornados por radios que cruzan el municipio, incluidas respuestas guardadas en caché.
+
+El inicio y el selector de vivienda usan `/api/geocode?scope=madrid`; los puntos del mapa se comprueban igualmente. La geocodificación general se conserva para el origen del trayecto. Las sugerencias y el prompt del agente explican Madrid capital; los perfiles antiguos fuera de ámbito deben corregirse antes de buscar.

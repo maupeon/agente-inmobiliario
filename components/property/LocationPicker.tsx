@@ -4,6 +4,7 @@ import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl/maplib
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MagnifyingGlass, MapPin } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { isMadridPoint, MADRID_CENTER, MADRID_SCOPE_MESSAGE } from "@/lib/search-scope";
 
 const MAP_STYLE = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 const SPAIN = { lat: 40.2, lon: -3.6, zoom: 4.7 };
@@ -23,6 +24,8 @@ interface LocationPickerProps {
   /** Color del pin (verde HabitIA para la zona, ink para el trabajo, p. ej.). */
   accent?: string;
   heightClass?: string;
+  /** La vivienda se limita a Madrid; el origen del trayecto puede estar fuera. */
+  madridOnly?: boolean;
 }
 
 export default function LocationPicker({
@@ -32,6 +35,7 @@ export default function LocationPicker({
   defaultCenter,
   accent = "#176547",
   heightClass = "h-[300px]",
+  madridOnly = false,
 }: LocationPickerProps) {
   const mapRef = useRef<MapRef | null>(null);
   const [query, setQuery] = useState("");
@@ -46,14 +50,19 @@ export default function LocationPicker({
     ? { longitude: value.lon, latitude: value.lat, zoom: 13 }
     : defaultCenter
     ? { longitude: defaultCenter.lon, latitude: defaultCenter.lat, zoom: defaultCenter.zoom ?? 11 }
+    : madridOnly ? { longitude: MADRID_CENTER.lon, latitude: MADRID_CENTER.lat, zoom: MADRID_CENTER.zoom }
     : { longitude: SPAIN.lon, latitude: SPAIN.lat, zoom: SPAIN.zoom };
 
   async function resolveAt(lat: number, lon: number) {
+    if (madridOnly && !isMadridPoint(lat, lon)) {
+      setError(MADRID_SCOPE_MESSAGE);
+      return;
+    }
     setPos({ lat, lon });
     setResolving(true);
     setError(null);
     try {
-      const res = await fetch(`/api/geocode?lat=${lat}&lon=${lon}`);
+      const res = await fetch(`/api/geocode?lat=${lat}&lon=${lon}${madridOnly ? "&scope=madrid" : ""}`);
       const { result } = (await res.json()) as { result: { label: string | null } | null };
       onChange({ lat, lon, label: result?.label ?? `${lat.toFixed(4)}, ${lon.toFixed(4)}` });
     } catch {
@@ -70,16 +79,17 @@ export default function LocationPicker({
     setSearching(true);
     setError(null);
     try {
-      const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
-      const { result } = (await res.json()) as {
+      const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}${madridOnly ? "&scope=madrid" : ""}`);
+      const { result, error: locationError } = (await res.json()) as {
         result: { lat: number; lon: number; label?: string } | null;
+        error?: string;
       };
-      if (result) {
+      if (result && (!madridOnly || isMadridPoint(result.lat, result.lon))) {
         setPos({ lat: result.lat, lon: result.lon });
         onChange({ lat: result.lat, lon: result.lon, label: result.label ?? q });
         mapRef.current?.flyTo({ center: [result.lon, result.lat], zoom: 13, duration: 700 });
       } else {
-        setError("No he encontrado ese sitio. Prueba otra búsqueda o haz clic en el mapa.");
+        setError(locationError ?? (madridOnly ? MADRID_SCOPE_MESSAGE : "No he encontrado ese sitio. Prueba otra búsqueda o haz clic en el mapa."));
       }
     } catch {
       setError("No he podido buscar ahora mismo. Haz clic en el mapa.");
@@ -155,7 +165,7 @@ export default function LocationPicker({
           <span className="text-stone">Busca arriba o toca el mapa para elegir.</span>
         )}
       </p>
-      {error && <p className="mt-1 text-xs text-rose-500">{error}</p>}
+      {error && <p role="alert" className="mt-1 text-xs text-rose-500">{error}</p>}
     </div>
   );
 }

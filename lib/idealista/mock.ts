@@ -31,18 +31,7 @@ const SEEDS: Seed[] = [
   { zona: "Arganzuela", municipio: "Madrid", provincia: "Madrid", lat: 40.3960, lon: -3.6960, alquilerM2: 18.0, ventaM2: 4500 },
   { zona: "Carabanchel", municipio: "Madrid", provincia: "Madrid", lat: 40.3840, lon: -3.7280, alquilerM2: 14.5, ventaM2: 3000 },
   { zona: "Vallecas", municipio: "Madrid", provincia: "Madrid", lat: 40.3920, lon: -3.6660, alquilerM2: 13.5, ventaM2: 2700 },
-  // ── Barcelona ──
-  { zona: "Eixample", municipio: "Barcelona", provincia: "Barcelona", lat: 41.3888, lon: 2.1590, alquilerM2: 20.5, ventaM2: 5200 },
-  { zona: "Gràcia", municipio: "Barcelona", provincia: "Barcelona", lat: 41.4030, lon: 2.1560, alquilerM2: 19.5, ventaM2: 4700 },
-  { zona: "Ciutat Vella", municipio: "Barcelona", provincia: "Barcelona", lat: 41.3810, lon: 2.1770, alquilerM2: 21.0, ventaM2: 4600 },
-  { zona: "Sant Martí", municipio: "Barcelona", provincia: "Barcelona", lat: 41.4180, lon: 2.2000, alquilerM2: 19.0, ventaM2: 4600 },
-  { zona: "Sants", municipio: "Barcelona", provincia: "Barcelona", lat: 41.3750, lon: 2.1380, alquilerM2: 17.5, ventaM2: 3900 },
-  // ── Valencia ──
-  { zona: "Ruzafa", municipio: "Valencia", provincia: "Valencia", lat: 39.4590, lon: -0.3730, alquilerM2: 13.5, ventaM2: 2700 },
-  { zona: "El Carmen", municipio: "Valencia", provincia: "Valencia", lat: 39.4790, lon: -0.3790, alquilerM2: 13.0, ventaM2: 2500 },
-  // ── Sevilla ──
-  { zona: "Triana", municipio: "Sevilla", provincia: "Sevilla", lat: 37.3860, lon: -6.0060, alquilerM2: 11.5, ventaM2: 2400 },
-  { zona: "Nervión", municipio: "Sevilla", provincia: "Sevilla", lat: 37.3800, lon: -5.9760, alquilerM2: 11.0, ventaM2: 2500 },
+
 ];
 
 const STREET_PREFIXES = ["Calle de", "Calle de", "Travesía de", "Plaza de", "Avenida de"];

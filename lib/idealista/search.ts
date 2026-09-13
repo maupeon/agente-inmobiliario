@@ -4,8 +4,8 @@ import type { Property, SearchFilters } from "@/types";
 import { getAccessToken } from "./auth";
 import { mockSearch } from "./mock";
 import { reserveIdealistaRequest } from "./usage";
-import { lookupPlace } from "@/lib/commute/places";
-import { geocodeAddress } from "@/lib/commute";
+import { validateMadridSearch } from "@/lib/search-location";
+import { isMadridProperty } from "@/lib/search-scope";
 
 const BASE_URL = process.env.IDEALISTA_BASE_URL ?? "https://api.idealista.com/3.5/";
 
@@ -48,29 +48,13 @@ function bedroomsFilter(min?: number): string | null {
 }
 
 /**
- * Resuelve la `zona` (texto) a coordenadas: primero el gazetteer offline y, si
- * falla, Nominatim. La API de búsqueda EXIGE `center`+`distance` o `locationId`,
- * así que sin centro no hay búsqueda posible.
- */
-async function resolveCenter(
-  zona: string
-): Promise<{ lat: number; lon: number } | null> {
-  const q = (zona ?? "").trim();
-  if (!q) return null;
-  const local = lookupPlace(q);
-  if (local) return { lat: local.lat, lon: local.lon };
-  const geo = await geocodeAddress(q);
-  if (geo) return { lat: geo.lat, lon: geo.lon };
-  return null;
-}
-
-/**
  * Construye los parámetros del POST /search a partir de los filtros del agente.
  * Async porque puede geocodificar la zona para obtener el centro.
  */
 async function buildSearchParams(
   filters: SearchFilters,
-  maxItems: number
+  maxItems: number,
+  center: { lat: number; lon: number }
 ): Promise<URLSearchParams> {
   const params = new URLSearchParams();
   params.set("country", "es");
@@ -84,22 +68,8 @@ async function buildSearchParams(
   params.set("maxItems", String(Math.min(Math.max(1, maxItems), 50)));
   params.set("numPage", "1");
 
-  // Ancla geográfica: locationId (si se conoce) o center+distance (geocodificado).
-  if (filters.locationId) {
-    params.set("locationId", filters.locationId);
-  } else {
-    const center = filters.centro ?? (await resolveCenter(filters.zona));
-    if (!center) {
-      throw new IdealistaError(
-        `no se pudo resolver la zona "${filters.zona}" a coordenadas`,
-        {
-          userMessage: `No he conseguido situar "${filters.zona}" en el mapa. Prueba con un barrio o una ciudad más concretos.`,
-        }
-      );
-    }
-    params.set("center", `${center.lat},${center.lon}`);
-    params.set("distance", String(filters.radioMetros ?? DEFAULT_RADIUS_M));
-  }
+  params.set("center", `${center.lat},${center.lon}`);
+  params.set("distance", String(filters.radioMetros ?? DEFAULT_RADIUS_M));
 
   if (filters.precioMin) params.set("minPrice", String(filters.precioMin));
   if (filters.precioMax) params.set("maxPrice", String(filters.precioMax));
@@ -195,14 +165,15 @@ export async function searchProperties(
   if (typeof filters.zona !== "string" || filters.zona.length > 200 || !["venta", "alquiler"].includes(filters.operacion)
     || [filters.precioMin, filters.precioMax, filters.metrosMin, filters.metrosMax, filters.habitaciones].some((v) => v !== undefined && (!Number.isFinite(v) || v < 0))) throw new ValidationError("invalid search filters", "Revisa la zona, la operación y los límites numéricos de la búsqueda.");
   maxItems = Math.max(1, Math.min(24, Math.floor(maxItems)));
+  const center = await validateMadridSearch(filters);
   if (process.env.MOCK_IDEALISTA === "true") {
-    return mockSearch(filters, maxItems).map((p) => ({ ...p, sourceKind: "demo" as const }));
+    return mockSearch(filters, maxItems).filter(isMadridProperty).map((p) => ({ ...p, sourceKind: "demo" as const }));
   }
 
-  const params = await buildSearchParams(filters, maxItems);
+  const params = await buildSearchParams(filters, maxItems, center);
   const url = `${BASE_URL.replace(/\/$/, "")}/es/search`;
 
-  return cachedSearch(params.toString(), async () => {
+  const properties = await cachedSearch(params.toString(), async () => {
   const token = await getAccessToken();
   await reserveIdealistaRequest();
   const res = await fetch(url, {
@@ -225,4 +196,5 @@ export async function searchProperties(
   const list = data.elementList ?? [];
   return list.map((el) => normalizeProperty(el, filters.operacion));
   });
+  return properties.filter(isMadridProperty);
 }

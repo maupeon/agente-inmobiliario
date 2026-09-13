@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { ArrowLeft, ArrowRight, Check } from "@phosphor-icons/react";
 import { DEFAULT_SCORE_WEIGHTS, SCORE_LABELS, scoreWeights, validScoreWeights } from "@/lib/personal-score";
 import { cn } from "@/lib/utils";
+import { isMadridPoint } from "@/lib/search-scope";
 import type {
   CommuteMode,
   Hogar,
@@ -78,7 +79,7 @@ export function Onboarding({
     initial?.tipo ?? "pisos"
   );
   const [zone, setZone] = useState<PickedLocation | null>(
-    initial?.zona && initial.zonaLat != null && initial.zonaLon != null
+    initial?.zona && initial.zonaLat != null && initial.zonaLon != null && isMadridPoint(initial.zonaLat, initial.zonaLon)
       ? { lat: initial.zonaLat, lon: initial.zonaLon, label: initial.zona }
       : null
   );
@@ -228,19 +229,20 @@ export function Onboarding({
               </ChoiceGroup>
 
               <div>
-                <p className="mb-2 text-sm font-medium text-ink">Zona donde quieres vivir</p>
+                <p className="mb-2 text-sm font-medium text-ink">Zona de Madrid capital donde quieres vivir</p>
                 <LocationPicker
                   value={zone}
+                  madridOnly
                   onChange={(nextZone) => {
                     setZone(nextZone);
                     setZoneError(false);
                   }}
                   accent="#176547"
-                  searchPlaceholder="Barrio o ciudad: Chamberí, Madrid…"
+                  searchPlaceholder="Barrio de Madrid: Chamberí, Retiro…"
                 />
                 {zoneError && (
                   <p role="alert" className="mt-2 text-sm font-medium text-rose-500">
-                    Elige una zona para poder buscar viviendas.
+                    Elige una zona de Madrid capital para buscar viviendas.
                   </p>
                 )}
               </div>

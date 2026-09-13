@@ -7,23 +7,39 @@ import { cn } from "@/lib/utils";
 
 type Operation = "alquiler" | "venta";
 
-const POPULAR_ZONES = ["Madrid", "Barcelona", "Valencia"];
+const POPULAR_ZONES = ["Madrid", "Chamberí", "Retiro"];
 
 export function HeroSearch() {
   const router = useRouter();
   const [operation, setOperation] = useState<Operation>("alquiler");
   const [zone, setZone] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
 
-  function launchSearch() {
+  async function launchSearch() {
+    if (searching) return;
     const cleanZone = zone.trim();
     if (!cleanZone) {
-      setError(true);
+      setError("Escribe un barrio o una dirección de Madrid.");
       return;
     }
 
-    const params = new URLSearchParams({ zona: cleanZone, operacion: operation });
-    router.push(`/dashboard?${params.toString()}`);
+    setSearching(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/geocode?scope=madrid&q=${encodeURIComponent(cleanZone)}`);
+      const data = await response.json();
+      if (!response.ok || !data.result) {
+        setError(data.error ?? "No he conseguido situar esa zona de Madrid.");
+        return;
+      }
+      const params = new URLSearchParams({ zona: data.result.label ?? cleanZone, operacion: operation });
+      router.push(`/dashboard?${params.toString()}`);
+    } catch {
+      setError("No he podido comprobar la ubicación. Vuelve a intentarlo.");
+    } finally {
+      setSearching(false);
+    }
   }
 
   return (
@@ -62,7 +78,7 @@ export function HeroSearch() {
 
       <div className="mt-2 grid gap-2 sm:grid-cols-[1fr,auto]">
         <label className="relative block">
-          <span className="sr-only">Barrio, ciudad o municipio</span>
+          <span className="sr-only">Barrio o dirección de Madrid</span>
           <MapPin
             aria-hidden
             size={20}
@@ -73,11 +89,11 @@ export function HeroSearch() {
             value={zone}
             onChange={(event) => {
               setZone(event.target.value);
-              if (error) setError(false);
+              if (error) setError(null);
             }}
             autoComplete="address-level2"
-            placeholder="Barrio, ciudad o municipio"
-            aria-invalid={error}
+            placeholder="Barrio o dirección de Madrid"
+            aria-invalid={!!error}
             aria-describedby={error ? "hero-search-error" : undefined}
             className={cn(
               "h-14 w-full rounded-xl border bg-paper-50 pl-12 pr-4 text-base text-ink shadow-nudge placeholder:text-stone-400 focus:outline-none",
@@ -88,28 +104,29 @@ export function HeroSearch() {
 
         <button
           type="submit"
+          disabled={searching}
           className="pressable inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-ink px-6 font-medium text-paper shadow-lift hover:bg-ink-700"
         >
           <MagnifyingGlass aria-hidden size={18} weight="bold" className="text-saffron-300" />
-          Buscar viviendas
+          {searching ? "Comprobando zona…" : "Buscar viviendas"}
         </button>
       </div>
 
       <div className="flex min-h-8 flex-wrap items-center gap-x-2 gap-y-1 px-2 pt-2.5 text-sm text-stone">
         {error ? (
           <p id="hero-search-error" role="alert" className="text-rose-500">
-            Escribe una zona para empezar.
+            {error}
           </p>
         ) : (
           <>
-            <span className="mr-1 text-stone-600">Zonas populares:</span>
+            <span className="mr-1 text-stone-600">Madrid capital:</span>
             {POPULAR_ZONES.map((item) => (
               <button
                 key={item}
                 type="button"
                 onClick={() => {
                   setZone(item);
-                  setError(false);
+                  setError(null);
                 }}
                 className="pressable rounded-full px-2 py-1 text-saffron-700 hover:bg-saffron-50"
               >

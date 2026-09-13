@@ -61,8 +61,8 @@ export async function recommend(input: RecommendInput): Promise<RecommendResult>
     tipo: input.tipo ?? profile?.tipo ?? "pisos",
     precioMax,
     habitaciones,
-    // Coordenadas exactas del punto elegido en el mapa del onboarding: evita
-    // geocodificar la zona y centra la búsqueda donde el usuario marcó.
+    // Conserva el punto del mapa; la búsqueda comprueba tanto sus coordenadas
+    // como la zona para impedir que un perfil antiguo eluda el ámbito de Madrid.
     centro:
       usesProfileZone && profile?.zonaLat != null && profile?.zonaLon != null
         ? { lat: profile.zonaLat, lon: profile.zonaLon }
