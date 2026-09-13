@@ -43,6 +43,11 @@ export interface ValoracionModeloV3 extends Omit<ValoracionModeloV2,
   model_id: "habitIA-xgboost-2018-v3";
   modelo: "arboles_desplegable_ajustado";
   modelo_sha256: string;
+  /** Desde 3.1: operación y unidades de la comparación; 3.0 solo admitía venta. */
+  operation?: "sale" | "rent";
+  precio_comparacion?: number;
+  unidad_comparacion?: "EUR" | "EUR/mes";
+  /** Valor de venta del inmueble en euros, también para anuncios de alquiler. */
   precio_estimado: number;
   precio_estimado_base: number;
   intervalo: null;
@@ -70,8 +75,15 @@ export interface ValoracionModeloV3 extends Omit<ValoracionModeloV2,
 
 export type ValoracionModelo = ValoracionModeloV2 | ValoracionModeloV3;
 
+export function operacionValoracion(v: ValoracionModelo): "sale" | "rent" {
+  return v.model_id === "habitIA-xgboost-2018-v3" && v.operation === "rent" ? "rent" : "sale";
+}
+
+/** Importe comparable con el anuncio: mensual en alquiler, total en venta. */
 export function precioEstimado(v: ValoracionModelo): number {
-  return v.model_id === "habitIA-xgboost-2018-v3" ? v.precio_estimado : v.precio_justo;
+  return v.model_id === "habitIA-xgboost-2018-v3"
+    ? v.operation === "rent" ? v.renta_mensual_estimada : v.precio_estimado
+    : v.precio_justo;
 }
 
 export interface RespuestaValoracion {

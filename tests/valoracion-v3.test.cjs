@@ -102,3 +102,68 @@ test('Idealista normalizer and chat tool preserve description and structured par
   assert.equal(observed.description, anuncio.description);
   assert.equal(observed.parkingSpace.hasParkingSpace, true);
 });
+
+const mixed = require('./fixtures/valoracion-v3-mixed.json');
+test('v3.1 compares sale totals and monthly rent in the same HTTP batch', async () => {
+  let posted;
+  const load = loader(mixed.respuesta, {}, data => { posted = data; });
+  const batch = await load('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
+  assert.equal(batch.resultados.size, 2);
+  assert.equal(posted.anuncios[1].operation, 'rent');
+  assert.equal(posted.anuncios[1].price, 1500);
+  const rent = batch.resultados.get(mixed.anuncios[1].propertyCode);
+  assert.equal(rent.unidad_comparacion, 'EUR/mes');
+  assert.equal(load('lib/valoracion/types.ts').precioEstimado(rent), rent.renta_mensual_estimada);
+  assert.equal(rent.precio_estimado, mixed.respuesta.resultados[0].precio_estimado);
+  assert(Math.abs(rent.brecha_pct) < 1);
+});
+
+test('rent rejects sale responses, incompatible units and inconsistent comparison amounts', async () => {
+  const rental = mixed.anuncios[1];
+  for (const changed of [{ operation: 'sale' }, { unidad_comparacion: 'EUR' },
+    { precio_comparacion: mixed.respuesta.resultados[1].precio_estimado },
+    { brecha_pct: (1500 / mixed.respuesta.resultados[1].precio_estimado - 1) * 100 }]) {
+    const response = { ...mixed.respuesta, resultados: [{ ...mixed.respuesta.resultados[1], ...changed }] };
+    assert.equal((await loader(response)('lib/valoracion/client.ts').valorarLoteConEstado([rental])).resultados.size, 0);
+  }
+  // Even an internally coherent sale response must not be used for a rental request.
+  for (const response of [respuesta, mixed.respuesta]) {
+    const body = { ...response, resultados: [{ ...response.resultados[0], propertyCode: rental.propertyCode }] };
+    assert.equal((await loader(body)('lib/valoracion/client.ts').valorarLoteConEstado([rental])).resultados.size, 0);
+  }
+});
+
+test('rental enrichment uses monthly rent per square metre and explicit derivation without Fair points', async () => {
+  const load = loader(mixed.respuesta, {
+    '@/lib/market/cache': { getMarketData: async () => ({ data: { data: [] }, fromFallback: true }) },
+    '@/lib/market/match-province': { findProvincePrice: () => null },
+    '@/lib/market/rent': { findRentReference: () => null },
+  });
+  const [sale, rent] = await load('lib/enrich.ts').enrichProperties(mixed.anuncios);
+  assert.equal(sale.valuation.operacion, 'venta');
+  assert.equal(rent.valuation.operacion, 'alquiler');
+  assert.equal(rent.valuation.precioEstimado, mixed.respuesta.resultados[1].renta_mensual_estimada);
+  assert.equal(rent.valuation.referenciaEurM2, 18.8);
+  assert(rent.valuation.avisoModelo.includes('2024'));
+  assert(rent.valuation.referencia.includes('renta derivada'));
+  assert.equal(rent.valuation.banda, null);
+  assert.equal(rent.valuation.intervalo, undefined);
+  assert(load('lib/dashboard-format.ts').priceComparison(rent.valuation).includes('renta mensual estimada'));
+  assert.equal(load('lib/personal-score.ts').personalScore(mixed.anuncios[1], rent, null).scoring.components.find(c => c.key === 'fair').value, null);
+});
+
+test('chat requires the observed operation and preserves rental monthly price', async () => {
+  let observed;
+  const load = loader(mixed.respuesta, {
+    '@/lib/valoracion/client': { valorarLoteConEstado: async ps => {
+      observed = ps[0]; return { resultados: new Map(), estados: new Map() };
+    } },
+  });
+  const tool = load('lib/agent/tools/valorar-vivienda.ts').runValorarVivienda;
+  const rental = mixed.anuncios[1];
+  const result = await tool(rental);
+  assert.equal(observed.operation, 'rent');
+  assert.equal(observed.price, 1500);
+  assert.equal(result.operation, 'rent');
+  await assert.rejects(tool({ ...rental, operation: undefined }));
+});

@@ -50,11 +50,12 @@ import type {
 export const TOOL_DEFINITIONS = [
   {
     name: "valorar_vivienda",
-    description: "Estima el precio de oferta de un piso de compra en Madrid con el mismo modelo que el panel. Usa solo campos observados de buscar_propiedades o aportados por el usuario; no inventes coordenadas ni características. Es un escenario indexado desde anuncios2018, no un precio de compraventa ni una ganga validada. Respeta estado y advertencias; si no responde, dilo.",
+    description: "Estima un piso de compra o alquiler en Madrid con el mismo predictor que el panel. Conserva operation del anuncio: sale compara euros totales, rent compara euros al mes con la renta derivada del valor de venta y ratios distritales de 2024. El alquiler no tiene validación independiente. Usa solo campos observados de buscar_propiedades o aportados por el usuario; no inventes coordenadas ni características. Respeta estado, unidades y advertencias.",
     input_schema: {
       type: "object", additionalProperties: false,
       properties: {
         propertyCode: { type: "string" }, price: { type: "number" }, size: { type: "number" },
+        operation: { type: "string", enum: ["sale", "rent"], description: "Operación observada: price es mensual para rent y total para sale." },
         latitude: { type: "number" }, longitude: { type: "number" }, municipality: { type: "string" },
         propertyType: { type: "string" }, rooms: { type: "number" }, bathrooms: { type: "number" },
         floor: { type: "string" }, hasLift: { type: "boolean" }, exterior: { type: "boolean" },
@@ -63,7 +64,7 @@ export const TOOL_DEFINITIONS = [
         sourceKind: { type: "string", enum: ["idealista", "demo"] },
         detailedType: { type: "object", properties: { typology: { type: "string" }, subTypology: { type: "string" } } },
       },
-      required: ["propertyCode", "price", "size", "latitude", "longitude", "municipality", "propertyType"],
+      required: ["propertyCode", "operation", "price", "size", "latitude", "longitude", "municipality", "propertyType"],
     },
   },
   {
@@ -165,7 +166,7 @@ export const TOOL_DEFINITIONS = [
   {
     name: "valorar_alquiler",
     description:
-      "Valora si la renta de un alquiler es cara o barata comparándola con la referencia €/m²/mes de la zona (o de la provincia como respaldo). Úsala proactivamente cuando presentes pisos en alquiler, y siempre que el usuario pregunte si una renta está bien de precio. Necesitas la zona, la renta mensual y los metros del piso. Los datos de referencia son orientativos: dilo al verbalizarlos.",
+      "Consulta una referencia territorial documentada de renta en €/m²/mes. Para estimar un anuncio de alquiler con sus atributos y coordenadas usa valorar_vivienda con operation=rent. Esta herramienta territorial requiere zona, renta mensual y metros; si falta una fuente verificada, indica la ausencia y no clasifiques el alquiler como barato o caro.",
     input_schema: {
       type: "object",
       properties: {

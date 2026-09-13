@@ -219,11 +219,11 @@ export function PropertyDetailDrawer({
           {val?.nivel === "modelo" && (
             <section className="rounded-xl border border-hairline bg-paper-50 p-5">
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-saffron-700">
-                {val.nivel === "modelo" ? "Precio frente a la estimación" : "Referencia territorial"}
+                {val.nivel === "modelo" ? op === "alquiler" ? "Alquiler frente a la estimación" : "Precio frente a la estimación" : "Referencia territorial"}
               </p>
               <div className="mt-2 flex flex-col items-start gap-2 sm:flex-row sm:items-baseline">
                 <span className="whitespace-nowrap font-display text-3xl" style={{ color: val.banda ? bandaColor(val.banda) : undefined }}>
-                  {priceLabel(val) ?? (val.precioEstimado != null ? `${formatNumber(Math.round(val.precioEstimado))} €` : "Estimación disponible")}
+                  {priceLabel(val) ?? (val.precioEstimado != null ? `${formatNumber(Math.round(val.precioEstimado))} ${op === "alquiler" ? "€/mes" : "€"}` : "Estimación disponible")}
                 </span>
                 <span className="text-sm text-ink-700">{priceComparison(val)}</span>
               </div>
@@ -233,7 +233,7 @@ export function PropertyDetailDrawer({
                   {op === "alquiler"
                     ? `${val.eurM2} €/m²·mes`
                     : `${formatNumber(Math.round(val.eurM2))} €/m²`}{" "}
-                  · {val.nivel === "modelo" ? "estimación indexada ≈" : `${val.referencia ?? "referencia territorial"} ≈`}{" "}
+                  · {val.nivel === "modelo" ? op === "alquiler" ? "renta estimada ≈" : "estimación indexada ≈" : `${val.referencia ?? "referencia territorial"} ≈`}{" "}
                   {op === "alquiler"
                     ? `${val.referenciaEurM2} €/m²·mes`
                     : `${formatNumber(Math.round(val.referenciaEurM2))} €/m²`}
@@ -253,12 +253,14 @@ export function PropertyDetailDrawer({
               )}
               <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-mist">
                 {val.nivel === "modelo"
-                  ? `Oferta 2018 · escenario ${val.nivelPrecios ?? "sin periodo"} · ${val.modeloVersion ?? "versión no identificada"}`
+                  ? op === "alquiler"
+                    ? `Venta ${val.nivelPrecios} × ratios renta ${val.rentaEscenario?.ano} · ${val.modeloVersion}`
+                    : `Oferta 2018 · escenario ${val.nivelPrecios ?? "sin periodo"} · ${val.modeloVersion ?? "versión no identificada"}`
                   : val.referenciaEurM2 == null ? "Sin referencia verificada" : "Referencia territorial orientativa"}
               </p>
               {val.nivel !== "modelo" && val.referenciaEurM2 != null && <p className="mt-1 text-[11px] text-stone">{val.fuente} · {formatMarketPeriod(val.periodo ?? "Sin periodo")}</p>}
               {val.avisoModelo && <p className="mt-2 text-xs leading-relaxed text-stone-600">{val.avisoModelo}{val.estadoModelo !== "ok" && val.referenciaEurM2 != null ? " La referencia territorial mostrada no valora esta vivienda individualmente." : ""}</p>}
-              {val.rentaEscenario && <p className="mt-3 text-xs leading-relaxed text-stone-600">Escenario de renta: {formatNumber(Math.round(val.rentaEscenario.mensual))} €/mes. Derivado de ratios distritales de {val.rentaEscenario.ano}; alquiler no validado.</p>}
+              {op === "venta" && val.rentaEscenario && <p className="mt-3 text-xs leading-relaxed text-stone-600">Escenario de renta: {formatNumber(Math.round(val.rentaEscenario.mensual))} €/mes. Derivado de ratios distritales de {val.rentaEscenario.ano}; alquiler no validado.</p>}
               {!!val.advertencias?.length && <details className="mt-3 text-xs leading-relaxed text-stone-600">
                 <summary className="cursor-pointer">Datos utilizados y límites de la estimación</summary>
                 <ul className="mt-2 list-disc space-y-1 pl-4">{val.advertencias.map((warning) => <li key={warning}>{warning}</li>)}</ul>

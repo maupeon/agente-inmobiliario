@@ -151,6 +151,7 @@ export interface Conversation {
 }
 
 export interface PurchaseValuation {
+  operation?: "sale" | "rent";
   propertyCode: string;
   resultado: ValoracionModelo | null;
   estado: "ok" | "fuera_ambito" | "datos_insuficientes" | "no_disponible";

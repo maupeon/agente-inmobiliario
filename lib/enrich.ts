@@ -7,7 +7,7 @@ import { findRentReference } from "@/lib/market/rent";
 import { buildNeighborhoodReport } from "@/lib/neighborhood/report";
 import { valorarLoteConEstado } from "@/lib/valoracion/client";
 import type { ValoracionModelo } from "@/lib/valoracion/types";
-import { precioEstimado } from "@/lib/valoracion/types";
+import { precioEstimado, operacionValoracion } from "@/lib/valoracion/types";
 import type {
   CommuteMode,
   CommuteResult,
@@ -55,7 +55,7 @@ export async function enrichProperties(
       valuation: (() => {
         const v = conComparativa(desdeModelo(p, porModelo.get(p.propertyCode)), valuate(p, rentRef, prices));
         const state = lote.estados.get(p.propertyCode);
-        return v && p.operation === "sale" ? { ...v, estadoModelo: state?.estado, avisoModelo: state?.motivo } : v;
+        return v ? { ...v, estadoModelo: state?.estado, avisoModelo: state?.motivo } : v;
       })(),
       neighborhood: buildNeighborhoodReport(zonaOf(p), provinciaOf(p)),
       commute: await commuteFor(p, origen, modoPreferido),
@@ -95,18 +95,21 @@ function desdeModelo(
   p: Property,
   v: ValoracionModelo | undefined
 ): PropertyValuation | null {
-  if (!v || p.size <= 0) return null;
+  if (!v || p.size <= 0 || operacionValoracion(v) !== p.operation) return null;
+  const rental = p.operation === "rent";
   const eurM2 = p.pricePerSqm ?? round1(p.price / p.size);
   const banda = (v.banda ?? null) as Banda | null;
   return {
-    operacion: "venta",
+    operacion: rental ? "alquiler" : "venta",
     eurM2,
     referenciaEurM2: round1(precioEstimado(v) / p.size),
     diferenciaPorcentual: v.brecha_pct,
     etiqueta: v.brecha_pct == null ? null : v.brecha_pct < -4 ? "por debajo de la estimación indexada" : v.brecha_pct > 8 ? "por encima de la estimación indexada" : "cerca de la estimación indexada",
     banda,
     nivel: "modelo",
-    referencia: `oferta 2018 · escenario indexado a ${v.nivel_precios}`,
+    referencia: rental && v.model_id === "habitIA-xgboost-2018-v3"
+      ? `renta derivada · venta ${v.nivel_precios} × ratios renta ${v.ano_renta}`
+      : `oferta 2018 · escenario indexado a ${v.nivel_precios}`,
     fromFallback: false,
     intervalo: v.intervalo ?? undefined,
     oportunidad: v.oportunidad,

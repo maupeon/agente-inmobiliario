@@ -17,12 +17,14 @@ El ZIP está en `06_modelo/` de la entrega local. Los seis archivos se comprueba
 
 ## Contrato y presentación
 
-- Identidad: `habitIA-xgboost-2018-v3`, versión `3.0.0`, objetivo `precio_anunciado`.
+- Identidad: `habitIA-xgboost-2018-v3`, versión `3.1.0`, objetivo `precio_anunciado`.
 - Entrenamiento 2018; venta indexada por distrito a 2025. No se aplica de nuevo el factor 1,5534 de v2.
-- 21 variables; pisos de venta de Madrid capital de hasta 367 m². Se requieren superficie, habitaciones, baños, tipología, municipio y coordenadas observadas.
+- 21 variables; pisos de compra o alquiler de Madrid capital de hasta 367 m². Se requieren superficie, habitaciones, baños, tipología, municipio y coordenadas observadas.
 - La búsqueda y el chat conservan `description`, `parkingSpace.hasParkingSpace`, `operation` y los otros atributos. La ausencia de descripción o garaje se convierte en ausencia para el modelo y se advierte.
 - Máximo 24 anuncios. La API valida cada fila antes de preparar geometrías y devuelve errores individuales sin anular los resultados válidos.
 - `precio_estimado` y `brecha_pct` son estimaciones puntuales. `intervalo` y `banda` son null; no hay oportunidades ni SHAP exportado. Fair no aporta puntos con v3 y sus pesos no se redistribuyen.
+- Para probarlo: **Panel → Comprar o Alquilar → Piso → Madrid → Buscar → Ver detalles**. En alquiler se muestra y compara la mensualidad en €/mes.
+- El contrato 3.1 añade `operation`, `precio_comparacion` y `unidad_comparacion`. `precio_estimado` conserva siempre el valor de venta; para `rent`, `precio_comparacion` es la renta mensual y `brecha_pct` compara mensualidades. La web rechaza operaciones o unidades incompatibles y conserva compatibilidad con venta v3.0.
 - La renta mensual es un escenario derivado de ratios distritales de 2024, con `alquiler_validado=false`. No se traslada automáticamente a la calculadora.
 - Las advertencias identifican datos ausentes, planta imputada, barrio rescatado y valores fuera de rango. El cliente comprueba fechas, identidad, coherencia aritmética y duplicados.
 

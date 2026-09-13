@@ -120,7 +120,7 @@ GitHub Actions ejecuta la misma verificación en los pushes a `main` y en las pu
 ## 6. Alcance académico
 
 - El modelo externo estima **precios anunciados de venta de Madrid de 2018**. Su indexación temporal es un escenario; no valida la precisión en anuncios actuales ni en precios de compraventa.
-- El predictor XGBoost v3 utiliza 21 variables y un índice de venta por distrito a 2025. No incluye intervalos calibrados ni bandas: Fair queda sin puntos. Su renta es un escenario derivado de ratios de 2024. Los resultados LightGBM de la presentación siguen identificados como evaluación histórica de otro modelo.
+- El predictor XGBoost v3 utiliza 21 variables y un índice de venta por distrito a 2025. No incluye intervalos calibrados ni bandas: Fair queda sin puntos. Admite anuncios de compra y alquiler (contrato 3.1.0): compara el precio total de venta o la mensualidad en €/mes. Su renta deriva del valor de venta estimado y ratios de 2024, sin validación independiente de alquiler. Los resultados LightGBM de la presentación siguen identificados como evaluación histórica de otro modelo.
 - La evaluación es retrospectiva y agrupada por inmueble. Las cifras de la presentación conservan su procedencia; los resultados exploratorios anteriores están identificados como antecedentes.
 - El HabitIA Score combina Fair, Opportunity, Zone y Lifestyle. Los componentes sin evidencia no aportan puntos y sus pesos no se redistribuyen. Actualmente Opportunity y Zone no cuentan con datos verificables para puntuar.
 - Las fuentes oficiales de barrio aportan contexto. Sus recuentos no se convierten en índices de seguridad o calidad de vida.

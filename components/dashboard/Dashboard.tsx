@@ -937,7 +937,7 @@ function PropertyRow({
         </div>
       </div>
 
-      {val?.avisoModelo && <p className="mt-3 text-xs leading-relaxed text-stone-600">{val.nivel === "modelo" ? `Oferta 2018 · escenario ${val.nivelPrecios}. Precisión actual no validada.` : val.avisoModelo}</p>}
+      {val?.avisoModelo && <p className="mt-3 text-xs leading-relaxed text-stone-600">{val.nivel === "modelo" && val.operacion === "venta" ? `Oferta 2018 · escenario ${val.nivelPrecios}. Precisión actual no validada.` : val.avisoModelo}</p>}
       {rationale && <p className="mt-3 text-sm leading-relaxed text-ink-700">{rationale}</p>}
 
       <ScoreBreakdown score={item.score} scoring={item.scoring} />

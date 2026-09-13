@@ -77,7 +77,7 @@ const STACK = [
   "Next.js 14 (App Router, SSR + SSE)",
   "Claude — chat y explicaciones opcionales",
   "Python + FastAPI — servicio de valoración",
-  "XGBoost — estimación puntual de venta indexada a 2025",
+  "XGBoost — venta indexada y renta mensual derivada",
   "MapLibre GL + teselas CARTO (sin clave)",
   "Supabase (Postgres) — caché y persistencia",
   "OpenRouteService — routing",
@@ -225,7 +225,7 @@ export default function ComoFuncionaPage() {
 
         <Section eyebrow="El entorno" title="Datos de distrito, sin inventar un índice de barrio">
           <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Datos y fuentes puedes consultar población, superficie y densidad por barrio, además de zonas verdes y actuaciones policiales por distrito. La superficie verde publicada no mide proximidad a una vivienda y excluye los parques históricos, singulares y forestales del fichero separado. Las actuaciones policiales no equivalen a todos los delitos ni a una tasa de criminalidad.</p>
-          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Estos datos aportan contexto, pero no se atribuyen a cada barrio ni se convierten en un Zone Score. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito, y acceso al mapa de ruido de tráfico de 2021. Son referencias fechadas, no índices de calidad de vida ni mediciones para cada anuncio. En alquiler usamos la renta del anuncio; la referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Estos datos aportan contexto, pero no se atribuyen a cada barrio ni se convierten en un Zone Score. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito, y acceso al mapa de ruido de tráfico de 2021. Son referencias fechadas, no índices de calidad de vida ni mediciones para cada anuncio. En alquiler comparamos la mensualidad del anuncio con la renta derivada del predictor cuando hay datos suficientes. La referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
         </Section>
 
         {/* Arquitectura */}
@@ -235,7 +235,7 @@ export default function ComoFuncionaPage() {
           <div className="mt-5 space-y-3 text-sm leading-relaxed text-stone-600">
             <p><Strong>Dónde está cada parte.</Strong> Vercel aloja la web y el backend; Fly.io aloja el servicio Python del modelo; Supabase aloja PostgreSQL; Anthropic ofrece la API de Claude. Desde el navegador puedes buscar, conversar, comparar compra y alquiler, guardar favoritos y activar avisos.</p>
             <p><Strong>El modelo ya está entrenado.</Strong> La preparación del histórico, el ajuste y la calibración se realizan fuera de la búsqueda. El servicio carga el artefacto evaluado; consultar una vivienda no vuelve a entrenarlo. El escenario indexado no acredita precisión actual en 2026.</p>
-            <p><Strong>Cada pieza tiene una función.</Strong> El predictor XGBoost estima el precio anunciado a nivel de 2025 con datos de 2018. Ofrece una cifra y sus advertencias, sin intervalos calibrados ni bandas de barato o caro; por eso Fair no aporta puntos con este modelo. Claude conecta herramientas y explica sus resultados. La renta que acompaña a la estimación deriva de ratios distritales de 2024 y no constituye una valoración de alquiler validada. La evaluación LightGBM de la presentación pertenece al estudio histórico.</p>
+            <p><Strong>Cada pieza tiene una función.</Strong> El predictor XGBoost estima el precio anunciado a nivel de 2025 con datos de 2018. Ofrece una cifra y sus advertencias, sin intervalos calibrados ni bandas de barato o caro; por eso Fair no aporta puntos con este modelo. Claude conecta herramientas y explica sus resultados. Las fichas de alquiler comparan mensualidades en €/mes: la renta estimada resulta del precio de venta indexado a 2025 multiplicado por ratios distritales de 2024. No constituye una valoración de alquiler validada. La evaluación LightGBM de la presentación pertenece al estudio histórico.</p>
             <p><Strong>Persistencia y tareas diarias.</Strong> Supabase (PostgreSQL) guarda cachés, favoritos, historial y suscripciones. Vercel programa la actualización de referencias de mercado. Supabase programa las llamadas al backend que preparan hasta cinco recomendaciones diarias para las suscripciones activas. Los datos urbanos de «Datos y fuentes» son copias fechadas y no alimentan automáticamente Zone.</p>
           </div>
 

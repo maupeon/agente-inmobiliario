@@ -2,6 +2,7 @@ import "server-only";
 import type { Property } from "@/types";
 import { isRecord } from "@/lib/api-validation";
 import type { AnuncioParaValorar, RespuestaValoracion, ValoracionModelo, ValoracionModeloV2, ValoracionModeloV3 } from "./types";
+import { operacionValoracion } from "./types";
 const URL_BASE = process.env.VALORACION_URL;
 const TOKEN = process.env.VALORACION_TOKEN;
 const TIMEOUT_MS = Math.min(20_000, Math.max(1000, Number(process.env.VALORACION_TIMEOUT_MS) || 10_000));
@@ -54,10 +55,17 @@ function validResultV3(value: unknown, codes: Set<string>): value is ValoracionM
     || !isRecord(value.calidad) || !["sin_descripcion", "planta_imputada", "ascensor_desde_descripcion", "barrio_rescatado"].every((key) => isRecord(value.calidad) && typeof value.calidad[key] === "boolean")
     || (value.calidad.fuera_de_rango !== null && typeof value.calidad.fuera_de_rango !== "string")) return false;
   const close = (a: number, b: number) => Math.abs(a - b) <= Math.max(0.01, Math.abs(b) * 1e-6);
+  const legacySale = /^3\.0\./.test(value.model_version);
+  const reference = value.operation === "rent" ? value.renta_mensual_estimada : value.precio_estimado;
+  if (legacySale) {
+    if (value.operation != null || value.precio_comparacion != null || value.unidad_comparacion != null) return false;
+  } else if (!["sale", "rent"].includes(String(value.operation)) || !finitePositive(value.precio_comparacion)
+    || value.unidad_comparacion !== (value.operation === "rent" ? "EUR/mes" : "EUR")
+    || !close(value.precio_comparacion, reference)) return false;
   return close(value.precio_estimado, value.precio_estimado_base * value.factor_escenario)
     && close(value.renta_mensual_estimada, value.precio_estimado * value.factor_renta_mensual)
     && (value.precio_anunciado === null ? value.brecha_pct === null
-      : typeof value.brecha_pct === "number" && close(value.brecha_pct, (value.precio_anunciado / value.precio_estimado - 1) * 100));
+      : typeof value.brecha_pct === "number" && close(value.brecha_pct, (value.precio_anunciado / reference - 1) * 100));
 }
 
 function validResult(value: unknown, codes: Set<string>): value is ValoracionModelo {
@@ -66,7 +74,7 @@ function validResult(value: unknown, codes: Set<string>): value is ValoracionMod
 export function valoracionDisponible(): boolean { return Boolean(URL_BASE); }
 export function esValorable(p: Property): boolean {
   const type = p.propertyType?.toLowerCase();
-  return p.operation === "sale" && p.municipality?.trim().toLowerCase() === "madrid"
+  return ["sale", "rent"].includes(p.operation) && p.municipality?.trim().toLowerCase() === "madrid"
     && Number.isFinite(p.latitude) && Number.isFinite(p.longitude)
     && p.latitude! >= 40.30 && p.latitude! <= 40.55 && p.longitude! >= -3.90 && p.longitude! <= -3.50
     && p.size >= 20 && p.size <= 1000
@@ -86,7 +94,7 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
   const estados = new Map<string, EstadoValoracion>();
   const candidates = properties.filter((p) => {
     if (esValorable(p)) return true;
-    estados.set(p.propertyCode, { estado: "fuera_ambito", motivo: "El modelo requiere piso de compra en Madrid capital, superficie de 20–1.000 m², tipología admitida y coordenadas." });
+    estados.set(p.propertyCode, { estado: "fuera_ambito", motivo: "Se requiere un piso de compra o alquiler en Madrid capital, superficie admitida y coordenadas. XGBoost admite hasta 367 m²." });
     return false;
   });
   const fail = (motivo: string) => {
@@ -95,6 +103,7 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
   };
   if (!candidates.length) return { resultados, estados };
   const candidateCodes = new Set(candidates.map((p) => p.propertyCode));
+  const candidateOperations = new Map(candidates.map((p) => [p.propertyCode, p.operation]));
   if (!URL_BASE) return fail("El servicio del modelo no está configurado.");
   if (candidates.length > MAX_VALORACION_BATCH) return fail("El lote supera el máximo de 24 anuncios.");
   try {
@@ -118,11 +127,14 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
     const data = raw as RespuestaValoracion;
     for (const v of data.resultados) {
       if (!validResult(v, candidateCodes) || v.model_version !== data.model_version || v.nivel_precios !== data.nivel_precios
+        || operacionValoracion(v) !== candidateOperations.get(v.propertyCode)
         || (data.model_id != null && v.model_id !== data.model_id)
         || data.resultados.filter((row) => row?.propertyCode === v.propertyCode).length !== 1) continue;
       resultados.set(v.propertyCode, v);
       estados.set(v.propertyCode, { estado: "ok", motivo: v.model_id === "habitIA-xgboost-2018-v3"
-        ? "Estimación de oferta a nivel de 2025. Sin intervalo calibrado; precisión actual no validada."
+        ? v.operation === "rent"
+          ? "Renta mensual derivada de la venta estimada a nivel de 2025 y ratios distritales de 2024. Alquiler no validado; sin intervalo calibrado."
+          : "Estimación de oferta a nivel de 2025. Sin intervalo calibrado; precisión actual no validada."
         : "Estimación de oferta histórica indexada. No demuestra precisión en precios actuales." });
     }
     return fail("El servicio no devolvió una valoración válida de un modelo compatible para este anuncio.");
