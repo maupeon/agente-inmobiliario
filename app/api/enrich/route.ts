@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   let body: EnrichRequestBody;
   try {
-    const raw = await readJson(req);
+    const raw = await readJson(req, 400_000);
     if (!isRecord(raw) || !Array.isArray(raw.properties) || raw.properties.length > MAX_PROPERTIES || !raw.properties.every(validProperty)) throw new ValidationError("invalid properties");
     body = { properties: raw.properties, profile: validatedProfile(raw.profile) };
   } catch {

@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const limit = rateLimit(`valoracion:${requestIp(req)}`);
   if (!limit.ok) return Response.json({ error: "Demasiadas consultas." }, { status: 429, headers: { "Retry-After": String(limit.retryAfter) } });
   try {
-    const body = await readJson(req, 60_000);
+    const body = await readJson(req, 400_000);
     if (!isRecord(body) || !Array.isArray(body.properties) || !body.properties.length || body.properties.length > MAX_VALORACION_BATCH) return Response.json({ error: "Envía entre 1 y 24 anuncios." }, { status: 400 });
     if (!body.properties.every((p: unknown) => isRecord(p) && typeof p.propertyCode === "string" && p.propertyCode.length <= 80 && typeof p.propertyType === "string" && ["sale", "rent"].includes(String(p.operation)) && Number.isFinite(p.size) && Number.isFinite(p.price) && Number(p.price) > 0 && (p.municipality === undefined || typeof p.municipality === "string"))) return Response.json({ error: "Hay anuncios con datos inválidos." }, { status: 400 });
     const batch = await valorarLoteConEstado(body.properties as Property[]);

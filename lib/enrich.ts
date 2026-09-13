@@ -7,6 +7,7 @@ import { findRentReference } from "@/lib/market/rent";
 import { buildNeighborhoodReport } from "@/lib/neighborhood/report";
 import { valorarLoteConEstado } from "@/lib/valoracion/client";
 import type { ValoracionModelo } from "@/lib/valoracion/types";
+import { precioEstimado } from "@/lib/valoracion/types";
 import type {
   CommuteMode,
   CommuteResult,
@@ -100,17 +101,22 @@ function desdeModelo(
   return {
     operacion: "venta",
     eurM2,
-    referenciaEurM2: round1(v.precio_justo / p.size),
+    referenciaEurM2: round1(precioEstimado(v) / p.size),
     diferenciaPorcentual: v.brecha_pct,
     etiqueta: v.brecha_pct == null ? null : v.brecha_pct < -4 ? "por debajo de la estimación indexada" : v.brecha_pct > 8 ? "por encima de la estimación indexada" : "cerca de la estimación indexada",
     banda,
     nivel: "modelo",
     referencia: `oferta 2018 · escenario indexado a ${v.nivel_precios}`,
     fromFallback: false,
-    intervalo: v.intervalo,
+    intervalo: v.intervalo ?? undefined,
     oportunidad: v.oportunidad,
     nivelPrecios: v.nivel_precios,
     modeloVersion: v.model_version,
+    modeloId: v.model_id,
+    precioEstimado: precioEstimado(v),
+    advertencias: v.advertencias,
+    rentaEscenario: v.model_id === "habitIA-xgboost-2018-v3"
+      ? { mensual: v.renta_mensual_estimada, ano: v.ano_renta, metodo: v.metodo_renta } : undefined,
   };
 }
 

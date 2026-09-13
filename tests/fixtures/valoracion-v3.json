@@ -1,0 +1,77 @@
+{
+  "anuncio": {
+    "propertyCode": "sintetico-1",
+    "operation": "sale",
+    "municipality": "Madrid",
+    "propertyType": "flat",
+    "size": 80,
+    "rooms": 2,
+    "bathrooms": 1,
+    "latitude": 40.4168,
+    "longitude": -3.7038,
+    "floor": "2",
+    "hasLift": true,
+    "price": 450000,
+    "description": "Piso con terraza, aire acondicionado, armarios empotrados y trastero.",
+    "parkingSpace": {
+      "hasParkingSpace": true
+    }
+  },
+  "respuesta": {
+    "resultados": [
+      {
+        "propertyCode": "sintetico-1",
+        "estado": "ok",
+        "model_id": "habitIA-xgboost-2018-v3",
+        "model_version": "3.0.0",
+        "modelo": "arboles_desplegable_ajustado",
+        "modelo_sha256": "5d29cd26889cc0777196f592aa9828b18cc7d71ccd1a05ee61a95f0a44741a04",
+        "objetivo": "precio_anunciado",
+        "periodo_entrenamiento": "2018",
+        "extrapolacion_temporal": true,
+        "precision_actual_validada": false,
+        "clasificacion_validada": false,
+        "nivel_precios": "2025",
+        "ano_base": 2018,
+        "ano_precio": 2025,
+        "ano_renta": 2024,
+        "factor_escenario": 1.4862215162,
+        "precio_estimado_base": 358314.0625,
+        "precio_estimado": 532534.0692388825,
+        "precio_anunciado": 450000.0,
+        "brecha_pct": -15.498364143507903,
+        "intervalo": null,
+        "banda": null,
+        "oportunidad": false,
+        "sobrevalorado": false,
+        "barrio_code": "016",
+        "distrito_code": "01",
+        "renta_mensual_estimada": 1505.2798707364,
+        "factor_renta_mensual": 0.0028266358,
+        "alquiler_validado": false,
+        "metodo_renta": "ratio_distrital_2024",
+        "advertencias": [
+          "Estimación de precio anunciado con datos de 2018, indexada a 2025. Precisión actual no validada.",
+          "El paquete no incluye intervalos calibrados ni clasificación validada de barato o caro.",
+          "No observa estado de conservación, condición de ático, vistas ni parcela.",
+          "La renta es un escenario derivado del precio de venta y ratios distritales de 2024; no un modelo de alquiler validado."
+        ],
+        "calidad": {
+          "sin_descripcion": false,
+          "planta_imputada": false,
+          "ascensor_desde_descripcion": false,
+          "barrio_rescatado": false,
+          "fuera_de_rango": null
+        }
+      }
+    ],
+    "errores": [],
+    "ms": 0,
+    "model_id": "habitIA-xgboost-2018-v3",
+    "model_version": "3.0.0",
+    "nivel_precios": "2025",
+    "objetivo": "precio_anunciado",
+    "extrapolacion_temporal": true,
+    "precision_actual_validada": false
+  }
+}

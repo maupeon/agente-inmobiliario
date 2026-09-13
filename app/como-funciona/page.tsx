@@ -77,7 +77,7 @@ const STACK = [
   "Next.js 14 (App Router, SSR + SSE)",
   "Claude — chat y explicaciones opcionales",
   "Python + FastAPI — servicio de valoración",
-  "LightGBM — estimación de precio e intervalos calibrados",
+  "XGBoost — estimación puntual de venta indexada a 2025",
   "MapLibre GL + teselas CARTO (sin clave)",
   "Supabase (Postgres) — caché y persistencia",
   "OpenRouteService — routing",
@@ -235,7 +235,7 @@ export default function ComoFuncionaPage() {
           <div className="mt-5 space-y-3 text-sm leading-relaxed text-stone-600">
             <p><Strong>Dónde está cada parte.</Strong> Vercel aloja la web y el backend; Fly.io aloja el servicio Python del modelo; Supabase aloja PostgreSQL; Anthropic ofrece la API de Claude. Desde el navegador puedes buscar, conversar, comparar compra y alquiler, guardar favoritos y activar avisos.</p>
             <p><Strong>El modelo ya está entrenado.</Strong> La preparación del histórico, el ajuste y la calibración se realizan fuera de la búsqueda. El servicio carga el artefacto evaluado; consultar una vivienda no vuelve a entrenarlo. El escenario indexado no acredita precisión actual en 2026.</p>
-            <p><Strong>Cada pieza tiene una función.</Strong> LightGBM estima el precio; la calibración añade el intervalo; el código calcula Fair y el resto del score disponible. Claude conecta herramientas y explica sus resultados. Si el servicio se abstiene o falla, Fair queda sin dato. El modelo de venta no se aplica al alquiler.</p>
+            <p><Strong>Cada pieza tiene una función.</Strong> El predictor XGBoost estima el precio anunciado a nivel de 2025 con datos de 2018. Ofrece una cifra y sus advertencias, sin intervalos calibrados ni bandas de barato o caro; por eso Fair no aporta puntos con este modelo. Claude conecta herramientas y explica sus resultados. La renta que acompaña a la estimación deriva de ratios distritales de 2024 y no constituye una valoración de alquiler validada. La evaluación LightGBM de la presentación pertenece al estudio histórico.</p>
             <p><Strong>Persistencia y tareas diarias.</Strong> Supabase (PostgreSQL) guarda cachés, favoritos, historial y suscripciones. Vercel programa la actualización de referencias de mercado. Supabase programa las llamadas al backend que preparan hasta cinco recomendaciones diarias para las suscripciones activas. Los datos urbanos de «Datos y fuentes» son copias fechadas y no alimentan automáticamente Zone.</p>
           </div>
 

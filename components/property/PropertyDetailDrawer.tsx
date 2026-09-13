@@ -201,8 +201,8 @@ export function PropertyDetailDrawer({
                 ))}
               </div>
             )}
-            {detail?.description && (
-              <p className="mt-3 text-sm leading-relaxed text-stone-600">{detail.description}</p>
+            {(detail?.description || p.description) && (
+              <p className="mt-3 text-sm leading-relaxed text-stone-600">{detail?.description || p.description}</p>
             )}
             <a
               href={p.sourceKind === "demo" ? undefined : p.url}
@@ -221,9 +221,9 @@ export function PropertyDetailDrawer({
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-saffron-700">
                 {val.nivel === "modelo" ? "Precio frente a la estimación" : "Referencia territorial"}
               </p>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="font-display text-3xl" style={{ color: bandaColor(val.banda) }}>
-                  {priceLabel(val) ?? "Sin valoración individual"}
+              <div className="mt-2 flex flex-col items-start gap-2 sm:flex-row sm:items-baseline">
+                <span className="whitespace-nowrap font-display text-3xl" style={{ color: val.banda ? bandaColor(val.banda) : undefined }}>
+                  {priceLabel(val) ?? (val.precioEstimado != null ? `${formatNumber(Math.round(val.precioEstimado))} €` : "Estimación disponible")}
                 </span>
                 <span className="text-sm text-ink-700">{priceComparison(val)}</span>
               </div>
@@ -239,8 +239,7 @@ export function PropertyDetailDrawer({
                     : `${formatNumber(Math.round(val.referenciaEurM2))} €/m²`}
                 </p>
               )}
-              {/* Con el modelo hay intervalo: se enseña, porque un número solo
-                  finge una precisión que no tenemos. */}
+              {val.modeloId === "habitIA-xgboost-2018-v3" && <p className="mt-2 text-xs text-stone-600">Estimación puntual · sin intervalo calibrado ni clasificación de barato o caro.</p>}
               {val.nivel === "modelo" && val.intervalo && (
                 <p className="mt-1 font-mono text-[11px] text-stone">
                   Intervalo del escenario {formatNumber(val.intervalo[0])} –{" "}
@@ -259,6 +258,11 @@ export function PropertyDetailDrawer({
               </p>
               {val.nivel !== "modelo" && val.referenciaEurM2 != null && <p className="mt-1 text-[11px] text-stone">{val.fuente} · {formatMarketPeriod(val.periodo ?? "Sin periodo")}</p>}
               {val.avisoModelo && <p className="mt-2 text-xs leading-relaxed text-stone-600">{val.avisoModelo}{val.estadoModelo !== "ok" && val.referenciaEurM2 != null ? " La referencia territorial mostrada no valora esta vivienda individualmente." : ""}</p>}
+              {val.rentaEscenario && <p className="mt-3 text-xs leading-relaxed text-stone-600">Escenario de renta: {formatNumber(Math.round(val.rentaEscenario.mensual))} €/mes. Derivado de ratios distritales de {val.rentaEscenario.ano}; alquiler no validado.</p>}
+              {!!val.advertencias?.length && <details className="mt-3 text-xs leading-relaxed text-stone-600">
+                <summary className="cursor-pointer">Datos utilizados y límites de la estimación</summary>
+                <ul className="mt-2 list-disc space-y-1 pl-4">{val.advertencias.map((warning) => <li key={warning}>{warning}</li>)}</ul>
+              </details>}
             </section>
           )}
 

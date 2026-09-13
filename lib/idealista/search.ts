@@ -113,6 +113,8 @@ async function buildSearchParams(
 }
 
 export interface IdealistaSearchResponseElement {
+  description?: string;
+  parkingSpace?: { hasParkingSpace?: boolean };
   propertyCode: string;
   thumbnail?: string;
   url?: string;
@@ -157,6 +159,9 @@ export function normalizeProperty(
     title,
     price: raw.price,
     pricePerSqm: raw.priceByArea,
+    description: typeof raw.description === "string" ? raw.description.slice(0, 12000) : undefined,
+    parkingSpace: typeof raw.parkingSpace?.hasParkingSpace === "boolean"
+      ? { hasParkingSpace: raw.parkingSpace.hasParkingSpace } : undefined,
     size: raw.size,
     rooms,
     bathrooms: raw.bathrooms,

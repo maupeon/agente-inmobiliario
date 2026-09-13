@@ -2,7 +2,7 @@
 
 export type BandaValoracion = "barato" | "ajustado" | "en_linea" | "caro" | "muy_caro";
 
-export interface ValoracionModelo {
+export interface ValoracionModeloV2 {
   propertyCode: string;
   estado: "ok";
   model_version: string;
@@ -37,7 +37,45 @@ export interface ValoracionModelo {
   nivel_precios: string;
 }
 
+/** Paquete XGBoost: estimación puntual anual, sin intervalos ni bandas calibradas. */
+export interface ValoracionModeloV3 extends Omit<ValoracionModeloV2,
+  "model_id" | "precio_justo" | "intervalo" | "banda" | "oportunidad" | "sobrevalorado" | "explicacion" | "seccion_censal" | "barrio" | "distrito"> {
+  model_id: "habitIA-xgboost-2018-v3";
+  modelo: "arboles_desplegable_ajustado";
+  modelo_sha256: string;
+  precio_estimado: number;
+  precio_estimado_base: number;
+  intervalo: null;
+  banda: null;
+  oportunidad: false;
+  sobrevalorado: false;
+  explicacion?: never;
+  ano_base: 2018;
+  ano_precio: 2025;
+  ano_renta: 2024;
+  barrio_code: string;
+  distrito_code: string;
+  renta_mensual_estimada: number;
+  factor_renta_mensual: number;
+  alquiler_validado: false;
+  metodo_renta: "ratio_distrital_2024";
+  calidad: {
+    sin_descripcion: boolean;
+    planta_imputada: boolean;
+    ascensor_desde_descripcion: boolean;
+    barrio_rescatado: boolean;
+    fuera_de_rango: string | null;
+  };
+}
+
+export type ValoracionModelo = ValoracionModeloV2 | ValoracionModeloV3;
+
+export function precioEstimado(v: ValoracionModelo): number {
+  return v.model_id === "habitIA-xgboost-2018-v3" ? v.precio_estimado : v.precio_justo;
+}
+
 export interface RespuestaValoracion {
+  model_id?: ValoracionModelo["model_id"];
   resultados: ValoracionModelo[];
   errores?: Array<{ indice: number; propertyCode?: string; estado: string; detalle: string }>;
   ms: number;
@@ -62,5 +100,8 @@ export interface AnuncioParaValorar {
   longitude: number;
   propertyType?: string;
   municipality?: string;
+  operation: "sale" | "rent";
+  description?: string;
+  parkingSpace?: { hasParkingSpace?: boolean };
   detailedType?: { typology?: string; subTypology?: string };
 }

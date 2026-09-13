@@ -58,6 +58,8 @@ export const TOOL_DEFINITIONS = [
         latitude: { type: "number" }, longitude: { type: "number" }, municipality: { type: "string" },
         propertyType: { type: "string" }, rooms: { type: "number" }, bathrooms: { type: "number" },
         floor: { type: "string" }, hasLift: { type: "boolean" }, exterior: { type: "boolean" },
+        description: { type: "string", maxLength: 12000, description: "Descripción literal observada del anuncio; el predictor extrae sus características." },
+        parkingSpace: { type: "object", properties: { hasParkingSpace: { type: "boolean" } } },
         sourceKind: { type: "string", enum: ["idealista", "demo"] },
         detailedType: { type: "object", properties: { typology: { type: "string" }, subTypology: { type: "string" } } },
       },

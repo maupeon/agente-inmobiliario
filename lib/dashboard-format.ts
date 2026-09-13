@@ -52,7 +52,7 @@ export function priceLabel(v?: PropertyValuation | null): "Barato" | "Justo" | "
   return v.banda === "barato" || v.banda === "ajustado" ? "Barato" : v.banda === "en_linea" ? "Justo" : "Caro";
 }
 export function priceComparison(v?: PropertyValuation | null): string {
-  if (!priceLabel(v) || v?.diferenciaPorcentual == null) return v?.referenciaEurM2 != null ? "referencia territorial disponible, sin valoración individual" : "no hay estimación individual comparable";
+  if (!v || v.nivel !== "modelo" || v.estadoModelo !== "ok" || v.fromFallback || v.diferenciaPorcentual == null) return v?.referenciaEurM2 != null ? "referencia territorial disponible, sin valoración individual" : "no hay estimación individual comparable";
   const diff = Math.abs(Math.round(v.diferenciaPorcentual));
   return diff === 0 ? "precio cercano a la estimación del escenario indexado" : `${diff}% ${v.diferenciaPorcentual < 0 ? "por debajo" : "por encima"} de la estimación del escenario indexado`;
 }

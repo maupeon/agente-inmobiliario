@@ -1,5 +1,7 @@
 # Conectar el servicio de valoración
 
+**Predictor nuevo:** consulta [XGBoost v3](modelo-xgboost.md) para la integración del 13 de septiembre, con 21 variables y venta indexada a 2025. Esta página conserva las instrucciones del LightGBM v2 histórico, que el cliente sigue admitiendo para reversión. Sus intervalos y métricas no se atribuyen a XGBoost.
+
 [Volver al README](../README.md)
 
 El modelo Python **no forma parte de este repositorio**. La aplicación contiene su cliente HTTP y los resultados agregados utilizados por la presentación. El código de entrenamiento, los artefactos LightGBM y el servicio FastAPI se entregan por separado con la memoria del TFM.

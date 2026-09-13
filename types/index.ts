@@ -124,6 +124,7 @@ export interface Property {
   thumbnail: string;
   url: string;
   description?: string;
+  parkingSpace?: { hasParkingSpace?: boolean };
   photos?: string[];
   features?: string[];
   hasLift?: boolean;
@@ -335,6 +336,10 @@ export interface PropertyValuation {
   /** Trimestre al que está renivelada la estimación, p. ej. "2026T1". */
   nivelPrecios?: string;
   modeloVersion?: string;
+  modeloId?: ValoracionModelo["model_id"];
+  precioEstimado?: number;
+  advertencias?: string[];
+  rentaEscenario?: { mensual: number; ano: number; metodo: string };
   avisoModelo?: string;
   estadoModelo?: "ok" | "fuera_ambito" | "datos_insuficientes" | "no_disponible";
   /** Contexto territorial verificado; no clasifica ni valora esta vivienda. */

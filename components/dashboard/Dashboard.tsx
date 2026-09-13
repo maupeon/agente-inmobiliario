@@ -471,7 +471,9 @@ export function Dashboard() {
           )}
 
           <div className="hidden sm:block">
-            <Legend />
+            {items.some((item) => item.enrichment?.valuation?.banda != null)
+              ? <Legend />
+              : items.length > 0 && <p className="text-xs text-stone">Precios de los anuncios · estimación en la ficha</p>}
           </div>
         </div>
 

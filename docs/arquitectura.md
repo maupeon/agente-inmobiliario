@@ -31,7 +31,7 @@ flowchart TD
 | Score | `lib/personal-score.ts` | Pesos, evidencias disponibles y filtros obligatorios |
 | Agente | `lib/agent/` | Prompt, ejecución de herramientas y conversación |
 | Proveedores | `lib/idealista/`, `lib/commute/`, `lib/market/` | Adaptación, caché y procedencia de datos |
-| Modelo externo | `lib/valoracion/` | Contrato v2 y estados por anuncio |
+| Modelo externo | `lib/valoracion/` | Contratos XGBoost v3 y LightGBM v2; estados por anuncio |
 | Persistencia | `lib/supabase/`, `lib/shared-demo.ts` | API de demo compartida y cliente del navegador |
 | Finanzas | `lib/finance/` | Cálculo determinista de compra frente a alquiler |
 | Contexto estático | `data/madrid/` | Instantáneas oficiales consumidas por `/datos` y `/como-funciona` |

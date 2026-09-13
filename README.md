@@ -39,7 +39,7 @@ El ejemplo desactiva Idealista real y Anthropic. Los mapas, la geocodificación 
 | Mapa y contexto de la zona | Recursos locales y fuentes públicas | Internet para las consultas externas |
 | Trayecto al trabajo | Aproximación identificada | OpenRouteService para los modos compatibles |
 | Chat con herramientas | Pausado | Clave de Anthropic y `LLM_ENABLED=true` |
-| Valoración individual | Estado «Valoración no disponible» | Servicio Python compatible con el contrato v2 |
+| Valoración individual | Estado «Valoración no disponible» | Predictor XGBoost v3; cliente también compatible con el histórico v2 |
 | Historial y favoritos | Persistencia no disponible; la interfaz avisa | Supabase y esquema de demo compartida |
 | Selección diaria de hasta 5 viviendas | No disponible | Supabase, migraciones y cron |
 | Presentación del TFM | Diapositivas, resultados y vídeo incluidos | Ningún backend del modelo para mostrar las cifras guardadas |
@@ -120,6 +120,7 @@ GitHub Actions ejecuta la misma verificación en los pushes a `main` y en las pu
 ## 6. Alcance académico
 
 - El modelo externo estima **precios anunciados de venta de Madrid de 2018**. Su indexación temporal es un escenario; no valida la precisión en anuncios actuales ni en precios de compraventa.
+- El predictor XGBoost v3 utiliza 21 variables y un índice de venta por distrito a 2025. No incluye intervalos calibrados ni bandas: Fair queda sin puntos. Su renta es un escenario derivado de ratios de 2024. Los resultados LightGBM de la presentación siguen identificados como evaluación histórica de otro modelo.
 - La evaluación es retrospectiva y agrupada por inmueble. Las cifras de la presentación conservan su procedencia; los resultados exploratorios anteriores están identificados como antecedentes.
 - El HabitIA Score combina Fair, Opportunity, Zone y Lifestyle. Los componentes sin evidencia no aportan puntos y sus pesos no se redistribuyen. Actualmente Opportunity y Zone no cuentan con datos verificables para puntuar.
 - Las fuentes oficiales de barrio aportan contexto. Sus recuentos no se convierten en índices de seguridad o calidad de vida.
