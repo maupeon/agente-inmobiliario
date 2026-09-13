@@ -4,7 +4,7 @@
 
 ## Entorno reproducible
 
-Usa Node.js 22, npm y `npm ci`. [`.nvmrc`](../.nvmrc) fija la familia de Node y [`package-lock.json`](../package-lock.json) fija el árbol de dependencias. No generes archivos de bloqueo de otros gestores. Python se necesita únicamente para actualizar las instantáneas o importar resultados del modelo externo.
+Usa Node.js 22, npm y `npm ci`. [`.nvmrc`](../.nvmrc) fija la familia de Node y [`package-lock.json`](../package-lock.json) fija el árbol de dependencias. [`.npmrc`](../.npmrc) mantiene la resolución de dependencias pares igual en local y en CI, aunque exista una configuración global diferente. No generes archivos de bloqueo de otros gestores. Python se necesita únicamente para actualizar las instantáneas o importar resultados del modelo externo.
 
 ## Verificación de la aplicación
 
