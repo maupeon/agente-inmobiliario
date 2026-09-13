@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { SiteNav } from "@/components/SiteNav";
-import { RentVsBuyCalculator } from "@/components/RentVsBuyCalculator";
+import { SiteNav } from "@/components/layout/SiteNav";
+import { RentVsBuyCalculator } from "@/components/finance/RentVsBuyCalculator";
 
 export const metadata: Metadata = {
   title: "Comprar o alquilar",

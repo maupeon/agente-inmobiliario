@@ -1,126 +1,142 @@
-# HabitIA — búsqueda y estimación de oferta de vivienda
+# HabitIA · Asistente inmobiliario
 
-Prototipo de TFM: combina anuncios de Idealista, preferencias, un modelo de precio **anunciado de 2018** y una calculadora de escenarios de compra/alquiler. Panel y chat consultan el mismo backend Python. La indexación temporal es un escenario; no demuestra precisión en anuncios actuales ni identifica gangas con etiquetas independientes.
+Aplicación web del **Trabajo Fin de Máster de Big Data, Data Science e Inteligencia Artificial de la Universidad Complutense de Madrid, curso 2025–2026**.
 
-## Arranque local sin consumo de proveedores de pago
+HabitIA reúne la búsqueda de vivienda, las preferencias personales, la comparación económica entre comprar y alquilar y un asistente conversacional. Permite explorar anuncios en un mapa y consultar su contexto, trayecto al trabajo y valoración cuando los servicios correspondientes están disponibles.
+
+**Este repositorio contiene la aplicación web y sus API de servidor.** El entrenamiento, los datos originales y el servicio Python del modelo se entregan por separado con la memoria. Para conectarlo, consulta [Servicio de valoración](docs/modelo-externo.md).
+
+[Aplicación publicada](https://habitiaucm.vercel.app) · [Presentación del TFM](https://habitiaucm.vercel.app/presentacion) · [Guía de configuración](docs/configuracion.md)
+
+## 1. Arrancar en local
+
+Necesitas **Node.js 22 y npm 10 o superior**, además de Git. No necesitas Python ni claves de proveedores para revisar la demo básica.
 
 ```bash
+git clone https://github.com/maupeon/agente-inmobiliario.git
+cd agente-inmobiliario
+
+# Si utilizas nvm, selecciona la versión del proyecto:
+nvm use
+
 npm ci
-cp -n .env.example .env.local
-# En .env.local: MOCK_IDEALISTA=true, LLM_ENABLED=false, LLM_INSIGHTS_ENABLED=false
+cp .env.example .env.local
 npm run dev
 ```
 
-Abre `http://localhost:3000/dashboard`. Los anuncios sintéticos llevan etiqueta Demo, imágenes ilustrativas locales y no enlazan a anuncios inexistentes. `MOCK_IDEALISTA=true` desactiva el proveedor inmobiliario; **no basta por sí solo para desactivar Anthropic**. Para ello utiliza `LLM_ENABLED=false` y `LLM_INSIGHTS_ENABLED=false`.
+Si ya tienes `.env.local`, conserva su configuración; no vuelvas a copiar el ejemplo encima. Si no utilizas nvm, instala Node.js 22 y omite `nvm use`.
 
-El chat pagado requiere `ANTHROPIC_API_KEY` y `LLM_ENABLED=true`. El panel, favoritos y calculadora pueden revisarse sin esa clave. El historial y los favoritos se guardan en un espacio global de Supabase compartido por todos los visitantes de la demo del TFM, sin registro. El perfil permanece en el navegador. Usa datos de ejemplo en las conversaciones.
+Abre **[http://localhost:3000/dashboard](http://localhost:3000/dashboard)**. Configura un perfil de ejemplo, elige Madrid y pulsa **Buscar → Confirmar y buscar**. Verás anuncios sintéticos identificados como **Demo**. La calculadora está en [http://localhost:3000/comprar-o-alquilar](http://localhost:3000/comprar-o-alquilar).
 
-## Variables
+El ejemplo desactiva Idealista real y Anthropic. Los mapas, la geocodificación y algunas fuentes públicas pueden necesitar internet: la demo no es completamente offline. El acceso al repositorio depende de los permisos que conceda el equipo.
 
-| Variable | Uso |
+## 2. Qué funciona en cada modo
+
+| Función | Con la configuración de ejemplo | Para habilitar la integración |
+| --- | --- | --- |
+| Buscar y ordenar viviendas | Anuncios sintéticos, filtros y HabitIA Score | Claves de Idealista y cuota configurada en Supabase |
+| Comprar frente a alquilar | Calculadora completa en el navegador | Ningún servicio adicional |
+| Mapa y contexto de la zona | Recursos locales y fuentes públicas | Internet para las consultas externas |
+| Trayecto al trabajo | Aproximación identificada | OpenRouteService para los modos compatibles |
+| Chat con herramientas | Pausado | Clave de Anthropic y `LLM_ENABLED=true` |
+| Valoración individual | Estado «Valoración no disponible» | Servicio Python compatible con el contrato v2 |
+| Historial y favoritos | Persistencia no disponible; la interfaz avisa | Supabase y esquema de demo compartida |
+| Selección diaria de hasta 5 viviendas | No disponible | Supabase, migraciones y cron |
+| Presentación del TFM | Diapositivas, resultados y vídeo incluidos | Ningún backend del modelo para mostrar las cifras guardadas |
+
+**Historial y favoritos son compartidos entre todos los visitantes de la demo.** Utiliza conversaciones de ejemplo. El perfil y la última búsqueda permanecen en el navegador; la bandeja de notificaciones tiene una identidad privada por navegador. No existe un sistema de cuentas de usuario.
+
+## 3. Recorrido por la aplicación
+
+| Ruta | Contenido |
 | --- | --- |
-| `MOCK_IDEALISTA` | `true`: datos sintéticos. `false`: requiere claves y cuota SQL operativa. |
-| `IDEALISTA_API_KEY` / `IDEALISTA_SECRET` | Credenciales del proveedor real; solo servidor. |
-| `IDEALISTA_MONTHLY_LIMIT` | Máximo de intentos mensuales, hasta 100; se reserva antes del fetch. |
-| `LLM_ENABLED` | `false` pausa el chat pagado. |
-| `LLM_INSIGHTS_ENABLED` | Narración adicional opcional; desactivada salvo `true`. |
-| `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | Chat; modelo predeterminado `claude-opus-4-6`. |
-| `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Historial y favoritos compartidos, caché y cuota técnica; la clave de servicio nunca va al navegador. |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | No es necesaria para historial o favoritos de esta demo. |
-| `VALORACION_URL` / `VALORACION_TOKEN` | Backend Python; por ejemplo `http://127.0.0.1:8018`. |
-| `VALORACION_TIMEOUT_MS` | Espera del modelo, 10 s por defecto y máximo 20 s. |
-| `ORS_API_KEY` | Rutas cuando está configurado; transporte público sigue aproximado. |
+| `/` | Presentación de HabitIA |
+| `/dashboard` | Perfil, búsqueda, mapa, resultados y favoritos |
+| `/chat` | Asistente conversacional |
+| `/comprar-o-alquilar` | Comparación patrimonial de compra y alquiler |
+| `/datos` | Fuentes, periodos y contexto territorial |
+| `/como-funciona` | Explicación del sistema y del score |
+| `/notificaciones` | Preferencias y bandeja de la selección diaria |
+| `/presentacion` | Presentación interactiva del TFM; también admite `/presentación` |
 
-No subas `.env.local` al repositorio.
+## 4. Estructura del repositorio
 
-## Base de datos y cuota
-
-Antes de activar búsquedas reales en una instalación existente, aplicar y verificar:
-
-`supabase/migrations/20260908_demo_privacy_quota.sql`
-
-La migración activa RLS, retira acceso público a tablas privadas, crea caché de búsquedas y la función `reserve_idealista_request`. La reserva usa un bloqueo transaccional: comprueba consumo y registra el intento antes de llamar a Idealista, también entre instancias. Los intentos fallidos consumen reserva de forma conservadora.
-
-**Sin esa función o con un fallo de verificación, las búsquedas nuevas se bloquean.** No se sustituye por un contador en memoria. Los mocks y resultados cacheados siguen funcionando. `supabase/schema.sql` incluye la configuración para una instalación nueva. Estos archivos locales no prueban que la migración ya esté aplicada en el entorno remoto.
-
-La demo global usa `supabase/migrations/20260909_shared_demo_storage.sql`: crea `demo_conversations`, `demo_messages`, `demo_favorites` y la función transaccional `save_demo_conversation`. Las API `/api/conversations` y `/api/favorites` acceden exclusivamente a este espacio compartido. Las tablas antiguas siguen cerradas y no se importan datos locales automáticamente.
-
-Todos los visitantes ven y pueden continuar el historial común y añadir o retirar favoritos. Cada mensaje conserva texto, anuncios y tarjetas como JSON; los guardados repetidos no duplican mensajes ni borran los anteriores. Se muestran las últimas 50 conversaciones, los últimos 200 mensajes de cada conversación y los últimos 100 favoritos. La interfaz sincroniza listas cada 30 s y al recuperar el foco, y avisa de errores de persistencia. Sin Supabase operativo se muestra el error: no se presenta un guardado local como si estuviera en la base de datos. El chat envía el guardado al finalizar o detener cada respuesta; no es una grabación continua del stream.
-
-Las tablas de demo mantienen RLS y acceso SQL solo para `service_role`; el acceso global intencional se ofrece a través de las API, con límites de cuerpo, validación y rate limit para escrituras. Este modo no proporciona privacidad entre visitantes y no sustituye un sistema de cuentas.
-
-El panel no busca al entrar, cargar el perfil, cambiar filtros o volver a Resultados. «Buscar» abre un resumen y solo «Confirmar y buscar» envía la petición. `/api/recommend` exige `confirmSearch: true` (428 si falta); es una protección contra llamadas accidentales, no autenticación. Reintentar requiere una nueva confirmación. La caché de 24 horas y la reserva mensual siguen aplicándose. El chat solo inicia herramientas tras enviar un mensaje y conserva su flujo propio.
-
-## Evidencia y fuentes
-
-- El modelo usa un único transformador de 25 variables para entrenamiento y servicio, datos ausentes explícitos y abstención fuera de soporte.
-- La evaluación corregida es **retrospectiva agrupada**: los datos de 2018 ya se habían explorado. No se llama test virgen a una nueva división del mismo histórico.
-- El backend devuelve versión, periodo, estado, intervalos y explicación SHAP opcional. Las atribuciones no son efectos causales.
-- Si el modelo no responde, se muestra el estado. Una referencia provincial, cuando está verificada, se presenta como tal, sin bandas ni colores de valoración individual.
-- El cliente exige el contrato revisado v2 y su identificador de modelo; rechaza servicios heredados aunque respondan HTTP 200, metadatos incompatibles y predicciones fuera de su intervalo.
-- Los fixtures de alquiler, tipos y precios son ilustrativos sin validación documental; no se usan para clasificar precios como observaciones oficiales.
-- Los indicadores manuales de seguridad/calidad de vida están retirados del ranking. Los requisitos incumplidos explícitamente se filtran y los desconocidos se señalan.
-- `/datos` muestra procedencia y periodos disponibles. Una fecha de caché no se presenta como fecha de observación.
-
-## Actualizar la presentación al terminar el experimento
-
-```bash
-python3 scripts/sync-model-results.py
+```text
+agente-inmobiliario/
+├── app/                        # Páginas y API de Next.js App Router
+│   ├── api/                    # Chat, búsqueda, valoración, persistencia y cron
+│   └── presentacion/           # Diapositivas y resultados publicados del TFM
+├── components/                 # Interfaz agrupada por función
+│   ├── chat/                   # Conversación, mensajes y compositor
+│   ├── dashboard/              # Panel, perfil y desglose del score
+│   ├── finance/                # Calculadoras y gráficos financieros
+│   ├── layout/                 # Navegación, portada y arquitectura visual
+│   ├── notifications/          # Bandeja y avisos
+│   ├── property/               # Anuncios, mapa y tarjetas de contexto
+│   └── ui/                     # Elementos compartidos
+├── hooks/                      # Estado de chat, favoritos y perfil
+├── lib/                        # Lógica del producto e integraciones
+│   ├── agent/                  # Prompt, bucle del agente y herramientas
+│   ├── commute/                # Geocodificación y trayectos
+│   ├── finance/                # Motor de compra frente a alquiler
+│   ├── idealista/              # API, datos demo, caché y cuota
+│   ├── market/                 # Fuentes de mercado y procedencia
+│   ├── neighborhood/           # Informes de contexto territorial
+│   ├── notifications/          # Identidad y selección diaria
+│   ├── supabase/               # Acceso a datos desde el servidor
+│   └── valoracion/             # Cliente y contrato del servicio Python
+├── data/madrid/                # Instantáneas oficiales y fuentes pequeñas
+├── public/                     # Imágenes, vídeo y recursos servidos por la web
+├── scripts/                    # Importación de datos y tareas de mantenimiento
+├── tests/                      # Pruebas automáticas sin red ni credenciales
+├── supabase/                   # Esquema, migraciones, cron y pruebas SQL
+├── types/                      # Contratos TypeScript compartidos
+├── docs/                       # Guías técnicas y de operación
+└── .github/workflows/ci.yml     # Verificación automática en GitHub
 ```
 
-Lee exclusivamente `../memoria/revision_2026-09-08/experimento/resultados_revision.json`. Si falta o está incompleto, no modifica la presentación. Verifica número de grupos, métricas finitas y paridad del artefacto; exporta cifras, SHAP y hash de la fuente a `app/presentacion/results-data.json`.
+Se utiliza **npm**, con `package-lock.json` como único archivo de bloqueo. La aplicación combina Next.js 14, React 18, TypeScript, Tailwind CSS, MapLibre, el SDK de Anthropic y Supabase. [Arquitectura y flujo de datos](docs/arquitectura.md).
 
-Mientras los resultados no estén sincronizados, las vistas revisadas dicen «Pendiente». Las cifras antiguas permanecen en `results-legacy.json` y solo se muestran como antecedentes exploratorios, identificadas como no independientes. La arquitectura visual, los controles y las animaciones se conservan.
-
-## Verificación y límites de consumo
+## 5. Comprobar que todo funciona
 
 ```bash
-node scripts/test-app-regression.cjs
-npx tsc --noEmit --incremental false
-npm run lint
-npm run build
+npm run check
 ```
 
-Las comprobaciones de regresión bloquean la red y no usan credenciales. Incluyen privacidad, contrato, abstención, cuota antes de red, caché, requisitos y 324 escenarios de la calculadora.
+Ejecuta, en orden, las pruebas, la comprobación de tipos, ESLint y la compilación de producción. Las pruebas usan datos simulados y bloquean el acceso a proveedores. La compilación carga las variables de tu entorno; para verificar una instalación de ejemplo, utiliza el `.env.local` descrito arriba.
 
-El chat tiene hasta 3 rondas, 4 herramientas y 1.600 tokens de salida por ronda. El rate limit de solicitudes es **por proceso** (10/min y 50/h); se reinicia y no es un presupuesto monetario distribuido. `LLM_ENABLED=false` permite pausar el consumo. No se garantiza una factura total fija por estos límites.
+| Comando | Uso |
+| --- | --- |
+| `npm run dev` | Desarrollo con recarga automática |
+| `npm test` | Todas las pruebas de la aplicación |
+| `npm run typecheck` | Comprobar TypeScript sin generar archivos |
+| `npm run lint` | Comprobar estilo y reglas de Next.js |
+| `npm run build` | Crear la compilación de producción |
+| `npm start` | Servir la compilación ya creada |
+| `npm run check` | Verificación completa |
 
-## Organización
+GitHub Actions ejecuta la misma verificación en los pushes a `main` y en las pull requests, sin credenciales de proveedores. Las pruebas SQL se ejecutan por separado en una base desechable: [Desarrollo y pruebas](docs/desarrollo.md).
 
-- `app/api/`: chat SSE, recomendaciones, enriquecimiento y proxy de valoración.
-- `lib/agent/`: prompt y herramientas, incluida `valorar_vivienda`.
-- `lib/valoracion/`: contrato común con el backend de `../memoria/servicio/`.
-- `lib/shared-demo.ts`, `lib/supabase/demo.ts`: persistencia compartida en Supabase.
-- `lib/local-conversations.ts`: utilidades del historial local anterior, sin importación automática.
-- `lib/idealista/`: proveedor, mocks, caché y cuota.
-- `lib/market/`: fuentes, procedencia y respaldos explícitos.
-- `lib/finance/rent-vs-buy.ts`: simulación, ganador al horizonte final y exención fiscal como supuesto separado.
-- `scripts/test-*.cjs` y `supabase/tests/`: pruebas de regresión y de base de datos.
-- `docs/notificaciones.md`: instalación y operación de la selección diaria.
+## 6. Alcance académico
 
-La revisión global del TFM requiere la migración de demo compartida además de la migración de cuota. No activa pagos ni despliega la aplicación automáticamente. El despliegue debe coordinar app, backend y artefactos comprobados.
+- El modelo externo estima **precios anunciados de venta de Madrid de 2018**. Su indexación temporal es un escenario; no valida la precisión en anuncios actuales ni en precios de compraventa.
+- La evaluación es retrospectiva y agrupada por inmueble. Las cifras de la presentación conservan su procedencia; los resultados exploratorios anteriores están identificados como antecedentes.
+- El HabitIA Score combina Fair, Opportunity, Zone y Lifestyle. Los componentes sin evidencia no aportan puntos y sus pesos no se redistribuyen. Actualmente Opportunity y Zone no cuentan con datos verificables para puntuar.
+- Las fuentes oficiales de barrio aportan contexto. Sus recuentos no se convierten en índices de seguridad o calidad de vida.
+- La comparación de compra y alquiler calcula escenarios según los supuestos introducidos; no predice el mercado.
 
+## 7. Documentación
 
-## Preferencias y selección diaria
+| Guía | Qué explica |
+| --- | --- |
+| [Configuración y despliegue](docs/configuracion.md) | Variables, Supabase, cuotas y publicación |
+| [Arquitectura](docs/arquitectura.md) | Responsabilidades, flujo de búsqueda y API |
+| [Servicio Python externo](docs/modelo-externo.md) | Conexión, contrato, abstenciones y resultados |
+| [Datos y procedencia](docs/datos.md) | Archivos conservados, fuentes y reproducción |
+| [Desarrollo y pruebas](docs/desarrollo.md) | Verificación, mantenimiento y solución de problemas |
+| [Notificaciones](docs/notificaciones.md) | Instalación, horarios, privacidad y operación del cron |
+| [Contribuir](CONTRIBUTING.md) | Convenciones para trabajar en el repositorio |
 
-El perfil permite distribuir 100 puntos entre Fair, Opportunity, Zone y Lifestyle (25 cada uno al empezar). El buscador ordena por ese HabitIA Score y muestra el desglose y la cobertura: un dato ausente no recibe puntos ni se sustituye por un índice inventado. Opportunity compara revalorización de zona y ciudad; Zone mide calidad de vida del barrio. Ambos están sin datos verificables y no aportan puntos. Lifestyle puntúa exclusivamente el tiempo al trabajo. El perfil y la última búsqueda guardan su estado local; restaurar o reordenar no consulta Idealista. Las etiquetas Barato, Justo y Caro se refieren únicamente a un escenario individual válido del modelo.
+## Equipo
 
-Datos y Notificaciones están en la navegación global. Datos identifica fuente, periodo y ausencia de referencias verificadas, y muestra trimestres como Q1 2025. La calculadora separa los grupos de compra, hipoteca, alquiler y supuestos; incorpora otros gastos, gestión, glosario y un desglose de liquidación opcional. La mudanza queda como aviso cualitativo y no simula una venta anticipada.
-
-`/notificaciones` permite activar una selección diaria privada de hasta cinco viviendas, inicialmente a las 07:00 Europe/Madrid, con hora y zona editables. Al guardar copia el perfil actual; cambiarlo después requiere guardar también en Notificaciones. El aviso opcional del navegador funciona con HabitIA abierta. La migración, la publicación en [HabitIA](https://habitiaucm.vercel.app/notificaciones) y el cron se verificaron el 9 de septiembre de 2026. Para operación y límites, consultar [docs/notificaciones.md](docs/notificaciones.md).
-
-Comprobaciones adicionales:
-
-```bash
-node scripts/test-scoring-search.cjs
-node scripts/test-rent-vs-buy.cjs
-node scripts/test-notifications-api.cjs
-# La prueba SQL requiere una base local desechable con la migración aplicada:
-psql -f supabase/tests/notifications.sql
-```
-
-El repositorio conserva código, recursos usados por la app, configuración, migraciones, pruebas y documentación de operación. Las capturas, informes de revisión, exportaciones y archivos de asistentes permanecen locales y están excluidos mediante `.gitignore`.
-
-## Comentarios del 10 de septiembre de 2026
-
-Revisión del 10 de septiembre: nuevas definiciones del HabitIA Score, histórico IPV desde 2018, cinco recomendaciones diarias y presentación reorganizada con 12 escenas principales. La migración `supabase/migrations/20260910120000_five_daily_recommendations.sql` está aplicada y verificada en producción; amplía a cinco los límites de tabla y función antes del nuevo trabajador. El factor del modelo sigue versionado como escenario heredado 1,5534 para Q1 2026; leer el histórico de Datos no lo actualiza.
+Mauricio Peón García · João Paulo Nogueira Cunha · Manuel Macedo Púlido · Aldo Mauricio Ress Villets · Tomás Perales Lara.

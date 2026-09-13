@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, memo, useEffect, useRef, useState, type CSSProperties } from "react";
-import Image from "next/image";
 import legacy from "./results-legacy.json";
 import { results as data, formatCount } from "./results-contract";
 import s from "./visuals.module.css";
@@ -164,14 +163,5 @@ export const ExplanationEvidence = memo(function ExplanationEvidence({ active }:
     {blocks.length ? <><div className={s.rows}>{blocks.map(({name,value})=><ChartBar key={name} name={name} value={value} max={max} active={active}/>)}</div><div className={s.alignedAxis}><Axis max={max} step={max / 5} label=" %"/></div></> : <div className={s.insight}><div><strong>Explicaciones globales pendientes del experimento.</strong><p>No se reutilizan aquí las importancias del modelo anterior.</p></div></div>}
     <div className={s.insight}><span className={s.insightMark} aria-hidden>↳</span><div><strong>Explicar el cálculo no equivale a demostrar causalidad.</strong><p>Las atribuciones usan la escala logarítmica. El servicio también puede mostrar las tres contribuciones más grandes de un anuncio concreto.</p></div></div>
     <p className={s.source}>Modelo vigente: {data.model_id}. Hasta seis variables principales y resto agrupado; normalización de SHAP absoluto medio. No son porcentajes del precio.</p>
-  </div>;
-});
-
-const layers = [{title:"La vivienda",copy:"Precio, características y margen de incertidumbre."},{title:"Tu entorno",copy:"Barrio, servicios y trayecto al trabajo."},{title:"Tu decisión",copy:"Preferencias, comparación y razones comprensibles."}];
-export const ProductConcept = memo(function ProductConcept({ active }: { active: boolean }) {
-  const [layer, setLayer] = useState(0);
-  return <div className={s.concept} data-active={active}>
-    <div className={s.conceptImage}><Image src="/presentacion/habitia-contexto-v1.png" alt="Maqueta conceptual de una manzana residencial: vivienda, barrio y trayecto conectados." width={1536} height={1024} sizes="(max-width: 900px) 90vw, 55vw"/><div className={s.conceptPin} style={{"--pin-x":`${[55,30,72][layer]}%`,"--pin-y":`${[58,37,81][layer]}%`} as CSSProperties}><span>0{layer+1}</span></div><span className={s.conceptCredit}>Ilustración conceptual · generada con IA</span></div>
-    <div className={s.conceptLayers}><p className={s.eyebrow}>Tres escalas. Una decisión.</p>{layers.map((item,i)=><button type="button" aria-pressed={layer === i} onClick={()=>setLayer(i)} key={item.title}><span>0{i+1}</span><div><strong>{item.title}</strong><p>{item.copy}</p></div></button>)}<p className={s.conceptGoal}>El objetivo: menos tiempo comparando.<br/><strong>Más confianza al decidir.</strong></p></div>
   </div>;
 });

@@ -1,9 +1,9 @@
 import { UrbanSources } from "./UrbanSources";
-import context from "@/lib/neighborhood/madrid-context.json";
+import context from "@/data/madrid/madrid-context.json";
 import modelResults from "@/app/presentacion/results-data.json";
-import madrid from "@/lib/neighborhood/madrid-official.json";
+import madrid from "@/data/madrid/madrid-official.json";
 import type { Metadata } from "next";
-import { SiteNav } from "@/components/SiteNav";
+import { SiteNav } from "@/components/layout/SiteNav";
 import { getMarketData } from "@/lib/market/cache";
 import { formatMarketPeriod, MARKET_SOURCES } from "@/lib/market/presentation";
 import { formatNumber, timeAgo } from "@/lib/utils";

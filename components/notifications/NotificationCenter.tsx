@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Bell, BellSlash, Check, Clock, ArrowRight } from "@phosphor-icons/react";
-import { SiteNav } from "./SiteNav";
+import { SiteNav } from "../layout/SiteNav";
 import { useProfile } from "@/hooks/useProfile";
 import { DEFAULT_NOTIFICATION_TIME, DEFAULT_NOTIFICATION_ZONE } from "@/lib/notifications/types";
 import type { NotificationState } from "@/lib/notifications/types";

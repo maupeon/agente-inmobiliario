@@ -18,7 +18,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { MotionPreferenceProvider, DataPartition, ModelEvidence, UncertaintyEvidence, ScopeEvidence, ExplanationEvidence } from "./ResultsVisuals";
 import { PricingMethod, ScoreMethod } from "./PresentationMethods";
 import { results, formatCount } from "./results-contract";
-import { ArchitectureGraphic } from "@/components/ArchitectureGraphic";
+import { ArchitectureGraphic } from "@/components/layout/ArchitectureGraphic";
 import { Logo } from "@/components/ui/Logo";
 import styles from "./presentation.module.css";
 

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowRight, List, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { IdealistaUsageBadge } from "./IdealistaUsageBadge";
-import { Logo } from "./ui/Logo";
-import { NotificationWatcher } from "./NotificationWatcher";
+import { IdealistaUsageBadge } from "../dashboard/IdealistaUsageBadge";
+import { Logo } from "../ui/Logo";
+import { NotificationWatcher } from "../notifications/NotificationWatcher";
 
 const LINKS = [
   { href: "/comprar-o-alquilar", label: "Comprar o alquilar" },

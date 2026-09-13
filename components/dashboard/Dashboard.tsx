@@ -32,11 +32,11 @@ import type {
   PropertyRecommendation,
   UserProfile,
 } from "@/types";
-import { SiteNav } from "./SiteNav";
+import { SiteNav } from "../layout/SiteNav";
 import { Onboarding } from "./Onboarding";
-import { PropertyDetailDrawer } from "./PropertyDetailDrawer";
+import { PropertyDetailDrawer } from "../property/PropertyDetailDrawer";
 
-const MapPanel = dynamic(() => import("./MapPanel"), {
+const MapPanel = dynamic(() => import("../property/MapPanel"), {
   ssr: false,
   loading: () => (
     <div className="grid h-full place-items-center bg-paper-200 font-mono text-[10px] uppercase tracking-[0.2em] text-stone">

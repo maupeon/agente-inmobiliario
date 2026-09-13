@@ -1,4 +1,4 @@
-.evidence, .dataVisual, .uncertainty, .concept { font-variant-numeric: tabular-nums; }
+.evidence, .dataVisual, .uncertainty { font-variant-numeric: tabular-nums; }
 .evidence { padding-top: clamp(1rem, 2.2vh, 1.8rem); }
 .chartToolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: 0 0 1.2rem; color: var(--stone); font-size: clamp(.8rem, 1vw, 1rem); line-height: 1.45; }
 .chartToolbar p { margin: 0; }
@@ -6,8 +6,8 @@
 .segmented { display: inline-flex; flex-shrink: 0; padding: .25rem; border-radius: 999px; background: #e8ece4; gap: .2rem; }
 .segmented button, .detailButton { border: 0; border-radius: 999px; background: transparent; color: var(--ink-soft); padding: .58rem .9rem; font-size: .78rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: color 180ms, background-color 180ms, box-shadow 180ms; }
 .segmented button[aria-pressed="true"] { background: var(--paper-raised); color: var(--green); box-shadow: 0 1px 4px #17211d17; }
-.segmented button:active, .detailButton:active, .stepButtons button:active, .conceptLayers button:active { transform: scale(.97); }
-.segmented button:focus-visible, .detailButton:focus-visible, .stepButtons button:focus-visible, .conceptLayers button:focus-visible, .priceSlider:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
+.segmented button:active, .detailButton:active, .stepButtons button:active { transform: scale(.97); }
+.segmented button:focus-visible, .detailButton:focus-visible, .stepButtons button:focus-visible, .priceSlider:focus-visible { outline: 2px solid var(--green); outline-offset: 4px; }
 .detailButton { border: 1px solid var(--line); }
 .detailButton[aria-pressed="true"] { background: var(--green-light); color: var(--green); }
 .rows { display: grid; gap: clamp(.85rem, 2vh, 1.5rem); }
@@ -95,30 +95,11 @@
 .scopeAxis .axis { grid-column: 2; }
 .foldPoint { position: absolute; width: .5rem; height: .5rem; border: 1px solid var(--clay); background: var(--paper); border-radius: 50%; transform: translateX(-50%); }
 .foldNote { color: var(--clay); font-size: .72rem; line-height: 1.5; margin: .8rem 0; }
-.concept { display: grid; grid-template-columns: 1.5fr 1fr; gap: 3rem; align-items: center; margin-top: .8rem; }
-.conceptImage { position: relative; min-width: 0; overflow: hidden; }
-.conceptImage > img { width: 100%; height: auto; display: block; mix-blend-mode: multiply; }
-.conceptCredit { position: absolute; bottom: .6rem; left: 1rem; font-size: .6rem; color: var(--stone); }
-.conceptPin { position: absolute; inset: 0; transform: translate(var(--pin-x),var(--pin-y)); pointer-events: none; transition: transform 400ms var(--ease-out); }
-.conceptPin span { transform: translate(-50%,-50%); display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border: 1px solid #fff9; border-radius: 50%; background: #176547ef; color: var(--paper); font-size: .8rem; box-shadow: 0 5px 20px #17211d30; }
-.conceptLayers { min-width: 0; }
-.conceptLayers > button { display: flex; gap: 1rem; align-items: baseline; text-align: left; width: 100%; padding: .9rem 0; background: none; border: 0; border-top: 1px solid var(--line); color: var(--stone); cursor: pointer; }
-.conceptLayers > button > span { font-size: .7rem; }
-.conceptLayers strong { display: block; font-size: clamp(1.2rem, 2vw, 2.15rem); letter-spacing: -.04em; font-weight: 580; }
-.conceptLayers button p { margin: .45rem 0 0; font-size: clamp(.8rem, 1.05vw, 1.05rem); line-height: 1.45; }
-.conceptLayers button[aria-pressed="true"] { color: var(--green); border-color: var(--green); }
-.conceptGoal { margin: 1.5rem 0 0; color: var(--ink-soft); font-size: .9rem; line-height: 1.5; }
-.conceptGoal strong { font-size: 1.05rem; margin-top: .3rem; }
-[data-active="true"] .conceptImage > img { animation: materialize 700ms cubic-bezier(.16,1,.3,1) both; }
-@keyframes materialize { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
 @media (max-width: 900px) {
   .chartToolbar { flex-wrap: wrap; }
   .uncertainty { grid-template-columns: 1fr; gap: 2rem; }
   .coveragePanel { border-left: 0; border-top: 1px solid var(--line); padding: 1.5rem 0 0; }
   .coverageReadout { display: flex; align-items: baseline; gap: 1rem; }
-  .concept { grid-template-columns: 1fr; gap: .5rem; }
-  .conceptImage { max-width: 38rem; margin: auto; }
-  .conceptLayers > button { padding: .8rem 0; }
 }
 @media (max-width: 640px) {
   .barRow, .scopeRow { grid-template-columns: minmax(0, 1fr) 5rem; gap: .6rem; }
@@ -141,19 +122,16 @@
   .dataSteps span + span::before { margin-right: .6rem; }
   .scopeRow { margin-bottom: 1.6rem; }
   .scopeTrack { height: 1.4rem; }
-  .concept { margin-top: 1rem; }
-  .conceptCredit { bottom: .1rem; font-size: .55rem; }
   .source { font-size: .68rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .conceptImage > img { animation: none !important; }
-  .stepButtons button::after, .segmented button, .detailButton, .conceptPin { transition: none; }
-  .segmented button:active, .detailButton:active, .stepButtons button:active, .conceptLayers button:active { transform: none; }
+  .stepButtons button::after, .segmented button, .detailButton { transition: none; }
+  .segmented button:active, .detailButton:active, .stepButtons button:active { transform: none; }
 }
 @media (prefers-contrast: more) {
   .source, .axis, .chartToolbar, .eyebrow, .priceTicks, .scopeRow > div:first-child span { color: var(--ink); }
   .track, .scopeTrack, .coverageTrack { outline: 1px solid var(--ink); }
   .segmented button[aria-pressed="true"] { outline: 2px solid var(--green); }
 }
-[data-motion="reduced"] .conceptImage > img { animation: none !important; }
-[data-motion="reduced"] .conceptPin, [data-motion="reduced"] .stepButtons button::after { transition: none; }
+
+[data-motion="reduced"] .stepButtons button::after { transition: none; }

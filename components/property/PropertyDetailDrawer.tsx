@@ -6,7 +6,7 @@ import { bandaColor, priceLabel, priceComparison } from "@/lib/dashboard-format"
 import { formatMarketPeriod } from "@/lib/market/presentation";
 import { cn, formatEUR, formatNumber } from "@/lib/utils";
 import type { Property, PropertyDetail, PropertyEnrichment, PersonalScoring } from "@/types";
-import { ScoreBreakdown } from "./ScoreBreakdown";
+import { ScoreBreakdown } from "../dashboard/ScoreBreakdown";
 import { CommuteCard } from "./CommuteCard";
 import { NeighborhoodCard } from "./NeighborhoodCard";
 

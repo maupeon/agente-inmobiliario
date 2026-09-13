@@ -13,15 +13,15 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { Message, Property, ToolCall } from "@/types";
-import { Markdown } from "./Markdown";
-import { PropertyGrid } from "./PropertyGrid";
-import { PurchaseValuationCard } from "./PurchaseValuationCard";
-import { MortgageCard } from "./MortgageCard";
-import { MarketCard } from "./MarketCard";
-import { RentValuationCard } from "./RentValuationCard";
-import { CommuteCard } from "./CommuteCard";
-import { NeighborhoodCard } from "./NeighborhoodCard";
-import { Logo } from "./ui/Logo";
+import { Markdown } from "../ui/Markdown";
+import { PropertyGrid } from "../property/PropertyGrid";
+import { PurchaseValuationCard } from "../property/PurchaseValuationCard";
+import { MortgageCard } from "../finance/MortgageCard";
+import { MarketCard } from "../property/MarketCard";
+import { RentValuationCard } from "../property/RentValuationCard";
+import { CommuteCard } from "../property/CommuteCard";
+import { NeighborhoodCard } from "../property/NeighborhoodCard";
+import { Logo } from "../ui/Logo";
 
 const TOOL_META: Record<
   string,

@@ -11,7 +11,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = ROOT / 'lib/neighborhood'
+BASE = ROOT / 'data/madrid'
 
 
 def normalize(value):

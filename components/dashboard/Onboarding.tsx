@@ -13,10 +13,10 @@ import type {
   UserProfile,
   ScoreWeights,
 } from "@/types";
-import type { PickedLocation } from "./LocationPicker";
-import { Logo } from "./ui/Logo";
+import type { PickedLocation } from "../property/LocationPicker";
+import { Logo } from "../ui/Logo";
 
-const LocationPicker = dynamic(() => import("./LocationPicker"), {
+const LocationPicker = dynamic(() => import("../property/LocationPicker"), {
   ssr: false,
   loading: () => (
     <div className="grid h-[300px] place-items-center rounded-2xl border border-hairline bg-paper-200 text-sm text-stone">

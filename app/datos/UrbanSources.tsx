@@ -1,4 +1,4 @@
-import urban from "@/lib/neighborhood/urban-sources.json";
+import urban from "@/data/madrid/urban-sources.json";
 
 const format = (value: number) => value.toLocaleString("es-ES");
 const categories = ["alimentacion", "farmacias", "gimnasios", "ocio"] as const;

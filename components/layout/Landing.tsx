@@ -12,9 +12,9 @@ import {
   ShieldCheck,
   Sparkle,
 } from "@phosphor-icons/react/dist/ssr";
-import { HeroSearch } from "./HeroSearch";
+import { HeroSearch } from "../dashboard/HeroSearch";
 import { SiteNav } from "./SiteNav";
-import { Logo } from "./ui/Logo";
+import { Logo } from "../ui/Logo";
 
 const BENEFITS = [
   {

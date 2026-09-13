@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Dashboard } from "@/components/Dashboard";
-import { SiteNav } from "@/components/SiteNav";
+import { Dashboard } from "@/components/dashboard/Dashboard";
+import { SiteNav } from "@/components/layout/SiteNav";
 
 export const metadata: Metadata = {
   title: "Buscar vivienda",

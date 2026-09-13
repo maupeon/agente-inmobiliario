@@ -2,7 +2,7 @@
 import { ArrowRight, PencilSimple } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import type { UserProfile } from "@/types";
-import { Logo } from "./ui/Logo";
+import { Logo } from "./Logo";
 
 type Suggestion = { label: string; prompt: string; tone?: "primary" | "muted" };
 

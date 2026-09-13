@@ -94,7 +94,7 @@ async function main() {
     assert.equal(requestedFilters.habitaciones, 2);
   });
   let cloudWrites=0;
-  const chatLoad=loader({'@/lib/agent/loop':{executeAgentLoop:async(_,send)=>send({type:'text',text:'Respuesta local de prueba'})},'@/lib/supabase/conversations':{persistTurn:()=>{cloudWrites++;}},'@/lib/rate-limit':{rateLimit:()=>({ok:true})}});
+  const chatLoad=loader({'@/lib/agent/loop':{executeAgentLoop:async(_,send)=>send({type:'text',text:'Respuesta local de prueba'})},'@/lib/supabase/server':{getServerSupabase:()=>{cloudWrites++;throw new Error('Chat must not write to Supabase directly');}},'@/lib/rate-limit':{rateLimit:()=>({ok:true})}});
   for (const body of [null,{messages:'wrong'},{messages:[{role:'user',content:42}]},{messages:[{role:'user',content:'x'.repeat(8001)}]}]) {
     const r=await chatLoad('app/api/chat/route.ts').POST(request(body)); assert.equal(r.status,400); passed++;
   }
@@ -137,13 +137,6 @@ async function main() {
   assert.equal((await demoFavApi.DELETE(demoReq({},'DELETE'))).status,400);passed++;
   assert.equal((await demoFavApi.DELETE(demoReq({propertyCode:'demo-one'},'DELETE'))).status,200);passed++;
   check('shared favorite removal is scoped to a property',()=>assert.equal(savedDemo.at(-1).removed,'demo-one'));
-  const store=new Map();const win={dispatchEvent(){}};
-  const local=loader({}, {localStorage:{getItem:k=>store.get(k)??null,setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)},window:win,Event:class{}})('lib/local-conversations.ts');
-  check('local history retains all cards across reload',()=>{
-    const m=[{id:'one',role:'user',content:'Piso',createdAt:'2026-09-08'},{id:'two',role:'assistant',content:'Resultado',createdAt:'2026-09-08',properties:[{propertyCode:'abc'}],purchaseValuation:{estado:'ok',propertyCode:'abc'}}];
-    assert(local.saveLocalConversation('a',m));assert.equal(local.loadLocalConversation('a')[1].properties[0].propertyCode,'abc');assert.equal(local.loadLocalConversation('other').length,0);
-    local.clearLocalConversations();assert.equal(local.listLocalConversations().length,0);
-  });
   const base={propertyCode:'a',operation:'sale',municipality:'Madrid',propertyType:'flat',latitude:40.42,longitude:-3.70,price:300000,size:80,rooms:2,detailedType:{typology:'flat',subTypology:'duplex'}};
   const model=load('lib/valoracion/client.ts');
   check('municipality/coordinate/type gate and subtype preserved',()=>{

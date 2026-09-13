@@ -12,9 +12,9 @@ import {
 } from "@phosphor-icons/react";
 import { cn, timeAgo } from "@/lib/utils";
 import type { Conversation, Property } from "@/types";
-import { FavoritesList } from "./FavoritesList";
-import { IdealistaUsageBadge } from "./IdealistaUsageBadge";
-import { Logo } from "./ui/Logo";
+import { FavoritesList } from "../property/FavoritesList";
+import { IdealistaUsageBadge } from "../dashboard/IdealistaUsageBadge";
+import { Logo } from "../ui/Logo";
 
 export function Sidebar({
   conversations,

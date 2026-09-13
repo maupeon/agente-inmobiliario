@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import { ArchitectureGraphic } from "@/components/ArchitectureGraphic";
-import { SiteNav } from "@/components/SiteNav";
+import { ArchitectureGraphic } from "@/components/layout/ArchitectureGraphic";
+import { SiteNav } from "@/components/layout/SiteNav";
 import { Logo } from "@/components/ui/Logo";
-import districtContext from "@/lib/neighborhood/madrid-context.json";
+import districtContext from "@/data/madrid/madrid-context.json";
 import { MARKET_SOURCES } from "@/lib/market/presentation";
 
 export const metadata: Metadata = {

@@ -35,7 +35,7 @@ def sha(path):
 def main():
     censo = get('actividades', CENSO_URL)
     metro = get('metro-stations.json', METRO_URL)
-    names = {b['code'][:2]: b['distrito'] for b in json.loads((ROOT / 'lib/neighborhood/madrid-official.json').read_text())['barrios']}
+    names = {b['code'][:2]: b['distrito'] for b in json.loads((ROOT / 'data/madrid/madrid-official.json').read_text())['barrios']}
     counts = {code: {k: set() for k in ['alimentacion', 'farmacias', 'gimnasios', 'ocio']} for code in names}
     dates, labels, unique, rows = set(), {}, {}, 0
     missing_district = set()
@@ -81,7 +81,7 @@ def main():
         'metro': {'fuente': 'Consorcio Regional de Transportes de Madrid', 'url': 'https://www.arcgis.com/home/item.html?id=0a6c45e7bdd94679b67a2ae662c8838b', 'download': METRO_URL, 'sha256': sha(metro), 'licencia': 'https://crtm.es/licencia-de-uso/', 'estaciones': sorted(stations, key=lambda s: (s['nombre'],s['id']))},
         'ruido': {'fuente': 'Ayuntamiento de Madrid · Mapa Estratégico del Ruido 2021', 'periodo': '2021', 'url': 'https://servpub.madrid.es/IDEAM_WBGEOPORTAL/dataset.iam?id=470b89af-5d64-41d3-8bdb-2fe6badd0364', 'download': 'https://geoportal.madrid.es/fsdescargas/IDEAM_WBGEOPORTAL/MEDIO_AMBIENTE/INFORMACION_ACUSTICA/Mapa_Estrategico_Ruido_2021/MER2021.zip'}
     }
-    (ROOT / 'lib/neighborhood/urban-sources.json').write_text(json.dumps(out, ensure_ascii=False, indent=2)+'\n')
+    (ROOT / 'data/madrid/urban-sources.json').write_text(json.dumps(out, ensure_ascii=False, indent=2)+'\n')
     print(f'{rows} filas censales; 21 distritos; {len(stations)} estaciones; sin duplicados por local y categoría.')
 
 

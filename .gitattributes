@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.mp4 binary
+*.xlsx binary
+# Preserve source bytes: provenance hashes include original line endings.
+data/madrid/sources/** -text

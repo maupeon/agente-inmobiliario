@@ -1,4 +1,5 @@
--- Schema completo para Nido. Ejecutar en el SQL editor de Supabase.
+-- Esquema base de HabitIA. Instalación y migraciones: docs/configuracion.md.
+-- Incluye cuota y demo compartida; las notificaciones requieren sus migraciones.
 
 -- Conversaciones ----------------------------------------------------------
 create table if not exists conversations (

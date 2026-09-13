@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ChatInterface } from "@/components/ChatInterface";
+import { ChatInterface } from "@/components/chat/ChatInterface";
 
 export const metadata: Metadata = {
   title: "Asistente de vivienda",
