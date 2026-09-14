@@ -94,6 +94,34 @@ export interface PersonalScoring {
   coveragePercent: number;
   explanation: string;
   zone?: ZoneScoring | null;
+  fair?: FairScoring | null;
+  opportunity?: OpportunityScoring | null;
+}
+
+export interface FairScoring {
+  method: "fair-linear-v1";
+  score: number;
+  gapPercent: number;
+  advertisedPrice: number;
+  estimatedPrice: number;
+  unit: "€" | "€/mes";
+  period: string;
+  modelVersion: string;
+}
+
+export interface OpportunityScoring {
+  method: "opportunity-linear-v1";
+  score: number;
+  scope: "distrito";
+  district: string;
+  districtCode: string;
+  districtGrowthPercent: number;
+  cityGrowthPercent: number;
+  gapPercentagePoints: number;
+  source: string;
+  sourceUrl: string;
+  period: string;
+  retrievedAt: string;
 }
 
 /**

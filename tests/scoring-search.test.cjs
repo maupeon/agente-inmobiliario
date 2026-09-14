@@ -34,7 +34,37 @@ async function main() {
   const profile = { operacion: 'venta', zona: 'Madrid', createdAt: '2026-09-09', zonaLat: 40.4, zonaLon: -3.7 };
   const property = { propertyCode: 'one', title: 'Vivienda', price: 100000, size: 60, propertyType: 'flat', operation: 'sale', latitude: 40.4, longitude: -3.7 };
   const empty = { propertyCode: 'one', valuation: null, neighborhood: null, commute: null };
-  const model = { ...empty, valuation: { nivel: 'modelo', estadoModelo: 'ok', fromFallback: false, modeloVersion: 'v2', banda: 'barato', diferenciaPorcentual: -10, intervalo: [100000, 150000] } };
+  const model = { ...empty, valuation: { nivel: 'modelo', estadoModelo: 'ok', fromFallback: false, modeloVersion: 'v2', operacion: 'venta', precioEstimado: 100000 / 0.9, banda: 'barato', diferenciaPorcentual: -10, intervalo: [100000, 150000] } };
+  const { fairFromGap, fairForProperty, opportunityFromGrowth, opportunityForProperty } = load('lib/scoring/price-scores.ts');
+  check('Fair has monotonic, bounded scores independent of model bands', () => {
+    for (const [gap, expected] of [[-80,100],[-20,100],[-10,75],[0,50],[10,25],[20,0],[300,0]]) assert.equal(fairFromGap(gap),expected);
+    for (const gap of [null,NaN,Infinity,-Infinity]) assert.equal(fairFromGap(gap),null);
+    const e={...model,valuation:{...model.valuation,banda:null,diferenciaPorcentual:999}};
+    assert.equal(Math.round(fairForProperty(property,e).score),75);
+    assert.equal(Math.round(personalScore(property,e,null).scoring.components[0].value),75);
+    for(const changed of [{precioEstimado:0},{precioEstimado:NaN},{precioEstimado:undefined},{operacion:'alquiler'},{fromFallback:true},{estadoModelo:'no_disponible'},{nivel:'provincia'},{modeloVersion:undefined}]) assert.equal(fairForProperty(property,{...e,valuation:{...e.valuation,...changed}}),null);
+    assert.equal(fairForProperty(property,{...e,propertyCode:'different'}),null);
+    for(const price of [0,-1,NaN,Infinity]) assert.equal(fairForProperty({...property,price},e),null);
+    const rental=fairForProperty({...property,operation:'rent',price:900},{...e,valuation:{...e.valuation,operacion:'alquiler',precioEstimado:1000}});
+    assert.equal(Math.round(rental.score),75); assert.equal(rental.unit,'€/mes');
+  });
+  check('Opportunity measures growth differences, including zero or negative city growth', () => {
+    for(const [district,city,expected] of [[10,10,50],[10,0,75],[0,10,25],[-5,-10,62.5],[-10,-5,37.5],[30,0,100],[-30,0,0]]) assert.equal(opportunityFromGrowth(district,city),expected);
+    for(const value of [null,NaN,Infinity,-100]) {assert.equal(opportunityFromGrowth(value,0),null);assert.equal(opportunityFromGrowth(0,value),null);}
+    const p={...property,municipality:'Madrid',district:'Centro'};
+    const result=opportunityForProperty(p);
+    assert.equal(result.districtGrowthPercent,3.3); assert.equal(result.cityGrowthPercent,2.2);
+    assert.equal(result.score,52.75); assert.equal(result.scope,'distrito');
+    assert.equal(opportunityForProperty({...p,price:2000000}).score,result.score);
+    for(const changed of [{operation:'rent'},{district:undefined},{district:'Malasaña'},{district:'Centro histórico'},{municipality:'Málaga'},{latitude:41.38,longitude:2.17}]) assert.equal(opportunityForProperty({...p,...changed}),null);
+    for(const district of ['Salamanca','Barrio de Salamanca','04']) assert.equal(opportunityForProperty({...p,district}).districtCode,'04');
+    const source=load('lib/scoring/opportunity-data.ts');
+    assert.equal(source.OPPORTUNITY_DISTRICTS.length,21);
+    assert.equal(new Set(source.OPPORTUNITY_DISTRICTS.map(d=>d.code)).size,21);
+    assert(source.OPPORTUNITY_DISTRICTS.every(d=>opportunityForProperty({...p,district:d.code})?.score != null));
+    const scored=personalScore(p,model,{...profile,scoreWeights:{alpha:50,beta:50,gamma:0,delta:0}});
+    assert.equal(scored.scoring.coveragePercent,100); assert.equal(scored.score,64);
+  });
   check('weights default25, extremes and strict total', () => {
     assert.equal(scoreWeights(undefined).alpha, 25);
     assert(validScoreWeights({alpha:100,beta:0,gamma:0,delta:0}));
@@ -108,7 +138,7 @@ async function main() {
     const travel={...empty,commute:{recomendado:'bici',proveedor:'estimacion',modos:[{modo:'bici',minutos:26}]}};
     const p={...profile,trabajo:{direccion:'Trabajo',modo:'bici'},scoreWeights:{alpha:20,beta:20,gamma:30,delta:30}};
     const combined=personalScore(madridProperty,travel,p);
-    assert.equal(combined.scoring.coveragePercent,54);
+    assert.equal(combined.scoring.coveragePercent,74);
     const onlyTravel=personalScore(property,travel,p);
     assert.equal(onlyTravel.score,21);
     assert.equal(evaluationLabel(onlyTravel.scoring),'Evaluación parcial: solo trayecto disponible');
@@ -153,7 +183,7 @@ async function main() {
     }
     assert.equal(personalScore({...property,hasLift:true},empty,p).score,0);
     const r=personalScore(property,{...model,commute:travel(20).commute},{...p,scoreWeights:{alpha:25,beta:25,gamma:25,delta:25}});
-    assert.equal(r.score,45); assert.equal(r.scoring.coveragePercent,50);
+    assert.equal(r.score,39); assert.equal(r.scoring.coveragePercent,50);
   });
   check('absent feature stays unknown, explicit negative fails requirement', () => {
     assert.equal(satisfiesMust({...property,features:['Exterior']},'terraza'),null);

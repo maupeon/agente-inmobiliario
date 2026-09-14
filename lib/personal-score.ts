@@ -1,4 +1,5 @@
 import type { Imprescindible, PersonalScoring, Property, PropertyEnrichment, ScoreComponent, ScoreWeights, UserProfile } from "@/types";
+import { fairForProperty, opportunityForProperty } from "@/lib/scoring/price-scores";
 import { zoneForProperty } from "@/lib/neighborhood/zone-score";
 
 export const DEFAULT_SCORE_WEIGHTS: ScoreWeights = { alpha: 25, beta: 25, gamma: 25, delta: 25 };
@@ -38,12 +39,10 @@ export function satisfiesMust(p: Property, m: Imprescindible): boolean | null {
 /** Fórmula reproducible de preferencia, no probabilidad, tasación ni calidad del barrio. */
 export function personalScore(p: Property, e: PropertyEnrichment, profile: UserProfile | null): { score: number; scoring: PersonalScoring } {
   const weights = scoreWeights(profile?.scoreWeights);
-  const model = usableModel(e);
-  const v = e.valuation;
-  const fairValues = { barato: 100, ajustado: 85, en_linea: 62, caro: 32, muy_caro: 12 };
-  const fair = model && v?.banda ? fairValues[v.banda] : null;
-  // Opportunity sigue necesitando series comparables de zona y ciudad.
-  const opportunity: number | null = null;
+  const fairScoring = fairForProperty(p, e);
+  const fair = fairScoring?.score ?? null;
+  const opportunityScoring = opportunityForProperty(p);
+  const opportunity = opportunityScoring?.score ?? null;
   const zoneScoring = zoneForProperty(p);
   const zone = zoneScoring?.score ?? null;
   const leg = e.commute?.modos.find((m) => m.modo === e.commute?.recomendado);
@@ -54,12 +53,13 @@ export function personalScore(p: Property, e: PropertyEnrichment, profile: UserP
     return { key, label, weight, value: shownValue, contribution: shownValue == null ? 0 : round(weight * shownValue / 100), explanation };
   };
   const components = [
-    component("fair", "Fair · precio", weights.alpha, fair, fair == null
-      ? v?.modeloId === "habitIA-xgboost-2018-v3" && model
-        ? "El modelo XGBoost ofrece una estimación puntual sin bandas calibradas. Fair no aporta puntos; consulta el precio y la desviación en la ficha."
-        : "Sin estimación individual válida. Una media territorial no sustituye al modelo."
-      : "Preferencia por menor precio frente al escenario indexado: bandas 100/85/62/32/12. Oferta de 2018; precisión actual no validada."),
-    component("opportunity", "Opportunity · inversión", weights.beta, opportunity, "Compara la revalorización de la zona con la media de la ciudad en el mismo periodo. Sin series comparables verificadas: no disponible. No se sustituye por el margen del precio frente al modelo."),
+    component("fair", "Fair · precio", weights.alpha, fair, fairScoring
+      ? `Regla provisional: Fair = limitar(50 − 2,5 × desviación %, 0, 100). Desviación del anuncio frente a la estimación: ${round(fairScoring.gapPercent)}%. Coincidencia = 50; 20% por debajo = 100; 20% por encima = 0. ${p.operation === "rent" ? "Compara mensualidades; renta derivada de venta 2025 y ratios 2024, sin validación independiente de alquiler." : "Estimación indexada desde oferta de 2018; precisión actual no validada."} No expresa confianza del modelo ni una tasación.`
+      : "Sin estimación individual válida y comparable con el anuncio. Una media territorial no sustituye al modelo."),
+    component("opportunity", "Opportunity · inversión", weights.beta, opportunity, opportunityScoring
+      ? `Distrito ${opportunityScoring.district}: variación anual ${opportunityScoring.districtGrowthPercent}% frente al ${opportunityScoring.cityGrowthPercent}% de Madrid; diferencia ${round(opportunityScoring.gapPercentagePoints)} puntos porcentuales. Regla provisional: limitar(50 + 2,5 × diferencia, 0, 100). Mismo crecimiento = 50. ${opportunityScoring.period}. Evolución histórica de precios de oferta; no predice rentabilidad ni revalorización de esta vivienda.`
+      : p.operation === "rent" ? "No aplica al alquiler: este criterio compara la revalorización histórica de venta para compra. Puedes asignarle peso 0; el peso no se redistribuye automáticamente."
+        : "Sin distrito de Madrid identificado con una variación anual comparable. No se sustituye por el margen del precio frente al modelo."),
     { ...component("zone", "Zone · entorno", weights.gamma, zone, zoneScoring
       ? `Distrito ${zoneScoring.district}: ${zoneScoring.available}/5 indicadores. Zone = 100 × suma de cinco índices / 5. Más m² verdes, líneas y servicios suman; menos actuaciones y ruido suman. Los indicadores ausentes no aportan puntos ni se redistribuye su peso. Recuentos absolutos de distintos periodos; menos actuaciones no acredita mayor seguridad.`
       : "Sin distrito de Madrid identificado en el anuncio. No se asignan indicadores por cercanía ni a partir de la zona del perfil."), coveragePercent: zoneScoring?.coveragePercent ?? 0 },
@@ -67,6 +67,6 @@ export function personalScore(p: Property, e: PropertyEnrichment, profile: UserP
   ];
   return {
     score: Math.round(components.reduce((sum, c) => sum + c.weight * (c.value ?? 0) / 100, 0)),
-    scoring: { weights, components, zone: zoneScoring, coveragePercent: round(components.reduce((sum, c) => sum + c.weight * (c.value == null ? 0 : c.coveragePercent ?? 100) / 100, 0)), explanation: "HabitIA Score = α×Fair + β×Opportunity + γ×Zone + δ×Lifestyle, dividido entre 100 y redondeado al entero. Con datos incompletos es una suma parcial de puntos, no una evaluación global. Los datos ausentes no aportan puntos y sus pesos no se redistribuyen; la cobertura incluye la fracción disponible de Zone." },
+    scoring: { weights, components, fair: fairScoring, opportunity: opportunityScoring, zone: zoneScoring, coveragePercent: round(components.reduce((sum, c) => sum + c.weight * (c.value == null ? 0 : c.coveragePercent ?? 100) / 100, 0)), explanation: "HabitIA Score = α×Fair + β×Opportunity + γ×Zone + δ×Lifestyle, dividido entre 100 y redondeado al entero. Con datos incompletos es una suma parcial de puntos, no una evaluación global. Los datos ausentes no aportan puntos y sus pesos no se redistribuyen; la cobertura incluye la fracción disponible de Zone." },
   };
 }

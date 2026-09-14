@@ -39,13 +39,13 @@ const STEPS = [
 const SIGNALS = [
   {
     t: "α · Fair · precio",
-    d: "Compara el precio anunciado con la estimación individual del modelo. Las bandas más favorables reciben más puntos. Una media provincial no sustituye esta estimación.",
+    d: "Compara el precio anunciado con la estimación individual del modelo. Escala provisional: 50 puntos si coinciden, 100 si el anuncio está un 20% o más por debajo y 0 si está un 20% o más por encima. Una media provincial no sustituye esta estimación.",
     fuente: "25% por defecto · Sin estimación: no disponible",
   },
   {
     t: "β · Opportunity · inversión",
-    d: "Compara la revalorización de la zona con la media de la ciudad en un mismo periodo. Necesita series comparables; hoy no está disponible y no aporta puntos. No predice la rentabilidad futura.",
-    fuente: "25% por defecto · Pendiente de series de zona y ciudad",
+    d: "En compra, compara la variación anual de precios de oferta del distrito con la de Madrid, de agosto de 2025 a agosto de 2026. Escala provisional: 50 si coinciden; suma 2,5 puntos por cada punto porcentual de ventaja, con límites 0 y 100. No predice rentabilidad futura.",
+    fuente: "25% por defecto · Idealista · 21 distritos · Solo compra",
   },
   {
     t: "γ · Zone · calidad de vida",
@@ -253,7 +253,7 @@ export default function ComoFuncionaPage() {
           <div className="mt-5 space-y-3 text-sm leading-relaxed text-stone-600">
             <p><Strong>Dónde está cada parte.</Strong> Vercel aloja la web y el backend; Fly.io aloja el servicio Python del modelo; Supabase aloja PostgreSQL; Anthropic ofrece la API de Claude. Desde el navegador puedes buscar, conversar, comparar compra y alquiler, guardar favoritos y activar avisos.</p>
             <p><Strong>El modelo ya está entrenado.</Strong> La preparación del histórico, el ajuste y la calibración se realizan fuera de la búsqueda. El servicio carga el artefacto evaluado; consultar una vivienda no vuelve a entrenarlo. El escenario indexado no acredita precisión actual en 2026.</p>
-            <p><Strong>Cada pieza tiene una función.</Strong> El predictor XGBoost estima el precio anunciado a nivel de 2025 con datos de 2018. Ofrece una cifra y sus advertencias, sin intervalos calibrados ni bandas de barato o caro; por eso Fair no aporta puntos con este modelo. Claude conecta herramientas y explica sus resultados. Las fichas de alquiler comparan mensualidades en €/mes: la renta estimada resulta del precio de venta indexado a 2025 multiplicado por ratios distritales de 2024. No constituye una valoración de alquiler validada. La evaluación LightGBM de la presentación pertenece al estudio histórico.</p>
+            <p><Strong>Cada pieza tiene una función.</Strong> El predictor XGBoost estima el precio anunciado a nivel de 2025 con datos de 2018. Ofrece una cifra y sus advertencias, sin intervalos calibrados ni bandas de barato o caro. Fair convierte la desviación del precio anunciado respecto a esa cifra en una puntuación provisional; no mide confianza ni precisión. Claude conecta herramientas y explica sus resultados. Las fichas de alquiler comparan mensualidades en €/mes: la renta estimada resulta del precio de venta indexado a 2025 multiplicado por ratios distritales de 2024. No constituye una valoración de alquiler validada. La evaluación LightGBM de la presentación pertenece al estudio histórico.</p>
             <p><Strong>Persistencia y tareas diarias.</Strong> Supabase (PostgreSQL) guarda cachés, favoritos, historial y suscripciones. Vercel programa la actualización de referencias de mercado. Supabase programa las llamadas al backend que preparan hasta cinco recomendaciones diarias para las suscripciones activas. Zone utiliza una copia reproducible de los recuentos urbanos por distrito; abrir la página no actualiza sus fuentes.</p>
           </div>
 

@@ -370,7 +370,7 @@ export function Onboarding({
                   <button type="button" onClick={() => { setWeights({ ...DEFAULT_SCORE_WEIGHTS }); setWeightsError(false); }} className="min-h-11 rounded-lg px-2 text-sm underline">Restablecer 25% cada uno</button>
                 </div>
                 {weightsError && <p role="alert" className="text-sm text-rose-700">Los cuatro pesos deben ser enteros entre 0 y 100 y sumar exactamente 100.</p>}
-                <p className="mt-2 text-xs leading-relaxed text-stone-600">Fair compara la estimación con la oferta; Opportunity compara la revalorización de la zona con la media de la ciudad; Zone indica la calidad de vida en ese barrio; Lifestyle refleja el tiempo al trabajo. Puedes descartar un componente poniendo su peso a 0 y repartir los 100 puntos entre los demás. Opportunity y Zone están sin datos verificables y no aportan puntos. Fair depende de un escenario basado en oferta de 2018.</p>
+                <p className="mt-2 text-xs leading-relaxed text-stone-600">Fair compara la estimación con la oferta; Opportunity compara la revalorización de la zona con la media de la ciudad; Zone combina indicadores del distrito; Lifestyle refleja el tiempo al trabajo. Puedes descartar un componente poniendo su peso a 0 y repartir los 100 puntos entre los demás. Opportunity usa evolución histórica de venta y solo aplica a compra. Zone dispone de cuatro de cinco indicadores. Fair necesita una estimación individual; sus datos de entrenamiento son de 2018.</p>
               </fieldset>
               <ChoiceGroup label="Preferencias del barrio (contexto para el asistente)">
                 {PRIORITIES.map((item) => (

@@ -56,8 +56,8 @@ Los pesos son enteros, suman 100 y empiezan en 25 por componente.
 
 | Componente | Qué representa | Disponibilidad |
 | --- | --- | --- |
-| Fair | Comparación del precio del anuncio con un escenario individual válido del modelo | Requiere valoración compatible |
-| Opportunity | Revalorización relativa de la zona frente a la ciudad | Sin evidencia verificable integrada |
+| Fair | Desviación del anuncio frente a la estimación individual, convertida con una regla provisional a 0–100 | Venta y alquiler con valoración compatible |
+| Opportunity | Variación anual de oferta del distrito menos la de Madrid, escala provisional | Solo compra; Idealista agosto 2025–agosto 2026 |
 | Zone | Indicadores del entorno | Cinco componentes de igual peso; cuatro calculados por distrito y ruido ausente. Score parcial y cobertura interna del 80% |
 | Lifestyle | Tiempo de trayecto al trabajo | Requiere perfil y trayecto |
 

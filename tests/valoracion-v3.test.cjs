@@ -67,7 +67,7 @@ test('mixed v3 results retain abstentions and reject duplicate or mismatched env
   }
 });
 
-test('enrichment and scoring expose a point estimate, warnings and rental scenario without Fair points', async () => {
+test('enrichment and scoring expose a point estimate, warnings and rental scenario with Fair derived from comparable prices', async () => {
   const value = respuesta.resultados[0];
   const stubs = {
     '@/lib/market/cache': { getMarketData: async () => ({ data: { data: [] }, fromFallback: true }) },
@@ -84,8 +84,8 @@ test('enrichment and scoring expose a point estimate, warnings and rental scenar
   assert.equal(format.priceLabel(enriched.valuation), null);
   assert(format.priceComparison(enriched.valuation).includes('por debajo'));
   const score = load('lib/personal-score.ts').personalScore(anuncio, enriched, null);
-  assert.equal(score.scoring.components.find(c => c.key === 'fair').value, null);
-  assert(score.scoring.components[0].explanation.includes('XGBoost'));
+  assert.equal(score.scoring.components.find(c => c.key === 'fair').value, Math.round(Math.min(100,Math.max(0,50 - 2.5 * value.brecha_pct))*10)/10);
+  assert(score.scoring.components[0].explanation.includes('Regla provisional'));
 });
 
 test('Idealista normalizer and chat tool preserve description and structured parking', async () => {
@@ -133,7 +133,7 @@ test('rent rejects sale responses, incompatible units and inconsistent compariso
   }
 });
 
-test('rental enrichment uses monthly rent per square metre and explicit derivation without Fair points', async () => {
+test('rental enrichment uses monthly rent per square metre and explicit derivation with Fair derived from comparable prices', async () => {
   const load = loader(mixed.respuesta, {
     '@/lib/market/cache': { getMarketData: async () => ({ data: { data: [] }, fromFallback: true }) },
     '@/lib/market/match-province': { findProvincePrice: () => null },
@@ -149,7 +149,10 @@ test('rental enrichment uses monthly rent per square metre and explicit derivati
   assert.equal(rent.valuation.banda, null);
   assert.equal(rent.valuation.intervalo, undefined);
   assert(load('lib/dashboard-format.ts').priceComparison(rent.valuation).includes('renta mensual estimada'));
-  assert.equal(load('lib/personal-score.ts').personalScore(mixed.anuncios[1], rent, null).scoring.components.find(c => c.key === 'fair').value, null);
+  const scoring=load('lib/personal-score.ts').personalScore(mixed.anuncios[1], rent, null).scoring;
+  assert.equal(scoring.components.find(c => c.key === 'fair').value, Math.round(Math.min(100,Math.max(0,50 - 2.5 * mixed.respuesta.resultados[1].brecha_pct))*10)/10);
+  assert.equal(scoring.components.find(c => c.key === 'opportunity').value,null);
+  assert.equal(scoring.fair.unit,'€/mes');
 });
 
 test('chat requires the observed operation and preserves rental monthly price', async () => {

@@ -75,7 +75,7 @@ La ficha conserva el precio mensual del anuncio. Cuando el predictor XGBoost v3 
 
 `renta_mensual_estimada = precio_estimado × factor_renta_mensual`
 
-La renta derivada no tiene validación independiente de alquiler ni intervalos calibrados. Fair no aporta puntos con este modelo, que no devuelve bandas. Si el servicio no está disponible o se abstiene, se indica la ausencia de estimación. El bloque «Cómo estimamos el alquiler» de `/datos` explica este método; no certifica que el servicio esté conectado. [Contrato del predictor](modelo-xgboost.md).
+La renta derivada no tiene validación independiente de alquiler ni intervalos calibrados. Fair compara anuncio y estimación mensual en una escala provisional, sin exigir bandas. Si el servicio no está disponible o se abstiene, se indica la ausencia de estimación. El bloque «Cómo estimamos el alquiler» de `/datos` explica este método; no certifica que el servicio esté conectado. [Contrato del predictor](modelo-xgboost.md).
 
 ## Metodología de Zone Score
 
@@ -99,7 +99,7 @@ Las fuentes tienen distintos periodos y coberturas. Menos actuaciones no acredit
 
 El ruido mantiene `rawValue`, `index` y `points` en `null`. Se suman únicamente las aportaciones conocidas, conservando el divisor de cinco. El resultado se etiqueta como **parcial**, con cuatro indicadores, cobertura del 80% y máximo alcanzable de 80 puntos. No se renormaliza a 100. Con γ = 25, Zone aporta hasta 20 puntos al total y cubre 20 puntos porcentuales de las prioridades. La cobertura global suma el peso de cada componente multiplicado por su fracción evaluable.
 
-El buscador muestra «Evaluación parcial» cuando la cobertura global es inferior al 100%, o «Evaluación parcial: solo trayecto disponible» si ese es el único criterio ponderado calculable. La suma numérica utilizada para ordenar queda en el desglose como puntos acumulados de una evaluación incompleta. No se presenta como una evaluación global baja. Fair y Opportunity conservan sus condiciones anteriores.
+El buscador muestra «Evaluación parcial» cuando la cobertura global es inferior al 100%, o «Evaluación parcial: solo trayecto disponible» si ese es el único criterio ponderado calculable. La suma numérica utilizada para ordenar queda en el desglose como puntos acumulados de una evaluación incompleta. No se presenta como una evaluación global baja. Fair y Opportunity se calculan según las reglas provisionales documentadas en `docs/price-scores.md`.
 
 ### Reproducir los indicadores
 

@@ -1,3 +1,4 @@
+import { OPPORTUNITY_DISTRICTS, OPPORTUNITY_SOURCE } from "@/lib/scoring/opportunity-data";
 import { UrbanSources } from "./UrbanSources";
 import context from "@/data/madrid/madrid-context.json";
 import modelResults from "@/app/presentacion/results-data.json";
@@ -81,6 +82,18 @@ export default async function DatosPage() {
               </div>
             </Collapsible>
           </div>
+        </section>
+
+        <section id="opportunity-score" className="mt-8 border-y border-hairline py-6">
+          <h2 className="font-display text-xl text-ink">Opportunity · evolución de venta por distrito</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Comparamos la variación anual publicada de cada distrito con el {OPPORTUNITY_SOURCE.cityGrowthPercent.toLocaleString("es-ES")}% de Madrid capital, durante {OPPORTUNITY_SOURCE.period}. Son precios de oferta; no son compraventas cerradas ni una previsión de rentabilidad.</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Escala provisional: 50 + 2,5 × (variación del distrito − variación de Madrid), limitada a 0–100. Las tasas se restan en puntos porcentuales. Solo se aplica a compra y a distritos identificados; en alquiler no se redistribuye automáticamente su peso.</p>
+          <p className="my-3 text-xs text-stone-600"><a href={OPPORTUNITY_SOURCE.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{OPPORTUNITY_SOURCE.source}</a> · consulta {OPPORTUNITY_SOURCE.retrievedAt}. Copia fija de las tasas anuales del informe; no contiene la serie mensual completa. Misma {OPPORTUNITY_SOURCE.methodology} para ciudad y distritos.</p>
+          <Collapsible summary="Ver variaciones de los 21 distritos">
+            <Table head={["Distrito", "Variación anual", "Diferencia frente a Madrid"]}>
+              {OPPORTUNITY_DISTRICTS.map(d => <Row key={d.code} cells={[d.district, `${d.growthPercent.toLocaleString("es-ES")}%`, `${(d.growthPercent - OPPORTUNITY_SOURCE.cityGrowthPercent).toLocaleString("es-ES", { maximumFractionDigits: 1 })} puntos porcentuales`]} />)}
+            </Table>
+          </Collapsible>
         </section>
 
         {/* Precio €/m² compra por provincia */}
