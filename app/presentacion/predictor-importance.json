@@ -1,0 +1,113 @@
+{
+  "source": "habitia_predictor/DATOS/modelos/paquete_produccion/modelo.json",
+  "sha256": "5d29cd26889cc0777196f592aa9828b18cc7d71ccd1a05ee61a95f0a44741a04",
+  "method": "gain: mean loss_changes over non-leaf splits using each feature, across all 401 trees",
+  "reference": "https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.Booster.get_score",
+  "features": [
+    {
+      "feature": "CONSTRUCTEDAREA",
+      "gain": 3.072297400929571,
+      "splits": 32325
+    },
+    {
+      "feature": "BATHNUMBER",
+      "gain": 1.9191292484048628,
+      "splits": 5623
+    },
+    {
+      "feature": "alq_mediana_eur_m2_barrio",
+      "gain": 1.7369705043747943,
+      "splits": 17319
+    },
+    {
+      "feature": "indice_vulnerabilidad",
+      "gain": 1.6560715138262412,
+      "splits": 15443
+    },
+    {
+      "feature": "HASLIFT",
+      "gain": 1.3296958192353094,
+      "splits": 4108
+    },
+    {
+      "feature": "ISSTUDIO",
+      "gain": 0.6711666229388549,
+      "splits": 664
+    },
+    {
+      "feature": "HASSWIMMINGPOOL",
+      "gain": 0.499805869563334,
+      "splits": 1881
+    },
+    {
+      "feature": "HASBOXROOM",
+      "gain": 0.4806912742920518,
+      "splits": 3928
+    },
+    {
+      "feature": "HASGARDEN",
+      "gain": 0.3912057287606256,
+      "splits": 2795
+    },
+    {
+      "feature": "ROOMNUMBER",
+      "gain": 0.25695806288134765,
+      "splits": 10295
+    },
+    {
+      "feature": "HASPARKINGSPACE",
+      "gain": 0.24098697459954166,
+      "splits": 3205
+    },
+    {
+      "feature": "HASDOORMAN",
+      "gain": 0.21295657063419587,
+      "splits": 3960
+    },
+    {
+      "feature": "delitos_per_10k_barrio",
+      "gain": 0.16678404661130763,
+      "splits": 17064
+    },
+    {
+      "feature": "FLOORCLEAN",
+      "gain": 0.14739617822349313,
+      "splits": 20040
+    },
+    {
+      "feature": "DISTANCE_TO_CASTELLANA",
+      "gain": 0.12645170290492638,
+      "splits": 34245
+    },
+    {
+      "feature": "ISDUPLEX",
+      "gain": 0.11424527707087699,
+      "splits": 935
+    },
+    {
+      "feature": "HASTERRACE",
+      "gain": 0.10909836654235222,
+      "splits": 5969
+    },
+    {
+      "feature": "HASAIRCONDITIONING",
+      "gain": 0.10870951901410104,
+      "splits": 5884
+    },
+    {
+      "feature": "DISTANCE_TO_CITY_CENTER",
+      "gain": 0.10466352669447442,
+      "splits": 35063
+    },
+    {
+      "feature": "HASWARDROBE",
+      "gain": 0.10048366755777755,
+      "splits": 6471
+    },
+    {
+      "feature": "DISTANCE_TO_METRO",
+      "gain": 0.0557854884259862,
+      "splits": 34340
+    }
+  ]
+}

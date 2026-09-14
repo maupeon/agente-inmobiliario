@@ -75,7 +75,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Modelo de pricing",
     "title": "El valor estimado según sus características",
     "target": 360,
-    "note": "Modelo de valoración: arboles_desplegable_ajustado, XGBoost, paquete v3 exportado el 13 de septiembre de 2026. 21 variables, 401 árboles, profundidad máxima 12. La predicción base es exp(predicción logarítmica) por 1,016823185598671, corrección de Duan. Estima precios anunciados de 2018; no precios de cierre ni un valor verdadero. MdAPE 9,2864% y MAE 48.992,73 euros declarados en su test de 2018. No comparar directamente estas cifras con las del experimento anterior: faltan particiones y tamaño del test. Venta: multiplica la estimación base por indice_venta del distrito hasta 2025; no aplicar el factor heredado 1,5534 ni el IPV autonómico de 2026. Alquiler: multiplica el precio indexado por factor_renta_mensual del distrito de 2024; el factor ya es mensual y no se divide de nuevo entre 12. Esa mensualidad es un escenario derivado sin validación independiente de alquiler. No hay intervalos ni SHAP exportados, y el ajuste de nivel no demuestra precisión actual."
+    "note": "Modelo de valoración: arboles_desplegable_ajustado, XGBoost, paquete v3 exportado el 13 de septiembre de 2026. 21 variables, 401 árboles, profundidad máxima 12. La predicción base es exp(predicción logarítmica) por 1,016823185598671, corrección de Duan. Estima precios anunciados de 2018; no precios de cierre ni un valor verdadero. MdAPE 9,2864% y MAE 48.992,73 euros declarados en su test de 2018. No comparar directamente estas cifras con las del experimento anterior: faltan particiones y tamaño del test. La diapositiva muestra una propuesta de actualización a 2026 mediante IPV y ratio mensual de 2026, aún pendiente de incorporar y validar; numerador y denominador del IPV deben usar la misma geografía y serie. El paquete implementado funciona así: venta: multiplica la estimación base por indice_venta del distrito hasta 2025; no aplicar el factor heredado 1,5534 ni el IPV autonómico de 2026. Alquiler: multiplica el precio indexado por factor_renta_mensual del distrito de 2024; el factor ya es mensual y no se divide de nuevo entre 12. Esa mensualidad es un escenario derivado sin validación independiente de alquiler. No hay intervalos ni SHAP exportados, y el ajuste de nivel no demuestra precisión actual."
   },
   {
     "kicker": "Comprar vs. alquilar",
@@ -87,13 +87,13 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Demo",
     "title": "La plataforma en acción",
     "target": 521,
-    "note": "Vídeo de 106 segundos con música continua de João y capturas con datos de ejemplo. Arranca al entrar; sus controles permiten pausar, buscar y ampliar. Al regresar conserva el punto alcanzado. El montaje conserva pantallas anteriores a la actualización del modelo: actualizar las capturas con la versión final de la plataforma y XGBoost. No utilizar el vídeo como prueba de los resultados del nuevo modelo."
+    "note": "Vídeo de 106 segundos con música continua de João y capturas con datos de ejemplo. Arranca al entrar; sus controles permiten pausar, buscar y ampliar. Al regresar conserva el punto alcanzado. Revisión v7: resultados, ficha y desglose renovados entre 68 y 88 segundos con la aplicación actual en una instancia aislada. Viviendas ficticias y trayecto aproximado; los cuatro componentes están visibles, con los datos ausentes identificados. No utilizar el vídeo como prueba de resultados del modelo XGBoost."
   },
   {
     "kicker": "Roadmap",
     "title": "Demostrar validar y escalar",
     "target": 551,
-    "note": "Hasta cinco viviendas diarias. El modelo de valoración ya está disponible y el código incorpora el contrato XGBoost v3. Verificar el despliegue y la conexión, actualizar las capturas y validar utilidad con usuarios reales y precisión con datos actuales. Futuro: revalorización, visita 2D a 3D, más ciudades, B2C y B2B."
+    "note": "Hasta cinco viviendas diarias. El modelo de valoración ya está disponible y el código incorpora el contrato XGBoost v3. Verificar el despliegue y la conexión, y validar utilidad con usuarios reales y precisión con datos actuales. Futuro: revalorización, visita 2D a 3D, más ciudades, B2C y B2B."
   },
   {
     "kicker": "Cierre",
@@ -117,7 +117,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Anexo · Modelo de valoración",
     "title": "XGBoost en detalle",
     "target": 561,
-    "note": "Fuente: metadatos.json del paquete arboles_desplegable_ajustado v3, exportado 2026-09-13T19:19:48. Se conserva una copia exacta en predictor-metadata.json. Test de 2018: error porcentual mediano 9,2864455758%; error absoluto mediano 23.648,5234 euros; MAE 48.992,7272 euros; RMSE log 0,1850312785; R² log 0,9402686686; 80,276931231% con error dentro de ±20%. Ese 80,28% es una proporción observada: no un intervalo de predicción ni probabilidad individual de acierto. RMSE y R² están en escala logarítmica. La metadata también declara RMSE log de validación cruzada 0,1856845156, pero no entrega particiones, tamaño del test ni notebook de selección. No se ha repetido ni auditado esa evaluación. 21 variables: 4 de tamaño/distribución/planta, 11 de equipamiento/tipología, 3 distancias y 3 del barrio. No son importancias ni atribuciones SHAP. El dominio de producción descarta viviendas mayores de 367 m² y casas/chalets. El histórico de entrenamiento registra superficies mayores: las métricas entregadas no detallan el resultado del subconjunto admitido en producción. El modelo omite conservación, condición de ático y vistas; parte del equipamiento depende de lo que describa el anuncio. Fuentes de barrio posteriores a 2018 y precios indexados a 2025 limitan la lectura temporal. Alquiler derivado de un factor mensual de 2024, sin validación propia. No afirmar superioridad frente a LightGBM sin una comparación común."
+    "note": "Fuente: metadatos.json del paquete arboles_desplegable_ajustado v3, exportado 2026-09-13T19:19:48. Se conserva una copia exacta en predictor-metadata.json. Test de 2018: error porcentual mediano 9,2864455758%; error absoluto mediano 23.648,5234 euros; MAE 48.992,7272 euros; RMSE log 0,1850312785; R² log 0,9402686686; 80,276931231% con error dentro de ±20%. Ese 80,28% es una proporción observada: no un intervalo de predicción ni probabilidad individual de acierto. RMSE y R² están en escala logarítmica. La metadata también declara RMSE log de validación cruzada 0,1856845156, pero no entrega particiones, tamaño del test ni notebook de selección. No se ha repetido ni auditado esa evaluación. 21 variables: 4 de tamaño/distribución/planta, 11 de equipamiento/tipología, 3 distancias y 3 del barrio. El top 5 de la diapositiva de pricing se ha calculado sobre los 401 árboles exportados por ganancia media de cada variable: superficie, baños, alquiler mediano del barrio, índice de vulnerabilidad y ascensor. No son atribuciones SHAP ni efectos causales. El dominio de producción descarta viviendas mayores de 367 m² y casas/chalets. El histórico de entrenamiento registra superficies mayores: las métricas entregadas no detallan el resultado del subconjunto admitido en producción. El modelo omite conservación, condición de ático y vistas; parte del equipamiento depende de lo que describa el anuncio. Fuentes de barrio posteriores a 2018 y precios indexados a 2025 limitan la lectura temporal. Alquiler derivado de un factor mensual de 2024, sin validación propia. No afirmar superioridad frente a LightGBM sin una comparación común."
   }
 ];
 
@@ -362,18 +362,20 @@ export function Presentation() {
         </SceneShell>
 
         <SceneShell index={1} active={active} state={sceneState(1)} label={SCENES[1].title}>
-          <section className={`${styles.sceneCanvas} ${styles.problemScene}`}>
-            <SceneHeader kicker="El problema" title={<>Buscar agota.<br />Decidir exige contexto.</>} />
+          <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.problemScene}`}>
+            <header className={styles.sceneHeader}><p className={styles.kicker}>El problema</p></header>
 
             <div className={styles.problemLayout}>
-
-              <div className={styles.editorialRows}>
+              <div>
+                <h2 className={styles.problemTitle}>Buscar agota.<br />Decidir exige contexto.</h2>
+                <div className={styles.editorialRows}>
                 {[
                   ["01", "Oferta fragmentada", "Saltar entre portales, repetir filtros y comparar anuncios."],
                   ["02", "Demasiadas variables", "Precio, estado, barrio, trayecto y financiación compiten por tu atención."],
                   ["03", "Referencias incompletas", "El precio anunciado no explica cuánto encaja una vivienda."],
                   ["04", "Tiempo e incertidumbre", "Encontrar opciones es solo el comienzo de la decisión."],
                 ].map(([n, title, copy]) => <article key={n}><span>{n}</span><div><h3>{title}</h3><p>{copy}</p></div></article>)}
+              </div>
               </div>
               <div className={styles.problemStatistic}>
                 <strong>43<span>%</span></strong>

@@ -27,22 +27,22 @@ export function PricingMethod() {
     <section aria-label="Modelo de valoración">
       <h3 className={styles.methodHeading}>01 <span>Modelo de valoración</span></h3>
       <div className={styles.pricingFlow}>
-        <article><span className={styles.methodLabel}>Inputs</span><h4>Dataset de {predictor.ano_base}</h4><p>Anuncios de Madrid. {predictor.columnas.length} variables: superficie, habitaciones, baños, equipamiento, distancias y contexto del barrio.</p></article>
-        <article><span className={styles.methodLabel}>Modelo</span><h4>XGBoost</h4><p>{predictor.params.n_estimators} árboles para captar relaciones no lineales entre vivienda y entorno. Predice en logaritmos y convierte a euros.</p><small>Estimación puntual; precisión actual sin validar.</small></article>
+        <article><span className={styles.methodLabel}>Inputs</span><h4>Dataset de {predictor.ano_base}</h4><p>Anuncios de Madrid de Idealista.</p><p>Top 5 por importancia: superficie, baños, alquiler mediano por m² del barrio, vulnerabilidad y ascensor.</p><small>De {predictor.columnas.length} variables · importancia por ganancia media (gain)</small></article>
+        <article><span className={styles.methodLabel}>Modelo</span><h4>XGBoost</h4><p>Capta relaciones no lineales e interacciones entre características de la vivienda y su entorno.</p><p>Fiabilidad en el test: {modelMetric("pct_dentro_del_20pct", 2, "%")} de los anuncios con error ≤20%.</p></article>
         <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra estimado · {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>MAE</dt><dd>{modelMetric("error_abs_medio_eur", 0, " €")}</dd></div></dl><small>Precios anunciados · métricas del test de {predictor.ano_base}</small></article>
       </div>
     </section>
-    <section aria-label="Actualización por distrito y estimación de alquiler">
-      <h3 className={styles.methodHeading}>02 <span>Actualización por distrito</span></h3>
+    <section aria-label="Propuesta de actualización macroeconómica a 2026">
+      <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span><small className={styles.proposalLabel}>Propuesta 2026</small></h3>
       <div className={styles.macroFlow}>
-        <article><h4>Comprar · nivel {predictor.ano_precio}</h4><div className={styles.macroEquation}><Equation label="Precio de compra de 2025 igual al precio de compra de 2018 por el índice registral del distrito de 2025 dividido entre el de 2018">
-          P<sub>compra {predictor.ano_precio}</sub> = P<sub>compra {predictor.ano_base}</sub> · <Fraction top={<>I<sub>distrito {predictor.ano_precio}</sub></>} bottom={<>I<sub>distrito {predictor.ano_base}</sub></>} />
+        <article><h4>Comprar · proyectar a 2026</h4><div className={styles.macroEquation}><Equation label="Proyección propuesta: precio de compra de 2026 igual al precio de 2018 por el IPV de 2026 dividido entre el IPV de 2018">
+          P<sub>compra 2026</sub> = P<sub>compra {predictor.ano_base}</sub> · <Fraction top={<>IPV<sub>2026</sub></>} bottom={<>IPV<sub>{predictor.ano_base}</sub></>} />
         </Equation></div></article>
-        <article><h4>Alquilar · escenario derivado</h4><div className={styles.macroEquation}><Equation label="Renta mensual estimada igual al precio de compra de 2025 por el factor mensual de renta del distrito de 2024">
-          R<sub>mensual</sub> = P<sub>compra {predictor.ano_precio}</sub> · f<sub>distrito {predictor.ano_renta}</sub>
+        <article><h4>Alquilar · escenario derivado</h4><div className={styles.macroEquation}><Equation label="Proyección propuesta: renta mensual de 2026 igual al precio de compra de 2026 por el factor mensual de renta del distrito de 2026">
+          R<sub>mensual 2026</sub> = P<sub>compra 2026</sub> · f<sub>distrito 2026</sub>
         </Equation></div></article>
       </div>
-      <p className={styles.equationKey}>I: índice registral de venta · f: ratio mensual renta/precio de {predictor.ano_renta}. El alquiler no tiene validación independiente.</p>
+      <p className={styles.equationKey}>IPV: Índice de Precios de las Viviendas · f: ratio mensual renta/precio. Proyección propuesta: requiere datos de 2026. Paquete actual: venta {predictor.ano_precio} y ratio {predictor.ano_renta}.</p>
     </section>
   </div>;
 }
@@ -51,7 +51,7 @@ export function PredictorDetails() {
   return <div className={styles.predictorDetails}>
     <dl className={styles.predictorMetrics}>
       <div><dt>Error porcentual mediano</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd><small>MdAPE · test de {predictor.ano_base}</small></div>
-      <div><dt>Error absoluto mediano</dt><dd>{modelMetric("error_abs_mediano_eur", 0, " €")}</dd><small>Mediana en euros</small></div>
+      <div><dt>Error absoluto medio</dt><dd>{modelMetric("error_abs_medio_eur", 0, " €")}</dd><small>MAE · test de {predictor.ano_base}</small></div>
       <div><dt>R² en logaritmos</dt><dd>{modelMetric("r2_log", 4)}</dd><small>RMSE log: {modelMetric("rmse_log", 4)}</small></div>
       <div><dt>Error dentro de ±20%</dt><dd>{modelMetric("pct_dentro_del_20pct", 2, "%")}</dd><small>Proporción observada en test</small></div>
     </dl>

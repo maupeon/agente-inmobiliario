@@ -45,3 +45,12 @@ El anexo del modelo distingue esa evaluación histórica del precio indexado a 2
 Para actualizar esta instantánea, copiar los metadatos de una entrega verificada a `app/presentacion/predictor-metadata.json` y revisar también fórmulas, notas y alcance. No utilizar `scripts/sync-model-results.py` para XGBoost: ese importador pertenece al estudio LightGBM.
 
 SHA-256 de los metadatos recibidos: `5da4831292ca56aad3d9054f9a64f4e1ce73bb87345b8e7056ec2f134c2f1e87`. El archivo nativo `modelo.json` confirma 21 entradas y 401 árboles. Esta comprobación identifica el artefacto; no valida su precisión.
+
+
+## Presentación: revisión v7
+
+Se muestra el mismo MAE de 48.993 € en pricing y anexo. La mediana absoluta de 23.649 € es otra estadística y se conserva en la metadata; no era un error de cálculo.
+
+El top 5 mostrado se deriva del JSON nativo: media de `loss_changes` en nodos no hoja, agrupada por `split_indices`, sobre los 401 árboles. Corresponde a la importancia `gain` de XGBoost (no SHAP ni causalidad): superficie, baños, alquiler mediano €/m² del barrio, índice de vulnerabilidad y ascensor. Valores y hash del modelo en `app/presentacion/predictor-importance.json`. Definición: https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.Booster.get_score .
+
+La fórmula de 2026 en la presentación es una **propuesta pendiente**, no una descripción del contrato desplegado: requiere una serie IPV homogénea en geografía/base y un ratio mensual renta/precio de 2026. El paquete sigue devolviendo venta a nivel de 2025 y renta con ratio de 2024. No se han modificado ni actualizado sus coeficientes.
