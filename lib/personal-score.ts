@@ -59,7 +59,7 @@ export function personalScore(p: Property, e: PropertyEnrichment, profile: UserP
         : "Sin estimación individual válida. Una media territorial no sustituye al modelo."
       : "Preferencia por menor precio frente al escenario indexado: bandas 100/85/62/32/12. Oferta de 2018; precisión actual no validada."),
     component("opportunity", "Opportunity · inversión", weights.beta, opportunity, "Compara la revalorización de la zona con la media de la ciudad en el mismo periodo. Sin series comparables verificadas: no disponible. No se sustituye por el margen del precio frente al modelo."),
-    component("zone", "Zone · calidad de vida", weights.gamma, zone, "Calidad de vida en el barrio. Sin indicadores verificables y una metodología validada: no disponible. La cercanía al punto elegido no mide calidad de vida."),
+    component("zone", "Zone · calidad de vida", weights.gamma, zone, "Pendiente de implementación. La metodología prevista combina cinco indicadores del entorno con el mismo peso; faltan datos comparables por distrito y valores de ruido. Zone no aporta puntos y su peso no se redistribuye."),
     component("lifestyle", "Lifestyle · tiempo al trabajo", weights.delta, lifestyle, minutes == null ? "Configura tu trabajo y un modo de transporte para calcular el trayecto. Sin tiempo disponible, no aporta puntos." : `Trayecto ${e.commute?.proveedor === "openrouteservice" ? "calculado" : "orientativo"} de ${minutes} min. 100 puntos hasta 10 min; baja 1,9 puntos por minuto hasta 5 puntos a partir de 60 min. Presupuesto e imprescindibles se aplican como filtros, no como este subscore.`),
   ];
   return {

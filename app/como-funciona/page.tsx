@@ -49,8 +49,8 @@ const SIGNALS = [
   },
   {
     t: "γ · Zone · calidad de vida",
-    d: "Describe la calidad de vida en el barrio. Faltan indicadores verificables y una metodología para combinarlos: hoy está sin datos y no aporta puntos. No se sustituye por la distancia al punto elegido.",
-    fuente: "25% por defecto · Indicadores de barrio pendientes",
+    d: "La metodología prevista combina zonas verdes, actuaciones policiales, transporte, servicios y descanso. Está pendiente de implementación: faltan indicadores comparables por distrito y datos de ruido. Hoy no aporta puntos.",
+    fuente: "25% por defecto · Pendiente de implementación",
   },
   {
     t: "δ · Lifestyle · tiempo al trabajo",
@@ -67,10 +67,11 @@ const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco:
   { fuente: "Banco de España", aporta: "Referencias de tipos de interés", estado: "oficial", refresco: "Publicación mensual", href: MARKET_SOURCES.rates.href },
   { fuente: "OpenRouteService", aporta: "Rutas; respaldos indicados como aproximados", estado: "proveedor", refresco: "Al calcular el trayecto" },
   { fuente: "Nominatim / OpenStreetMap", aporta: "Búsqueda de ubicaciones", estado: "proveedor", refresco: "Al localizar una dirección" },
-  { fuente: "Referencia de alquiler", aporta: "La integración de SERPAVI está pendiente", estado: "no disponible", refresco: "Los ejemplos no se usan para valorar" },
+  { fuente: "Modelo XGBoost · alquiler", aporta: "Renta mensual derivada de la venta estimada y ratios distritales de 2024; sin validación independiente de alquiler", estado: "proveedor", refresco: "Al consultar una vivienda, si el modelo está disponible" },
+  { fuente: "Referencia independiente de alquiler", aporta: "La integración de SERPAVI está pendiente; no interviene en la estimación del modelo", estado: "no disponible", refresco: "Pendiente de integración" },
   { fuente: "Ayuntamiento de Madrid · Zonas verdes", aporta: "Superficie municipal de zonas verdes por distrito", estado: "oficial", refresco: `Instantánea de ${districtContext.zonasVerdes.periodo}`, href: districtContext.zonasVerdes.url },
   { fuente: "Policía Municipal de Madrid", aporta: "Actuaciones por distrito; no son una tasa de criminalidad", estado: "oficial", refresco: `Instantánea de ${districtContext.seguridad.periodo}`, href: districtContext.seguridad.url },
-  { fuente: "Zone · calidad del barrio", aporta: "Índice pendiente de indicadores comparables y metodología", estado: "no disponible", refresco: "Los datos de distrito no calculan Zone" },
+  { fuente: "Zone · entorno", aporta: "Metodología prevista con cinco componentes de igual peso", estado: "no disponible", refresco: "Pendiente de implementación y datos comparables" },
 ];
 
 const STACK = [
@@ -223,9 +224,26 @@ export default function ComoFuncionaPage() {
           </div>
         </Section>
 
-        <Section eyebrow="El entorno" title="Datos de distrito, sin inventar un índice de barrio">
+        <Section eyebrow="El entorno" title="Datos de barrio y distrito">
           <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Datos y fuentes puedes consultar población, superficie y densidad por barrio, además de zonas verdes y actuaciones policiales por distrito. La superficie verde publicada no mide proximidad a una vivienda y excluye los parques históricos, singulares y forestales del fichero separado. Las actuaciones policiales no equivalen a todos los delitos ni a una tasa de criminalidad.</p>
           <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Estos datos aportan contexto, pero no se atribuyen a cada barrio ni se convierten en un Zone Score. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito, y acceso al mapa de ruido de tráfico de 2021. Son referencias fechadas, no índices de calidad de vida ni mediciones para cada anuncio. En alquiler comparamos la mensualidad del anuncio con la renta derivada del predictor cuando hay datos suficientes. La referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
+        </Section>
+
+        <Section id="zone-score" eyebrow="Pendiente de implementación" title="Cómo se plantea el Zone Score">
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">La metodología prevista combina cinco componentes con el mismo peso: zonas verdes, actuaciones policiales, transporte, servicios y descanso. Cada índice se expresaría entre 0 y 1 según su posición relativa entre territorios comparables; el resultado de Zone iría de 0 a 100.</p>
+          <details className="mt-4 text-sm leading-relaxed text-stone-600">
+            <summary className="inline-flex min-h-11 cursor-pointer items-center font-medium text-saffron-700 underline underline-offset-4">Ver la fórmula prevista y sus componentes</summary>
+            <p className="mt-3 break-words font-mono text-ink" aria-label="Fórmula prevista de Zone Score">Zone = 100 × (I verde + I actuaciones + I transporte + I servicios + I descanso) / 5</p>
+            <ul className="mt-4 list-disc space-y-2 pl-5">
+              <li><Strong>Zonas verdes:</Strong> más dotación verde, mayor índice. Falta elegir cómo ajustar la superficie verde al tamaño o población del distrito.</li>
+              <li><Strong>Actuaciones policiales:</Strong> la propuesta asigna mayor índice a menos actuaciones. Su interpretación sigue pendiente; una cifra menor no acredita mayor seguridad.</li>
+              <li><Strong>Transporte:</Strong> más líneas distintas, mayor índice. Falta definir la cobertura territorial y los modos incluidos.</li>
+              <li><Strong>Servicios:</Strong> más servicios, mayor índice. Falta acordar categorías, evitar duplicados y ajustar los recuentos para comparar distritos.</li>
+              <li><Strong>Descanso:</Strong> menos ruido nocturno, mayor índice. Todavía falta extraer los valores del mapa de ruido.</li>
+            </ul>
+            <p className="mt-4">Los índices usarían percentiles entre 0 y 1. Para actuaciones y ruido se propone invertirlos como 1 − percentil(valor). Quedan por fijar el tratamiento de empates, los datos ausentes y los periodos comparables.</p>
+          </details>
+          <p className="mt-4 max-w-[72ch] text-sm leading-relaxed text-stone-600">La preparación se plantea por distrito, que es la escala disponible para varias fuentes. No se presentarán esas cifras como mediciones de cada barrio. Hasta completar los datos y la implementación, Zone permanece sin dato, aporta cero y su peso no se redistribuye.</p>
         </Section>
 
         {/* Arquitectura */}
@@ -282,16 +300,18 @@ export default function ComoFuncionaPage() {
 }
 
 function Section({
+  id,
   eyebrow,
   title,
   children,
 }: {
+  id?: string;
   eyebrow: string;
   title: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-16">
+    <section id={id} className="mt-16 scroll-mt-24">
       <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
         <h2 className="font-display text-2xl text-ink sm:text-3xl">{title}</h2>
         <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-stone">

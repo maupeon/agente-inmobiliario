@@ -3,6 +3,7 @@ import context from "@/data/madrid/madrid-context.json";
 import modelResults from "@/app/presentacion/results-data.json";
 import madrid from "@/data/madrid/madrid-official.json";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SiteNav } from "@/components/layout/SiteNav";
 import { getMarketData } from "@/lib/market/cache";
 import { formatMarketPeriod, MARKET_SOURCES } from "@/lib/market/presentation";
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 // Siempre refleja el estado actual de la caché (no se prerenderiza).
 export const dynamic = "force-dynamic";
 
-type Estado = "real" | "orientativo";
+type Estado = "real" | "orientativo" | "modelo";
 
 export default async function DatosPage() {
   const [price, ipv, bde] = await Promise.all([
@@ -144,22 +145,22 @@ export default async function DatosPage() {
         </DataCard>
 
         <DataCard
-          title="Alquiler · qué datos usamos hoy"
-          estado="orientativo"
-          fuente="Renta del anuncio; referencia independiente pendiente."
-          officialPage="https://serpavi.mivau.gob.es/"
-          sourceLink={MARKET_SOURCES.rent}
-          meta="No aporta puntos al Score"
+          title="Cómo estimamos el alquiler"
+          estado="modelo"
+          fuente="Precio del anuncio y estimación del modelo XGBoost, cuando está disponible."
+          meta="Venta a nivel de 2025 · ratios distritales de 2024"
         >
           <div className="space-y-3 text-sm leading-relaxed text-stone-600">
-            <p>El precio de alquiler que ves es el del anuncio. Para saber cómo se compara con el mercado necesitamos una referencia de viviendas comparables, con zona y periodo conocidos.</p>
-            <p>Esa referencia todavía no está integrada. Este bloque explica la fuente prevista; no calcula una renta ni clasifica el anuncio como barato o caro. Fair de alquiler permanece sin dato. La metodología de SERPAVI se enlaza para consulta.</p>
+            <p>La ficha muestra el alquiler mensual anunciado. Cuando el modelo dispone de los datos necesarios, también muestra una renta estimada en euros al mes y la desviación porcentual del anuncio respecto a esa estimación.</p>
+            <p>La renta estimada se obtiene multiplicando el valor de venta estimado a nivel de 2025 por un factor de renta mensual del distrito, calculado con ratios de 2024.</p>
+            <p>Es una estimación derivada, sin validación independiente de alquiler ni intervalos calibrados. Fair no aporta puntos con este modelo. Si la estimación no está disponible, la ficha lo indica.</p>
+            <p>La referencia independiente de SERPAVI sigue pendiente de integración y no interviene en este cálculo.</p>
           </div>
         </DataCard>
 
         <section aria-labelledby="neighborhood-data-title" className="mt-12">
           <h2 id="neighborhood-data-title" className="font-display text-2xl text-ink">El entorno de la vivienda</h2>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">Zonas verdes y seguridad vuelven a tener su espacio con datos municipales. Cada tabla indica si describe un distrito o un barrio. Son referencias de contexto y todavía no se convierten en puntos de Zone.</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Consulta las fuentes del entorno y el territorio que describe cada tabla: distrito o barrio. Estos datos aportan contexto; Zone Score está pendiente de implementación y no aporta puntos.</p>
         </section>
         <DataCard title="Zonas verdes · superficie por distrito" estado="real" fuente={context.zonasVerdes.fuente} officialPage={context.zonasVerdes.url} sourceLink={{ label: "Descargar datos originales (CSV)", href: context.zonasVerdes.download }} meta="21 distritos · 2025 · consulta 11 septiembre 2026">
           <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.zonasVerdes.nota} Es superficie total, no proximidad a tu vivienda ni un índice de calidad de vida.</p>
@@ -172,19 +173,25 @@ export default async function DatosPage() {
         <DataCard title="Seguridad · actuaciones de Policía Municipal" estado="real" fuente={context.seguridad.fuente} officialPage={context.seguridad.url} sourceLink={{ label: "Descargar publicación original (XLSX)", href: context.seguridad.download }} meta="21 distritos · mayo 2026 · consulta 11 septiembre 2026">
           <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.seguridad.nota} No se trasladan estas cifras a cada barrio ni se utilizan para ordenar viviendas.</p>
           <Collapsible summary="Ver actuaciones por distrito y categoría">
-            <Table head={["Distrito", "Personas", "Patrimonio", "Tenencia de armas", "Tenencia de drogas", "Consumo de drogas"]}>
+            <Table head={["Distrito", "Relacionadas con las personas", "Relacionadas con el patrimonio", "Tenencia de armas", "Tenencia de drogas", "Consumo de drogas"]}>
               {context.seguridad.distritos.map(d => <Row key={d.code} cells={[d.distrito, ...d.actuaciones.map(v => formatNumber(v))]} />)}
               <Row cells={["Sin distrito asignado", ...context.seguridad.sinDistrito.map(v => formatNumber(v))]} />
               <Row cells={["Total publicado", ...context.seguridad.totales.map(v => formatNumber(v))]} />
             </Table>
-            <p className="mt-3 text-xs leading-relaxed text-stone-600">Todas las columnas cuentan actuaciones. «Personas» y «Patrimonio» son actuaciones relacionadas con esas materias; no recuentos de víctimas ni tasas por habitante.</p>
+            <p className="mt-3 text-xs leading-relaxed text-stone-600">Todas las columnas cuentan actuaciones. «Relacionadas con las personas» y «Relacionadas con el patrimonio» conservan los nombres de la fuente; no son recuentos de víctimas ni tasas por habitante.</p>
           </Collapsible>
         </DataCard>
         <UrbanSources />
 
-        <DataCard title="Barrios de Madrid · superficie, población y densidad" estado="real" fuente={madrid.fuente} officialPage={madrid.pageUrl} sourceLink={{ label: "Ayuntamiento de Madrid · tabla original (XLSX)", href: madrid.url }} meta="131 barrios · 1 enero 2026 · consulta 11 septiembre 2026">
-          <p className="mb-4 text-sm leading-relaxed text-stone-600">Población y superficie describen el territorio. Complementan las referencias de zonas verdes y seguridad; no las sustituyen ni indican si un barrio es mejor para vivir.</p>
-          <Collapsible summary="Ver los 131 barrios · datos territoriales, sin puntuación de calidad de vida">
+        <section aria-labelledby="zone-status-title" className="mt-8">
+          <h2 id="zone-status-title" className="font-display text-xl text-ink">Zone Score · pendiente de implementación</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">La metodología prevista combina zonas verdes, actuaciones policiales, transporte, servicios y descanso, con el mismo peso. Antes de calcularla faltan indicadores comparables por distrito, resolver cómo interpretar las actuaciones y extraer los valores de ruido.</p>
+          <Link href="/como-funciona#zone-score" className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-saffron-700 underline underline-offset-4">Consultar la metodología prevista de Zone</Link>
+        </section>
+
+        <DataCard title="Contexto territorial · barrios de Madrid" estado="real" fuente={madrid.fuente} officialPage={madrid.pageUrl} sourceLink={{ label: "Ayuntamiento de Madrid · tabla original (XLSX)", href: madrid.url }} meta="131 barrios · 1 enero 2026 · consulta 11 septiembre 2026">
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">Estos datos permiten consultar población, superficie y densidad; actualmente no intervienen en la puntuación.</p>
+          <Collapsible summary="Consultar población, superficie y densidad de los 131 barrios">
             <Table head={["Barrio", "Distrito", "Superficie (ha)", "Población", "Densidad (hab./ha)"]}>
               {madrid.barrios.map((b) => <Row key={b.code} cells={[b.barrio, b.distrito, formatNumber(b.superficieHa), formatNumber(b.poblacion), formatNumber(b.densidadHabHa)]} />)}
             </Table>
@@ -222,7 +229,7 @@ function DataCard({
   title: string;
   estado: Estado;
   fuente: string;
-  sourceLink: { label: string; href: string };
+  sourceLink?: { label: string; href: string };
   officialPage?: string;
   meta: string;
   children: React.ReactNode;
@@ -236,10 +243,10 @@ function DataCard({
             <Pill estado={estado} />
           </div>
           <p className="mt-1.5 text-sm text-stone-600">{fuente}</p>
-          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
+          {(officialPage || sourceLink) && <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1">
           {officialPage && <a href={officialPage} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm font-medium text-saffron-700 underline underline-offset-4 hover:text-ink">Página oficial de la fuente ↗</a>}
-          <a href={sourceLink.href} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-9 items-center text-sm font-medium text-saffron-700 underline decoration-saffron-300 underline-offset-4 hover:text-ink">{sourceLink.label} ↗</a>
-          </div>
+          {sourceLink && <a href={sourceLink.href} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-9 items-center text-sm font-medium text-saffron-700 underline decoration-saffron-300 underline-offset-4 hover:text-ink">{sourceLink.label} ↗</a>}
+          </div>}
         </div>
         <span className="max-w-full font-mono text-[10px] uppercase tracking-[0.14em] text-stone">
           {meta}
@@ -303,7 +310,7 @@ function Pill({ estado }: { estado: Estado }) {
       : "border-amber-300 bg-amber-50 text-amber-900";
   return (
     <span className={`inline-block whitespace-nowrap rounded-md border px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] ${cls}`}>
-      {estado === "real" ? "Fuente oficial" : "Sin verificar"}
+      {estado === "real" ? "Fuente oficial" : estado === "modelo" ? "Estimación derivada" : "Sin verificar"}
     </span>
   );
 }
