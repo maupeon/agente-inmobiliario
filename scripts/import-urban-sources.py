@@ -2,7 +2,7 @@
 
 Uso: python3 scripts/import-urban-sources.py [directorio-cache]
 Descarga únicamente cuando la copia no existe. Conserva URL, fecha y SHA-256.
-Los recuentos no son índices y no intervienen en Zone. Solo requiere stdlib.
+Los recuentos se conservan como fuente; import-zone-indicators.py prepara Zone. Solo requiere stdlib.
 """
 import collections
 import csv

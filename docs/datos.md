@@ -18,7 +18,7 @@ Los archivos de este repositorio son los necesarios para mostrar la aplicación 
 | `app/presentacion/results-legacy.json` | Antecedentes exploratorios identificados | Mantener la comparación histórica que usa la presentación |
 | `public/presentacion/` | Infografía utilizada, vídeo de demo, póster y subtítulos | Recursos activos de la presentación |
 
-Los JSON conservan las URLs y los periodos de las fuentes. La fecha de consulta o caché no es la fecha de observación. Los recuentos de actuaciones policiales no equivalen a todos los delitos, a una tasa de criminalidad ni al riesgo individual. Ninguna de estas tablas genera automáticamente el componente Zone.
+Los JSON conservan las URLs y los periodos de las fuentes. La fecha de consulta o caché no es la fecha de observación. Los recuentos de actuaciones policiales no equivalen a todos los delitos, a una tasa de criminalidad ni al riesgo individual. El importador de Zone prepara recuentos de distrito a partir de estas instantáneas; la página no los actualiza automáticamente.
 
 La tabla de los 131 barrios se muestra plegada como «Contexto territorial». Población, superficie y densidad se conservan para consulta; actualmente no intervienen en la puntuación. Los importadores de contexto y fuentes urbanas también utilizan este archivo como catálogo de códigos y nombres de distrito.
 
@@ -40,10 +40,10 @@ El script lee las dos copias de `data/madrid/sources/`, comprueba nombres, unida
 
 ## Fuentes urbanas incorporadas
 
-`data/madrid/urban-sources.json` es una instantánea de contexto para `/datos`. No alimenta el Zone Score ni atribuye métricas a una vivienda.
+`data/madrid/urban-sources.json` es una instantánea de contexto para `/datos`. Sus líneas de Metro y el censo original alimentan los indicadores territoriales de Zone; se identifican como datos del distrito.
 
 - **CRTM, Metro:** consulta de la capa `M4_Estaciones` (GeoServicio oficial enlazado desde el catálogo del Consorcio), 11-09-2026. Se conservan los 293 registros devueltos. La página muestra 240 estaciones con nombre y código municipal 079; omite dos registros sin nombre y los de otros municipios. Las líneas son las declaradas por el catálogo, sin prometer servicio activo ni frecuencias. No se agregan autobuses, Cercanías o Metro Ligero. URL y condiciones de reutilización en el JSON.
-- **Censo municipal:** fichero de actividades descargable del 11-09-2026, con fecha de carga 10-09-2026 en todas sus 225.615 filas. Solo se cuentan locales cuya situación censal es `Abierto`, deduplicados por `id_local`, categoría y distrito. Un local abierto sin distrito se excluye. Las categorías pueden solaparse. No se utilizan las coordenadas ni se trasladan estos recuentos a barrios o viviendas.
+- **Censo municipal:** fichero de actividades descargable del 11-09-2026, con fecha de carga 10-09-2026 en todas sus 225.615 filas. Solo se cuentan locales cuya situación censal es `Abierto`, deduplicados por `id_local`, categoría y distrito. Un local abierto sin distrito se excluye. Las categorías pueden solaparse. No se utilizan las coordenadas ni se trasladan estos recuentos a barrios. Zone deduplica también entre categorías para obtener locales únicos por distrito.
 - **Ruido:** enlace al mapa municipal MER 2021 y a su descarga TIF. Se identifica como ruido de tráfico, con indicadores Ld, Le, Ln y Lden. No se descargan ni interpretan píxeles como decibelios individuales: el usuario consulta la cartografía original. No es una medición actual de tranquilidad ni de ruido doméstico.
 
 ### Categorías censales
@@ -77,24 +77,38 @@ La ficha conserva el precio mensual del anuncio. Cuando el predictor XGBoost v3 
 
 La renta derivada no tiene validación independiente de alquiler ni intervalos calibrados. Fair no aporta puntos con este modelo, que no devuelve bandas. Si el servicio no está disponible o se abstiene, se indica la ausencia de estimación. El bloque «Cómo estimamos el alquiler» de `/datos` explica este método; no certifica que el servicio esté conectado. [Contrato del predictor](modelo-xgboost.md).
 
-## Metodología prevista de Zone Score
+## Metodología de Zone Score
 
-Estado: pendiente de implementación. La propuesta combina cinco componentes con igual peso interno, un 20% cada uno. Estos pesos son distintos de γ, el peso que el usuario asigna a Zone dentro del HabitIA Score.
+Estado: cálculo parcial por distrito, con cuatro de cinco indicadores disponibles. La fórmula mantiene cinco componentes con igual peso interno, un 20% cada uno. Estos pesos son distintos de γ, el peso que el usuario asigna a Zone dentro del HabitIA Score.
 
 `Zone = 100 × (I_verde + I_actuaciones + I_transporte + I_servicios + I_descanso) / 5`
 
-Cada índice se expresaría entre 0 y 1 mediante el rango percentil del indicador entre territorios comparables. Para actuaciones y ruido, la propuesta utiliza `1 − percentil(valor)`, calculado sobre la misma distribución del indicador original. Una puntuación relativa no acredita una medida validada de calidad de vida.
+Se utilizan recuentos absolutos, sin dividir por población ni superficie. Cada índice es el rango percentil entre los 21 distritos: `(rango medio − 1) / (n − 1)`. Los empates comparten rango medio; si toda la distribución es igual, el índice es 0,5. Para actuaciones y ruido se calcula `1 − percentil(valor)`. Se requieren al menos dos observaciones y una distribución completa, finita y no negativa; una ausencia no se interpreta como cero.
 
-| Componente | Sentido propuesto | Preparación pendiente |
+| Componente | Sentido | Dato utilizado |
 | --- | --- | --- |
-| Verde | Más dotación verde, mayor índice | Elegir superficie verde por habitante o proporción de superficie, comprobar cobertura y mantener unidades consistentes |
-| Actuaciones | Menos actuaciones, mayor índice | Definir categorías, periodo y ajuste por población; justificar su interpretación sin equiparar menos actuaciones con mayor seguridad |
-| Transporte | Más líneas distintas, mayor índice | Definir los modos incluidos, la asignación a distritos y la deduplicación de líneas |
-| Servicios | Más servicios, mayor índice | Acordar categorías, evitar duplicados por solapamiento y ajustar los recuentos para comparar distritos |
-| Descanso | Menos ruido nocturno, mayor índice | Extraer y agregar los valores de ruido nocturno del mapa; documentar la cobertura y el periodo |
+| Verde | Más m² verdes, mayor índice | Superficie municipal total publicada por distrito, 2025; excluye los parques del fichero separado |
+| Actuaciones | Menos actuaciones, mayor índice | Suma de las cinco categorías de Policía Municipal, mayo de 2026; excluye registros sin distrito |
+| Transporte | Más líneas, mayor índice | Líneas distintas de Metro con estación identificada en el distrito, catálogo consultado el 11 de septiembre de 2026; cada línea cuenta una vez por distrito |
+| Servicios | Más servicios, mayor índice | Locales únicos abiertos en el censo de 10 de septiembre de 2026, de alimentación, farmacias, gimnasios u ocio; sin duplicados entre categorías |
+| Descanso | Menos ruido, mayor índice | Sin valor extraído; se conserva el enlace al mapa de ruido nocturno de 2021 |
 
-La preparación se plantea por distrito, escala de varias de las fuentes disponibles. Los datos por barrio pueden agregarse cuando corresponda, pero no se repartirán cifras de distrito para presentarlas como mediciones de cada barrio. Quedan por acordar la distribución de referencia, el tratamiento de empates, los periodos comparables y la política ante componentes ausentes.
+Las fuentes tienen distintos periodos y coberturas. Menos actuaciones no acredita mayor seguridad; los recuentos absolutos pueden favorecer distritos grandes o poblados. Transporte solo incluye Metro y servicios las categorías declaradas. Es una regla de preferencia relativa, no una medida validada de calidad de vida.
 
-La fórmula documentada no se ejecuta. Hasta completar los datos y la implementación, `personalScore` mantiene Zone en `null`, su aportación es cero y su peso no se redistribuye. La fórmula y su estado se explican también en `/como-funciona#zone-score`.
+`zoneForProperty` solo identifica nombres o códigos explícitos de distrito en anuncios de Madrid; no usa el perfil, coincidencias parciales ni proximidad. Sin distrito identificado, Zone permanece en `null`. No se presentan los datos del distrito como mediciones de cada barrio.
+
+El ruido mantiene `rawValue`, `index` y `points` en `null`. Se suman únicamente las aportaciones conocidas, conservando el divisor de cinco. El resultado se etiqueta como **parcial**, con cuatro indicadores, cobertura del 80% y máximo alcanzable de 80 puntos. No se renormaliza a 100. Con γ = 25, Zone aporta hasta 20 puntos al total y cubre 20 puntos porcentuales de las prioridades. La cobertura global suma el peso de cada componente multiplicado por su fracción evaluable.
+
+El buscador muestra «Evaluación parcial» cuando la cobertura global es inferior al 100%, o «Evaluación parcial: solo trayecto disponible» si ese es el único criterio ponderado calculable. La suma numérica utilizada para ordenar queda en el desglose como puntos acumulados de una evaluación incompleta. No se presenta como una evaluación global baja. Fair y Opportunity conservan sus condiciones anteriores.
+
+### Reproducir los indicadores
+
+```bash
+python3 scripts/import-zone-indicators.py /ruta/a/actividades
+```
+
+El script comprueba que el SHA-256 del censo coincida con `urban-sources.json`, valida sus recuentos por categoría y distrito, y deduplica los locales entre categorías. Cuenta líneas distintas de Metro y excluye los dos registros municipales sin nombre ni distrito. No descarga datos. Produce `lib/neighborhood/zone-data.ts`, con los 21 distritos, los valores ausentes y las fuentes, periodos y huellas. El censo se puede recuperar mediante el importador de fuentes urbanas descrito arriba.
+
+`lib/neighborhood/zone-score.ts` calcula los percentiles y `personalScore` los incorpora al ranking. La fórmula y sus límites se explican en `/como-funciona#zone-score` y cada ficha desglosa valores originales, índices, aportaciones y fuentes.
 
 Los datos originales de entrenamiento y los artefactos del modelo pertenecen a la entrega separada de la memoria: [Servicio externo](modelo-externo.md).

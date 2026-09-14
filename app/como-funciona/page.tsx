@@ -49,8 +49,8 @@ const SIGNALS = [
   },
   {
     t: "γ · Zone · calidad de vida",
-    d: "La metodología prevista combina zonas verdes, actuaciones policiales, transporte, servicios y descanso. Está pendiente de implementación: faltan indicadores comparables por distrito y datos de ruido. Hoy no aporta puntos.",
-    fuente: "25% por defecto · Pendiente de implementación",
+    d: "Aplica percentiles a los m² verdes, actuaciones policiales, líneas de Metro y servicios del distrito. El ruido sigue sin dato: Zone suma cuatro de cinco componentes y se muestra como parcial, sin redistribuir pesos.",
+    fuente: "25% por defecto · Zone parcial por distrito",
   },
   {
     t: "δ · Lifestyle · tiempo al trabajo",
@@ -71,7 +71,7 @@ const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco:
   { fuente: "Referencia independiente de alquiler", aporta: "La integración de SERPAVI está pendiente; no interviene en la estimación del modelo", estado: "no disponible", refresco: "Pendiente de integración" },
   { fuente: "Ayuntamiento de Madrid · Zonas verdes", aporta: "Superficie municipal de zonas verdes por distrito", estado: "oficial", refresco: `Instantánea de ${districtContext.zonasVerdes.periodo}`, href: districtContext.zonasVerdes.url },
   { fuente: "Policía Municipal de Madrid", aporta: "Actuaciones por distrito; no son una tasa de criminalidad", estado: "oficial", refresco: `Instantánea de ${districtContext.seguridad.periodo}`, href: districtContext.seguridad.url },
-  { fuente: "Zone · entorno", aporta: "Metodología prevista con cinco componentes de igual peso", estado: "no disponible", refresco: "Pendiente de implementación y datos comparables" },
+  { fuente: "Zone · entorno", aporta: "Percentiles de cinco componentes con igual peso", estado: "proveedor", refresco: "Cuatro disponibles por distrito; ruido pendiente" },
 ];
 
 const STACK = [
@@ -226,24 +226,24 @@ export default function ComoFuncionaPage() {
 
         <Section eyebrow="El entorno" title="Datos de barrio y distrito">
           <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Datos y fuentes puedes consultar población, superficie y densidad por barrio, además de zonas verdes y actuaciones policiales por distrito. La superficie verde publicada no mide proximidad a una vivienda y excluye los parques históricos, singulares y forestales del fichero separado. Las actuaciones policiales no equivalen a todos los delitos ni a una tasa de criminalidad.</p>
-          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Estos datos aportan contexto, pero no se atribuyen a cada barrio ni se convierten en un Zone Score. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito, y acceso al mapa de ruido de tráfico de 2021. Son referencias fechadas, no índices de calidad de vida ni mediciones para cada anuncio. En alquiler comparamos la mensualidad del anuncio con la renta derivada del predictor cuando hay datos suficientes. La referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Los recuentos de distrito alimentan los componentes disponibles de Zone. Se identifican como datos del distrito, no de cada barrio. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito, y acceso al mapa de ruido de tráfico de 2021. Son referencias fechadas de distintos periodos; la puntuación es una regla de preferencia, no una medición validada de calidad de vida. En alquiler comparamos la mensualidad del anuncio con la renta derivada del predictor cuando hay datos suficientes. La referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
         </Section>
 
-        <Section id="zone-score" eyebrow="Pendiente de implementación" title="Cómo se plantea el Zone Score">
-          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">La metodología prevista combina cinco componentes con el mismo peso: zonas verdes, actuaciones policiales, transporte, servicios y descanso. Cada índice se expresaría entre 0 y 1 según su posición relativa entre territorios comparables; el resultado de Zone iría de 0 a 100.</p>
+        <Section id="zone-score" eyebrow="Cuatro de cinco indicadores" title="Cómo se calcula el Zone Score">
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">Zone combina cinco componentes con el mismo peso: zonas verdes, actuaciones policiales, transporte, servicios y descanso. Cada índice está entre 0 y 1 según su rango percentil entre los 21 distritos. Cada componente aporta hasta 20 puntos; se mantiene el divisor de cinco aunque falte un dato.</p>
           <details className="mt-4 text-sm leading-relaxed text-stone-600">
-            <summary className="inline-flex min-h-11 cursor-pointer items-center font-medium text-saffron-700 underline underline-offset-4">Ver la fórmula prevista y sus componentes</summary>
-            <p className="mt-3 break-words font-mono text-ink" aria-label="Fórmula prevista de Zone Score">Zone = 100 × (I verde + I actuaciones + I transporte + I servicios + I descanso) / 5</p>
+            <summary className="inline-flex min-h-11 cursor-pointer items-center font-medium text-saffron-700 underline underline-offset-4">Ver la fórmula y sus componentes</summary>
+            <p className="mt-3 break-words font-mono text-ink" aria-label="Fórmula de Zone Score">Zone = 100 × (I verde + I actuaciones + I transporte + I servicios + I descanso) / 5</p>
             <ul className="mt-4 list-disc space-y-2 pl-5">
-              <li><Strong>Zonas verdes:</Strong> más dotación verde, mayor índice. Falta elegir cómo ajustar la superficie verde al tamaño o población del distrito.</li>
-              <li><Strong>Actuaciones policiales:</Strong> la propuesta asigna mayor índice a menos actuaciones. Su interpretación sigue pendiente; una cifra menor no acredita mayor seguridad.</li>
-              <li><Strong>Transporte:</Strong> más líneas distintas, mayor índice. Falta definir la cobertura territorial y los modos incluidos.</li>
-              <li><Strong>Servicios:</Strong> más servicios, mayor índice. Falta acordar categorías, evitar duplicados y ajustar los recuentos para comparar distritos.</li>
+              <li><Strong>Zonas verdes:</Strong> más m² verdes totales, mayor índice. Se usa el recuento publicado, sin dividirlo por población ni superficie del distrito.</li>
+              <li><Strong>Actuaciones policiales:</Strong> menos actuaciones, mayor índice. Se suman las cinco categorías publicadas por distrito; una cifra menor no acredita mayor seguridad.</li>
+              <li><Strong>Transporte:</Strong> más líneas distintas de Metro con estación en el distrito, mayor índice. Una línea cuenta una sola vez por distrito. No incluye autobuses ni Cercanías.</li>
+              <li><Strong>Servicios:</Strong> más locales de alimentación, farmacia, gimnasio u ocio, mayor índice. Cada local cuenta una sola vez aunque tenga varias categorías; se utilizan cantidades absolutas.</li>
               <li><Strong>Descanso:</Strong> menos ruido nocturno, mayor índice. Todavía falta extraer los valores del mapa de ruido.</li>
             </ul>
-            <p className="mt-4">Los índices usarían percentiles entre 0 y 1. Para actuaciones y ruido se propone invertirlos como 1 − percentil(valor). Quedan por fijar el tratamiento de empates, los datos ausentes y los periodos comparables.</p>
+            <p className="mt-4">Los índices usan percentiles entre 0 y 1. Para actuaciones y ruido se invierten como 1 − percentil(valor). Los empates comparten el rango medio. Si falta una observación de la distribución territorial, ese indicador queda sin percentil; no se rellena con cero.</p>
           </details>
-          <p className="mt-4 max-w-[72ch] text-sm leading-relaxed text-stone-600">La preparación se plantea por distrito, que es la escala disponible para varias fuentes. No se presentarán esas cifras como mediciones de cada barrio. Hasta completar los datos y la implementación, Zone permanece sin dato, aporta cero y su peso no se redistribuye.</p>
+          <p className="mt-4 max-w-[72ch] text-sm leading-relaxed text-stone-600">Actualmente hay cuatro indicadores y falta ruido: Zone es parcial y puede aportar hasta 80 de 100 puntos. Su cobertura es del 80%; si le asignas un peso del 25%, cubre 20 puntos porcentuales de tus prioridades. Los 20 puntos internos de ruido permanecen pendientes. Las fuentes tienen distintos periodos, visibles en el desglose. Sin distrito de Madrid identificado en el anuncio, Zone queda sin dato.</p>
         </Section>
 
         {/* Arquitectura */}
@@ -254,7 +254,7 @@ export default function ComoFuncionaPage() {
             <p><Strong>Dónde está cada parte.</Strong> Vercel aloja la web y el backend; Fly.io aloja el servicio Python del modelo; Supabase aloja PostgreSQL; Anthropic ofrece la API de Claude. Desde el navegador puedes buscar, conversar, comparar compra y alquiler, guardar favoritos y activar avisos.</p>
             <p><Strong>El modelo ya está entrenado.</Strong> La preparación del histórico, el ajuste y la calibración se realizan fuera de la búsqueda. El servicio carga el artefacto evaluado; consultar una vivienda no vuelve a entrenarlo. El escenario indexado no acredita precisión actual en 2026.</p>
             <p><Strong>Cada pieza tiene una función.</Strong> El predictor XGBoost estima el precio anunciado a nivel de 2025 con datos de 2018. Ofrece una cifra y sus advertencias, sin intervalos calibrados ni bandas de barato o caro; por eso Fair no aporta puntos con este modelo. Claude conecta herramientas y explica sus resultados. Las fichas de alquiler comparan mensualidades en €/mes: la renta estimada resulta del precio de venta indexado a 2025 multiplicado por ratios distritales de 2024. No constituye una valoración de alquiler validada. La evaluación LightGBM de la presentación pertenece al estudio histórico.</p>
-            <p><Strong>Persistencia y tareas diarias.</Strong> Supabase (PostgreSQL) guarda cachés, favoritos, historial y suscripciones. Vercel programa la actualización de referencias de mercado. Supabase programa las llamadas al backend que preparan hasta cinco recomendaciones diarias para las suscripciones activas. Los datos urbanos de «Datos y fuentes» son copias fechadas y no alimentan automáticamente Zone.</p>
+            <p><Strong>Persistencia y tareas diarias.</Strong> Supabase (PostgreSQL) guarda cachés, favoritos, historial y suscripciones. Vercel programa la actualización de referencias de mercado. Supabase programa las llamadas al backend que preparan hasta cinco recomendaciones diarias para las suscripciones activas. Zone utiliza una copia reproducible de los recuentos urbanos por distrito; abrir la página no actualiza sus fuentes.</p>
           </div>
 
           <div className="mt-6">
@@ -290,7 +290,7 @@ export default function ComoFuncionaPage() {
         </div>
 
         <p className="mt-10 text-xs leading-relaxed text-mist">
-          El índice Zone y la referencia independiente de alquiler siguen pendientes. Las explicaciones se generan con los datos disponibles;
+          Zone ofrece una evaluación parcial mientras falte el ruido; la referencia independiente de alquiler sigue pendiente. Las explicaciones se generan con los datos disponibles;
           si se usa narración con IA, puede equivocarse. Confirma precio, condiciones
           y disponibilidad en el anuncio original.
         </p>

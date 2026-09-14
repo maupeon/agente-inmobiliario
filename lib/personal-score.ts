@@ -1,4 +1,5 @@
 import type { Imprescindible, PersonalScoring, Property, PropertyEnrichment, ScoreComponent, ScoreWeights, UserProfile } from "@/types";
+import { zoneForProperty } from "@/lib/neighborhood/zone-score";
 
 export const DEFAULT_SCORE_WEIGHTS: ScoreWeights = { alpha: 25, beta: 25, gamma: 25, delta: 25 };
 export const SCORE_LABELS = { alpha: "α Fair · precio", beta: "β Opportunity · inversión", gamma: "γ Zone · calidad de vida", delta: "δ Lifestyle · tiempo al trabajo" } as const;
@@ -41,10 +42,10 @@ export function personalScore(p: Property, e: PropertyEnrichment, profile: UserP
   const v = e.valuation;
   const fairValues = { barato: 100, ajustado: 85, en_linea: 62, caro: 32, muy_caro: 12 };
   const fair = model && v?.banda ? fairValues[v.banda] : null;
-  // Pendientes de series comparables de zona/ciudad y de indicadores de calidad
-  // de vida con procedencia. Nunca sustituirlos por margen de precio o cercanía.
+  // Opportunity sigue necesitando series comparables de zona y ciudad.
   const opportunity: number | null = null;
-  const zone: number | null = null;
+  const zoneScoring = zoneForProperty(p);
+  const zone = zoneScoring?.score ?? null;
   const leg = e.commute?.modos.find((m) => m.modo === e.commute?.recomendado);
   const minutes = profile?.trabajo && leg?.minutos != null && Number.isFinite(leg.minutos) && leg.minutos >= 0 ? leg.minutos : null;
   const lifestyle = minutes == null ? null : minutes <= 10 ? 100 : minutes >= 60 ? 5 : 100 - (minutes - 10) * 1.9;
@@ -59,11 +60,13 @@ export function personalScore(p: Property, e: PropertyEnrichment, profile: UserP
         : "Sin estimación individual válida. Una media territorial no sustituye al modelo."
       : "Preferencia por menor precio frente al escenario indexado: bandas 100/85/62/32/12. Oferta de 2018; precisión actual no validada."),
     component("opportunity", "Opportunity · inversión", weights.beta, opportunity, "Compara la revalorización de la zona con la media de la ciudad en el mismo periodo. Sin series comparables verificadas: no disponible. No se sustituye por el margen del precio frente al modelo."),
-    component("zone", "Zone · calidad de vida", weights.gamma, zone, "Pendiente de implementación. La metodología prevista combina cinco indicadores del entorno con el mismo peso; faltan datos comparables por distrito y valores de ruido. Zone no aporta puntos y su peso no se redistribuye."),
+    { ...component("zone", "Zone · entorno", weights.gamma, zone, zoneScoring
+      ? `Distrito ${zoneScoring.district}: ${zoneScoring.available}/5 indicadores. Zone = 100 × suma de cinco índices / 5. Más m² verdes, líneas y servicios suman; menos actuaciones y ruido suman. Los indicadores ausentes no aportan puntos ni se redistribuye su peso. Recuentos absolutos de distintos periodos; menos actuaciones no acredita mayor seguridad.`
+      : "Sin distrito de Madrid identificado en el anuncio. No se asignan indicadores por cercanía ni a partir de la zona del perfil."), coveragePercent: zoneScoring?.coveragePercent ?? 0 },
     component("lifestyle", "Lifestyle · tiempo al trabajo", weights.delta, lifestyle, minutes == null ? "Configura tu trabajo y un modo de transporte para calcular el trayecto. Sin tiempo disponible, no aporta puntos." : `Trayecto ${e.commute?.proveedor === "openrouteservice" ? "calculado" : "orientativo"} de ${minutes} min. 100 puntos hasta 10 min; baja 1,9 puntos por minuto hasta 5 puntos a partir de 60 min. Presupuesto e imprescindibles se aplican como filtros, no como este subscore.`),
   ];
   return {
     score: Math.round(components.reduce((sum, c) => sum + c.weight * (c.value ?? 0) / 100, 0)),
-    scoring: { weights, components, coveragePercent: components.reduce((sum, c) => sum + (c.value == null ? 0 : c.weight), 0), explanation: "HabitIA Score = α×Fair + β×Opportunity + γ×Zone + δ×Lifestyle, dividido entre 100 y redondeado al entero. Los datos ausentes no aportan puntos y sus pesos no se redistribuyen; revisa la cobertura antes de comparar." },
+    scoring: { weights, components, zone: zoneScoring, coveragePercent: round(components.reduce((sum, c) => sum + c.weight * (c.value == null ? 0 : c.coveragePercent ?? 100) / 100, 0)), explanation: "HabitIA Score = α×Fair + β×Opportunity + γ×Zone + δ×Lifestyle, dividido entre 100 y redondeado al entero. Con datos incompletos es una suma parcial de puntos, no una evaluación global. Los datos ausentes no aportan puntos y sus pesos no se redistribuyen; la cobertura incluye la fracción disponible de Zone." },
   };
 }

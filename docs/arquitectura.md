@@ -58,12 +58,12 @@ Los pesos son enteros, suman 100 y empiezan en 25 por componente.
 | --- | --- | --- |
 | Fair | Comparación del precio del anuncio con un escenario individual válido del modelo | Requiere valoración compatible |
 | Opportunity | Revalorización relativa de la zona frente a la ciudad | Sin evidencia verificable integrada |
-| Zone | Indicadores del entorno | Metodología prevista de cinco componentes con igual peso; pendiente de implementación y datos comparables por distrito |
+| Zone | Indicadores del entorno | Cinco componentes de igual peso; cuatro calculados por distrito y ruido ausente. Score parcial y cobertura interna del 80% |
 | Lifestyle | Tiempo de trayecto al trabajo | Requiere perfil y trayecto |
 
 Cada aportación es `peso × valor / 100`. Un dato ausente aporta cero y su peso no se redistribuye. La cobertura indica cuánto de las prioridades puede evaluarse. Una referencia provincial o un recuento urbano no sustituye una valoración individual ni un índice de barrio.
 
-La [metodología prevista de Zone](datos.md#metodología-prevista-de-zone-score) documenta la fórmula, los datos disponibles y las decisiones pendientes. No modifica el cálculo actual: Zone permanece en `null`.
+La [metodología de Zone](datos.md#metodología-de-zone-score) documenta los percentiles, los recuentos y las ausencias. `lib/neighborhood/zone-score.ts` usa el distrito explícito del anuncio de Madrid; `personalScore` incorpora los puntos parciales y pondera la cobertura interna. Sin distrito identificado, Zone permanece en `null`.
 
 ## Persistencia e identidad
 

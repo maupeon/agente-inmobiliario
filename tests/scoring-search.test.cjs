@@ -51,6 +51,86 @@ async function main() {
     assert.equal(result.score,0); assert.equal(result.scoring.coveragePercent,0);
     assert.equal(result.scoring.components.find(c=>c.key==='zone').value,null);
   });
+  const { percentileRank, calculateZone, zoneForProperty } = load('lib/neighborhood/zone-score.ts');
+  const { evaluationLabel } = load('lib/score-presentation.ts');
+  const districtRows = [
+    {code:'a',district:'A',green:0,actions:30,transport:0,services:0,noise:70},
+    {code:'b',district:'B',green:10,actions:20,transport:1,services:10,noise:60},
+    {code:'c',district:'C',green:20,actions:10,transport:2,services:20,noise:50},
+  ];
+  check('Zone directions follow all five proposed rules, with identical internal weights', () => {
+    assert.equal(calculateZone('a',districtRows).score,0);
+    assert.equal(calculateZone('b',districtRows).score,50);
+    const best=calculateZone('c',districtRows);
+    assert.equal(best.score,100); assert.equal(best.coveragePercent,100);
+    assert(best.indicators.every(i=>i.index===1 && i.points===20));
+  });
+  check('percentiles use average ranks for ties and reject invalid or incomplete distributions', () => {
+    assert.equal(percentileRank(0,[0,10,20,20]),0);
+    assert.equal(percentileRank(20,[0,10,20,20]),5/6);
+    assert.equal(percentileRank(7,[7,7,7]),0.5);
+    for(const ref of [[10], [null,10], [NaN,10], [-1,10], [Infinity,10]]) assert.equal(percentileRank(10,ref),null);
+    assert.equal(percentileRank(null,[0,10]),null);
+    assert.equal(percentileRank(8,[0,10]),null);
+  });
+  check('missing noise stays null and preserves the fifth weight instead of making an 80 into 100', () => {
+    const partial=calculateZone('c',districtRows.map(d=>({...d,noise:null})));
+    assert.equal(partial.score,80); assert.equal(partial.coveragePercent,80); assert.equal(partial.available,4);
+    const noise=partial.indicators.find(i=>i.key==='noise');
+    assert.equal(noise.rawValue,null); assert.equal(noise.index,null); assert.equal(noise.points,null);
+    const incomplete=calculateZone('c',districtRows.map(d=>({...d,noise:null,transport:d.code==='a'?null:d.transport})));
+    assert.equal(incomplete.score,60); assert.equal(incomplete.coveragePercent,60);
+    assert.equal(incomplete.indicators.find(i=>i.key==='transport').index,null);
+    const none=calculateZone('c',districtRows.map(d=>({...d,green:null,actions:null,transport:null,services:null,noise:null})));
+    assert.equal(none.score,null); assert.equal(none.coveragePercent,0);
+    assert.equal(calculateZone('missing',districtRows),null);
+    assert.equal(calculateZone('a',[...districtRows,districtRows[0]]),null);
+  });
+  const madridProperty={...property,municipality:'Madrid',district:'Centro'};
+  check('Zone identifies only an explicit Madrid district, and never the profile or a similar name', () => {
+    const zone=zoneForProperty(madridProperty);
+    assert.equal(zone.district,'Centro'); assert.equal(zone.scope,'distrito'); assert.equal(zone.available,4);
+    assert.equal(zoneForProperty({...madridProperty,district:' Chamberí '}).districtCode,'07');
+    for(const changed of [{district:undefined},{district:'Centro histórico'},{district:'Malasaña'},{municipality:'Málaga'},{latitude:41.38,longitude:2.17}]) {
+      assert.equal(zoneForProperty({...madridProperty,...changed}),null);
+    }
+    const withoutDistrict=personalScore(property,empty,{...profile,zona:'Centro'});
+    assert.equal(withoutDistrict.scoring.zone,null);
+  });
+  check('Zone covers only its available fraction of the user weight, for sale and rental', () => {
+    for(const operation of ['sale','rent']) {
+      const result=personalScore({...madridProperty,operation},empty,{...profile,scoreWeights:{alpha:0,beta:0,gamma:100,delta:0}});
+      assert.equal(result.scoring.coveragePercent,80);
+      assert.equal(result.scoring.components.find(c=>c.key==='zone').coveragePercent,80);
+      assert.equal(evaluationLabel(result.scoring),'Evaluación parcial');
+      assert.equal(result.score,Math.round(result.scoring.zone.score));
+    }
+    const travel={...empty,commute:{recomendado:'bici',proveedor:'estimacion',modos:[{modo:'bici',minutos:26}]}};
+    const p={...profile,trabajo:{direccion:'Trabajo',modo:'bici'},scoreWeights:{alpha:20,beta:20,gamma:30,delta:30}};
+    const combined=personalScore(madridProperty,travel,p);
+    assert.equal(combined.scoring.coveragePercent,54);
+    const onlyTravel=personalScore(property,travel,p);
+    assert.equal(onlyTravel.score,21);
+    assert.equal(evaluationLabel(onlyTravel.scoring),'Evaluación parcial: solo trayecto disponible');
+    const zeroWeight=personalScore(madridProperty,travel,{...p,scoreWeights:{alpha:0,beta:0,gamma:0,delta:100}});
+    assert.equal(zeroWeight.scoring.coveragePercent,100);
+    assert.equal(evaluationLabel(zeroWeight.scoring),'HabitIA Score');
+    assert.equal(evaluationLabel(personalScore(property,empty,null).scoring),'Evaluación sin datos');
+  });
+  check('Zone source snapshot counts each Metro line once per district and keeps noise absent', () => {
+    const urban=req('./data/madrid/urban-sources.json');
+    const rows=load('lib/neighborhood/zone-data.ts').ZONE_DISTRICTS;
+    assert.equal(rows.length,21);
+    for(const district of rows) {
+      const lines=new Set(urban.metro.estaciones.filter(s=>s.municipio==='079'&&s.distrito===district.code&&s.nombre!=='Sin nombre en el catálogo').flatMap(s=>s.lineas.split(',').map(l=>l.trim())));
+      assert.equal(district.transport,lines.size);
+      assert.equal(district.noise,null);
+      const services=urban.locales.distritos.find(d=>d.code===district.code);
+      assert(district.services<=services.alimentacion+services.farmacias+services.gimnasios+services.ocio);
+      assert(district.services>=Math.max(services.alimentacion,services.farmacias,services.gimnasios,services.ocio));
+    }
+    assert.equal(rows.find(d=>d.code==='01').services,2017);
+  });
   check('fallback and invalid model state cannot award Fair/Opportunity', () => {
     for (const changed of [{fromFallback:true},{estadoModelo:'no_disponible'},{nivel:'provincia'},{modeloVersion:undefined}]) {
       const result = personalScore(property,{...model,valuation:{...model.valuation,...changed}},null);

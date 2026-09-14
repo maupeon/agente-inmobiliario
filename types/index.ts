@@ -61,6 +61,31 @@ export interface ScoreComponent {
   value: number | null;
   contribution: number;
   explanation: string;
+  /** Fracción evaluable del componente; ausente en resultados antiguos. */
+  coveragePercent?: number;
+}
+export interface ZoneIndicator {
+  key: "green" | "actions" | "transport" | "services" | "noise";
+  label: string;
+  unit: string;
+  rawValue: number | null;
+  index: number | null;
+  points: number | null;
+  inverse: boolean;
+  source: string;
+  sourceUrl: string;
+  period: string;
+}
+export interface ZoneScoring {
+  method: "zone-percentiles-v1";
+  district: string;
+  districtCode: string;
+  scope: "distrito";
+  indicators: ZoneIndicator[];
+  available: number;
+  coveragePercent: number;
+  /** Suma de aportaciones conocidas, sobre 100; parcial si falta algún indicador. */
+  score: number | null;
 }
 export interface PersonalScoring {
   weights: ScoreWeights;
@@ -68,6 +93,7 @@ export interface PersonalScoring {
   /** Porcentaje de los pesos que se ha podido evaluar. */
   coveragePercent: number;
   explanation: string;
+  zone?: ZoneScoring | null;
 }
 
 /**

@@ -7,6 +7,7 @@
 .metric dt span { display: block; margin-top: .2rem; color: #52645a; font-size: .65rem; font-weight: 400; }
 .metric dd { order: 1; margin: 0 0 .3rem; color: #176547; font-size: 1.9rem; font-weight: 650; letter-spacing: -.04em; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .metric dd small { margin-left: .2rem; font-size: .65rem; font-weight: 400; letter-spacing: 0; }
+.metric dd .metricNote { display: block; margin: .2rem 0 0; color: #52645a; line-height: 1.4; }
 .metric .missing { color: #68736d; }
 .details { border-top: 1px solid #dce4de; padding-top: .45rem; }
 .details summary { display: list-item; min-height: 44px; align-content: center; cursor: pointer; color: #52645a; font-size: .75rem; }

@@ -152,18 +152,20 @@ export default async function DatosPage() {
         >
           <div className="space-y-3 text-sm leading-relaxed text-stone-600">
             <p>La ficha muestra el alquiler mensual anunciado. Cuando el modelo dispone de los datos necesarios, también muestra una renta estimada en euros al mes y la desviación porcentual del anuncio respecto a esa estimación.</p>
-            <p>La renta estimada se obtiene multiplicando el valor de venta estimado a nivel de 2025 por un factor de renta mensual del distrito, calculado con ratios de 2024.</p>
-            <p>Es una estimación derivada, sin validación independiente de alquiler ni intervalos calibrados. Fair no aporta puntos con este modelo. Si la estimación no está disponible, la ficha lo indica.</p>
-            <p>La referencia independiente de SERPAVI sigue pendiente de integración y no interviene en este cálculo.</p>
+            <p>El modelo se entrenó con anuncios de 2018 y actualiza la estimación de venta a precios de 2025. A partir de ella calcula un alquiler orientativo utilizando la relación alquiler/venta del distrito de 2024.</p>
+            <p>Estimación orientativa, sin validación independiente de alquiler.</p>
+            <Collapsible summary="Cómo interpretar los años de referencia">
+              <p>2018 corresponde a los anuncios de entrenamiento; 2025, al nivel de precios de venta; y 2024, a la relación alquiler/venta aplicada. El cálculo supone que esa relación se mantiene. Consultar un anuncio en 2026 no actualiza automáticamente estas referencias ni convierte la estimación en una renta observada de 2026.</p>
+            </Collapsible>
           </div>
         </DataCard>
 
         <section aria-labelledby="neighborhood-data-title" className="mt-12">
           <h2 id="neighborhood-data-title" className="font-display text-2xl text-ink">El entorno de la vivienda</h2>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">Consulta las fuentes del entorno y el territorio que describe cada tabla: distrito o barrio. Estos datos aportan contexto; Zone Score está pendiente de implementación y no aporta puntos.</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Consulta las fuentes del entorno y el territorio que describe cada tabla: distrito o barrio. Zone calcula los indicadores disponibles por distrito mediante percentiles. La puntuación es parcial mientras falten valores de ruido.</p>
         </section>
         <DataCard title="Zonas verdes · superficie por distrito" estado="real" fuente={context.zonasVerdes.fuente} officialPage={context.zonasVerdes.url} sourceLink={{ label: "Descargar datos originales (CSV)", href: context.zonasVerdes.download }} meta="21 distritos · 2025 · consulta 11 septiembre 2026">
-          <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.zonasVerdes.nota} Es superficie total, no proximidad a tu vivienda ni un índice de calidad de vida.</p>
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.zonasVerdes.nota} Zone utiliza estos m² totales: más superficie, mayor índice verde. No mide la proximidad a tu vivienda.</p>
           <Collapsible summary="Ver zonas verdes de los 21 distritos">
             <Table head={["Distrito", "Zonas verdes (m²)"]}>
               {context.zonasVerdes.distritos.map(d => <Row key={d.code} cells={[d.distrito, formatNumber(d.superficieM2)]} />)}
@@ -171,7 +173,7 @@ export default async function DatosPage() {
           </Collapsible>
         </DataCard>
         <DataCard title="Seguridad · actuaciones de Policía Municipal" estado="real" fuente={context.seguridad.fuente} officialPage={context.seguridad.url} sourceLink={{ label: "Descargar publicación original (XLSX)", href: context.seguridad.download }} meta="21 distritos · mayo 2026 · consulta 11 septiembre 2026">
-          <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.seguridad.nota} No se trasladan estas cifras a cada barrio ni se utilizan para ordenar viviendas.</p>
+          <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.seguridad.nota} Zone suma las cinco categorías por distrito y aplica un percentil inverso: menos actuaciones, mayor índice. Es una regla de puntuación; no acredita mayor seguridad ni se presenta como una medición del barrio.</p>
           <Collapsible summary="Ver actuaciones por distrito y categoría">
             <Table head={["Distrito", "Relacionadas con las personas", "Relacionadas con el patrimonio", "Tenencia de armas", "Tenencia de drogas", "Consumo de drogas"]}>
               {context.seguridad.distritos.map(d => <Row key={d.code} cells={[d.distrito, ...d.actuaciones.map(v => formatNumber(v))]} />)}
@@ -184,9 +186,9 @@ export default async function DatosPage() {
         <UrbanSources />
 
         <section aria-labelledby="zone-status-title" className="mt-8">
-          <h2 id="zone-status-title" className="font-display text-xl text-ink">Zone Score · pendiente de implementación</h2>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">La metodología prevista combina zonas verdes, actuaciones policiales, transporte, servicios y descanso, con el mismo peso. Antes de calcularla faltan indicadores comparables por distrito, resolver cómo interpretar las actuaciones y extraer los valores de ruido.</p>
-          <Link href="/como-funciona#zone-score" className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-saffron-700 underline underline-offset-4">Consultar la metodología prevista de Zone</Link>
+          <h2 id="zone-status-title" className="font-display text-xl text-ink">Zone Score · cuatro de cinco indicadores disponibles</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Más m² verdes, líneas de Metro y servicios aumentan sus índices; menos actuaciones y ruido aumentan los índices inversos. Cada componente conserva un peso del 20%. El ruido sigue sin dato: se muestra una puntuación parcial por distrito, sin redistribuir su peso.</p>
+          <Link href="/como-funciona#zone-score" className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-saffron-700 underline underline-offset-4">Consultar cómo se calcula Zone</Link>
         </section>
 
         <DataCard title="Contexto territorial · barrios de Madrid" estado="real" fuente={madrid.fuente} officialPage={madrid.pageUrl} sourceLink={{ label: "Ayuntamiento de Madrid · tabla original (XLSX)", href: madrid.url }} meta="131 barrios · 1 enero 2026 · consulta 11 septiembre 2026">

@@ -446,7 +446,7 @@ export function Dashboard() {
         {source === "favoritos" && <p className="mt-3 text-sm leading-relaxed text-stone-600">Los guardados son copias del anuncio. Si desaparece de Idealista, el favorito permanece hasta que lo quites; no verificamos automáticamente su disponibilidad. Abre el anuncio para comprobarla.</p>}
         {lastSavedAt && <p className="mt-3 text-xs text-stone-600">Última búsqueda guardada en este navegador: {new Date(lastSavedAt).toLocaleString("es-ES")}. Es una instantánea; confirma la disponibilidad en el anuncio.</p>}
         {storageError && <p role="alert" className="mt-2 text-sm text-rose-700">La búsqueda se ha mostrado, pero no ha cabido en el almacenamiento del navegador.</p>}
-        {items.length > 0 && <p className="mt-3 text-xs text-stone-600">Orden: HabitIA Score de mayor a menor. La cobertura indica qué parte de tus pesos se puede evaluar. Opportunity y Zone están pendientes de datos verificables.</p>}
+        {items.length > 0 && <p className="mt-3 text-xs text-stone-600">Orden: puntos disponibles de mayor a menor. La cobertura indica qué parte de tus pesos se puede evaluar. Zone es parcial por distrito; Opportunity sigue pendiente de series comparables.</p>}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <Toggle on={showTrajectory} onClick={() => setShowTrajectory((value) => !value)}>

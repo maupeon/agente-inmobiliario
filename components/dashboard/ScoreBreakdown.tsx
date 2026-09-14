@@ -1,10 +1,11 @@
 import type { PersonalScoring } from "@/types";
+import { evaluationLabel } from "@/lib/score-presentation";
 import styles from "./ScoreBreakdown.module.css";
 
 const COMPONENTS = [
   { key: "fair", name: "Fair", description: "Precio" },
   { key: "opportunity", name: "Opportunity", description: "Inversión" },
-  { key: "zone", name: "Zone", description: "Calidad de vida" },
+  { key: "zone", name: "Zone", description: "Entorno del distrito" },
   { key: "lifestyle", name: "Lifestyle", description: "Tiempo al trabajo" },
 ] as const;
 
@@ -13,8 +14,8 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
   return (
     <section className={styles.root} aria-label="Desglose del HabitIA Score">
       <div className={styles.heading}>
-        <strong>HabitIA Score: {scoring.coveragePercent ? `${score ?? 0}/100` : "sin datos"}</strong>
-        <span>Datos para el {scoring.coveragePercent}% de tus pesos</span>
+        <strong>{evaluationLabel(scoring)}{scoring.coveragePercent >= 100 ? `: ${score ?? 0}/100` : ""}</strong>
+        <span>Datos para el {scoring.coveragePercent.toLocaleString("es-ES", { maximumFractionDigits: 1 })}% de tus pesos</span>
       </div>
       <dl className={styles.metrics} aria-label="Los cuatro subscores">
         {COMPONENTS.map(({ key, name, description }) => {
@@ -24,12 +25,29 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
             <dt>{name}<span>{description}</span></dt>
             <dd className={value == null ? styles.missing : undefined}>
               {value == null ? <><span aria-hidden>—</span><small>Sin dato</small></> : <>{value.toLocaleString("es-ES", { maximumFractionDigits: 1 })}<small>/100</small></>}
+              {key === "zone" && scoring.zone && <small className={styles.metricNote}>{scoring.zone.available < 5 ? "Parcial · " : ""}{scoring.zone.available}/5 indicadores</small>}
             </dd>
           </div>;
         })}
       </dl>
+      {scoring.zone && <details className={styles.details}>
+        <summary>Zone · distrito de {scoring.zone.district} · {scoring.zone.available}/5 indicadores</summary>
+        <p className="mt-2 text-xs leading-relaxed text-stone-600">Cada indicador aporta hasta 20 puntos. El valor parcial suma los puntos disponibles sobre 100; los indicadores ausentes conservan su peso y no se consideran cero observado. Son datos de distrito, no mediciones del barrio o la vivienda.</p>
+        <dl className="my-3 space-y-3 text-xs leading-relaxed">
+          {scoring.zone.indicators.map(indicator => <div key={indicator.key}>
+            <dt className="font-medium">{indicator.label} · {indicator.index == null ? "Sin dato" : `${(indicator.index * 100).toLocaleString("es-ES", { maximumFractionDigits: 1 })}/100`}</dt>
+            <dd className="mt-1 text-stone-600">
+              {indicator.rawValue == null ? "Valor territorial pendiente." : `${indicator.rawValue.toLocaleString("es-ES", { maximumFractionDigits: 2 })} ${indicator.unit}. ${indicator.inverse ? "Menos" : "Más"} cantidad, mayor índice.`}
+              {indicator.points != null && ` Aporta ${indicator.points.toLocaleString("es-ES", { maximumFractionDigits: 1 })} de 20 puntos a Zone.`}
+              {" "}<a href={indicator.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{indicator.source}</a> · {indicator.period}.
+            </dd>
+          </div>)}
+        </dl>
+        <p className="mb-3 text-xs leading-relaxed text-stone-600">Verde: m² totales publicados. Transporte: líneas distintas de Metro. Servicios: locales únicos de alimentación, farmacia, gimnasio u ocio. Actuaciones: suma de las cinco categorías publicadas; menos actuaciones no acredita mayor seguridad. Los periodos de las fuentes son distintos.</p>
+      </details>}
       <details className={styles.details}>
         <summary>Cómo se calcula y qué aporta cada factor</summary>
+        <p className="mt-2 text-xs text-stone-600">Puntos acumulados para ordenar: {score ?? 0}/100{scoring.coveragePercent < 100 ? " · evaluación incompleta" : ""}.</p>
         <p className="mt-2 text-xs leading-relaxed text-stone-600">{scoring.explanation}</p>
         <p className="mt-2 text-xs text-stone-600">Podemos evaluar el {scoring.coveragePercent}% de tus prioridades ponderadas. Los criterios sin datos no suman puntos y sus pesos no se reparten entre los demás.</p>
         <dl className="mt-3 space-y-3">
