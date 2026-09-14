@@ -1,69 +1,112 @@
 "use client";
 
-import { useState } from "react";
-import { results } from "./results-contract";
+import type { ReactNode } from "react";
+import predictor from "./predictor-metadata.json";
 import styles from "./presentation.module.css";
 
-function modelMetric(key: string, unit: string) {
-  const outer = results.metrics.outer as Record<string, Record<string, unknown>> | undefined;
-  const value = outer?.LightGBM?.[key];
-  return results.status === "complete" && typeof value === "number" && Number.isFinite(value)
-    ? `${value.toLocaleString("es-ES", { maximumFractionDigits: key === "MAE_eur" ? 0 : 2 })}${unit}`
-    : "Pendiente";
+function modelMetric(key: keyof typeof predictor.metricas_test, digits = 2, unit = "") {
+  return `${predictor.metricas_test[key].toLocaleString("es-ES", { minimumFractionDigits: digits, maximumFractionDigits: digits })}${unit}`;
+}
+
+function Fraction({ top, bottom }: { top: ReactNode; bottom: ReactNode }) {
+  return <span className={styles.fraction}><span>{top}</span><span>{bottom}</span></span>;
+}
+
+function Equation({ label, children }: { label: string; children: ReactNode }) {
+  return <span className={styles.equation} role="math" aria-label={label}><span aria-hidden="true">{children}</span></span>;
+}
+
+export function ScoreEquation() {
+  return <Equation label="HabitIA Score igual a alfa por Fair más beta por Opportunity más gamma por Zone más delta por Lifestyle, todo dividido entre cien">
+    HabitIA Score = <Fraction top={<>α · Fair + β · Opportunity + γ · Zone + δ · Lifestyle</>} bottom="100" />
+  </Equation>;
 }
 
 export function PricingMethod() {
   return <div className={styles.pricingMethod}>
-    <section aria-label="Modelo de pricing de 2018">
-      <h3 className={styles.methodHeading}>01 <span>Modelo de pricing</span></h3>
+    <section aria-label="Modelo de valoración">
+      <h3 className={styles.methodHeading}>01 <span>Modelo de valoración</span></h3>
       <div className={styles.pricingFlow}>
-        <article><span className={styles.methodLabel}>Inputs</span><h4>Anuncios de Madrid · 2018</h4><p>{results.n_features} variables: superficie, localización, habitaciones, baños, planta y ascensor.</p></article>
-        <article><span className={styles.methodLabel}>Modelo</span><h4>LightGBM</h4><p>Menor error que Ridge y la referencia territorial. Evaluación por activo e intervalos calibrados.</p><small>Aprende oferta histórica; precisión actual sin validar.</small></article>
-        <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de oferta estimado · 2018</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("MdAPE_pct", "%")}</dd></div><div><dt>MAE</dt><dd>{modelMetric("MAE_eur", " €")}</dd></div></dl><small>Evaluación exterior agrupada · {results.model_id}</small></article>
+        <article><span className={styles.methodLabel}>Inputs</span><h4>Dataset de {predictor.ano_base}</h4><p>Anuncios de Madrid. {predictor.columnas.length} variables: superficie, habitaciones, baños, equipamiento, distancias y contexto del barrio.</p></article>
+        <article><span className={styles.methodLabel}>Modelo</span><h4>XGBoost</h4><p>{predictor.params.n_estimators} árboles para captar relaciones no lineales entre vivienda y entorno. Predice en logaritmos y convierte a euros.</p><small>Estimación puntual; precisión actual sin validar.</small></article>
+        <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra estimado · {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>MAE</dt><dd>{modelMetric("error_abs_medio_eur", 0, " €")}</dd></div></dl><small>Precios anunciados · métricas del test de {predictor.ano_base}</small></article>
       </div>
     </section>
-    <section aria-label="Actualización macroeconómica">
-      <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span></h3>
+    <section aria-label="Actualización por distrito y estimación de alquiler">
+      <h3 className={styles.methodHeading}>02 <span>Actualización por distrito</span></h3>
       <div className={styles.macroFlow}>
-        <article><h4>Comprar</h4><p className={styles.methodEquation}>Precio compra 2026 = Precio compra 2018 × (IPV 2026 / IPV 2018)</p><small>Escenario del artefacto: × 1,5534 · Q1 2026. Misma serie, ámbito y base del IPV.</small></article>
-        <article><h4>Alquilar <span className={styles.proposalLabel}>Propuesta</span></h4><p className={styles.methodEquation}>Precio alquiler 2026 = Precio compra 2026 × Rentabilidad anual 2026 del distrito / 12</p><small>Rentabilidad en tanto por uno. Fuente pendiente; hoy la app utiliza la renta del anuncio.</small></article>
+        <article><h4>Comprar · nivel {predictor.ano_precio}</h4><div className={styles.macroEquation}><Equation label="Precio de compra de 2025 igual al precio de compra de 2018 por el índice registral del distrito de 2025 dividido entre el de 2018">
+          P<sub>compra {predictor.ano_precio}</sub> = P<sub>compra {predictor.ano_base}</sub> · <Fraction top={<>I<sub>distrito {predictor.ano_precio}</sub></>} bottom={<>I<sub>distrito {predictor.ano_base}</sub></>} />
+        </Equation></div></article>
+        <article><h4>Alquilar · escenario derivado</h4><div className={styles.macroEquation}><Equation label="Renta mensual estimada igual al precio de compra de 2025 por el factor mensual de renta del distrito de 2024">
+          R<sub>mensual</sub> = P<sub>compra {predictor.ano_precio}</sub> · f<sub>distrito {predictor.ano_renta}</sub>
+        </Equation></div></article>
       </div>
+      <p className={styles.equationKey}>I: índice registral de venta · f: ratio mensual renta/precio de {predictor.ano_renta}. El alquiler no tiene validación independiente.</p>
     </section>
   </div>;
 }
 
-const currentRows = [
-  { name: "Fair", question: "¿Cómo se compara el precio?", formula: "100 / 85 / 62 / 32 / 12 puntos, según la banda de valoración", detail: "Solo cuando existe una estimación individual válida." },
-  { name: "Opportunity", question: "¿Hay revalorización relativa?", formula: "Sin puntuación disponible", detail: "Faltan series comparables de zona y ciudad para el mismo periodo." },
-  { name: "Zone", question: "¿Qué calidad de vida ofrece?", formula: "Sin puntuación disponible", detail: "Faltan indicadores verificables del barrio y una metodología de agregación." },
-  { name: "Lifestyle", question: "¿Cuánto tardo al trabajo?", formula: "100 hasta 10 min · 100 − 1,9 × (min − 10) entre 10 y 60 min · 5 desde 60 min", detail: "Se utiliza el tiempo del modo recomendado para el perfil." },
-];
-
-const proposedRows = [
-  { name: "Fair", question: "¿Está bien valorada?", formula: "Fair Gap (%) = (Precio predicho − Precio oferta) / Precio predicho × 100", detail: "Fair Score = percentil del gap en una distribución de referencia por definir." },
-  { name: "Opportunity", question: "¿Es una oportunidad de inversión?", formula: "Opportunity Gap (%) = (Revalorización inmueble − Revalorización ciudad) × 100", detail: "Opportunity Score = percentil del gap. Tasas en tanto por uno y mismo periodo." },
-  { name: "Zone", question: "¿Está en buena zona?", formula: "Zone Score (%) = (Σ característicaᵢ / n) × 100", detail: "Requiere características comparables entre 0 y 1, fuente y tratamiento de ausencias." },
-  { name: "Lifestyle", question: "¿Cuánto tardo al trabajo?", formula: "Lifestyle Score (%) = percentil de −Tiempo al trabajo", detail: "Referencia: viviendas que pasan los filtros del usuario. Menos minutos, más puntos." },
-];
+export function PredictorDetails() {
+  return <div className={styles.predictorDetails}>
+    <dl className={styles.predictorMetrics}>
+      <div><dt>Error porcentual mediano</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd><small>MdAPE · test de {predictor.ano_base}</small></div>
+      <div><dt>Error absoluto mediano</dt><dd>{modelMetric("error_abs_mediano_eur", 0, " €")}</dd><small>Mediana en euros</small></div>
+      <div><dt>R² en logaritmos</dt><dd>{modelMetric("r2_log", 4)}</dd><small>RMSE log: {modelMetric("rmse_log", 4)}</small></div>
+      <div><dt>Error dentro de ±20%</dt><dd>{modelMetric("pct_dentro_del_20pct", 2, "%")}</dd><small>Proporción observada en test</small></div>
+    </dl>
+    <div className={styles.predictorColumns}>
+      <article><h3>Del anuncio al precio</h3>
+        <p><strong>{predictor.columnas.length} variables.</strong> Superficie, habitaciones, baños y planta; equipamiento y tipología; distancias al centro, metro y Castellana; alquiler, delitos y vulnerabilidad del barrio.</p>
+        <p><strong>{predictor.params.n_estimators} árboles.</strong> Profundidad máxima {predictor.params.max_depth}. Estimación del logaritmo del precio y corrección de Duan al volver a euros.</p>
+        <div className={styles.predictorEquation}><Equation label="Precio de 2018 igual a la exponencial de la predicción XGBoost por el factor de corrección 1,016823">
+          P<sub>{predictor.ano_base}</sub> = exp(XGBoost(x)) · {predictor.smearing.toLocaleString("es-ES", { maximumFractionDigits: 6 })}
+        </Equation></div>
+      </article>
+      <article><h3>Ámbito y límites</h3>
+        <p><strong>Madrid capital · hasta {predictor.area_max_dominio} m².</strong> Excluye casas y chalets; exige superficie, habitaciones, baños y coordenadas.</p>
+        <p>No distingue estado de conservación, áticos ni vistas. Parte del equipamiento se extrae de la descripción; lo no mencionado puede perderse.</p>
+        <p><strong>Sin intervalos ni SHAP exportados.</strong> Venta a nivel de {predictor.ano_precio}; alquiler derivado con ratios de {predictor.ano_renta}, sin validación propia.</p>
+      </article>
+    </div>
+    <p className={styles.predictorSource}>Resultados declarados · {predictor.nombre} · paquete v{predictor.version_paquete}. La entrega no incluye particiones ni tamaño del test para auditar la evaluación.</p>
+  </div>;
+}
 
 export function ScoreMethod() {
-  const [view, setView] = useState<"current" | "proposal">("current");
-  const rows = view === "current" ? currentRows : proposedRows;
-  return <div className={styles.scoreMethod} data-presentation-interactive>
-    <div className={styles.methodSwitcher} role="group" aria-label="Versión del cálculo del Score">
-      <button type="button" aria-pressed={view === "current"} onClick={() => setView("current")}>Cálculo actual</button>
-      <button type="button" aria-pressed={view === "proposal"} onClick={() => setView("proposal")}>Propuesta v12</button>
+  return <div className={styles.scoreMethod}>
+    <div className={styles.scoreSummary}><ScoreEquation /></div>
+    <p className={styles.methodWeights}>Tú eliges los pesos: α, β, γ, δ entre 0 y 100 · α + β + γ + δ = 100</p>
+    <dl className={styles.scoreMethodRows}>
+      <div><dt>Fair<small>¿Está bien valorada?</small></dt><dd>
+        <Equation label="Fair Gap en porcentaje igual al precio predicho menos el precio de oferta, dividido entre el precio predicho, por cien">Fair Gap (%) = <Fraction top="Precio predicho − Precio oferta" bottom="Precio predicho" /> · 100</Equation>
+        <p className={styles.percentileEquation}>Fair Score (%) = Percentil(Fair Gap normalizado respecto a la distribución de referencia)</p>
+      </dd></div>
+      <div><dt>Opportunity<small>¿Es una oportunidad de inversión?</small></dt><dd>
+        <Equation label="Opportunity Gap en porcentaje igual a la revalorización del inmueble menos la revalorización de la ciudad, por cien">Opportunity Gap (%) = (Revalorización inmueble − Revalorización ciudad) · 100</Equation>
+        <p className={styles.percentileEquation}>Opportunity Score (%) = Percentil(Opportunity Gap normalizado respecto a la distribución de referencia)</p>
+      </dd></div>
+      <div><dt>Zone<small>¿Está en buena zona?</small></dt><dd>
+        <Equation label="Zone Score en porcentaje igual a la suma de los n indicadores normalizados entre cero y uno, dividido entre n, por cien">Zone Score (%) = <Fraction top={<>∑<sub>i = 1</sub><sup>n</sup> indicador<sub>i</sub></>} bottom="n" /> · 100</Equation>
+        <p className={styles.percentileEquation}>Indicadores entre 0 y 1: zonas verdes, seguridad, transporte, servicios y descanso.</p>
+      </dd></div>
+      <div><dt>Lifestyle<small>¿Cuánto tardo al trabajo?</small></dt><dd>
+        <p className={styles.percentileEquation}>Lifestyle Score (%) = Percentil(−Tiempo al trabajo normalizado respecto a la distribución de pisos que pasan tus filtros)</p>
+      </dd></div>
+    </dl>
+  </div>;
+}
+
+export function PresentationArchitecture() {
+  return <div className={styles.architectureDiagram} aria-label="Arquitectura del producto">
+    <div className={styles.architectureUser}><span className={styles.overline}>Usuario</span><p>Buscar <span>·</span> Conversar <span>·</span> Comparar <span>·</span> Guardar y recibir avisos</p></div>
+    <div className={styles.architectureConnector} aria-hidden="true">↕</div>
+    <article className={styles.architectureBackend}><span className={styles.overline}>Vercel</span><h3>Web y backend</h3><p>Next.js · panel, chat, mapa y comparador</p></article>
+    <div className={styles.architectureServices}>
+      <article><span className={styles.architectureConnector} aria-hidden="true">↕</span><span className={styles.overline}>Fly.io</span><h3>Modelo de precio</h3><p>Python · FastAPI · XGBoost</p><small>Precio puntual · escenario de renta</small></article>
+      <article><span className={styles.architectureConnector} aria-hidden="true">↕</span><span className={styles.overline}>Supabase</span><h3>Datos y automatización</h3><p>PostgreSQL</p><small>Favoritos · historial · selección diaria</small></article>
+      <article><span className={styles.architectureConnector} aria-hidden="true">↕</span><span className={styles.overline}>Anthropic</span><h3>Asistente</h3><p>Claude</p><small>Interpreta y explica</small></article>
     </div>
-    <p className={styles.methodEquation}>HabitIA Score = (α × Fair + β × Opportunity + γ × Zone + δ × Lifestyle) / 100</p>
-    <p className={styles.methodWeights}>Preferencias: α, β, γ, δ entre 0 y 100 · α + β + γ + δ = 100</p>
-    <div aria-live="polite">
-      <dl className={styles.scoreMethodRows}>{rows.map(row => <div key={row.name}>
-        <dt>{row.name}<small>{row.question}</small></dt>
-        <dd><strong>{row.formula}</strong><p>{row.detail}</p></dd>
-      </div>)}</dl>
-      <p className={styles.methodStatus}>{view === "current"
-        ? "Ejemplo con pesos iguales: Fair 100 y Lifestyle 81 → Score 45/100 · datos disponibles para el 50% de tus pesos. Los pesos sin datos no se redistribuyen."
-        : "Diseño de la v12, aún sin implementar. Hay que fijar referencias y empates de los percentiles fuera del test reservado del modelo."}</p>
-    </div>
+    <div className={styles.architectureSources}><span className={styles.overline}>Fuentes externas → backend</span><p>Idealista · anuncios <span> / </span> OpenRouteService · trayectos <span> / </span> Fuentes oficiales · contexto</p></div>
   </div>;
 }

@@ -1,0 +1,178 @@
+{
+ "nombre": "arboles_desplegable_ajustado",
+ "familia": "xgboost",
+ "dataset": "arboles_desplegable",
+ "columnas": [
+  "CONSTRUCTEDAREA",
+  "ROOMNUMBER",
+  "BATHNUMBER",
+  "HASTERRACE",
+  "HASLIFT",
+  "HASAIRCONDITIONING",
+  "HASPARKINGSPACE",
+  "HASBOXROOM",
+  "HASWARDROBE",
+  "HASSWIMMINGPOOL",
+  "HASDOORMAN",
+  "HASGARDEN",
+  "ISDUPLEX",
+  "ISSTUDIO",
+  "FLOORCLEAN",
+  "DISTANCE_TO_CITY_CENTER",
+  "DISTANCE_TO_METRO",
+  "DISTANCE_TO_CASTELLANA",
+  "alq_mediana_eur_m2_barrio",
+  "delitos_per_10k_barrio",
+  "indice_vulnerabilidad"
+ ],
+ "params": {
+  "colsample_bytree": 0.528081635815584,
+  "gamma": 0.0005361223891082169,
+  "learning_rate": 0.08788507761298064,
+  "max_depth": 12,
+  "min_child_weight": 5,
+  "reg_alpha": 0.0034879036214009018,
+  "reg_lambda": 8.659692055247017,
+  "subsample": 0.9568742693092576,
+  "n_estimators": 401
+ },
+ "smearing": 1.016823185598671,
+ "metricas_test": {
+  "rmse_log": 0.18503127845156148,
+  "r2_log": 0.9402686686372956,
+  "error_abs_medio_eur": 48992.72719680626,
+  "error_abs_mediano_eur": 23648.523437499985,
+  "error_pct_medio": 13.59169478232827,
+  "error_pct_mediano": 9.286445575800467,
+  "pct_dentro_del_10pct": 53.02769312309527,
+  "pct_dentro_del_20pct": 80.2769312309527,
+  "sesgo_mediano_pct": 1.1056640519608862,
+  "rmse_log CV (06)": 0.1856845156269647
+ },
+ "mediana_planta_train": 2.0,
+ "rangos_train": {
+  "CONSTRUCTEDAREA": {
+   "min": 21,
+   "max": 985
+  },
+  "ROOMNUMBER": {
+   "min": 0,
+   "max": 93
+  },
+  "BATHNUMBER": {
+   "min": 0,
+   "max": 20
+  },
+  "HASTERRACE": {
+   "min": 0,
+   "max": 1
+  },
+  "HASLIFT": {
+   "min": 0,
+   "max": 1
+  },
+  "HASAIRCONDITIONING": {
+   "min": 0,
+   "max": 1
+  },
+  "HASPARKINGSPACE": {
+   "min": 0,
+   "max": 1
+  },
+  "HASBOXROOM": {
+   "min": 0,
+   "max": 1
+  },
+  "HASWARDROBE": {
+   "min": 0,
+   "max": 1
+  },
+  "HASSWIMMINGPOOL": {
+   "min": 0,
+   "max": 1
+  },
+  "HASDOORMAN": {
+   "min": 0,
+   "max": 1
+  },
+  "HASGARDEN": {
+   "min": 0,
+   "max": 1
+  },
+  "ISDUPLEX": {
+   "min": 0,
+   "max": 1
+  },
+  "ISSTUDIO": {
+   "min": 0,
+   "max": 1
+  },
+  "FLOORCLEAN": {
+   "min": -1.0,
+   "max": 11.0
+  },
+  "DISTANCE_TO_CITY_CENTER": {
+   "min": 0.0076465716045885,
+   "max": 14.1588142264487
+  },
+  "DISTANCE_TO_METRO": {
+   "min": 0.0014160886550168,
+   "max": 9.374053603288582
+  },
+  "DISTANCE_TO_CASTELLANA": {
+   "min": 0.0014350974069677,
+   "max": 12.573582659586416
+  },
+  "alq_mediana_eur_m2_barrio": {
+   "min": 6.707111044593158,
+   "max": 14.83943408371498
+  },
+  "delitos_per_10k_barrio": {
+   "min": 25.44,
+   "max": 1395.23
+  },
+  "indice_vulnerabilidad": {
+   "min": 0.005305531,
+   "max": 0.011819176
+  }
+ },
+ "medias_train": {
+  "CONSTRUCTEDAREA": 100.29489026915114,
+  "ROOMNUMBER": 2.5695403726708075,
+  "BATHNUMBER": 1.5701863354037267,
+  "HASTERRACE": 0.35062525879917184,
+  "HASLIFT": 0.6879668737060042,
+  "HASAIRCONDITIONING": 0.43986749482401655,
+  "HASPARKINGSPACE": 0.21674534161490683,
+  "HASBOXROOM": 0.24983850931677018,
+  "HASWARDROBE": 0.5658467908902691,
+  "HASSWIMMINGPOOL": 0.13982608695652174,
+  "HASDOORMAN": 0.2486625258799172,
+  "HASGARDEN": 0.17490683229813664,
+  "ISDUPLEX": 0.024960662525879918,
+  "ISSTUDIO": 0.027461697722567287,
+  "FLOORCLEAN": 2.7383271221532093,
+  "DISTANCE_TO_CITY_CENTER": 4.444374562225971,
+  "DISTANCE_TO_METRO": 0.4624985099400416,
+  "DISTANCE_TO_CASTELLANA": 2.6368170291843764,
+  "alq_mediana_eur_m2_barrio": 10.681732793811392,
+  "delitos_per_10k_barrio": 126.71595345755692,
+  "indice_vulnerabilidad": 0.007711459640993789
+ },
+ "entrenado": "2026-09-13T18:08:59",
+ "version_paquete": 3,
+ "exportado": "2026-09-13T19:19:48",
+ "ano_base": 2018,
+ "ano_precio": 2025,
+ "ano_renta": 2024,
+ "ano_alquiler_barrio": 2024,
+ "indice_alquiler_ciudad": 1.2713921528528462,
+ "calibracion_metodo": 0.9285634138823831,
+ "area_max_dominio": 367.0,
+ "verificacion_modelo_nativo_max_abs_log": 0.0,
+ "versiones": {
+  "xgboost": "3.4.1",
+  "pandas": "3.0.0",
+  "geopandas": "1.1.2"
+ }
+}

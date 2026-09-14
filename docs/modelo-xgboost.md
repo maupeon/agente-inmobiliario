@@ -36,4 +36,12 @@ Tipos y validación: `lib/valoracion/types.ts` y `lib/valoracion/client.ts`. El 
 
 Se verificó igualdad de precio con el paquete recibido en 131 anuncios sintéticos, uno por polígono de barrio, con diferencia máxima de 0 euros. Esto acredita conservación del cálculo, no precisión actual.
 
-`app/presentacion/results-data.json` conserva el estudio agrupado LightGBM del 8 de septiembre, con 25 variables, MdAPE exterior 10,31 % e intervalos calibrados. El XGBoost declara MdAPE 9,29 % en su test de 2018, pero no incluye particiones, tamaño del test ni notebook de selección. Las cifras no forman una comparación controlada. La memoria de entrega explica ambas procedencias.
+`app/presentacion/predictor-metadata.json` es una copia exacta de `habitia_predictor/DATOS/modelos/paquete_produccion/metadatos.json`, exportado el 13 de septiembre de 2026 a las 19:19:48. La presentación obtiene de esta copia las 21 variables, los 401 árboles, las fechas y las métricas de XGBoost: MdAPE 9,29 %, MAE 48.993 €, error absoluto mediano 23.649 €, RMSE log 0,1850, R² log 0,9403 y 80,28 % de casos dentro de ±20 % en el test de 2018. No se ha repetido la evaluación. El paquete no incluye particiones, tamaño del test ni notebook de selección.
+
+El anexo del modelo distingue esa evaluación histórica del precio indexado a 2025 y de la renta derivada con ratios de 2024. La fracción de casos dentro de ±20 % no es un intervalo individual. Las métricas no acreditan precisión actual ni validación independiente de alquiler.
+
+`app/presentacion/results-data.json` conserva el estudio agrupado LightGBM del 8 de septiembre como antecedente, junto con sus componentes visuales, pero ya no alimenta la diapositiva de pricing ni el anexo de Tomás. Sus 25 variables, MdAPE exterior 10,31 % e intervalos calibrados corresponden a otro experimento. Las cifras de ambos modelos no forman una comparación controlada.
+
+Para actualizar esta instantánea, copiar los metadatos de una entrega verificada a `app/presentacion/predictor-metadata.json` y revisar también fórmulas, notas y alcance. No utilizar `scripts/sync-model-results.py` para XGBoost: ese importador pertenece al estudio LightGBM.
+
+SHA-256 de los metadatos recibidos: `5da4831292ca56aad3d9054f9a64f4e1ce73bb87345b8e7056ec2f134c2f1e87`. El archivo nativo `modelo.json` confirma 21 entradas y 401 árboles. Esta comprobación identifica el artefacto; no valida su precisión.
