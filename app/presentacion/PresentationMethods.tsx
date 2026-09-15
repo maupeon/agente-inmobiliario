@@ -88,7 +88,7 @@ export function ScoreMethod() {
       </dd></div>
       <div><dt>Zone<small>¿Está en buena zona?</small></dt><dd>
         <Equation label="Zone Score en porcentaje igual a la suma de los 4 indicadores normalizados entre cero y uno, dividido entre 4, por cien">Zone Score (%) = <Fraction top={<>∑<sub>i = 1</sub><sup>4</sup> indicador<sub>i</sub></>} bottom="4" /> · 100</Equation>
-        <p className={styles.percentileEquation}>Indicadores entre 0 y 1: zonas verdes, seguridad, transporte y servicios.</p>
+        <p className={styles.percentileEquation}>El valor de cada indicador es su percentil para ese inmueble respecto a la distribución de referencia, expresado entre 0 y 1. Indicadores: zonas verdes, seguridad, transporte y servicios.</p>
       </dd></div>
       <div><dt>Lifestyle<small>¿Cuánto tardo al trabajo?</small></dt><dd>
         <p className={styles.percentileEquation}>Lifestyle Score (%) = Percentil(−Tiempo al trabajo normalizado respecto a la distribución de pisos que pasan tus filtros)</p>

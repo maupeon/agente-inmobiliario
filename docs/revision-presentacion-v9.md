@@ -25,6 +25,8 @@ La calculadora utiliza sus valores iniciales; únicamente se cambia el horizonte
 
 - HyperFrames: comprobación de estructura, ejecución, encuadre y contraste; inspección visual de las escenas modificadas.
 - `verify.py`: formato y duración, muestras en cortes y escenas, comparación SSIM de los primeros 68 segundos y coincidencia exacta del flujo de audio con la versión anterior.
+- Verificación final: 106,000 s de vídeo y audio, H.264/AAC, 1920×1080; audio idéntico y SSIM de las escenas conservadas entre 0,9955 y 0,9994. La presentación local carga el archivo v9 sin error de reproducción.
+- Exportación: las escenas nuevas se renderizan con HyperFrames en `render-tail.html`; `assemble.sh` une ese tramo a los primeros 2040 fotogramas y conserva el audio original. Evita la reserva temporal de 26 GB que exigía la exportación completa.
 - Resultado técnico: `../videos/habitia-demo/revision-v9/verified/report.json`.
 - TypeScript del proyecto: `npm run typecheck`.
 
