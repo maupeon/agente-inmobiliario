@@ -149,9 +149,10 @@ test('rental enrichment uses monthly rent per square metre and explicit derivati
   assert.equal(rent.valuation.banda, null);
   assert.equal(rent.valuation.intervalo, undefined);
   assert(load('lib/dashboard-format.ts').priceComparison(rent.valuation).includes('renta mensual estimada'));
-  const scoring=load('lib/personal-score.ts').personalScore(mixed.anuncios[1], rent, null).scoring;
+  const scoring=load('lib/personal-score.ts').personalScore({...mixed.anuncios[1],district:'Chamberí'}, rent, null).scoring;
   assert.equal(scoring.components.find(c => c.key === 'fair').value, Math.round(Math.min(100,Math.max(0,50 - 2.5 * mixed.respuesta.resultados[1].brecha_pct))*10)/10);
-  assert.equal(scoring.components.find(c => c.key === 'opportunity').value,null);
+  assert.equal(scoring.components.find(c => c.key === 'opportunity').value,54.5);
+  assert.equal(scoring.opportunity.sourceUrl.includes('/venta/'),true);
   assert.equal(scoring.fair.unit,'€/mes');
 });
 

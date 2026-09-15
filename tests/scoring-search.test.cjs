@@ -14,10 +14,11 @@ function loader(stubs = {}, globals = {}) {
     if (!fs.existsSync(file)) file += '.ts';
     if (cache.has(file)) return cache.get(file).exports;
     const module = { exports: {} }; cache.set(file, module);
-    const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true } }).outputText;
+    const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText;
     vm.runInNewContext(code, { module, exports: module.exports, require(id) {
       if (Object.hasOwn(stubs, id)) return stubs[id];
       if (id === 'server-only') return {};
+      if (id.endsWith('.module.css')) return {};
       if (id.startsWith('@/')) return load(id.slice(2));
       if (id.startsWith('.')) return load(path.resolve(path.dirname(file), id));
       return req(id);
@@ -55,15 +56,36 @@ async function main() {
     const result=opportunityForProperty(p);
     assert.equal(result.districtGrowthPercent,3.3); assert.equal(result.cityGrowthPercent,2.2);
     assert.equal(result.score,52.75); assert.equal(result.scope,'distrito');
+    assert.equal(opportunityForProperty({...p,operation:'rent'}).score,result.score);
     assert.equal(opportunityForProperty({...p,price:2000000}).score,result.score);
-    for(const changed of [{operation:'rent'},{district:undefined},{district:'Malasaña'},{district:'Centro histórico'},{municipality:'Málaga'},{latitude:41.38,longitude:2.17}]) assert.equal(opportunityForProperty({...p,...changed}),null);
+    for(const changed of [{operation:'other'},{district:undefined},{district:'Malasaña'},{district:'Centro histórico'},{municipality:'Málaga'},{latitude:41.38,longitude:2.17}]) assert.equal(opportunityForProperty({...p,...changed}),null);
     for(const district of ['Salamanca','Barrio de Salamanca','04']) assert.equal(opportunityForProperty({...p,district}).districtCode,'04');
     const source=load('lib/scoring/opportunity-data.ts');
     assert.equal(source.OPPORTUNITY_DISTRICTS.length,21);
     assert.equal(new Set(source.OPPORTUNITY_DISTRICTS.map(d=>d.code)).size,21);
     assert(source.OPPORTUNITY_DISTRICTS.every(d=>opportunityForProperty({...p,district:d.code})?.score != null));
+    for (const d of source.OPPORTUNITY_DISTRICTS) {
+      const sale = opportunityForProperty({...p,district:d.code,operation:'sale'});
+      const rent = opportunityForProperty({...p,district:d.code,operation:'rent'});
+      assert.equal(JSON.stringify(rent),JSON.stringify(sale));
+    }
+    assert.equal(opportunityForProperty({...p,district:'Chamberí',operation:'rent'}).score,54.5);
     const scored=personalScore(p,model,{...profile,scoreWeights:{alpha:50,beta:50,gamma:0,delta:0}});
     assert.equal(scored.scoring.coveragePercent,100); assert.equal(scored.score,64);
+  });
+  check('rental Fair zero is a calculated score and Opportunity keeps its user weight', () => {
+    const rental={...property,municipality:'Madrid',district:'Chamberí',operation:'rent',price:1190};
+    const enrichment={...model,valuation:{...model.valuation,operacion:'alquiler',precioEstimado:670.37}};
+    const result=personalScore(rental,enrichment,{...profile,scoreWeights:{alpha:50,beta:50,gamma:0,delta:0}});
+    assert.equal(result.scoring.fair.score,0);
+    assert.equal(result.scoring.components.find(c=>c.key==='fair').value,0);
+    assert.equal(result.scoring.fair.unit,'€/mes');
+    assert.equal(result.scoring.opportunity.score,54.5);
+    assert.equal(result.scoring.coveragePercent,100);
+    assert.equal(result.score,27);
+    const withoutModel=personalScore(rental,empty,null);
+    assert.equal(withoutModel.scoring.fair,null);
+    assert.equal(withoutModel.scoring.opportunity.score,54.5);
   });
   check('weights default25, extremes and strict total', () => {
     assert.equal(scoreWeights(undefined).alpha, 25);
@@ -88,12 +110,12 @@ async function main() {
     {code:'b',district:'B',green:10,actions:20,transport:1,services:10,noise:60},
     {code:'c',district:'C',green:20,actions:10,transport:2,services:20,noise:50},
   ];
-  check('Zone directions follow all five proposed rules, with identical internal weights', () => {
+  check('Zone directions follow all four rules, with identical internal weights', () => {
     assert.equal(calculateZone('a',districtRows).score,0);
     assert.equal(calculateZone('b',districtRows).score,50);
     const best=calculateZone('c',districtRows);
     assert.equal(best.score,100); assert.equal(best.coveragePercent,100);
-    assert(best.indicators.every(i=>i.index===1 && i.points===20));
+    assert(best.indicators.every(i=>i.index===1 && i.points===25));
   });
   check('percentiles use average ranks for ties and reject invalid or incomplete distributions', () => {
     assert.equal(percentileRank(0,[0,10,20,20]),0);
@@ -103,13 +125,15 @@ async function main() {
     assert.equal(percentileRank(null,[0,10]),null);
     assert.equal(percentileRank(8,[0,10]),null);
   });
-  check('missing noise stays null and preserves the fifth weight instead of making an 80 into 100', () => {
+  check('Zone ignores noise and uses four equal weights while preserving genuine missing data', () => {
     const partial=calculateZone('c',districtRows.map(d=>({...d,noise:null})));
-    assert.equal(partial.score,80); assert.equal(partial.coveragePercent,80); assert.equal(partial.available,4);
+    assert.equal(partial.score,100); assert.equal(partial.coveragePercent,100); assert.equal(partial.available,4);
     const noise=partial.indicators.find(i=>i.key==='noise');
-    assert.equal(noise.rawValue,null); assert.equal(noise.index,null); assert.equal(noise.points,null);
+    assert.equal(noise,undefined); assert.equal(partial.indicators.length,4);
+    assert.equal(calculateZone('c',districtRows.map(d=>({...d,noise:999}))).score,100);
+    assert.equal(calculateZone('c',districtRows.map(({noise,...d})=>d)).score,100);
     const incomplete=calculateZone('c',districtRows.map(d=>({...d,noise:null,transport:d.code==='a'?null:d.transport})));
-    assert.equal(incomplete.score,60); assert.equal(incomplete.coveragePercent,60);
+    assert.equal(incomplete.score,75); assert.equal(incomplete.coveragePercent,75);
     assert.equal(incomplete.indicators.find(i=>i.key==='transport').index,null);
     const none=calculateZone('c',districtRows.map(d=>({...d,green:null,actions:null,transport:null,services:null,noise:null})));
     assert.equal(none.score,null); assert.equal(none.coveragePercent,0);
@@ -130,22 +154,52 @@ async function main() {
   check('Zone covers only its available fraction of the user weight, for sale and rental', () => {
     for(const operation of ['sale','rent']) {
       const result=personalScore({...madridProperty,operation},empty,{...profile,scoreWeights:{alpha:0,beta:0,gamma:100,delta:0}});
-      assert.equal(result.scoring.coveragePercent,80);
-      assert.equal(result.scoring.components.find(c=>c.key==='zone').coveragePercent,80);
-      assert.equal(evaluationLabel(result.scoring),'Evaluación parcial');
+      assert.equal(result.scoring.coveragePercent,100);
+      assert.equal(result.scoring.components.find(c=>c.key==='zone').coveragePercent,100);
+      assert.equal(evaluationLabel(result.scoring),'HabitIA Score');
       assert.equal(result.score,Math.round(result.scoring.zone.score));
     }
     const travel={...empty,commute:{recomendado:'bici',proveedor:'estimacion',modos:[{modo:'bici',minutos:26}]}};
     const p={...profile,trabajo:{direccion:'Trabajo',modo:'bici'},scoreWeights:{alpha:20,beta:20,gamma:30,delta:30}};
     const combined=personalScore(madridProperty,travel,p);
-    assert.equal(combined.scoring.coveragePercent,74);
+    assert.equal(combined.scoring.coveragePercent,80);
     const onlyTravel=personalScore(property,travel,p);
     assert.equal(onlyTravel.score,21);
-    assert.equal(evaluationLabel(onlyTravel.scoring),'Evaluación parcial: solo trayecto disponible');
+    assert.equal(evaluationLabel(onlyTravel.scoring),'HabitIA Score · parcial, solo trayecto');
     const zeroWeight=personalScore(madridProperty,travel,{...p,scoreWeights:{alpha:0,beta:0,gamma:0,delta:100}});
     assert.equal(zeroWeight.scoring.coveragePercent,100);
     assert.equal(evaluationLabel(zeroWeight.scoring),'HabitIA Score');
-    assert.equal(evaluationLabel(personalScore(property,empty,null).scoring),'Evaluación sin datos');
+    assert.equal(evaluationLabel(personalScore(property,empty,null).scoring),'HabitIA Score · sin datos');
+  });
+  check('all four subscores restore complete HabitIA Score for sale and rent', () => {
+    const { renderToStaticMarkup } = req('react-dom/server');
+    const { createElement } = req('react');
+    const { ScoreBreakdown } = load('components/dashboard/ScoreBreakdown.tsx');
+    for(const operation of ['sale','rent']) {
+      const propertyWithDistrict={...madridProperty,operation};
+      const enrichment={...model,valuation:{...model.valuation,operacion:operation==='rent'?'alquiler':'venta'},commute:{recomendado:'bici',proveedor:'estimacion',modos:[{modo:'bici',minutos:26}]}};
+      const result=personalScore(propertyWithDistrict,enrichment,{...profile,trabajo:{direccion:'Trabajo',modo:'bici'},scoreWeights:{alpha:25,beta:25,gamma:25,delta:25}});
+      assert.equal(result.scoring.coveragePercent,100);
+      assert.equal(evaluationLabel(result.scoring),'HabitIA Score');
+      assert(result.scoring.components.every(c=>c.value!=null));
+      assert.equal(result.scoring.zone.score,50.625);
+      assert.equal(result.scoring.zone.method,'zone-percentiles-v2');
+      assert.equal(result.score,Math.round(result.scoring.components.reduce((sum,c)=>sum+c.value/4,0)));
+      const markup=renderToStaticMarkup(createElement(ScoreBreakdown,result));
+      assert(markup.includes(`<strong>HabitIA Score: ${result.score}/100</strong>`));
+      assert(markup.includes('4/4 indicadores'));
+      assert(!markup.includes('Descanso'));
+      assert(!markup.includes('Parcial ·'));
+    }
+    const partial=personalScore(madridProperty,empty,null);
+    const partialMarkup=renderToStaticMarkup(createElement(ScoreBreakdown,partial));
+    assert(partialMarkup.includes(`<strong>HabitIA Score · parcial: ${partial.score}/100</strong>`));
+    const noData=personalScore(property,empty,null);
+    assert(renderToStaticMarkup(createElement(ScoreBreakdown,noData)).includes('<strong>HabitIA Score · sin datos: —</strong>'));
+    const chamberi=zoneForProperty({...madridProperty,district:'Chamberí'});
+    assert.equal(chamberi.score,65.625);
+    assert.equal(chamberi.coveragePercent,100);
+    assert.equal(chamberi.indicators.length,4);
   });
   check('Zone source snapshot counts each Metro line once per district and keeps noise absent', () => {
     const urban=req('./data/madrid/urban-sources.json');

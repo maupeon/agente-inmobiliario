@@ -44,13 +44,13 @@ const SIGNALS = [
   },
   {
     t: "β · Opportunity · inversión",
-    d: "En compra, compara la variación anual de precios de oferta del distrito con la de Madrid, de agosto de 2025 a agosto de 2026. Escala provisional: 50 si coinciden; suma 2,5 puntos por cada punto porcentual de ventaja, con límites 0 y 100. No predice rentabilidad futura.",
-    fuente: "25% por defecto · Idealista · 21 distritos · Solo compra",
+    d: "En compra y alquiler, compara la misma variación anual de precios de oferta de venta del distrito con la de Madrid, de agosto de 2025 a agosto de 2026. Escala provisional: 50 si coinciden; suma 2,5 puntos por cada punto porcentual de ventaja, con límites 0 y 100. No predice rentabilidad futura.",
+    fuente: "25% por defecto · Idealista · 21 distritos · Compra y alquiler",
   },
   {
     t: "γ · Zone · calidad de vida",
-    d: "Aplica percentiles a los m² verdes, actuaciones policiales, líneas de Metro y servicios del distrito. El ruido sigue sin dato: Zone suma cuatro de cinco componentes y se muestra como parcial, sin redistribuir pesos.",
-    fuente: "25% por defecto · Zone parcial por distrito",
+    d: "Aplica percentiles a los m² verdes, actuaciones policiales, líneas de Metro y servicios del distrito. Zone promedia estos cuatro componentes con un peso del 25% cada uno y se expresa sobre 100.",
+    fuente: "25% por defecto · Zone por distrito",
   },
   {
     t: "δ · Lifestyle · tiempo al trabajo",
@@ -71,7 +71,7 @@ const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco:
   { fuente: "Referencia independiente de alquiler", aporta: "La integración de SERPAVI está pendiente; no interviene en la estimación del modelo", estado: "no disponible", refresco: "Pendiente de integración" },
   { fuente: "Ayuntamiento de Madrid · Zonas verdes", aporta: "Superficie municipal de zonas verdes por distrito", estado: "oficial", refresco: `Instantánea de ${districtContext.zonasVerdes.periodo}`, href: districtContext.zonasVerdes.url },
   { fuente: "Policía Municipal de Madrid", aporta: "Actuaciones por distrito; no son una tasa de criminalidad", estado: "oficial", refresco: `Instantánea de ${districtContext.seguridad.periodo}`, href: districtContext.seguridad.url },
-  { fuente: "Zone · entorno", aporta: "Percentiles de cinco componentes con igual peso", estado: "proveedor", refresco: "Cuatro disponibles por distrito; ruido pendiente" },
+  { fuente: "Zone · entorno", aporta: "Percentiles de cuatro componentes con igual peso", estado: "proveedor", refresco: "Cuatro indicadores disponibles por distrito" },
 ];
 
 const STACK = [
@@ -229,21 +229,20 @@ export default function ComoFuncionaPage() {
           <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Los recuentos de distrito alimentan los componentes disponibles de Zone. Se identifican como datos del distrito, no de cada barrio. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito, y acceso al mapa de ruido de tráfico de 2021. Son referencias fechadas de distintos periodos; la puntuación es una regla de preferencia, no una medición validada de calidad de vida. En alquiler comparamos la mensualidad del anuncio con la renta derivada del predictor cuando hay datos suficientes. La referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
         </Section>
 
-        <Section id="zone-score" eyebrow="Cuatro de cinco indicadores" title="Cómo se calcula el Zone Score">
-          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">Zone combina cinco componentes con el mismo peso: zonas verdes, actuaciones policiales, transporte, servicios y descanso. Cada índice está entre 0 y 1 según su rango percentil entre los 21 distritos. Cada componente aporta hasta 20 puntos; se mantiene el divisor de cinco aunque falte un dato.</p>
+        <Section id="zone-score" eyebrow="Cuatro indicadores" title="Cómo se calcula el Zone Score">
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">Zone combina cuatro componentes con el mismo peso: zonas verdes, actuaciones policiales, transporte y servicios. Cada índice está entre 0 y 1 según su rango percentil entre los 21 distritos. Cada componente pesa un 25% y aporta hasta 25 puntos.</p>
           <details className="mt-4 text-sm leading-relaxed text-stone-600">
             <summary className="inline-flex min-h-11 cursor-pointer items-center font-medium text-saffron-700 underline underline-offset-4">Ver la fórmula y sus componentes</summary>
-            <p className="mt-3 break-words font-mono text-ink" aria-label="Fórmula de Zone Score">Zone = 100 × (I verde + I actuaciones + I transporte + I servicios + I descanso) / 5</p>
+            <p className="mt-3 break-words font-mono text-ink" aria-label="Fórmula de Zone Score">Zone = 100 × (I verde + I actuaciones + I transporte + I servicios) / 4</p>
             <ul className="mt-4 list-disc space-y-2 pl-5">
               <li><Strong>Zonas verdes:</Strong> más m² verdes totales, mayor índice. Se usa el recuento publicado, sin dividirlo por población ni superficie del distrito.</li>
               <li><Strong>Actuaciones policiales:</Strong> menos actuaciones, mayor índice. Se suman las cinco categorías publicadas por distrito; una cifra menor no acredita mayor seguridad.</li>
               <li><Strong>Transporte:</Strong> más líneas distintas de Metro con estación en el distrito, mayor índice. Una línea cuenta una sola vez por distrito. No incluye autobuses ni Cercanías.</li>
               <li><Strong>Servicios:</Strong> más locales de alimentación, farmacia, gimnasio u ocio, mayor índice. Cada local cuenta una sola vez aunque tenga varias categorías; se utilizan cantidades absolutas.</li>
-              <li><Strong>Descanso:</Strong> menos ruido nocturno, mayor índice. Todavía falta extraer los valores del mapa de ruido.</li>
             </ul>
-            <p className="mt-4">Los índices usan percentiles entre 0 y 1. Para actuaciones y ruido se invierten como 1 − percentil(valor). Los empates comparten el rango medio. Si falta una observación de la distribución territorial, ese indicador queda sin percentil; no se rellena con cero.</p>
+            <p className="mt-4">Los índices usan percentiles entre 0 y 1. Para actuaciones se invierte como 1 − percentil(valor). Los empates comparten el rango medio. Si falta una observación de la distribución territorial, ese indicador queda sin percentil; no se rellena con cero.</p>
           </details>
-          <p className="mt-4 max-w-[72ch] text-sm leading-relaxed text-stone-600">Actualmente hay cuatro indicadores y falta ruido: Zone es parcial y puede aportar hasta 80 de 100 puntos. Su cobertura es del 80%; si le asignas un peso del 25%, cubre 20 puntos porcentuales de tus prioridades. Los 20 puntos internos de ruido permanecen pendientes. Las fuentes tienen distintos periodos, visibles en el desglose. Sin distrito de Madrid identificado en el anuncio, Zone queda sin dato.</p>
+          <p className="mt-4 max-w-[72ch] text-sm leading-relaxed text-stone-600">Con los cuatro indicadores disponibles, Zone tiene una cobertura del 100% y puede alcanzar 100 puntos. Si le asignas un peso del 25% en HabitIA Score, aporta hasta 25 puntos al total. Las fuentes tienen distintos periodos, visibles en el desglose. Sin distrito de Madrid identificado en el anuncio, Zone queda sin dato.</p>
         </Section>
 
         {/* Arquitectura */}
@@ -290,7 +289,7 @@ export default function ComoFuncionaPage() {
         </div>
 
         <p className="mt-10 text-xs leading-relaxed text-mist">
-          Zone ofrece una evaluación parcial mientras falte el ruido; la referencia independiente de alquiler sigue pendiente. Las explicaciones se generan con los datos disponibles;
+          Zone combina los cuatro indicadores disponibles; la referencia independiente de alquiler sigue pendiente. Las explicaciones se generan con los datos disponibles;
           si se usa narración con IA, puede equivocarse. Confirma precio, condiciones
           y disponibilidad en el anuncio original.
         </p>

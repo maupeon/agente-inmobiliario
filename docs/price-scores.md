@@ -28,10 +28,14 @@ La copia fija está en `lib/scoring/opportunity-data.ts`, con fecha de consulta,
 
 Se usa el distrito explícito de un anuncio de Madrid. Se admiten códigos y nombres exactos, sin inferencia por cercanía, barrio o perfil. Alias documentados: Barrio de Salamanca→Salamanca, Fuencarral→Fuencarral-El Pardo, Moncloa→Moncloa-Aravaca y San Blas→San Blas-Canillejas.
 
-Solo aplica a compra. En alquiler queda sin puntuación y se muestra «No aplica»; el usuario puede asignar beta=0. No se convierte una subida del alquiler en un beneficio para el inquilino ni se modifican automáticamente sus pesos. No es predicción de rentabilidad.
+Se aplica a compra y alquiler con la misma referencia de evolución de venta del distrito y la misma escala. En alquiler mide la revalorización de venta de la zona, no la evolución de la renta. Conserva el peso beta elegido por el usuario. No es predicción de rentabilidad.
 
 ## Integración y comprobación
 
-`lib/scoring/price-scores.ts` concentra ambos cálculos y `personalScore` los comparte entre buscador, cambios de pesos y recomendaciones. Cada ficha conserva importes/tasas, periodo, regla y procedencia en un detalle desplegable. Ausencias siguen siendo null; no se redistribuyen pesos. Zone conserva 80% de cobertura interna; con pesos iguales, compra puede alcanzar 95% de cobertura y alquiler 70% si Fair y Lifestyle están disponibles.
+`lib/scoring/price-scores.ts` concentra ambos cálculos y `personalScore` los comparte entre buscador, cambios de pesos y recomendaciones. Cada ficha conserva importes/tasas, periodo, regla y procedencia en un detalle desplegable. Ausencias siguen siendo null; no se redistribuyen pesos. Zone tiene 100% de cobertura interna con sus cuatro indicadores; con pesos iguales, compra y alquiler pueden alcanzar 100% de cobertura si Fair y Lifestyle están disponibles.
 
 Pruebas: límites, monotonía, cero, signos, datos inválidos, correspondencia de anuncio/operación, ausencia de estimación, independencia entre Opportunity y precio individual, atribución territorial, cobertura ponderada y los contratos reales XGBoost de compra y alquiler.
+
+## Revisión de alquiler en el dashboard
+
+Opportunity conserva en alquiler los mismos valores, fuente y periodo de venta que en compra; Chamberí obtiene 54,5/100. Fair compara mensualidades y mantiene la misma escala que compra. Un anuncio al menos un 20% por encima de su estimación obtiene 0/100: es un resultado calculado, no un dato ausente, y se explica junto al desglose. No se modifica el predictor ni se fuerza una puntuación positiva.

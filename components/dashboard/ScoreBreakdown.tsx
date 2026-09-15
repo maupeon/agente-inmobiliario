@@ -1,5 +1,6 @@
 import type { PersonalScoring } from "@/types";
 import { evaluationLabel } from "@/lib/score-presentation";
+import { ZONE_INDICATOR_COUNT, ZONE_INDICATOR_POINTS } from "@/lib/neighborhood/zone-score";
 import styles from "./ScoreBreakdown.module.css";
 
 const COMPONENTS = [
@@ -14,7 +15,7 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
   return (
     <section className={styles.root} aria-label="Desglose del HabitIA Score">
       <div className={styles.heading}>
-        <strong>{evaluationLabel(scoring)}{scoring.coveragePercent >= 100 ? `: ${score ?? 0}/100` : ""}</strong>
+        <strong>{evaluationLabel(scoring)}: {scoring.coveragePercent > 0 && score != null ? `${score}/100` : "—"}</strong>
         <span>Datos para el {scoring.coveragePercent.toLocaleString("es-ES", { maximumFractionDigits: 1 })}% de tus pesos</span>
       </div>
       <dl className={styles.metrics} aria-label="Los cuatro subscores">
@@ -22,13 +23,14 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
           const component = scoring.components.find((c) => c.key === key);
           const value = component?.value;
           return <div key={key} className={styles.metric}>
-            <dt>{name}<span>{description}</span>{key === "zone" && scoring.zone && <span>{scoring.zone.available < 5 ? "Parcial · " : ""}{scoring.zone.available}/5 indicadores</span>}</dt>
+            <dt>{name}<span>{description}</span>{key === "zone" && scoring.zone && <span>{scoring.zone.available < ZONE_INDICATOR_COUNT ? "Parcial · " : ""}{scoring.zone.available}/{ZONE_INDICATOR_COUNT} indicadores</span>}</dt>
             <dd className={value == null ? styles.missing : undefined}>
               {value == null ? <><span aria-hidden>—</span><small>{component?.explanation.startsWith("No aplica") ? "No aplica" : "Sin dato"}</small></> : <>{value.toLocaleString("es-ES", { maximumFractionDigits: 1 })}<small>/100</small></>}
             </dd>
           </div>;
         })}
       </dl>
+      {scoring.fair?.score === 0 && <p className="mt-3 text-xs leading-relaxed text-stone-600">Fair calculado: 0/100. El anuncio supera la estimación en un {scoring.fair.gapPercent.toLocaleString("es-ES", { maximumFractionDigits: 1 })}%. La escala asigna 0 puntos a partir del 20% por encima; puedes consultar los importes en el desglose.</p>}
       {scoring.fair && <details className={styles.details}>
         <summary>Fair · comparación con la estimación</summary>
         <p className="my-2 text-xs leading-relaxed text-stone-600">Anuncio: {scoring.fair.advertisedPrice.toLocaleString("es-ES", { maximumFractionDigits: 0 })} {scoring.fair.unit}. Estimación: {scoring.fair.estimatedPrice.toLocaleString("es-ES", { maximumFractionDigits: 0 })} {scoring.fair.unit} · referencia {scoring.fair.period}.</p>
@@ -40,14 +42,14 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
         <p className="mb-3 text-xs text-stone-600"><a href={scoring.opportunity.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{scoring.opportunity.source}</a> · consulta {scoring.opportunity.retrievedAt}. Copia de la variación anual publicada, sin actualización automática.</p>
       </details>}
       {scoring.zone && <details className={styles.details}>
-        <summary>Zone · distrito de {scoring.zone.district} · {scoring.zone.available}/5 indicadores</summary>
-        <p className="mt-2 text-xs leading-relaxed text-stone-600">Cada indicador aporta hasta 20 puntos. El valor parcial suma los puntos disponibles sobre 100; los indicadores ausentes conservan su peso y no se consideran cero observado. Son datos de distrito, no mediciones del barrio o la vivienda.</p>
+        <summary>Zone · distrito de {scoring.zone.district} · {scoring.zone.available}/{ZONE_INDICATOR_COUNT} indicadores</summary>
+        <p className="mt-2 text-xs leading-relaxed text-stone-600">Zone combina zonas verdes, actuaciones policiales, transporte y servicios. Cada indicador aporta hasta {ZONE_INDICATOR_POINTS} puntos, con el mismo peso. Son datos de distrito, no mediciones del barrio o la vivienda.</p>
         <dl className="my-3 space-y-3 text-xs leading-relaxed">
           {scoring.zone.indicators.map(indicator => <div key={indicator.key}>
             <dt className="font-medium">{indicator.label} · {indicator.index == null ? "Sin dato" : `${(indicator.index * 100).toLocaleString("es-ES", { maximumFractionDigits: 1 })}/100`}</dt>
             <dd className="mt-1 text-stone-600">
               {indicator.rawValue == null ? "Valor territorial pendiente." : `${indicator.rawValue.toLocaleString("es-ES", { maximumFractionDigits: 2 })} ${indicator.unit}. ${indicator.inverse ? "Menos" : "Más"} cantidad, mayor índice.`}
-              {indicator.points != null && ` Aporta ${indicator.points.toLocaleString("es-ES", { maximumFractionDigits: 1 })} de 20 puntos a Zone.`}
+              {indicator.points != null && ` Aporta ${indicator.points.toLocaleString("es-ES", { maximumFractionDigits: 1 })} de ${ZONE_INDICATOR_POINTS} puntos a Zone.`}
               {" "}<a href={indicator.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{indicator.source}</a> · {indicator.period}.
             </dd>
           </div>)}

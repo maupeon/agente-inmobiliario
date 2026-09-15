@@ -87,7 +87,7 @@ export default async function DatosPage() {
         <section id="opportunity-score" className="mt-8 border-y border-hairline py-6">
           <h2 className="font-display text-xl text-ink">Opportunity · evolución de venta por distrito</h2>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">Comparamos la variación anual publicada de cada distrito con el {OPPORTUNITY_SOURCE.cityGrowthPercent.toLocaleString("es-ES")}% de Madrid capital, durante {OPPORTUNITY_SOURCE.period}. Son precios de oferta; no son compraventas cerradas ni una previsión de rentabilidad.</p>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">Escala provisional: 50 + 2,5 × (variación del distrito − variación de Madrid), limitada a 0–100. Las tasas se restan en puntos porcentuales. Solo se aplica a compra y a distritos identificados; en alquiler no se redistribuye automáticamente su peso.</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Escala provisional: 50 + 2,5 × (variación del distrito − variación de Madrid), limitada a 0–100. Las tasas se restan en puntos porcentuales. Se aplica a distritos identificados, con la misma referencia de venta en compra y alquiler. En alquiler describe la revalorización de venta de la zona, no la evolución de la renta.</p>
           <p className="my-3 text-xs text-stone-600"><a href={OPPORTUNITY_SOURCE.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{OPPORTUNITY_SOURCE.source}</a> · consulta {OPPORTUNITY_SOURCE.retrievedAt}. Copia fija de las tasas anuales del informe; no contiene la serie mensual completa. Misma {OPPORTUNITY_SOURCE.methodology} para ciudad y distritos.</p>
           <Collapsible summary="Ver variaciones de los 21 distritos">
             <Table head={["Distrito", "Variación anual", "Diferencia frente a Madrid"]}>
@@ -157,24 +157,9 @@ export default async function DatosPage() {
           )}
         </DataCard>
 
-        <DataCard
-          title="Cómo estimamos el alquiler"
-          estado="modelo"
-          fuente="Precio del anuncio y estimación del modelo XGBoost, cuando está disponible."
-          meta="Entrenamiento: 2018 · venta: 2025 · relación alquiler/venta: 2024"
-        >
-          <div className="space-y-3 text-sm leading-relaxed text-stone-600">
-            <p>La ficha muestra el alquiler mensual anunciado. Cuando el modelo dispone de los datos necesarios, también muestra una renta estimada en euros al mes y la desviación porcentual del anuncio respecto a esa estimación.</p>
-            <p>El modelo aprende de anuncios de venta de 2018. Primero ajusta el valor de venta estimado al nivel de precios de 2025. Después obtiene un alquiler mensual orientativo aplicando la relación entre alquiler y venta del distrito, calculada con datos de 2024.</p>
-            <Collapsible summary="Por qué aparecen años distintos">
-              <p>Cada año corresponde a una etapa: los anuncios con los que aprende el modelo, el ajuste del precio de venta y la referencia para convertirlo en alquiler. El cálculo supone que la relación alquiler/venta de 2024 se mantiene al aplicarla al valor de venta de 2025. Consultar un anuncio en 2026 no actualiza estas referencias: la estimación todavía no está ajustada a 2026.</p>
-            </Collapsible>
-          </div>
-        </DataCard>
-
         <section aria-labelledby="neighborhood-data-title" className="mt-12">
           <h2 id="neighborhood-data-title" className="font-display text-2xl text-ink">El entorno de la vivienda</h2>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">Consulta las fuentes del entorno y el territorio que describe cada tabla: distrito o barrio. Zone calcula los indicadores disponibles por distrito mediante percentiles. La puntuación es parcial mientras falten valores de ruido.</p>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Consulta las fuentes del entorno y el territorio que describe cada tabla: distrito o barrio. Zone calcula los indicadores disponibles por distrito mediante percentiles. Zonas verdes, actuaciones policiales, transporte y servicios pesan un 25% cada uno.</p>
         </section>
         <DataCard title="Zonas verdes · superficie por distrito" estado="real" fuente={context.zonasVerdes.fuente} officialPage={context.zonasVerdes.url} sourceLink={{ label: "Descargar datos originales (CSV)", href: context.zonasVerdes.download }} meta="21 distritos · 2025 · consulta 11 septiembre 2026">
           <p className="mb-4 text-sm leading-relaxed text-stone-600">{context.zonasVerdes.nota} Zone utiliza estos m² totales: más superficie, mayor índice verde. No mide la proximidad a tu vivienda.</p>
@@ -198,8 +183,8 @@ export default async function DatosPage() {
         <UrbanSources />
 
         <section aria-labelledby="zone-status-title" className="mt-8">
-          <h2 id="zone-status-title" className="font-display text-xl text-ink">Zone Score · cuatro de cinco indicadores disponibles</h2>
-          <p className="mt-3 text-sm leading-relaxed text-stone-600">Más m² verdes, líneas de Metro y servicios aumentan sus índices; menos actuaciones y ruido aumentan los índices inversos. Cada componente conserva un peso del 20%. El ruido sigue sin dato: se muestra una puntuación parcial por distrito, sin redistribuir su peso.</p>
+          <h2 id="zone-status-title" className="font-display text-xl text-ink">Zone Score · cuatro indicadores</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">Más m² verdes, líneas de Metro y servicios aumentan sus índices; menos actuaciones aumentan el índice de actuaciones. Cada componente pesa un 25%. Zone promedia estos cuatro índices y los expresa sobre 100.</p>
           <Link href="/como-funciona#zone-score" className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-saffron-700 underline underline-offset-4">Consultar cómo se calcula Zone</Link>
         </section>
 

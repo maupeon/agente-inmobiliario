@@ -65,7 +65,7 @@ export interface ScoreComponent {
   coveragePercent?: number;
 }
 export interface ZoneIndicator {
-  key: "green" | "actions" | "transport" | "services" | "noise";
+  key: "green" | "actions" | "transport" | "services";
   label: string;
   unit: string;
   rawValue: number | null;
@@ -77,7 +77,7 @@ export interface ZoneIndicator {
   period: string;
 }
 export interface ZoneScoring {
-  method: "zone-percentiles-v1";
+  method: "zone-percentiles-v2";
   district: string;
   districtCode: string;
   scope: "distrito";

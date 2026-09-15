@@ -33,9 +33,9 @@ export function opportunityFromGrowth(district: number | null, city: number | nu
   return clamp(50 + 2.5 * (district - city));
 }
 
-/** Solo compra y distrito explícito. No infiere barrio, proximidad o distrito del perfil. */
+/** Misma evolución territorial de venta para compra y alquiler; distrito explícito. */
 export function opportunityForProperty(p: Property): OpportunityScoring | null {
-  if (p.operation !== "sale" || !isMadridProperty(p) || !p.district) return null;
+  if (!["sale", "rent"].includes(p.operation) || !isMadridProperty(p) || !p.district) return null;
   const name = normalize(p.district);
   const district = OPPORTUNITY_DISTRICTS.find(d => [d.code, d.district, d.sourceName].some(s => normalize(s) === name));
   if (!district) return null;

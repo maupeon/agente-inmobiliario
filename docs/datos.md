@@ -75,15 +75,15 @@ La ficha conserva el precio mensual del anuncio. Cuando el predictor XGBoost v3 
 
 `renta_mensual_estimada = precio_estimado × factor_renta_mensual`
 
-La renta derivada no tiene validación independiente de alquiler ni intervalos calibrados. Fair compara anuncio y estimación mensual en una escala provisional, sin exigir bandas. Si el servicio no está disponible o se abstiene, se indica la ausencia de estimación. El bloque «Cómo estimamos el alquiler» de `/datos` explica este método; no certifica que el servicio esté conectado. [Contrato del predictor](modelo-xgboost.md).
+La renta derivada no tiene validación independiente de alquiler ni intervalos calibrados. Fair compara anuncio y estimación mensual en una escala provisional, sin exigir bandas. Si el servicio no está disponible o se abstiene, se indica la ausencia de estimación. [Contrato del predictor](modelo-xgboost.md).
 
 ## Metodología de Zone Score
 
-Estado: cálculo parcial por distrito, con cuatro de cinco indicadores disponibles. La fórmula mantiene cinco componentes con igual peso interno, un 20% cada uno. Estos pesos son distintos de γ, el peso que el usuario asigna a Zone dentro del HabitIA Score.
+Estado: cálculo por distrito con cuatro indicadores disponibles. La fórmula promedia cuatro componentes con igual peso interno, un 25% cada uno. Estos pesos son distintos de γ, el peso que el usuario asigna a Zone dentro del HabitIA Score.
 
-`Zone = 100 × (I_verde + I_actuaciones + I_transporte + I_servicios + I_descanso) / 5`
+`Zone = 100 × (I_verde + I_actuaciones + I_transporte + I_servicios) / 4`
 
-Se utilizan recuentos absolutos, sin dividir por población ni superficie. Cada índice es el rango percentil entre los 21 distritos: `(rango medio − 1) / (n − 1)`. Los empates comparten rango medio; si toda la distribución es igual, el índice es 0,5. Para actuaciones y ruido se calcula `1 − percentil(valor)`. Se requieren al menos dos observaciones y una distribución completa, finita y no negativa; una ausencia no se interpreta como cero.
+Se utilizan recuentos absolutos, sin dividir por población ni superficie. Cada índice es el rango percentil entre los 21 distritos: `(rango medio − 1) / (n − 1)`. Los empates comparten rango medio; si toda la distribución es igual, el índice es 0,5. Para actuaciones se calcula `1 − percentil(valor)`. Se requieren al menos dos observaciones y una distribución completa, finita y no negativa; una ausencia no se interpreta como cero.
 
 | Componente | Sentido | Dato utilizado |
 | --- | --- | --- |
@@ -91,15 +91,14 @@ Se utilizan recuentos absolutos, sin dividir por población ni superficie. Cada 
 | Actuaciones | Menos actuaciones, mayor índice | Suma de las cinco categorías de Policía Municipal, mayo de 2026; excluye registros sin distrito |
 | Transporte | Más líneas, mayor índice | Líneas distintas de Metro con estación identificada en el distrito, catálogo consultado el 11 de septiembre de 2026; cada línea cuenta una vez por distrito |
 | Servicios | Más servicios, mayor índice | Locales únicos abiertos en el censo de 10 de septiembre de 2026, de alimentación, farmacias, gimnasios u ocio; sin duplicados entre categorías |
-| Descanso | Menos ruido, mayor índice | Sin valor extraído; se conserva el enlace al mapa de ruido nocturno de 2021 |
 
 Las fuentes tienen distintos periodos y coberturas. Menos actuaciones no acredita mayor seguridad; los recuentos absolutos pueden favorecer distritos grandes o poblados. Transporte solo incluye Metro y servicios las categorías declaradas. Es una regla de preferencia relativa, no una medida validada de calidad de vida.
 
 `zoneForProperty` solo identifica nombres o códigos explícitos de distrito en anuncios de Madrid; no usa el perfil, coincidencias parciales ni proximidad. Sin distrito identificado, Zone permanece en `null`. No se presentan los datos del distrito como mediciones de cada barrio.
 
-El ruido mantiene `rawValue`, `index` y `points` en `null`. Se suman únicamente las aportaciones conocidas, conservando el divisor de cinco. El resultado se etiqueta como **parcial**, con cuatro indicadores, cobertura del 80% y máximo alcanzable de 80 puntos. No se renormaliza a 100. Con γ = 25, Zone aporta hasta 20 puntos al total y cubre 20 puntos porcentuales de las prioridades. La cobertura global suma el peso de cada componente multiplicado por su fracción evaluable.
+Descanso queda fuera de los indicadores, el divisor y la cobertura. Con los cuatro indicadores disponibles, Zone tiene cobertura del 100% y puede alcanzar 100 puntos. Con γ = 25, aporta hasta 25 puntos al total. Si faltara uno de los cuatro indicadores, su dato permanece en null y su peso no se redistribuye. La versión del cálculo es `zone-percentiles-v2`.
 
-El buscador muestra «Evaluación parcial» cuando la cobertura global es inferior al 100%, o «Evaluación parcial: solo trayecto disponible» si ese es el único criterio ponderado calculable. La suma numérica utilizada para ordenar queda en el desglose como puntos acumulados de una evaluación incompleta. No se presenta como una evaluación global baja. Fair y Opportunity se calculan según las reglas provisionales documentadas en `docs/price-scores.md`.
+El buscador muestra el HabitIA Score numérico en la cabecera. Si la cobertura global es inferior al 100%, conserva el total y añade «parcial»; sin ningún dato evaluable muestra un guion. Con los cuatro subscores disponibles, la cobertura puede llegar al 100%. Fair y Opportunity se calculan según las reglas provisionales documentadas en `docs/price-scores.md`.
 
 ### Reproducir los indicadores
 

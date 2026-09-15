@@ -43,7 +43,7 @@ export function UrbanSources() {
         <Links links={[["Abrir la ficha y el mapa oficial", urban.ruido.url], ["Descargar mapas originales (TIF en ZIP)", urban.ruido.download]]} />
         <p>Es una referencia histórica de ruido de tráfico. No mide el aislamiento de una vivienda, el ruido de vecinos o toda la actividad nocturna actual. La plataforma ofrece acceso a la cartografía original; todavía no extrae decibelios para cada anuncio.</p>
       </SourceSection>
-      <p className="text-sm leading-relaxed text-stone-600">Zone cuenta líneas distintas de Metro por distrito y locales únicos de las categorías de servicios, sin duplicarlos cuando aparecen en varias categorías. El ruido permanece sin dato. La puntuación es parcial y se atribuye al distrito, no al barrio. Las tablas son copias fechadas; consulta la fuente para comprobar cambios posteriores.</p>
+      <p className="text-sm leading-relaxed text-stone-600">Zone cuenta líneas distintas de Metro por distrito y locales únicos de las categorías de servicios, sin duplicarlos cuando aparecen en varias categorías. Zone combina cuatro indicadores al 25% cada uno y se atribuye al distrito, no al barrio. El mapa de ruido se ofrece como información complementaria y no interviene en el score. Las tablas son copias fechadas; consulta la fuente para comprobar cambios posteriores.</p>
     </div>
   );
 }
