@@ -40,15 +40,16 @@ Recorrido por las calles calculado con OpenRouteService.
 Abre la ficha para ver el precio, las características y el HabitIA Score.
 
 01:24.000 --> 01:28.000
-Cuatro componentes calculados y cobertura del 95%: falta el indicador de ruido de Zone.
+HabitIA Score: 73 de 100, con los cuatro scores y cobertura del 100%.
+Zone utiliza cuatro indicadores con el mismo peso.
 
 01:28.000 --> 01:34.000
 La fórmula, sus componentes y sus límites explicados.
 
 01:34.000 --> 01:41.000
 ¿Y a ti, qué te sale más rentable, comprar o alquilar?
-Introduce tu caso con compra, hipoteca y alquiler agrupados.
+Compara el patrimonio de ambas alternativas durante 18 años.
 
 01:41.000 --> 01:46.000
-Al alquilar, puedes invertir lo que queda.
-Al comprar, también se invierte el capital restante tras entrada y gastos.
+En este ejemplo, el equilibrio llega a los 9,8 años.
+Ambas opciones invierten el capital restante; el resultado depende de los supuestos.

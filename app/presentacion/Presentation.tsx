@@ -69,7 +69,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Motor de decisión",
     "title": "Filtrar calcular y ordenar",
     "target": 305,
-    "note": "El diseño del Score combina Fair, Opportunity, Zone y Lifestyle con los pesos elegidos por el usuario. El predictor XGBoost v3 devuelve precio y desviación sin bandas calibradas. El código actual calcula Fair con una escala lineal provisional de la desviación. Opportunity compara tasas anuales de oferta del distrito con Madrid, solo en compra. Zone dispone de cuatro indicadores y falta ruido. Con todos los componentes calculables en compra y pesos iguales, la cobertura es 95%; los ausentes no se redistribuyen. La propuesta v12 del anexo plantea transformar las brechas en percentiles, todavía sin implementar. Los indicadores del modelo de precio no equivalen a un Zone Score calculado."
+    "note": "El diseño del Score combina Fair, Opportunity, Zone y Lifestyle con los pesos elegidos por el usuario. El predictor XGBoost v3 devuelve precio y desviación sin bandas calibradas. El código actual calcula Fair con una escala lineal provisional de la desviación. Opportunity compara la misma variación anual de oferta de venta del distrito frente a Madrid en compra y alquiler. Zone promedia cuatro indicadores disponibles con un peso del 25% cada uno. Con todos los componentes calculables, la cobertura es 100%; los pesos ausentes no se redistribuyen. La propuesta v12 del anexo plantea transformar las brechas en percentiles, todavía sin implementar. Los indicadores del modelo de precio no equivalen a un Zone Score calculado."
   },
   {
     "kicker": "Modelo de pricing",
@@ -87,7 +87,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Demo",
     "title": "La plataforma en acción",
     "target": 521,
-    "note": "Vídeo de 106 segundos con música continua de João y capturas con datos de ejemplo. Arranca al entrar; sus controles permiten pausar, buscar y ampliar. Al regresar conserva el punto alcanzado. Revisión v8: resultados, ficha y desglose renovados entre 68 y 88 segundos con la aplicación actual en una instancia aislada. Vivienda ficticia de compra y predicción del servicio XGBoost conectado; ruta de OpenRouteService desde la vivienda a Nuevos Ministerios. Fair 100, Opportunity 52,8, Zone 40,5 y Lifestyle 86,7; 70 puntos acumulados y cobertura del 95% por falta del indicador de ruido. La ruta de bici contiene 163 coordenadas y dura 17 minutos. En alquiler, Opportunity no aplica. Las escalas lineales actuales no son los percentiles propuestos en el anexo. No utilizar el vídeo como prueba de resultados del modelo XGBoost."
+    "note": "Vídeo de 106 segundos con música continua de João y capturas con datos de ejemplo. Arranca al entrar; sus controles permiten pausar, buscar y ampliar. Al regresar conserva el punto alcanzado. Revisión v9: resultados, ficha, desglose y metodología actualizados entre 68 y 94 segundos. Capturas de la aplicación en una instancia aislada con la respuesta de valoración XGBoost y ruta OpenRouteService guardada en v8. Vivienda ficticia de compra en Centro: Fair 100, Opportunity 52,8, Zone 50,6 y Lifestyle 86,7; HabitIA Score 73 y cobertura del 100%. Zone utiliza cuatro indicadores al 25%. La ruta de bici contiene 163 coordenadas y dura 17 minutos. Opportunity utiliza el mismo indicador de venta en compra y alquiler. De 94 a 106 segundos, el gráfico completo compara 18 años con equilibrio a los 9,8; patrimonio final de compra 338.318 euros y alquiler 292.153 euros de hoy. Son los supuestos editables de ejemplo; solo se amplía el horizonte a 18 años para centrar el cruce en el vídeo. Las escalas lineales actuales no son los percentiles propuestos en el anexo. No utilizar el vídeo como prueba de resultados del modelo XGBoost."
   },
   {
     "kicker": "Roadmap",
@@ -102,10 +102,10 @@ const SCENES: SceneDefinition[] = [
     "note": "HabitIA. La herramienta que echábamos en falta. Acierta, fácil, rápido."
   },
   {
-    "kicker": "Anexo · HabitIA Score · diseño v12",
+    "kicker": "Anexo · HabitIA Score",
     "title": "Desglose del cálculo del HabitIA Score",
     "target": 561,
-    "note": "Diseño v12 pendiente de implementación. Fair y Opportunity proponen percentiles de las brechas respecto a una distribución de referencia por fijar, independiente de la evaluación final. No usar el test reservado para diseñar el Score. Zone requiere indicadores entre 0 y 1, con orientación y ausencias resueltas; las variables de barrio de XGBoost no lo implementan por sí mismas. Lifestyle usa el negativo de los minutos y las viviendas filtradas como referencia; resolver empates y el caso de una vivienda. El código actual usa escalas lineales provisionales para Fair y Opportunity; no implementa los percentiles v12. Fair compara importes del anuncio y del modelo. Opportunity solo aplica a compra y utiliza la variación anual de oferta del distrito frente a Madrid. Zone tiene cuatro de cinco indicadores. Lifestyle mantiene la función por minutos. La cobertura máxima con todos los demás componentes y pesos iguales es 95%; no se redistribuyen pesos ausentes."
+    "note": "Diseño v12 pendiente de implementación. Fair y Opportunity proponen percentiles de las brechas respecto a una distribución de referencia por fijar, independiente de la evaluación final. No usar el test reservado para diseñar el Score. Zone requiere indicadores entre 0 y 1, con orientación y ausencias resueltas; las variables de barrio de XGBoost no lo implementan por sí mismas. Lifestyle usa el negativo de los minutos y las viviendas filtradas como referencia; resolver empates y el caso de una vivienda. El código actual usa escalas lineales provisionales para Fair y Opportunity; no implementa los percentiles v12. Fair compara importes del anuncio y del modelo. Opportunity utiliza la misma variación anual de oferta de venta del distrito frente a Madrid en compra y alquiler. Zone promedia cuatro indicadores al 25%. Lifestyle mantiene la función por minutos. La cobertura alcanza el 100% cuando todos los componentes tienen datos; no se redistribuyen pesos ausentes."
   },
   {
     "kicker": "Anexo · Arquitectura",
@@ -429,7 +429,7 @@ export function Presentation() {
         <SceneShell index={9} active={active} state={sceneState(9)} label={SCENES[9].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.demoScene}`}>
             <SceneHeader kicker="Demo · HabitIA en acción" title="De la búsqueda a la decisión." />
-            <div className={styles.demoPlayer}><video ref={videoRef} controls aria-label="Demostración de HabitIA" playsInline preload="metadata" poster="/presentacion/demo-poster.jpg" onPlay={(event) => { if (active !== DEMO_SCENE_INDEX) event.currentTarget.pause(); }}><source src="/presentacion/habitia-demo.mp4" type="video/mp4" /><track kind="captions" src="/presentacion/demo-captions.vtt" srcLang="es" label="Español" />Tu navegador no puede reproducir el vídeo.</video></div>
+            <div className={styles.demoPlayer}><video ref={videoRef} controls aria-label="Demostración de HabitIA" playsInline preload="metadata" poster="/presentacion/demo-poster.jpg" onPlay={(event) => { if (active !== DEMO_SCENE_INDEX) event.currentTarget.pause(); }}><source src="/presentacion/habitia-demo.mp4?v=9" type="video/mp4" /><track kind="captions" src="/presentacion/demo-captions.vtt?v=9" srcLang="es" label="Español" />Tu navegador no puede reproducir el vídeo.</video></div>
             <div className={styles.demoActions}><span>João: historia conceptual · Aplicación actual con datos de ejemplo</span></div>
           </section>
         </SceneShell>
@@ -453,7 +453,7 @@ export function Presentation() {
 
         <SceneShell index={12} active={active} state={sceneState(12)} label={SCENES[12].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.scoreMethodScene}`}>
-            <SceneHeader kicker="Anexo · HabitIA Score · diseño v12" title="Cómo se calcula cada componente." />
+            <SceneHeader kicker="Anexo · HabitIA Score" title="Cómo se calcula cada componente." />
             <ScoreMethod />
           </section>
         </SceneShell>

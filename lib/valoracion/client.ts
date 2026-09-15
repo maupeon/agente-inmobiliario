@@ -11,6 +11,7 @@ const EXPECTED_MODEL_ID = "habitIA-oferta-2018-v2";
 const isVersion2 = (value: unknown): value is string => typeof value === "string" && /^2\.\d+\.\d+$/.test(value);
 const isVersion3 = (value: unknown): value is string => typeof value === "string" && /^3\.\d+\.\d+$/.test(value);
 const finitePositive = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value > 0;
+const validYear = (value: unknown): value is number => typeof value === "number" && Number.isInteger(value) && value >= 2018 && value <= 2099;
 /** El servicio heredado puede responder 200: su contrato no acredita el modelo revisado. */
 function validResultV2(value: unknown, codes: Set<string>): value is ValoracionModeloV2 {
   if (!isRecord(value) || typeof value.propertyCode !== "string" || !codes.has(value.propertyCode)
@@ -42,10 +43,10 @@ function validResultV3(value: unknown, codes: Set<string>): value is ValoracionM
     || value.modelo !== "arboles_desplegable_ajustado" || typeof value.modelo_sha256 !== "string" || !/^[a-f0-9]{64}$/.test(value.modelo_sha256)
     || value.objetivo !== "precio_anunciado" || value.periodo_entrenamiento !== "2018"
     || value.extrapolacion_temporal !== true || value.precision_actual_validada !== false || value.clasificacion_validada !== false
-    || value.nivel_precios !== "2025" || value.ano_base !== 2018 || value.ano_precio !== 2025 || value.ano_renta !== 2024
+    || !validYear(value.ano_precio) || !validYear(value.ano_renta) || value.nivel_precios !== String(value.ano_precio) || value.ano_base !== 2018
     || !finitePositive(value.precio_estimado) || !finitePositive(value.precio_estimado_base) || !finitePositive(value.factor_escenario)
     || value.intervalo !== null || value.banda !== null || value.oportunidad !== false || value.sobrevalorado !== false
-    || value.explicacion != null || value.alquiler_validado !== false || value.metodo_renta !== "ratio_distrital_2024"
+    || value.explicacion != null || value.alquiler_validado !== false || value.metodo_renta !== `ratio_distrital_${value.ano_renta}`
     || !finitePositive(value.renta_mensual_estimada) || !finitePositive(value.factor_renta_mensual)
     || typeof value.barrio_code !== "string" || !/^\d{3}$/.test(value.barrio_code)
     || typeof value.distrito_code !== "string" || value.barrio_code.slice(0, 2) !== value.distrito_code
@@ -133,8 +134,8 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
       resultados.set(v.propertyCode, v);
       estados.set(v.propertyCode, { estado: "ok", motivo: v.model_id === "habitIA-xgboost-2018-v3"
         ? v.operation === "rent"
-          ? "Renta mensual derivada de la venta estimada a nivel de 2025 y ratios distritales de 2024. Alquiler no validado; sin intervalo calibrado."
-          : "Estimación de oferta a nivel de 2025. Sin intervalo calibrado; precisión actual no validada."
+          ? `Renta mensual derivada de la venta estimada a nivel de ${v.ano_precio} y ratios distritales de ${v.ano_renta}. Alquiler no validado; sin intervalo calibrado.`
+          : `Estimación de oferta a nivel de ${v.ano_precio}. Sin intervalo calibrado; precisión actual no validada.`
         : "Estimación de oferta histórica indexada. No demuestra precisión en precios actuales." });
     }
     return fail("El servicio no devolvió una valoración válida de un modelo compatible para este anuncio.");

@@ -56,14 +56,14 @@ export interface ValoracionModeloV3 extends Omit<ValoracionModeloV2,
   sobrevalorado: false;
   explicacion?: never;
   ano_base: 2018;
-  ano_precio: 2025;
-  ano_renta: 2024;
+  ano_precio: number;
+  ano_renta: number;
   barrio_code: string;
   distrito_code: string;
   renta_mensual_estimada: number;
   factor_renta_mensual: number;
   alquiler_validado: false;
-  metodo_renta: "ratio_distrital_2024";
+  metodo_renta: `ratio_distrital_${number}`;
   calidad: {
     sin_descripcion: boolean;
     planta_imputada: boolean;

@@ -87,8 +87,8 @@ export function ScoreMethod() {
         <p className={styles.percentileEquation}>Opportunity Score (%) = Percentil(Opportunity Gap normalizado respecto a la distribución de referencia)</p>
       </dd></div>
       <div><dt>Zone<small>¿Está en buena zona?</small></dt><dd>
-        <Equation label="Zone Score en porcentaje igual a la suma de los n indicadores normalizados entre cero y uno, dividido entre n, por cien">Zone Score (%) = <Fraction top={<>∑<sub>i = 1</sub><sup>n</sup> indicador<sub>i</sub></>} bottom="n" /> · 100</Equation>
-        <p className={styles.percentileEquation}>Indicadores entre 0 y 1: zonas verdes, seguridad, transporte, servicios y descanso.</p>
+        <Equation label="Zone Score en porcentaje igual a la suma de los 4 indicadores normalizados entre cero y uno, dividido entre 4, por cien">Zone Score (%) = <Fraction top={<>∑<sub>i = 1</sub><sup>4</sup> indicador<sub>i</sub></>} bottom="4" /> · 100</Equation>
+        <p className={styles.percentileEquation}>Indicadores entre 0 y 1: zonas verdes, seguridad, transporte y servicios.</p>
       </dd></div>
       <div><dt>Lifestyle<small>¿Cuánto tardo al trabajo?</small></dt><dd>
         <p className={styles.percentileEquation}>Lifestyle Score (%) = Percentil(−Tiempo al trabajo normalizado respecto a la distribución de pisos que pasan tus filtros)</p>

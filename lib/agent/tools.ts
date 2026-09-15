@@ -50,7 +50,7 @@ import type {
 export const TOOL_DEFINITIONS = [
   {
     name: "valorar_vivienda",
-    description: "Estima un piso de compra o alquiler en Madrid con el mismo predictor que el panel. Conserva operation del anuncio: sale compara euros totales, rent compara euros al mes con la renta derivada del valor de venta y ratios distritales de 2024. El alquiler no tiene validación independiente. Usa solo campos observados de buscar_propiedades o aportados por el usuario; no inventes coordenadas ni características. Respeta estado, unidades y advertencias.",
+    description: "Estima un piso de compra o alquiler en Madrid con el mismo predictor que el panel. Conserva operation del anuncio: sale compara euros totales, rent compara euros al mes con la renta derivada del valor de venta y ratios distritales del periodo que devuelva el predictor. El alquiler no tiene validación independiente. Usa solo campos observados de buscar_propiedades o aportados por el usuario; no inventes coordenadas ni características. Respeta estado, unidades y advertencias.",
     input_schema: {
       type: "object", additionalProperties: false,
       properties: {

@@ -171,3 +171,27 @@ test('chat requires the observed operation and preserves rental monthly price', 
   assert.equal(result.operation, 'rent');
   await assert.rejects(tool({ ...rental, operation: undefined }));
 });
+
+test('v3.1 accepts consistent 2026 index periods and carries them into status messages', async () => {
+  const response = structuredClone(mixed.respuesta);
+  response.nivel_precios = '2026';
+  for (const value of response.resultados) {
+    value.nivel_precios = '2026';
+    value.ano_precio = 2026;
+    value.ano_renta = 2026;
+    value.metodo_renta = 'ratio_distrital_2026';
+  }
+  const batch = await loader(response)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
+  assert.equal(batch.resultados.size, response.resultados.length);
+  for (const value of response.resultados) {
+    const message = batch.estados.get(value.propertyCode).motivo;
+    assert(message.includes('2026'));
+    assert(!/2024|2025/.test(message));
+  }
+  for (const changed of [{ ano_precio: 2025 }, { ano_renta: 2024 }, { ano_precio: '2026' }, { ano_renta: 2026.5 }]) {
+    const invalid = structuredClone(response);
+    invalid.resultados = [{ ...response.resultados[0], ...changed }];
+    const rejected = await loader(invalid)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
+    assert.equal(rejected.resultados.size, 0, JSON.stringify(changed));
+  }
+});
