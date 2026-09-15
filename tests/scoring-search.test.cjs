@@ -186,16 +186,16 @@ async function main() {
       assert.equal(result.scoring.zone.method,'zone-percentiles-v2');
       assert.equal(result.score,Math.round(result.scoring.components.reduce((sum,c)=>sum+c.value/4,0)));
       const markup=renderToStaticMarkup(createElement(ScoreBreakdown,result));
-      assert(markup.includes(`<strong>HabitIA Score: ${result.score}/100</strong>`));
+      assert(markup.includes(`aria-label="HabitIA Score: ${result.score}/100"`));
       assert(markup.includes('4/4 indicadores'));
       assert(!markup.includes('Descanso'));
       assert(!markup.includes('Parcial ·'));
     }
     const partial=personalScore(madridProperty,empty,null);
     const partialMarkup=renderToStaticMarkup(createElement(ScoreBreakdown,partial));
-    assert(partialMarkup.includes(`<strong>HabitIA Score · parcial: ${partial.score}/100</strong>`));
+    assert(partialMarkup.includes(`aria-label="HabitIA Score · parcial: ${partial.score}/100"`));
     const noData=personalScore(property,empty,null);
-    assert(renderToStaticMarkup(createElement(ScoreBreakdown,noData)).includes('<strong>HabitIA Score · sin datos: —</strong>'));
+    assert(renderToStaticMarkup(createElement(ScoreBreakdown,noData)).includes('aria-label="HabitIA Score · sin datos: —"'));
     const chamberi=zoneForProperty({...madridProperty,district:'Chamberí'});
     assert.equal(chamberi.score,65.625);
     assert.equal(chamberi.coveragePercent,100);

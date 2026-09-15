@@ -1,11 +1,16 @@
 .root { container-type: inline-size; margin-top: .75rem; padding: .9rem; border: 1px solid #dce4de; border-radius: 16px; background: #fbfdf9; color: #17211d; font-size: .875rem; }
-.heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .35rem .75rem; }
-.heading > span { color: #52645a; font-size: .7rem; }
+.heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1rem; padding: .25rem 0 1rem; border-bottom: 1px solid theme('colors.hairline.DEFAULT'); }
+.overallMeta { display: flex; flex: 1 1 10rem; flex-direction: column; gap: .35rem; min-width: 0; }
+.overallLabel { color: theme('colors.ink.DEFAULT'); font-size: 1.125rem; font-weight: 700; letter-spacing: -.025em; line-height: 1.25; }
+.overallStatus { color: theme('colors.stone.600'); font-size: .75rem; font-weight: 500; }
+.coverage { color: theme('colors.stone.600'); font-size: .7rem; line-height: 1.4; }
+.overallValue { flex-shrink: 0; color: theme('colors.saffron.700'); font-size: clamp(2.5rem, 12cqi, 3.5rem); font-weight: 700; letter-spacing: -.055em; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.overallValue span { margin-left: .2rem; color: theme('colors.stone.600'); font-size: .8rem; font-weight: 500; letter-spacing: 0; }
 .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 1rem 0; gap: 1rem .75rem; }
 .metric { display: flex; flex-direction: column; min-width: 0; }
 .metric dt { order: 2; font-size: .8rem; font-weight: 600; }
 .metric dt span { display: block; margin-top: .2rem; color: #52645a; font-size: .65rem; font-weight: 400; }
-.metric dd { order: 1; margin: 0 0 .3rem; color: #176547; font-size: 1.9rem; font-weight: 650; letter-spacing: -.04em; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.metric dd { order: 1; margin: 0 0 .3rem; color: theme('colors.ink.700'); font-size: 1.45rem; font-weight: 600; letter-spacing: -.04em; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .metric dd small { margin-left: .2rem; font-size: .65rem; font-weight: 400; letter-spacing: 0; }
 .metric dd .metricNote { display: block; margin: .2rem 0 0; color: #52645a; line-height: 1.4; }
 .metric .missing { color: #68736d; }

@@ -15,8 +15,14 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
   return (
     <section className={styles.root} aria-label="Desglose del HabitIA Score">
       <div className={styles.heading}>
-        <strong>{evaluationLabel(scoring)}: {scoring.coveragePercent > 0 && score != null ? `${score}/100` : "—"}</strong>
-        <span>Datos para el {scoring.coveragePercent.toLocaleString("es-ES", { maximumFractionDigits: 1 })}% de tus pesos</span>
+        <div className={styles.overallMeta}>
+          <strong className={styles.overallLabel}>HabitIA Score</strong>
+          {scoring.coveragePercent < 100 && <span className={styles.overallStatus}>{scoring.coveragePercent > 0 ? "Evaluación parcial" : "Sin datos disponibles"}</span>}
+          <span className={styles.coverage}>Datos para el {scoring.coveragePercent.toLocaleString("es-ES", { maximumFractionDigits: 1 })}% de tus pesos</span>
+        </div>
+        <output className={styles.overallValue} aria-label={`${evaluationLabel(scoring)}: ${scoring.coveragePercent > 0 && score != null ? `${score}/100` : "—"}`}>
+          {scoring.coveragePercent > 0 && score != null ? <>{score}<span>/100</span></> : "—"}
+        </output>
       </div>
       <dl className={styles.metrics} aria-label="Los cuatro subscores">
         {COMPONENTS.map(({ key, name, description }) => {
