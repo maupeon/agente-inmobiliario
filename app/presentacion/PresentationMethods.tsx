@@ -29,7 +29,7 @@ export function PricingMethod() {
       <div className={styles.pricingFlow}>
         <article><span className={styles.methodLabel}>Inputs</span><h4>Dataset de {predictor.ano_base}</h4><p>Anuncios de Madrid de Idealista.</p><p>Top 5 por importancia: superficie, baños, alquiler mediano por m² del barrio, vulnerabilidad y ascensor.</p><small>De {predictor.columnas.length} variables · importancia por ganancia media (gain)</small></article>
         <article><span className={styles.methodLabel}>Modelo</span><h4>XGBoost</h4><p>Capta relaciones no lineales e interacciones entre características de la vivienda y su entorno.</p><p>Fiabilidad en el test: {modelMetric("pct_dentro_del_20pct", 2, "%")} de los anuncios con error ≤20%.</p></article>
-        <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra de {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>MAE</dt><dd>{modelMetric("error_abs_medio_eur", 0, " €")}</dd></div></dl><small>Estimación del precio anunciado · métricas del test de {predictor.ano_base}</small></article>
+        <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra de {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>R² (log)</dt><dd>{modelMetric("r2_log", 4)}</dd></div></dl><small>Estimación del precio anunciado · métricas del test de {predictor.ano_base}</small></article>
       </div>
     </section>
     <section aria-label="Actualización macroeconómica del paquete actual">
