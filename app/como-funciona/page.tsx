@@ -68,7 +68,6 @@ const SOURCES: Array<{ fuente: string; aporta: string; estado: Estado; refresco:
   { fuente: "OpenRouteService", aporta: "Rutas; respaldos indicados como aproximados", estado: "proveedor", refresco: "Al calcular el trayecto" },
   { fuente: "Nominatim / OpenStreetMap", aporta: "Búsqueda de ubicaciones", estado: "proveedor", refresco: "Al localizar una dirección" },
   { fuente: "Modelo XGBoost · alquiler", aporta: "Renta mensual derivada de la venta estimada y ratios distritales de 2024; sin validación independiente de alquiler", estado: "proveedor", refresco: "Al consultar una vivienda, si el modelo está disponible" },
-  { fuente: "Referencia independiente de alquiler", aporta: "La integración de SERPAVI está pendiente; no interviene en la estimación del modelo", estado: "no disponible", refresco: "Pendiente de integración" },
   { fuente: "Ayuntamiento de Madrid · Zonas verdes", aporta: "Superficie municipal de zonas verdes por distrito", estado: "oficial", refresco: `Instantánea de ${districtContext.zonasVerdes.periodo}`, href: districtContext.zonasVerdes.url },
   { fuente: "Policía Municipal de Madrid", aporta: "Actuaciones por distrito; no son una tasa de criminalidad", estado: "oficial", refresco: `Instantánea de ${districtContext.seguridad.periodo}`, href: districtContext.seguridad.url },
   { fuente: "Zone · entorno", aporta: "Percentiles de cuatro componentes con igual peso", estado: "proveedor", refresco: "Cuatro indicadores disponibles por distrito" },
@@ -226,7 +225,7 @@ export default function ComoFuncionaPage() {
 
         <Section eyebrow="El entorno" title="Datos de barrio y distrito">
           <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">En Datos y fuentes puedes consultar población, superficie y densidad por barrio, además de zonas verdes y actuaciones policiales por distrito. La superficie verde publicada no mide proximidad a una vivienda y excluye los parques históricos, singulares y forestales del fichero separado. Las actuaciones policiales no equivalen a todos los delitos ni a una tasa de criminalidad.</p>
-          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Los recuentos de distrito alimentan los componentes disponibles de Zone. Se identifican como datos del distrito, no de cada barrio. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito. Son referencias fechadas de distintos periodos; la puntuación es una regla de preferencia, no una medición validada de calidad de vida. En alquiler comparamos la mensualidad del anuncio con la renta derivada del predictor cuando hay datos suficientes. La referencia independiente de SERPAVI todavía no está integrada y no aporta puntos al score.</p>
+          <p className="mt-3 max-w-[72ch] text-sm leading-relaxed text-stone-600">Los recuentos de distrito alimentan los componentes disponibles de Zone. Se identifican como datos del distrito, no de cada barrio. Datos y fuentes incluye también el catálogo de Metro, recuentos de comercios, farmacias, gimnasios y ocio por distrito. Son referencias fechadas de distintos periodos; la puntuación es una regla de preferencia, no una medición validada de calidad de vida. En alquiler comparamos la mensualidad del anuncio con la renta derivada del predictor cuando hay datos suficientes.</p>
         </Section>
 
         <Section id="zone-score" eyebrow="Cuatro indicadores" title="Cómo se calcula el Zone Score">
@@ -289,7 +288,7 @@ export default function ComoFuncionaPage() {
         </div>
 
         <p className="mt-10 text-xs leading-relaxed text-mist">
-          Zone combina los cuatro indicadores disponibles; la referencia independiente de alquiler sigue pendiente. Las explicaciones se generan con los datos disponibles;
+          Zone combina los cuatro indicadores disponibles. Las explicaciones se generan con los datos disponibles;
           si se usa narración con IA, puede equivocarse. Confirma precio, condiciones
           y disponibilidad en el anuncio original.
         </p>
