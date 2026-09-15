@@ -1,5 +1,6 @@
 "use client";
 
+import { INDEX_TARGET_YEAR } from "@/lib/valoracion/index-update";
 import type { ReactNode } from "react";
 import predictor from "./predictor-metadata.json";
 import styles from "./presentation.module.css";
@@ -32,17 +33,17 @@ export function PricingMethod() {
         <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra de {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>R² (log)</dt><dd>{modelMetric("r2_log", 4)}</dd></div></dl><small>Estimación del precio anunciado · métricas del test de {predictor.ano_base}</small></article>
       </div>
     </section>
-    <section aria-label="Actualización macroeconómica del paquete actual">
-      <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span></h3>
+    <section aria-label="Actualización macroeconómica prevista a 2026">
+      <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span><small className={styles.proposalLabel}>Índices pendientes</small></h3>
       <div className={styles.macroFlow}>
-        <article><h4>Comprar · nivel de {predictor.ano_precio}</h4><div className={styles.macroEquation}><Equation label={`Precio de compra de ${predictor.ano_precio} igual al precio de ${predictor.ano_base} por el factor de venta del distrito de ${predictor.ano_base} a ${predictor.ano_precio}`}>
-          P<sub>compra {predictor.ano_precio}</sub> = P<sub>compra {predictor.ano_base}</sub> · f<sub>venta distrito</sub>
+        <article><h4>Comprar · proyectar a {INDEX_TARGET_YEAR}</h4><div className={styles.macroEquation}><Equation label={`Precio de compra de ${INDEX_TARGET_YEAR} igual al precio de ${predictor.ano_base} por el factor de venta del distrito de ${predictor.ano_base} a ${INDEX_TARGET_YEAR}`}>
+          P<sub>compra {INDEX_TARGET_YEAR}</sub> = P<sub>compra {predictor.ano_base}</sub> · f<sub>venta distrito</sub>
         </Equation></div></article>
-        <article><h4>Alquilar · escenario con ratio de {predictor.ano_renta}</h4><div className={styles.macroEquation}><Equation label={`Escenario de renta mensual igual al precio de compra de ${predictor.ano_precio} por el factor mensual de renta del distrito de ${predictor.ano_renta}`}>
-          R<sub>escenario mensual</sub> = P<sub>compra {predictor.ano_precio}</sub> · f<sub>renta distrito {predictor.ano_renta}</sub>
+        <article><h4>Alquilar · proyectar a {INDEX_TARGET_YEAR}</h4><div className={styles.macroEquation}><Equation label={`Escenario de renta mensual igual al precio de compra de ${INDEX_TARGET_YEAR} por el factor mensual de renta del distrito de ${INDEX_TARGET_YEAR}`}>
+          R<sub>escenario mensual</sub> = P<sub>compra {INDEX_TARGET_YEAR}</sub> · f<sub>renta distrito {INDEX_TARGET_YEAR}</sub>
         </Equation></div></article>
       </div>
-      <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {predictor.ano_precio} · f renta: ratio mensual renta/precio de {predictor.ano_renta}. Estos resultados no son valoraciones validadas de 2026. Actualizar exige fuentes y periodos compatibles y una nueva validación.</p>
+      <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {INDEX_TARGET_YEAR} · f renta: ratio mensual renta/precio de {INDEX_TARGET_YEAR}. Proyección prevista: índices de {INDEX_TARGET_YEAR} pendientes de incorporar. La actualización no acredita por sí sola precisión actual.</p>
     </section>
   </div>;
 }
@@ -66,7 +67,7 @@ export function PredictorDetails() {
       <article><h3>Ámbito y límites</h3>
         <p><strong>Madrid capital · hasta {predictor.area_max_dominio} m².</strong> Excluye casas y chalets; exige superficie, habitaciones, baños y coordenadas.</p>
         <p>No distingue estado de conservación, áticos ni vistas. Parte del equipamiento se extrae de la descripción; lo no mencionado puede perderse.</p>
-        <p><strong>Sin intervalos ni SHAP exportados.</strong> Venta a nivel de {predictor.ano_precio}; alquiler derivado con ratios de {predictor.ano_renta}, sin validación propia.</p>
+        <p><strong>Sin intervalos ni SHAP exportados.</strong> Actualización de venta y ratios de alquiler a {INDEX_TARGET_YEAR} pendiente de incorporar. Alquiler derivado, sin validación propia.</p>
       </article>
     </div>
     <p className={styles.predictorSource}>Resultados declarados · {predictor.nombre} · paquete v{predictor.version_paquete}. La entrega no incluye particiones ni tamaño del test para auditar la evaluación.</p>

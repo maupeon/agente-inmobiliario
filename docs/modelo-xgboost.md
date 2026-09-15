@@ -54,3 +54,8 @@ Se muestra el mismo MAE de 48.993 € en pricing y anexo. La mediana absoluta de
 El top 5 mostrado se deriva del JSON nativo: media de `loss_changes` en nodos no hoja, agrupada por `split_indices`, sobre los 401 árboles. Corresponde a la importancia `gain` de XGBoost (no SHAP ni causalidad): superficie, baños, alquiler mediano €/m² del barrio, índice de vulnerabilidad y ascensor. Valores y hash del modelo en `app/presentacion/predictor-importance.json`. Definición: https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.Booster.get_score .
 
 La fórmula de 2026 en la presentación es una **propuesta pendiente**, no una descripción del contrato desplegado: requiere una serie IPV homogénea en geografía/base y un ratio mensual renta/precio de 2026. El paquete sigue devolviendo venta a nivel de 2025 y renta con ratio de 2024. No se han modificado ni actualizado sus coeficientes.
+
+
+## Preparación editorial de los índices de 2026
+
+La presentación y las páginas de explicación anuncian la actualización a 2026 como pendiente. El objetivo y el aviso se centralizan en `lib/valoracion/index-update.ts`. No se cambian los coeficientes, las fechas de fuentes históricas ni la metadata del paquete recibido. Las fichas y el chat conservan el periodo de la respuesta del predictor. Cuando lleguen los índices, deben incorporarse y verificarse antes de retirar el aviso de pendiente.

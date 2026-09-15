@@ -1,4 +1,5 @@
 "use client";
+import { INDEX_UPDATE_NOTICE } from "@/lib/valoracion/index-update";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
@@ -372,6 +373,7 @@ export function Dashboard() {
                 ? "Busca en Madrid capital y compara las opciones por precio, zona y trayecto. Los indicadores son orientativos; confirma siempre la disponibilidad en el anuncio."
                 : "Vuelve a tus viviendas y compáralas con el mismo contexto."}
             </p>
+            <p className="mt-2 max-w-[75ch] text-xs leading-relaxed text-stone-600">{INDEX_UPDATE_NOTICE}</p>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

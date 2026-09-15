@@ -1,3 +1,4 @@
+import { INDEX_TARGET_YEAR, INDEX_UPDATE_NOTICE } from "@/lib/valoracion/index-update";
 import { OPPORTUNITY_DISTRICTS, OPPORTUNITY_SOURCE } from "@/lib/scoring/opportunity-data";
 import { UrbanSources } from "./UrbanSources";
 import context from "@/data/madrid/madrid-context.json";
@@ -50,6 +51,12 @@ export default async function DatosPage() {
             procedencia verificada, lo señalamos y no mostramos sus cifras como referencia.
           </p>
         </header>
+
+        <section id="actualizacion-indices" className="mt-8 border-y border-hairline py-6">
+          <h2 className="font-display text-xl text-ink">Índices de venta y alquiler · {INDEX_TARGET_YEAR}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">{INDEX_UPDATE_NOTICE}</p>
+          <p className="mt-2 text-sm leading-relaxed text-stone-600">La actualización prevista utilizará factores de venta y ratios mensuales de alquiler por distrito con referencia de {INDEX_TARGET_YEAR}. Las fechas de las fuentes históricas y la base de los índices se conservan.</p>
+        </section>
 
         <section id="datos-modelo" className="mt-8 overflow-hidden rounded-xl border border-hairline bg-paper-50">
           <header className="border-b border-hairline p-5">
