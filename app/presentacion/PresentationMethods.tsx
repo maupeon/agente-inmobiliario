@@ -34,13 +34,13 @@ export function PricingMethod() {
       </div>
     </section>
     <section aria-label="Actualización macroeconómica prevista a 2026">
-      <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span><small className={styles.proposalLabel}>Índices pendientes</small></h3>
+      <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span></h3>
       <div className={styles.macroFlow}>
-        <article><h4>Comprar · proyectar a {INDEX_TARGET_YEAR}</h4><div className={styles.macroEquation}><Equation label={`Precio de compra de ${INDEX_TARGET_YEAR} igual al precio de ${predictor.ano_base} por el factor de venta del distrito de ${predictor.ano_base} a ${INDEX_TARGET_YEAR}`}>
+        <article><h4>Comprar</h4><div className={styles.macroEquation}><Equation label={`Precio de compra de ${INDEX_TARGET_YEAR} igual al precio de ${predictor.ano_base} por el factor de venta del distrito de ${predictor.ano_base} a ${INDEX_TARGET_YEAR}`}>
           P<sub>compra {INDEX_TARGET_YEAR}</sub> = P<sub>compra {predictor.ano_base}</sub> · f<sub>venta distrito</sub>
         </Equation></div></article>
-        <article><h4>Alquilar · proyectar a {INDEX_TARGET_YEAR}</h4><div className={styles.macroEquation}><Equation label={`Escenario de renta mensual igual al precio de compra de ${INDEX_TARGET_YEAR} por el factor mensual de renta del distrito de ${INDEX_TARGET_YEAR}`}>
-          R<sub>escenario mensual</sub> = P<sub>compra {INDEX_TARGET_YEAR}</sub> · f<sub>renta distrito {INDEX_TARGET_YEAR}</sub>
+        <article><h4>Alquilar</h4><div className={styles.macroEquation}><Equation label={`Escenario de renta mensual igual al precio de compra de ${INDEX_TARGET_YEAR} por el factor mensual de renta del distrito de ${INDEX_TARGET_YEAR}`}>
+          P<sub>alquiler {INDEX_TARGET_YEAR}</sub> = P<sub>compra {INDEX_TARGET_YEAR}</sub> · f<sub>renta distrito {INDEX_TARGET_YEAR}</sub>
         </Equation></div></article>
       </div>
       <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {INDEX_TARGET_YEAR} · f renta: ratio mensual renta/precio de {INDEX_TARGET_YEAR}. Proyección prevista: índices de {INDEX_TARGET_YEAR} pendientes de incorporar. La actualización no acredita por sí sola precisión actual.</p>
