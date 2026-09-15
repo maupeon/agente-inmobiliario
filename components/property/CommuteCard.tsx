@@ -19,7 +19,7 @@ const MODE_META: Record<
   coche: { label: "En coche", Icon: Car },
 };
 
-/** Trayecto trabajo → vivienda por cada modo. Resalta el recomendado. */
+/** Trayecto vivienda → trabajo por cada modo. Resalta el recomendado. */
 export function CommuteCard({ data }: { data: CommuteResult }) {
   return (
     <article className="grainy-blob relative overflow-hidden rounded-xl border border-hairline bg-paper-50 p-6 animate-fade-up md:p-8">
@@ -37,7 +37,7 @@ export function CommuteCard({ data }: { data: CommuteResult }) {
       <div className="flex items-center gap-2 pt-4 text-sm text-ink-700">
         <MapPin size={14} weight="bold" className="shrink-0 text-stone" />
         <span className="truncate">
-          {data.origen?.direccion ?? "tu trabajo"}
+          {data.origen?.direccion ?? "tu vivienda"}
         </span>
         <span className="text-mist">→</span>
         <span className="truncate font-medium text-ink">{data.destino.etiqueta}</span>

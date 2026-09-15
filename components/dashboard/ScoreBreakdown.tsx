@@ -22,10 +22,9 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
           const component = scoring.components.find((c) => c.key === key);
           const value = component?.value;
           return <div key={key} className={styles.metric}>
-            <dt>{name}<span>{description}</span></dt>
+            <dt>{name}<span>{description}</span>{key === "zone" && scoring.zone && <span>{scoring.zone.available < 5 ? "Parcial · " : ""}{scoring.zone.available}/5 indicadores</span>}</dt>
             <dd className={value == null ? styles.missing : undefined}>
               {value == null ? <><span aria-hidden>—</span><small>{component?.explanation.startsWith("No aplica") ? "No aplica" : "Sin dato"}</small></> : <>{value.toLocaleString("es-ES", { maximumFractionDigits: 1 })}<small>/100</small></>}
-              {key === "zone" && scoring.zone && <small className={styles.metricNote}>{scoring.zone.available < 5 ? "Parcial · " : ""}{scoring.zone.available}/5 indicadores</small>}
             </dd>
           </div>;
         })}

@@ -29,20 +29,20 @@ export function PricingMethod() {
       <div className={styles.pricingFlow}>
         <article><span className={styles.methodLabel}>Inputs</span><h4>Dataset de {predictor.ano_base}</h4><p>Anuncios de Madrid de Idealista.</p><p>Top 5 por importancia: superficie, baños, alquiler mediano por m² del barrio, vulnerabilidad y ascensor.</p><small>De {predictor.columnas.length} variables · importancia por ganancia media (gain)</small></article>
         <article><span className={styles.methodLabel}>Modelo</span><h4>XGBoost</h4><p>Capta relaciones no lineales e interacciones entre características de la vivienda y su entorno.</p><p>Fiabilidad en el test: {modelMetric("pct_dentro_del_20pct", 2, "%")} de los anuncios con error ≤20%.</p></article>
-        <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra estimado · {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>MAE</dt><dd>{modelMetric("error_abs_medio_eur", 0, " €")}</dd></div></dl><small>Precios anunciados · métricas del test de {predictor.ano_base}</small></article>
+        <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra de {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>MAE</dt><dd>{modelMetric("error_abs_medio_eur", 0, " €")}</dd></div></dl><small>Estimación del precio anunciado · métricas del test de {predictor.ano_base}</small></article>
       </div>
     </section>
-    <section aria-label="Propuesta de actualización macroeconómica a 2026">
-      <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span><small className={styles.proposalLabel}>Propuesta 2026</small></h3>
+    <section aria-label="Actualización macroeconómica del paquete actual">
+      <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span></h3>
       <div className={styles.macroFlow}>
-        <article><h4>Comprar · proyectar a 2026</h4><div className={styles.macroEquation}><Equation label="Proyección propuesta: precio de compra de 2026 igual al precio de 2018 por el IPV de 2026 dividido entre el IPV de 2018">
-          P<sub>compra 2026</sub> = P<sub>compra {predictor.ano_base}</sub> · <Fraction top={<>IPV<sub>2026</sub></>} bottom={<>IPV<sub>{predictor.ano_base}</sub></>} />
+        <article><h4>Comprar · nivel de {predictor.ano_precio}</h4><div className={styles.macroEquation}><Equation label={`Precio de compra de ${predictor.ano_precio} igual al precio de ${predictor.ano_base} por el factor de venta del distrito de ${predictor.ano_base} a ${predictor.ano_precio}`}>
+          P<sub>compra {predictor.ano_precio}</sub> = P<sub>compra {predictor.ano_base}</sub> · f<sub>venta distrito</sub>
         </Equation></div></article>
-        <article><h4>Alquilar · escenario derivado</h4><div className={styles.macroEquation}><Equation label="Proyección propuesta: renta mensual de 2026 igual al precio de compra de 2026 por el factor mensual de renta del distrito de 2026">
-          R<sub>mensual 2026</sub> = P<sub>compra 2026</sub> · f<sub>distrito 2026</sub>
+        <article><h4>Alquilar · escenario con ratio de {predictor.ano_renta}</h4><div className={styles.macroEquation}><Equation label={`Escenario de renta mensual igual al precio de compra de ${predictor.ano_precio} por el factor mensual de renta del distrito de ${predictor.ano_renta}`}>
+          R<sub>escenario mensual</sub> = P<sub>compra {predictor.ano_precio}</sub> · f<sub>renta distrito {predictor.ano_renta}</sub>
         </Equation></div></article>
       </div>
-      <p className={styles.equationKey}>IPV: Índice de Precios de las Viviendas · f: ratio mensual renta/precio. Proyección propuesta: requiere datos de 2026. Paquete actual: venta {predictor.ano_precio} y ratio {predictor.ano_renta}.</p>
+      <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {predictor.ano_precio} · f renta: ratio mensual renta/precio de {predictor.ano_renta}. Estos resultados no son valoraciones validadas de 2026. Actualizar exige fuentes y periodos compatibles y una nueva validación.</p>
     </section>
   </div>;
 }

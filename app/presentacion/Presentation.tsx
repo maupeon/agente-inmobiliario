@@ -73,9 +73,9 @@ const SCENES: SceneDefinition[] = [
   },
   {
     "kicker": "Modelo de pricing",
-    "title": "El valor estimado según sus características",
+    "title": "El verdadero valor del inmueble según sus características",
     "target": 360,
-    "note": "Modelo de valoración: arboles_desplegable_ajustado, XGBoost, paquete v3 exportado el 13 de septiembre de 2026. 21 variables, 401 árboles, profundidad máxima 12. La predicción base es exp(predicción logarítmica) por 1,016823185598671, corrección de Duan. Estima precios anunciados de 2018; no precios de cierre ni un valor verdadero. MdAPE 9,2864% y MAE 48.992,73 euros declarados en su test de 2018. No comparar directamente estas cifras con las del experimento anterior: faltan particiones y tamaño del test. La diapositiva muestra una propuesta de actualización a 2026 mediante IPV y ratio mensual de 2026, aún pendiente de incorporar y validar; numerador y denominador del IPV deben usar la misma geografía y serie. El paquete implementado funciona así: venta: multiplica la estimación base por indice_venta del distrito hasta 2025; no aplicar el factor heredado 1,5534 ni el IPV autonómico de 2026. Alquiler: multiplica el precio indexado por factor_renta_mensual del distrito de 2024; el factor ya es mensual y no se divide de nuevo entre 12. Esa mensualidad es un escenario derivado sin validación independiente de alquiler. No hay intervalos ni SHAP exportados, y el ajuste de nivel no demuestra precisión actual."
+    "note": "Modelo de valoración: arboles_desplegable_ajustado, XGBoost, paquete v3 exportado el 13 de septiembre de 2026. 21 variables, 401 árboles, profundidad máxima 12. La predicción base es exp(predicción logarítmica) por 1,016823185598671, corrección de Duan. Estima precios anunciados de 2018; no precios de cierre ni un valor verdadero. MdAPE 9,2864% y MAE 48.992,73 euros declarados en su test de 2018. No comparar directamente estas cifras con las del experimento anterior: faltan particiones y tamaño del test. El titular expresa el objetivo del producto; el resultado sigue siendo una estimación. La diapositiva muestra los periodos reales del paquete, no una valoración de 2026. El paquete usa un factor de venta distrital, que no debe confundirse con el IPV autonómico. Actualizar a 2026 exige documentar fuentes compatibles y volver a validar; cambiar las fechas de la fórmula no actualiza el modelo. El paquete implementado funciona así: venta: multiplica la estimación base por indice_venta del distrito hasta 2025; no aplicar el factor heredado 1,5534 ni el IPV autonómico de 2026. Alquiler: multiplica el precio indexado por factor_renta_mensual del distrito de 2024; el factor ya es mensual y no se divide de nuevo entre 12. Esa mensualidad es un escenario derivado sin validación independiente de alquiler. No hay intervalos ni SHAP exportados, y el ajuste de nivel no demuestra precisión actual."
   },
   {
     "kicker": "Comprar vs. alquilar",
@@ -87,7 +87,7 @@ const SCENES: SceneDefinition[] = [
     "kicker": "Demo",
     "title": "La plataforma en acción",
     "target": 521,
-    "note": "Vídeo de 106 segundos con música continua de João y capturas con datos de ejemplo. Arranca al entrar; sus controles permiten pausar, buscar y ampliar. Al regresar conserva el punto alcanzado. Revisión v7: resultados, ficha y desglose renovados entre 68 y 88 segundos con la aplicación actual en una instancia aislada. Viviendas ficticias y trayecto aproximado; los cuatro componentes están visibles, con los datos ausentes identificados. No utilizar el vídeo como prueba de resultados del modelo XGBoost."
+    "note": "Vídeo de 106 segundos con música continua de João y capturas con datos de ejemplo. Arranca al entrar; sus controles permiten pausar, buscar y ampliar. Al regresar conserva el punto alcanzado. Revisión v8: resultados, ficha y desglose renovados entre 68 y 88 segundos con la aplicación actual en una instancia aislada. Vivienda ficticia de compra y predicción del servicio XGBoost conectado; ruta de OpenRouteService desde la vivienda a Nuevos Ministerios. Fair 100, Opportunity 52,8, Zone 40,5 y Lifestyle 86,7; 70 puntos acumulados y cobertura del 95% por falta del indicador de ruido. La ruta de bici contiene 163 coordenadas y dura 17 minutos. En alquiler, Opportunity no aplica. Las escalas lineales actuales no son los percentiles propuestos en el anexo. No utilizar el vídeo como prueba de resultados del modelo XGBoost."
   },
   {
     "kicker": "Roadmap",
@@ -363,11 +363,10 @@ export function Presentation() {
 
         <SceneShell index={1} active={active} state={sceneState(1)} label={SCENES[1].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.problemScene}`}>
-            <header className={styles.sceneHeader}><p className={styles.kicker}>El problema</p></header>
+            <SceneHeader kicker="El problema" title="Buscar agota. Decidir exige contexto." />
 
             <div className={styles.problemLayout}>
               <div>
-                <h2 className={styles.problemTitle}>Buscar agota.<br />Decidir exige contexto.</h2>
                 <div className={styles.editorialRows}>
                 {[
                   ["01", "Oferta fragmentada", "Saltar entre portales, repetir filtros y comparar anuncios."],
@@ -418,7 +417,7 @@ export function Presentation() {
 
         <SceneShell index={7} active={active} state={sceneState(7)} label={SCENES[7].title}>
           <section className={`${styles.sceneCanvas} ${styles.clearScene} ${styles.pricingScene}`}>
-            <SceneHeader kicker="Modelo de pricing" title="El valor estimado del inmueble, según sus características." />
+            <SceneHeader kicker="Modelo de pricing" title="El verdadero valor del inmueble, según sus características" />
             <PricingMethod />
           </section>
         </SceneShell>

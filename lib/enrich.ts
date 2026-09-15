@@ -233,12 +233,12 @@ async function commuteFor(
 
   try {
     return await computeCommute({
-      origen,
-      destino: {
+      origen: {
         lat: p.latitude,
         lon: p.longitude,
-        etiqueta: p.district || p.address || p.municipality || "vivienda",
+        direccion: p.address || p.district || p.municipality || "vivienda",
       },
+      destino: { lat: origen.lat, lon: origen.lon, etiqueta: origen.direccion },
       modos: [modoPreferido],
       preferido: modoPreferido,
     });

@@ -175,15 +175,11 @@ export async function computeCommute(opts: {
     const coords = await orsRouteGeometry(GEOMETRY_PROFILE[recomendado], origen, destino, key);
     if (coords) geometria = coords;
   }
-  const rutaGeo: CommuteResult["rutaGeo"] = {
-    geometria:
-      geometria ??
-      ([
-        [origen.lon, origen.lat],
-        [destino.lon, destino.lat],
-      ] as Array<[number, number]>),
-    aprox: !geometria || recomendado === "transporte",
-  };
+  // Sin una geometría del proveedor no hay recorrido que dibujar. Un segmento
+  // entre los extremos no representa las calles, aunque el tiempo se estime.
+  const rutaGeo: CommuteResult["rutaGeo"] = geometria
+    ? { geometria, aprox: recomendado === "transporte" }
+    : undefined;
 
   return {
     origen: { direccion: origen.direccion, lat: origen.lat, lon: origen.lon },
@@ -238,12 +234,16 @@ async function orsGeojson(
     };
     const feat = json.features?.[0];
     const summary = feat?.properties?.summary;
-    if (!summary?.duration) return null;
+    if (!summary || !Number.isFinite(summary.duration) || summary.duration! < 0
+      || !Number.isFinite(summary.distance) || summary.distance! < 0) return null;
     const coords = feat?.geometry?.coordinates ?? null;
+    const validCoords = Array.isArray(coords) && coords.length > 1 && coords.every(point =>
+      Array.isArray(point) && point.length === 2 && Number.isFinite(point[0]) && Number.isFinite(point[1])
+      && Math.abs(point[0]) <= 180 && Math.abs(point[1]) <= 90);
     return {
-      duration: summary.duration,
-      distance: summary.distance ?? 0,
-      coords: coords && coords.length > 1 ? coords : null,
+      duration: summary.duration!,
+      distance: summary.distance!,
+      coords: validCoords ? coords : null,
     };
   } catch {
     return null;

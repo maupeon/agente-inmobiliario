@@ -161,14 +161,13 @@ export default async function DatosPage() {
           title="Cómo estimamos el alquiler"
           estado="modelo"
           fuente="Precio del anuncio y estimación del modelo XGBoost, cuando está disponible."
-          meta="Venta a nivel de 2025 · ratios distritales de 2024"
+          meta="Entrenamiento: 2018 · venta: 2025 · relación alquiler/venta: 2024"
         >
           <div className="space-y-3 text-sm leading-relaxed text-stone-600">
             <p>La ficha muestra el alquiler mensual anunciado. Cuando el modelo dispone de los datos necesarios, también muestra una renta estimada en euros al mes y la desviación porcentual del anuncio respecto a esa estimación.</p>
-            <p>El modelo se entrenó con anuncios de 2018 y actualiza la estimación de venta a precios de 2025. A partir de ella calcula un alquiler orientativo utilizando la relación alquiler/venta del distrito de 2024.</p>
-            <p>Estimación orientativa, sin validación independiente de alquiler.</p>
-            <Collapsible summary="Cómo interpretar los años de referencia">
-              <p>2018 corresponde a los anuncios de entrenamiento; 2025, al nivel de precios de venta; y 2024, a la relación alquiler/venta aplicada. El cálculo supone que esa relación se mantiene. Consultar un anuncio en 2026 no actualiza automáticamente estas referencias ni convierte la estimación en una renta observada de 2026.</p>
+            <p>El modelo aprende de anuncios de venta de 2018. Primero ajusta el valor de venta estimado al nivel de precios de 2025. Después obtiene un alquiler mensual orientativo aplicando la relación entre alquiler y venta del distrito, calculada con datos de 2024.</p>
+            <Collapsible summary="Por qué aparecen años distintos">
+              <p>Cada año corresponde a una etapa: los anuncios con los que aprende el modelo, el ajuste del precio de venta y la referencia para convertirlo en alquiler. El cálculo supone que la relación alquiler/venta de 2024 se mantiene al aplicarla al valor de venta de 2025. Consultar un anuncio en 2026 no actualiza estas referencias: la estimación todavía no está ajustada a 2026.</p>
             </Collapsible>
           </div>
         </DataCard>

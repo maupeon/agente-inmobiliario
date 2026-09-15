@@ -208,7 +208,7 @@ export default function MapPanel({
         <div className={styles.commute}>
           <span className={styles.routeIcon} aria-hidden>↗</span>
           <div><strong>{selected.enrichment?.commute?.recomendado ? `${legMinutes(selected.enrichment.commute)} min ${MODE_LABEL[selected.enrichment.commute.recomendado]} al trabajo` : work ? "Trayecto no disponible" : "Añade tu trabajo para comparar trayectos"}</strong>
-          <p>{showTrajectory && trajectory ? trajectory.aprox ? "Conexión aproximada · no representa las calles del recorrido" : "Recorrido al trabajo" : !showTrajectory && trajectory ? "Trayecto oculto en el mapa" : "Selecciona otra vivienda para comparar"}</p></div>
+          <p>{showTrajectory && trajectory ? trajectory.aprox ? "Referencia por carretera · no es el itinerario de transporte público" : "Recorrido al trabajo" : !showTrajectory && trajectory ? "Trayecto oculto en el mapa" : selected?.enrichment?.commute ? "Recorrido no disponible · tiempo orientativo" : "Selecciona otra vivienda para comparar"}</p></div>
         </div>
       </section>
     ) : <div className={styles.hint}>Selecciona un precio para explorar la vivienda{work ? " y su trayecto" : ""}</div>}
