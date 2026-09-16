@@ -8,7 +8,7 @@ export interface CalcularHipotecaInput {
   tipoInteres?: number;
 }
 
-/** Salario medio mensual neto en España (referencia INE 2024 redondeada). */
+/** Ingreso mensual ilustrativo; no representa un salario neto oficial ni personal. */
 const SALARIO_REFERENCIA = 2200;
 
 /**
@@ -18,13 +18,16 @@ const SALARIO_REFERENCIA = 2200;
  *  n = meses
  */
 export function calcularHipoteca(input: CalcularHipotecaInput): MortgageCalc {
-  if (!input?.precioPropiedad || input.precioPropiedad <= 0)
+  if (!Number.isFinite(input?.precioPropiedad) || input.precioPropiedad <= 0)
     throw new ValidationError("precioPropiedad debe ser un número positivo");
+  for (const value of [input.entradaPorcentaje, input.plazoAnios, input.tipoInteres]) {
+    if (value !== undefined && !Number.isFinite(value)) throw new ValidationError("los parámetros hipotecarios deben ser números finitos");
+  }
 
   const precio = input.precioPropiedad;
   const entradaPct = clamp(input.entradaPorcentaje ?? 20, 0, 100);
   const plazo = clamp(input.plazoAnios ?? 30, 1, 40);
-  const interes = clamp(input.tipoInteres ?? 3.5, 0.1, 15);
+  const interes = clamp(input.tipoInteres ?? 3.5, 0, 15);
 
   const downPayment = Math.round((precio * entradaPct) / 100);
   const loan = precio - downPayment;

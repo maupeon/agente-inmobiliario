@@ -5,6 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { isRecord, readJson, requestIp, validatedProfile } from "@/lib/api-validation";
 import type { StreamEvent, UserProfile } from "@/types";
 import { uid } from "@/lib/utils";
+import { MAX_CHAT_HISTORY_CHARS, MAX_CHAT_MESSAGE_CHARS, MAX_CHAT_MESSAGES } from "@/lib/chat-history";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
@@ -17,12 +18,12 @@ export async function POST(req: Request) {
   let profile: UserProfile | null = null;
   try {
     const body = await readJson(req, 120_000);
-    if (!isRecord(body) || !Array.isArray(body.messages) || !body.messages.length || body.messages.length > 20) throw new ValidationError("invalid messages", "Envía entre 1 y 20 mensajes de texto.");
+    if (!isRecord(body) || !Array.isArray(body.messages) || !body.messages.length || body.messages.length > MAX_CHAT_MESSAGES) throw new ValidationError("invalid messages", "Envía entre 1 y 20 mensajes de texto.");
     messages = body.messages.map((m: unknown) => {
-      if (!isRecord(m) || !["user", "assistant"].includes(String(m.role)) || typeof m.content !== "string" || m.content.length > 8000) throw new ValidationError("invalid message", "Cada mensaje debe ser texto de hasta 8.000 caracteres.");
+      if (!isRecord(m) || !["user", "assistant"].includes(String(m.role)) || typeof m.content !== "string" || m.content.length > MAX_CHAT_MESSAGE_CHARS) throw new ValidationError("invalid message", "Cada mensaje debe ser texto de hasta 8.000 caracteres.");
       return { role: m.role as "user" | "assistant", content: m.content };
     }).filter((m) => (m.content as string).trim());
-    if (!messages.length || messages[messages.length - 1].role !== "user" || messages.reduce((n, m) => n + (m.content as string).length, 0) > 32_000) throw new ValidationError("invalid history", "Acorta el historial o inicia una conversación nueva.");
+    if (!messages.length || messages[messages.length - 1].role !== "user" || messages.reduce((n, m) => n + (m.content as string).length, 0) > MAX_CHAT_HISTORY_CHARS) throw new ValidationError("invalid history", "Acorta el historial o inicia una conversación nueva.");
     conversationId = typeof body.conversationId === "string" && /^[a-zA-Z0-9-]{1,80}$/.test(body.conversationId) ? body.conversationId : uid();
     profile = validatedProfile(body.profile);
   } catch (err) {

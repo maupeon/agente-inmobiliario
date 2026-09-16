@@ -27,6 +27,7 @@ export function usableModel(e: PropertyEnrichment): boolean {
 export function satisfiesMust(p: Property, m: Imprescindible): boolean | null {
   if (m === "ascensor") return p.hasLift ?? null;
   if (m === "exterior") return p.exterior ?? null;
+  if (m === "garaje" && typeof p.parkingSpace?.hasParkingSpace === "boolean") return p.parkingSpace.hasParkingSpace;
   const patterns: Record<Exclude<Imprescindible, "ascensor" | "exterior">, RegExp> = {
     terraza: /terraza|balc[oó]n/, aire_acondicionado: /aire acondicionado/,
     amueblado: /amueblad/, garaje: /garaje|parking|plaza de aparcamiento/, trastero: /trastero/,

@@ -1,6 +1,7 @@
 import "server-only";
 import { AppError, ValidationError } from "@/lib/errors";
-import { isRecord, validProperty } from "@/lib/api-validation";
+import { isRecord, validDisplayProperty } from "@/lib/api-validation";
+import { readStoredMessage, validMessageCards } from "@/lib/message-validation";
 import { getServerSupabase } from "./server";
 import type { Conversation, Message, Property } from "@/types";
 
@@ -18,17 +19,8 @@ export function demoMessages(value: unknown): Message[] {
     const id = demoId(item.id);
     if (ids.has(id)) throw new ValidationError("duplicate message id", "Hay mensajes duplicados en la petición.");
     ids.add(id);
-    for (const field of ["properties", "toolCalls"] as const) {
-      if (item[field] !== undefined && !Array.isArray(item[field])) throw new ValidationError("invalid message cards");
-    }
-    if (Array.isArray(item.properties) && !item.properties.every(validProperty)) throw new ValidationError("invalid message properties");
-    if (Array.isArray(item.toolCalls) && !item.toolCalls.every((call) => isRecord(call)
-      && typeof call.id === "string" && typeof call.name === "string" && isRecord(call.input)
-      && ["running", "done", "error"].includes(String(call.status)))) throw new ValidationError("invalid tool calls");
-    for (const field of ["mortgage", "market", "rent", "commute", "neighborhood", "purchaseValuation"] as const) {
-      if (item[field] !== undefined && !isRecord(item[field])) throw new ValidationError("invalid message card");
-    }
-    return item as unknown as Message;
+    if (!validMessageCards(item)) throw new ValidationError("invalid message cards", "El mensaje contiene una tarjeta con datos inválidos.");
+    return readStoredMessage(item)!;
   });
 }
 function database() {
@@ -51,7 +43,7 @@ export async function loadDemoConversation(id: string): Promise<Message[]> {
   if (!conversation) throw new AppError({ code: "not_found", message: "Demo conversation not found", status: 404, userMessage: "Esa conversación no está en el historial compartido." });
   const { data, error: messagesError } = await db.from("demo_messages").select("payload").eq("conversation_id", id).order("position", { ascending: false }).limit(200);
   checked(messagesError);
-  return (data ?? []).reverse().map((row) => row.payload as Message);
+  return (data ?? []).reverse().map((row) => readStoredMessage(row.payload)).filter((message): message is Message => message !== null);
 }
 export async function saveDemoConversation(id: string, messages: Message[]): Promise<void> {
   const { error } = await database().rpc("save_demo_conversation", { p_id: id, p_messages: messages });
@@ -60,7 +52,7 @@ export async function saveDemoConversation(id: string, messages: Message[]): Pro
 export async function listDemoFavorites(): Promise<Property[]> {
   const { data, error } = await database().from("demo_favorites").select("property_data").order("created_at", { ascending: false }).limit(100);
   checked(error);
-  return (data ?? []).map((row) => row.property_data as Property);
+  return (data ?? []).map((row) => row.property_data).filter(validDisplayProperty);
 }
 export async function saveDemoFavorite(property: Property): Promise<void> {
   const { error } = await database().from("demo_favorites").upsert({ property_id: property.propertyCode, property_data: property }, { onConflict: "property_id" });

@@ -69,6 +69,21 @@ const capacity = await query("select pg_get_constraintdef(oid) as digest_constra
 console.log('Digest capacity:', JSON.stringify(capacity));
 const worker = await query("select position('jsonb_array_length(p_items) > 5' in pg_get_functiondef('public.finish_notification_subscription(text,uuid,jsonb,text)'::regprocedure)) > 0 as accepts_five, has_function_privilege('service_role','public.finish_notification_subscription(text,uuid,jsonb,text)','execute') as service_access, has_function_privilege('anon','public.finish_notification_subscription(text,uuid,jsonb,text)','execute') as anon_access, has_function_privilege('authenticated','public.finish_notification_subscription(text,uuid,jsonb,text)','execute') as authenticated_access;", true);
 console.log('Worker verification:', JSON.stringify(worker));
+if (!verification?.[0]?.subscriptions || !verification[0].digests || verification[0].public_worker_access !== false) {
+  throw Error('Notification schema or worker permissions are not ready.');
+}
+if (!capacity?.[0]?.digest_constraint?.includes('<= 5') || worker?.[0]?.accepts_five !== true
+    || worker[0].service_access !== true || worker[0].anon_access !== false || worker[0].authenticated_access !== false) {
+  throw Error('Five-recommendation capacity or delivery permissions are not ready.');
+}
+const cron = await query(`select j.jobname, j.schedule, j.active,
+  d.status as last_status, d.start_time as last_started_at, d.end_time as last_finished_at
+  from cron.job j left join lateral (
+    select status, start_time, end_time from cron.job_run_details
+    where jobid=j.jobid order by start_time desc limit 1
+  ) d on true where j.jobname='habitia-daily-recommendations';`, true).catch(() => null);
+console.log('Cron verification:', JSON.stringify(cron));
+if (!cron?.some((job) => job.active)) console.warn('No active notification cron was verified. Use --activate-cron after checking the deployed worker.');
 
 }
 main().catch((error) => { console.error(error instanceof Error ? error.message : "Notification setup failed."); process.exitCode = 1; });

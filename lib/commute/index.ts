@@ -16,6 +16,9 @@ export interface GeoPoint {
   lat: number;
   lon: number;
 }
+function validPoint(point: GeoPoint): boolean {
+  return Number.isFinite(point.lat) && Number.isFinite(point.lon) && Math.abs(point.lat) <= 90 && Math.abs(point.lon) <= 180;
+}
 
 const ORS_BASE = "https://api.openrouteservice.org/v2/directions";
 
@@ -64,8 +67,9 @@ function realRoutingEnabled(): boolean {
 export async function geocodeAddress(
   address: string
 ): Promise<{ lat: number; lon: number; label: string } | null> {
+  if (typeof address !== "string") return null;
   const q = address.trim();
-  if (!q) return null;
+  if (!q || q.length > 300) return null;
   try {
     const url =
       "https://nominatim.openstreetmap.org/search" +
@@ -83,10 +87,10 @@ export async function geocodeAddress(
     const arr = (await res.json()) as Array<{ lat: string; lon: string; display_name?: string }>;
     const hit = arr?.[0];
     if (!hit) return null;
-    const lat = Number.parseFloat(hit.lat);
-    const lon = Number.parseFloat(hit.lon);
-    if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
-    return { lat, lon, label: hit.display_name ?? q };
+    const lat = Number(hit.lat);
+    const lon = Number(hit.lon);
+    if (!hit.lat || !hit.lon || !validPoint({ lat, lon })) return null;
+    return { lat, lon, label: typeof hit.display_name === "string" ? hit.display_name : q };
   } catch {
     return null;
   }
@@ -100,7 +104,7 @@ export async function reverseGeocode(
   lat: number,
   lon: number
 ): Promise<{ label: string } | null> {
-  if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+  if (!validPoint({ lat, lon })) return null;
   try {
     const url =
       "https://nominatim.openstreetmap.org/reverse" +
@@ -143,12 +147,14 @@ export async function computeCommute(opts: {
   preferido?: CommuteMode;
 }): Promise<CommuteResult> {
   const { origen, destino } = opts;
+  if (!validPoint(origen) || !validPoint(destino)) throw new RangeError("Las coordenadas del trayecto no son válidas.");
+  if (opts.modos !== undefined && (!Array.isArray(opts.modos) || !opts.modos.every((mode) => DEFAULT_MODES.includes(mode)))) throw new RangeError("Modo de transporte no válido.");
   const modos = opts.modos?.length ? dedupe(opts.modos) : DEFAULT_MODES;
   const distLinea = haversineKm(origen, destino);
 
   const key = process.env.ORS_API_KEY;
   const real = realRoutingEnabled();
-  let proveedor: CommuteResult["proveedor"] = "estimacion";
+  const routedModes = new Set<CommuteMode>();
 
   const legs: CommuteLeg[] = [];
   const geomByMode = new Map<CommuteMode, Array<[number, number]>>();
@@ -158,7 +164,7 @@ export async function computeCommute(opts: {
       const r = await orsLeg(modo, origen, destino, key);
       if (r) {
         leg = r.leg;
-        proveedor = "openrouteservice";
+        routedModes.add(modo);
         if (r.geometria) geomByMode.set(modo, r.geometria);
       }
     }
@@ -166,6 +172,9 @@ export async function computeCommute(opts: {
   }
 
   const recomendado = pickRecommended(legs, opts.preferido);
+  // El proveedor describe el tiempo destacado; una ruta de coche no convierte
+  // la estimación del transporte público en una medición de ese modo.
+  const proveedor: CommuteResult["proveedor"] = recomendado && routedModes.has(recomendado) ? "openrouteservice" : "estimacion";
 
   // Geometría del trayecto recomendado para pintarlo en el mapa.
   let geometria = recomendado ? geomByMode.get(recomendado) : undefined;
@@ -192,7 +201,7 @@ export async function computeCommute(opts: {
     nota:
       proveedor === "estimacion"
         ? "Tiempos estimados a partir de la distancia (sin routing en vivo)."
-        : undefined,
+        : routedModes.size < legs.length ? "Algunos modos usan tiempos estimados; el transporte público no dispone de routing en vivo." : undefined,
   };
 }
 
@@ -327,7 +336,7 @@ export function haversineKm(a: GeoPoint, b: GeoPoint): number {
   const h =
     Math.sin(dLat / 2) ** 2 +
     Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
+  return 2 * R * Math.asin(Math.sqrt(Math.min(1, Math.max(0, h))));
 }
 
 function dedupe(modos: CommuteMode[]): CommuteMode[] {

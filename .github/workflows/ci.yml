@@ -33,4 +33,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - name: Revisar vulnerabilidades conocidas
+        run: npm audit --audit-level=high
       - run: npm run check

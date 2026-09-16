@@ -11,8 +11,7 @@ import type { PropertyDetail } from "@/types";
  *
  * Por eso, en modo real devolvemos `null`: la UI pinta la ficha con el
  * `Property` que ya tiene y enlaza al anuncio en idealista.com. En
- * `MOCK_IDEALISTA=true` devolvemos una ficha rica (descripción, fotos…) para
- * la demo.
+ * `MOCK_IDEALISTA=true` se conserva igualmente la ficha del resultado sintético.
  */
 export async function getPropertyDetail(
   propertyCode: string

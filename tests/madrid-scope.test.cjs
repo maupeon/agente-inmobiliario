@@ -83,7 +83,7 @@ test('real and cached search results crossing the city boundary are filtered', a
 
 test('scoped geocoder rejects external pins and cities but general commute lookup remains available', async () => {
   const route=loader({'@/lib/commute':{...geo,reverseGeocode:async()=>({label:'Madrid'})}})('app/api/geocode/route.ts');
-  const get=query=>route.GET({nextUrl:new URL('http://local/api/geocode?'+query)});
+  const get=query=>route.GET({nextUrl:new URL('http://local/api/geocode?'+query),headers:new Headers()});
   for (const query of ['scope=madrid&q=Barcelona','scope=madrid&q=Valencia',`scope=madrid&lat=${pozuelo.lat}&lon=${pozuelo.lon}`]) {
     const r=await get(query);assert.equal(r.status,400);assert((await r.json()).error.includes('Madrid capital'));
   }

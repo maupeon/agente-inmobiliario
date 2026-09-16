@@ -14,8 +14,10 @@ Los archivos de este repositorio son los necesarios para mostrar la aplicación 
 | `data/madrid/sources/` | CSV de zonas verdes y XLSX de Policía Municipal | Copias pequeñas que permiten reproducir el contexto de distrito |
 | `lib/idealista/mock.ts` | Anuncios sintéticos con etiqueta Demo | Buscar sin credenciales del proveedor |
 | `lib/market/fixtures.ts` | Respaldos ilustrativos identificados | Explicar la falta de referencias sin inventar observaciones oficiales |
-| `app/presentacion/results-data.json` | Resultados agregados del experimento revisado | Mostrar las cifras del TFM sin ejecutar el entrenamiento |
-| `app/presentacion/results-legacy.json` | Antecedentes exploratorios identificados | Mantener la comparación histórica que usa la presentación |
+| `app/presentacion/predictor-metadata.json` | Metadatos exactos del XGBoost vigente | Métricas declaradas, variables y periodos, sin reevaluación |
+| `public/model-results/` | Metadatos, ganancia media, manifiesto y casos de referencia | Evidencia descargable del paquete vigente |
+| `app/presentacion/results-data.json` | Resultados agregados del LightGBM anterior | Antecedente identificado en `/datos`; no describe XGBoost |
+| `app/presentacion/results-legacy.json` | Antecedentes exploratorios identificados | Conservar la procedencia de los experimentos anteriores |
 | `public/presentacion/` | Infografía utilizada, vídeo de demo, póster y subtítulos | Recursos activos de la presentación |
 
 Los JSON conservan las URLs y los periodos de las fuentes. La fecha de consulta o caché no es la fecha de observación. Los recuentos de actuaciones policiales no equivalen a todos los delitos, a una tasa de criminalidad ni al riesgo individual. El importador de Zone prepara recuentos de distrito a partir de estas instantáneas; la página no los actualiza automáticamente.

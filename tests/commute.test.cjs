@@ -81,3 +81,21 @@ test('property enrichment routes from the property to work, which matters on one
   assert.equal(route.destino.lat,opts.destino.lat);
   assert.equal(route.destino.etiqueta,'Trabajo');
 });
+
+test('invalid journey inputs fail before routing and antipodal distances stay finite', async () => {
+  let calls=0;
+  const {computeCommute,haversineKm}=load('lib/commute/index.ts',{ORS_API_KEY:'test'},async()=>{calls++;return response()});
+  for(const origen of [{lat:Infinity,lon:0},{lat:91,lon:0},{lat:40,lon:181}]) {
+    await assert.rejects(computeCommute({...opts,origen:{...origen,direccion:'Invalid'}}));
+  }
+  await assert.rejects(computeCommute({...opts,modos:['unknown']}));
+  assert.equal(calls,0);
+  assert(Number.isFinite(haversineKm({lat:0,lon:0},{lat:0,lon:180})));
+});
+
+test('a real car route never labels the recommended transit time as measured', async () => {
+  const {computeCommute}=load('lib/commute/index.ts',{ORS_API_KEY:'test'},async()=>response());
+  const result=await computeCommute({...opts,modos:['coche','transporte'],preferido:'transporte'});
+  assert.equal(result.recomendado,'transporte');assert.equal(result.proveedor,'estimacion');
+  assert.equal(result.rutaGeo.aprox,true);assert.match(result.nota,/estimados/);
+});

@@ -19,6 +19,11 @@ export interface BuscarPropiedadesResult {
   /** Resumen plano que Claude puede leer y comentar al usuario. */
   summary: Array<{
     propertyCode: string;
+    operation: Property["operation"];
+    bathrooms?: number;
+    description?: string;
+    parkingSpace?: Property["parkingSpace"];
+    newDevelopment?: boolean;
     title: string;
     price: number;
     pricePerSqm?: number;
@@ -60,6 +65,8 @@ export async function runBuscarPropiedades(
     filters,
     summary: properties.map((p) => ({
       propertyCode: p.propertyCode,
+      operation: p.operation, bathrooms: p.bathrooms, description: p.description,
+      parkingSpace: p.parkingSpace, newDevelopment: p.newDevelopment,
       latitude: p.latitude, longitude: p.longitude, propertyType: p.propertyType, detailedType: p.detailedType, sourceKind: p.sourceKind,
       title: p.title,
       price: p.price,

@@ -33,7 +33,7 @@ async function main() {
   const load = loader();
   const { personalScore, validScoreWeights, scoreWeights, satisfiesMust } = load('lib/personal-score.ts');
   const profile = { operacion: 'venta', zona: 'Madrid', createdAt: '2026-09-09', zonaLat: 40.4, zonaLon: -3.7 };
-  const property = { propertyCode: 'one', title: 'Vivienda', price: 100000, size: 60, propertyType: 'flat', operation: 'sale', latitude: 40.4, longitude: -3.7 };
+  const property = { propertyCode: 'one', title: 'Vivienda', address: '', thumbnail: '', url: '', price: 100000, size: 60, propertyType: 'flat', operation: 'sale', latitude: 40.4, longitude: -3.7 };
   const empty = { propertyCode: 'one', valuation: null, neighborhood: null, commute: null };
   const model = { ...empty, valuation: { nivel: 'modelo', estadoModelo: 'ok', fromFallback: false, modeloVersion: '3.3.0', modeloPaqueteSha256: '043304773c081968a67703429bbe028b3f397b1ccc49f2856fa0df91e7a079fc', modeloId: 'habitIA-xgboost-2018-v3', modeloSha256: 'e5526aca6001741f24eb976dbd9607df131b3822b5b5a01b66c6c92af2a9d748', operacion: 'venta', precioEstimado: 100000 / 0.9, banda: 'barato', diferenciaPorcentual: -10, intervalo: [100000, 150000] } };
   const { fairFromGap, fairForProperty, opportunityFromGrowth, opportunityForProperty } = load('lib/scoring/price-scores.ts');

@@ -1,4 +1,4 @@
-import { isRecord, validProperty } from "@/lib/api-validation";
+import { isRecord, validDisplayProperty } from "@/lib/api-validation";
 import { DEMO_HEADERS, readDemoWrite } from "@/lib/demo-api";
 import { handleError, ValidationError } from "@/lib/errors";
 import { listDemoFavorites, saveDemoFavorite, removeDemoFavorite } from "@/lib/supabase/demo";
@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await readDemoWrite(req, 100_000);
-    if (!isRecord(body) || !validProperty(body.property) || !body.property.propertyCode.trim()) throw new ValidationError("invalid favorite", "El inmueble no tiene un formato válido.");
+    if (!isRecord(body) || !validDisplayProperty(body.property)) throw new ValidationError("invalid favorite", "El inmueble no tiene un formato válido.");
     await saveDemoFavorite(body.property);
     return Response.json({ saved: true }, { headers: DEMO_HEADERS });
   } catch (error) {

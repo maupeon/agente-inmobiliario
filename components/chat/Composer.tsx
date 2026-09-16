@@ -43,6 +43,7 @@ export function Composer({
       <textarea
         ref={ref}
         rows={1}
+        maxLength={8000}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}

@@ -34,9 +34,10 @@ export function useFavorites() {
     window.addEventListener("focus", sync);
     window.addEventListener(DEMO_FAVORITES_CHANGED, sync);
     const timer = setInterval(sync, 30_000);
+    const requests = requestRef;
     return () => {
       alive.current = false;
-      requestRef.current++;
+      requests.current++;
       window.removeEventListener("focus", sync);
       window.removeEventListener(DEMO_FAVORITES_CHANGED, sync);
       clearInterval(timer);

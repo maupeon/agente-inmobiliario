@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { scoreWeights } from "@/lib/personal-score";
+import { validatedProfile } from "@/lib/api-validation";
 import type { UserProfile } from "@/types";
 
 const KEY = "habitia:profile:v1";
@@ -13,7 +14,7 @@ function readStoredProfile(): UserProfile | null {
       const raw = localStorage.getItem(key);
       if (raw) {
         const parsed = JSON.parse(raw) as UserProfile;
-        if (parsed && ["alquiler", "venta"].includes(parsed.operacion)) return { ...parsed, scoreWeights: scoreWeights(parsed.scoreWeights) };
+        if (parsed && ["alquiler", "venta"].includes(parsed.operacion)) return validatedProfile({ ...parsed, scoreWeights: scoreWeights(parsed.scoreWeights) });
       }
     } catch {
       // Si una entrada está corrupta, probamos la siguiente clave compatible.

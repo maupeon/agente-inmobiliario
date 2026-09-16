@@ -37,7 +37,9 @@ export async function POST(req: NextRequest) {
   let body: RecommendRequestBody;
   try {
     const raw = await readJson(req, 12_000);
-    if (!isRecord(raw) || (raw.zona !== undefined && (typeof raw.zona !== "string" || raw.zona.length > 200)) || (raw.operacion !== undefined && !["venta", "alquiler"].includes(String(raw.operacion))) || ["precioMax", "habitaciones"].some((k) => raw[k] != null && !Number.isFinite(raw[k]))) return Response.json({ error: "Filtros inválidos." }, { status: 400 });
+    if (!isRecord(raw) || (raw.zona !== undefined && (typeof raw.zona !== "string" || raw.zona.length > 200)) || (raw.operacion !== undefined && !["venta", "alquiler"].includes(String(raw.operacion)))
+      || (raw.precioMax != null && (!Number.isFinite(raw.precioMax) || Number(raw.precioMax) <= 0))
+      || (raw.habitaciones != null && (!Number.isInteger(raw.habitaciones) || Number(raw.habitaciones) < 0 || Number(raw.habitaciones) > 100))) return Response.json({ error: "Filtros inválidos." }, { status: 400 });
     body = { ...raw, profile: validatedProfile(raw.profile) } as RecommendRequestBody;
   } catch {
     return Response.json({ error: "Petición inválida." }, { status: 400 });

@@ -186,11 +186,13 @@ export function Dashboard() {
     const ctrl = new AbortController();
     recControllerRef.current = ctrl;
     setPendingSearch(null);
+    setSource("para_ti");
     setApplied(filters);
     setHasSearched(true);
     setRecs([]);
     setRecIntro(null);
     setSelectedCode(null);
+    setDetailItem(null);
     setRecLoading(true);
     setRecError(null);
     try {
@@ -238,7 +240,7 @@ export function Dashboard() {
   useEffect(() => {
     const requestId = ++enrichRequestRef.current;
     const base = enrichCache.key === enrichProfileKey ? enrichCache.map : {};
-    const missing = enrichList.filter((p) => !base[p.propertyCode]).slice(0, 24);
+    const missing = enrichList.filter((p) => !base[p.propertyCode]);
     if (missing.length === 0) {
       setEnriching(false);
       if (enrichCache.key !== enrichProfileKey) setEnrichCache({ key: enrichProfileKey, map: base });
@@ -246,14 +248,15 @@ export function Dashboard() {
     }
     const ctrl = new AbortController();
     setEnriching(true);
-    fetch("/api/enrich", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ properties: missing, profile }),
-      signal: ctrl.signal,
-    })
-      .then((r) => (r.ok ? r.json() : { enrichments: [] }))
-      .then((data: { enrichments?: PropertyEnrichment[] }) => {
+    void (async () => {
+      // Favoritos admite 100 anuncios; la API limita cada lote a 24.
+      for (let offset = 0; offset < missing.length; offset += 24) {
+        const response = await fetch("/api/enrich", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ properties: missing.slice(offset, offset + 24), profile }), signal: ctrl.signal,
+        });
+        if (!response.ok) break;
+        const data: { enrichments?: PropertyEnrichment[] } = await response.json();
         if (ctrl.signal.aborted || requestId !== enrichRequestRef.current) return;
         const add: Record<string, PropertyEnrichment> = {};
         for (const e of data.enrichments ?? []) add[e.propertyCode] = e;
@@ -261,7 +264,8 @@ export function Dashboard() {
           const baseMap = prev.key === enrichProfileKey ? prev.map : {};
           return { key: enrichProfileKey, map: { ...baseMap, ...add } };
         });
-      })
+      }
+    })()
       .catch(() => {})
       .finally(() => {
         if (!ctrl.signal.aborted && requestId === enrichRequestRef.current) {

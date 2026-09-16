@@ -166,6 +166,11 @@ export async function searchProperties(
 ): Promise<Property[]> {
   if (typeof filters.zona !== "string" || filters.zona.length > 200 || !["venta", "alquiler"].includes(filters.operacion)
     || [filters.precioMin, filters.precioMax, filters.metrosMin, filters.metrosMax, filters.habitaciones].some((v) => v !== undefined && (!Number.isFinite(v) || v < 0))) throw new ValidationError("invalid search filters", "Revisa la zona, la operación y los límites numéricos de la búsqueda.");
+  if ((filters.precioMin !== undefined && filters.precioMax !== undefined && filters.precioMin > filters.precioMax)
+    || (filters.metrosMin !== undefined && filters.metrosMax !== undefined && filters.metrosMin > filters.metrosMax)
+    || (filters.habitaciones !== undefined && (!Number.isInteger(filters.habitaciones) || filters.habitaciones > 100))
+    || (filters.tipo !== undefined && !["pisos", "casas", "locales", "garajes"].includes(filters.tipo))
+    || !Number.isFinite(maxItems)) throw new ValidationError("inconsistent search filters", "Revisa los intervalos de precio y superficie, el tipo de vivienda y las habitaciones.");
   maxItems = Math.max(1, Math.min(24, Math.floor(maxItems)));
   const center = await validateMadridSearch(filters);
   if (process.env.MOCK_IDEALISTA === "true") {
@@ -198,5 +203,7 @@ export async function searchProperties(
   const list = data.elementList ?? [];
   return list.map((el) => normalizeProperty(el, filters.operacion));
   });
-  return properties.filter(isMadridProperty);
+  // La API agrupa 4+ dormitorios; conserva el mínimo solicitado también para 5+.
+  return properties.filter((p) => isMadridProperty(p)
+    && (filters.habitaciones == null || p.rooms == null || p.rooms >= filters.habitaciones));
 }

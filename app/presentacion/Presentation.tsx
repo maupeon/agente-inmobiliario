@@ -13,6 +13,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { PricingMethod, ScoreMethod, ScoreEquation, PresentationArchitecture, PredictorDetails } from "./PresentationMethods";
 import { Logo } from "@/components/ui/Logo";
 import styles from "./presentation.module.css";
@@ -533,7 +534,7 @@ export function Presentation() {
         aria-hidden={!started || !chromeVisible}
         ref={(element) => { if (element) element.inert = !started || !chromeVisible; }}
       >
-        <a href="/" className={styles.exitLink}>Salir</a>
+        <Link href="/" className={styles.exitLink}>Salir</Link>
         <div className={styles.sceneIdentity}>
           <span>{active < MAIN_SCENE_COUNT ? `${String(active + 1).padStart(2, "0")} / ${MAIN_SCENE_COUNT}` : `Anexo ${active - MAIN_SCENE_COUNT + 1} / ${SCENES.length - MAIN_SCENE_COUNT}`}</span>
           <select className={styles.scenePicker} aria-label="Ir a una sección" value={active} onChange={(event) => goTo(Number(event.target.value))}>

@@ -27,19 +27,20 @@ function loader(stubs = {}, env = {}) {
   return load;
 }
 async function main() {
-  const cookiesStub={cookies:()=>({get:()=>undefined})};
+  const cookiesStub={cookies:async()=>({get:()=>undefined})};
   const server=loader({'next/headers':cookiesStub},{CRON_SECRET:'x'.repeat(32)})('lib/notifications/server.ts');
   ok('cron always rejects missing or malformed authorization',()=>{
     for (const auth of ['', 'Bearer wrong', 'bearer '+'x'.repeat(32)]) assert.equal(server.validCronAuthorization(new Request('https://habitia.test',{headers:{authorization:auth}})),false);
     assert.equal(server.validCronAuthorization(new Request('https://habitia.test',{headers:{authorization:'Bearer '+'x'.repeat(32)}})),true);
     assert.equal(loader({'next/headers':cookiesStub},{CRON_SECRET:'short'})('lib/notifications/server.ts').validCronAuthorization(new Request('https://habitia.test',{headers:{authorization:'Bearer short'}})),false);
   });
+  const a=await server.notificationIdentity(true), b=await server.notificationIdentity(true);
+  const anonymous=await server.notificationIdentity();
   ok('private random identity is server issued and only hash is used in database',()=>{
-    const a=server.notificationIdentity(true), b=server.notificationIdentity(true);
     assert.match(a.token,/^[a-f0-9]{64}$/); assert.notEqual(a.token,b.token);assert.notEqual(a.hash,a.token);
     const response=server.notificationResponse({},a);const cookie=response.headers.get('set-cookie');
     assert.match(cookie,/HttpOnly/i);assert.match(cookie,/SameSite=strict/i);assert.match(response.headers.get('cache-control'),/no-store/);
-    assert.equal(server.notificationIdentity(),null);
+    assert.equal(anonymous,null);
   });
   const validation=loader()('lib/notifications/types.ts');
   ok('time and timezone validation',()=>{

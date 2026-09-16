@@ -1,6 +1,6 @@
 # Conectar el servicio de valoración
 
-La integración vigente es [XGBoost v3, contrato 3.3.0](modelo-xgboost.md), actualizada con `habitia_predictor` el 16 de septiembre de 2026. El código Python, el instalador y las pruebas viven en el [repositorio académico](https://github.com/maupeon/habitia-tfm); los seis artefactos se distribuyen en su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r2).
+La integración vigente es [XGBoost v3, contrato 3.3.0](modelo-xgboost.md), actualizada con `habitia_predictor` el 16 de septiembre de 2026. El código Python, el instalador y las pruebas viven en el [repositorio académico](https://github.com/maupeon/habitia-tfm); los seis artefactos se distribuyen en su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3).
 
 [Volver al README](../README.md)
 

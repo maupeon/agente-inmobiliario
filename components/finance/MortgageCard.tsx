@@ -56,7 +56,7 @@ export function MortgageCard({ data }: { data: MortgageCalc }) {
 
       <div className="mt-7 border-t border-hairline pt-5">
         <div className="flex items-baseline justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-stone">
-          <span>Esfuerzo sobre salario medio (2.200 €/mes)</span>
+          <span>Esfuerzo con ingreso ilustrativo de 2.200 €/mes</span>
           <span className="text-ink tabular">
             {data.effortPercent.toFixed(1)} %
           </span>

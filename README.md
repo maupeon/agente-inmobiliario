@@ -39,7 +39,7 @@ El ejemplo desactiva Idealista real y Anthropic. Los mapas, la geocodificación 
 | Mapa y contexto de la zona | Recursos locales y fuentes públicas | Internet para las consultas externas |
 | Trayecto al trabajo | Aproximación identificada | OpenRouteService para los modos compatibles |
 | Chat con herramientas | Pausado | Clave de Anthropic y `LLM_ENABLED=true` |
-| Valoración individual | Estado «Valoración no disponible» | Predictor XGBoost v3; cliente también compatible con el histórico v2 |
+| Valoración individual | Estado «Valoración no disponible» | Predictor XGBoost v3, contrato 3.3.0 e identidad de paquete vigente |
 | Historial y favoritos | Persistencia no disponible; la interfaz avisa | Supabase y esquema de demo compartida |
 | Selección diaria de hasta 5 viviendas | No disponible | Supabase, migraciones y cron |
 | Presentación del TFM | Diapositivas, resultados y vídeo incluidos | Ningún backend del modelo para mostrar las cifras guardadas |
@@ -95,7 +95,7 @@ agente-inmobiliario/
 └── .github/workflows/ci.yml     # Verificación automática en GitHub
 ```
 
-Se utiliza **npm**, con `package-lock.json` como único archivo de bloqueo. La aplicación combina Next.js 14, React 18, TypeScript, Tailwind CSS, MapLibre, el SDK de Anthropic y Supabase. [Arquitectura y flujo de datos](docs/arquitectura.md).
+Se utiliza **npm**, con `package-lock.json` como único archivo de bloqueo. La aplicación combina Next.js 15, React 19, TypeScript, Tailwind CSS, MapLibre, el SDK de Anthropic y Supabase. [Arquitectura y flujo de datos](docs/arquitectura.md).
 
 ## 5. Comprobar que todo funciona
 
@@ -115,19 +115,19 @@ Ejecuta, en orden, las pruebas, la comprobación de tipos, ESLint y la compilaci
 | `npm start` | Servir la compilación ya creada |
 | `npm run check` | Verificación completa |
 
-GitHub Actions ejecuta la misma verificación en los pushes a `main` y en las pull requests, sin credenciales de proveedores. Las pruebas SQL se ejecutan por separado en una base desechable: [Desarrollo y pruebas](docs/desarrollo.md).
+GitHub Actions comprueba vulnerabilidades conocidas y ejecuta la misma verificación en los pushes a `main` y en las pull requests, sin credenciales de proveedores. Las pruebas SQL se ejecutan por separado en una base desechable: [Desarrollo y pruebas](docs/desarrollo.md).
 
 ## 6. Alcance académico
 
 - La búsqueda, el inicio, el agente y la demo se limitan a **Madrid capital**, para compra y alquiler. Se comprueban la zona y el centro antes de consultar Idealista; también se filtran resultados de radios que crucen el límite municipal. Los orígenes de trayecto pueden estar fuera de Madrid.
 - El modelo externo estima **precios anunciados de venta de Madrid de 2018**. Su indexación temporal es un escenario; no valida la precisión en anuncios actuales ni en precios de compraventa.
 - El predictor XGBoost v3 recibido en `habitia_predictor` (exportado el 16/09/2026 a las 11:57:54, 410 árboles) conserva sus 21 variables y pesos; actualiza los índices de venta y renta y el alquiler del barrio a un escenario proyectado de 2026. No incluye intervalos calibrados ni bandas. Fair usa la desviación frente a la estimación individual en una escala provisional de 0–100. Admite anuncios de compra y alquiler (contrato 3.3.0): compara el precio total de venta o la mensualidad en €/mes. Su renta deriva del valor de venta estimado y ratios proyectados a 2026, sin validación independiente de alquiler. Las últimas fuentes observadas son venta de 2025 y alquiler de 2024. Los resultados LightGBM de la presentación siguen identificados como evaluación histórica de otro modelo.
-- La evaluación es retrospectiva y agrupada por inmueble. Las cifras de la presentación conservan su procedencia; los resultados exploratorios anteriores están identificados como antecedentes.
+- Las métricas de XGBoost son las declaradas en el paquete; no se dispone de sus particiones ni predicciones de test para auditarlas. La evaluación retrospectiva agrupada por inmueble corresponde al experimento LightGBM anterior y se identifica como antecedente.
 - El HabitIA Score combina Fair, Opportunity, Zone y Lifestyle. Los componentes sin evidencia no aportan puntos y sus pesos no se redistribuyen. Opportunity compara, en compra y alquiler, la variación anual de oferta del distrito con Madrid (Idealista, agosto 2025–agosto 2026). Zone promedia cuatro percentiles de recuentos de distrito (zonas verdes, actuaciones policiales, transporte y servicios), con un peso del 25% cada uno. Descanso queda fuera del cálculo. Con los cuatro disponibles, la cobertura interna es del 100%. El dashboard muestra el HabitIA Score numérico y señala cuando faltan datos.
 - Las fuentes oficiales de barrio aportan contexto. Sus recuentos no se convierten en índices de seguridad o calidad de vida.
 - La comparación de compra y alquiler calcula escenarios según los supuestos introducidos; no predice el mercado.
 
-La memoria, los anexos, los artefactos de inferencia y la API Python se encuentran en el repositorio académico público [habitia-tfm](https://github.com/maupeon/habitia-tfm). Su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r2) reúne documentos y artefactos de acceso público.
+La memoria, los anexos, los artefactos de inferencia y la API Python se encuentran en el repositorio académico público [habitia-tfm](https://github.com/maupeon/habitia-tfm). Su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3) reúne documentos y artefactos de acceso público.
 
 ## 7. Documentación
 

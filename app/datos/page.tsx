@@ -3,6 +3,8 @@ import { OPPORTUNITY_DISTRICTS, OPPORTUNITY_SOURCE } from "@/lib/scoring/opportu
 import { UrbanSources } from "./UrbanSources";
 import context from "@/data/madrid/madrid-context.json";
 import modelResults from "@/app/presentacion/results-data.json";
+import predictor from "@/app/presentacion/predictor-metadata.json";
+import modelManifest from "@/public/model-results/manifiesto_v3.json";
 import madrid from "@/data/madrid/madrid-official.json";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -62,7 +64,7 @@ export default async function DatosPage() {
           <header className="border-b border-hairline p-5">
             <h2 className="font-display text-xl leading-tight text-ink">Datos utilizados para el modelo de precio</h2>
             <p className="mt-1.5 text-sm text-stone-600">Idealista18 · anuncios de venta de Madrid · cuatro trimestres de 2018</p>
-            <p className="mt-2 break-words font-mono text-[10px] uppercase tracking-[0.14em] text-stone">LightGBM · {modelResults.model_id} · revisión del 8 de septiembre de 2026</p>
+            <p className="mt-2 break-words font-mono text-[10px] uppercase tracking-[0.14em] text-stone">XGBoost · {modelManifest.model_id} · contrato {modelManifest.model_version}</p>
           </header>
           <div className="space-y-5 p-5 text-sm leading-relaxed text-stone-600">
             <p>La fuente histórica declarada es <Strong>Idealista18</Strong>, descrita por Rey-Blanco, Arbués, López y Páez (2024). El modelo aprende el <Strong>precio anunciado de venta</Strong>, no el precio de cierre. Este conjunto histórico es distinto de los anuncios que recupera la búsqueda actual.</p>
@@ -71,7 +73,20 @@ export default async function DatosPage() {
               <a href="https://paezha.github.io/idealista18/reference/Madrid_Sale.html" target="_blank" rel="noopener noreferrer" className="text-saffron-700 underline underline-offset-4">Datos y diccionario de Madrid ↗</a>
               <a href="https://paezha.github.io/idealista18/LICENSE.html" target="_blank" rel="noopener noreferrer" className="text-saffron-700 underline underline-offset-4">Licencia ODbL ↗</a>
             </div>
-            <Table head={["Etapa de la revisión local", "Registros"]}>
+            <Table head={["Evidencia del modelo vigente", "Detalle"]}>
+              <Row cells={["Histórico enriquecido recibido", "94.852 filas · 75.804 inmuebles distintos"]} />
+              <Row cells={["Modelo exportado", `${predictor.params.n_estimators} árboles · ${predictor.columnas.length} variables`]} />
+              <Row cells={["Base de entrenamiento", String(predictor.ano_base)]} />
+              <Row cells={["Ajuste de venta y renta", `${INDEX_TARGET_YEAR} · escenario proyectado`]} />
+              <Row cells={["Últimas fuentes observadas", "Venta: 2025 · alquiler: 2024"]} />
+            </Table>
+            <p><Strong>Las métricas de XGBoost son las declaradas en el paquete recibido.</Strong> No se entregan la matriz final de entrenamiento, las particiones ni las predicciones de test. El histórico permite verificar sus filas y columnas, pero no reconstruir por sí solo la evaluación del modelo vigente.</p>
+            <p><Strong>{predictor.columnas.length} variables de entrada.</Strong> Características y equipamiento de la vivienda, tres distancias y alquiler, delitos y vulnerabilidad del barrio. El precio anunciado es el objetivo. Las variables de barrio incluyen fuentes posteriores a 2018: la evaluación declarada no acredita validación temporal externa ni precisión en anuncios actuales.</p>
+            <p>Los precios y las coordenadas de la fuente están perturbados por anonimización. El ajuste distrital a {INDEX_TARGET_YEAR} y la renta mensual derivada son escenarios; no son precios de cierre ni una validación independiente de alquiler.</p>
+            <p><a href="https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3" target="_blank" rel="noopener noreferrer" className="text-saffron-700 underline underline-offset-4">Modelo, memoria, anexos y evidencia de verificación ↗</a></p>
+            <Collapsible summary="Antecedente LightGBM · evaluación de otro modelo">
+            <p className="mb-3">{modelResults.model_id} · revisión del 8 de septiembre de 2026. Estos conteos y métodos describen el experimento anterior; no son las particiones de XGBoost.</p>
+            <Table head={["Etapa del experimento LightGBM", "Registros"]}>
               <Row cells={["Fichero enriquecido recibido", formatNumber(modelResults.sample.input)]} />
               <Row cells={["Tras fusionar duplicados de enriquecimiento", "94.815"]} />
               <Row cells={["Elegibles para el modelo", formatNumber(modelResults.sample.eligible)]} />
@@ -81,7 +96,6 @@ export default async function DatosPage() {
             </Table>
             <p>Los conteos corresponden al fichero local auditado. Las filas pueden representar anuncios del mismo inmueble; las particiones mantienen cada identificador de activo en un solo bloque. Los registros de calibración y evaluación no se usan para ajustar el modelo conservado. La evaluación es retrospectiva: el histórico ya había sido explorado.</p>
             <p><Strong>{modelResults.n_features} variables de entrada.</Strong> Características de la vivienda y su localización, indicadores de datos ausentes, variables derivadas y categorías territoriales. El precio anunciado es el objetivo; precio por m², alquiler, rentabilidad y variables catastrales no son entradas del modelo principal.</p>
-            <Collapsible summary="Procedencia y límites del histórico">
               <div className="space-y-3">
                 <p>Los precios y las coordenadas de la fuente están perturbados por anonimización. La ubicación aprendida es aproximada. El fichero recibido incorpora enriquecimientos cuyo proceso original no se pudo reconstruir por completo; las capas de alquiler y Catastro sin disponibilidad histórica acreditada se excluyen del modelo principal.</p>
                 <p>El diccionario público muestra conteos incompatibles entre su cabecera y su descripción final. Aquí se publican los conteos comprobados en la revisión local, sin equiparar las filas recibidas a viviendas únicas.</p>

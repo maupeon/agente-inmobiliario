@@ -13,7 +13,7 @@ python scripts/install_predictor_v3.py --check
 python -m uvicorn servicio.api_v3:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-El ZIP está en `04_modelo/` de la entrega `HabitIA_TFM_2026-09-16` y en la [release del predictor](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r2). El instalador comprueba los seis artefactos contra `servicio/manifiesto_v3.json`. Configura el mismo `VALORACION_TOKEN` privado en Python y Next.js, y `VALORACION_URL=http://127.0.0.1:8000` en la web. La URL es el origen, sin `/valorar`; en producción se mantiene `https://habitia-valoracion.fly.dev` y su token. Reinicia Next.js al cambiar variables.
+El ZIP está en `04_modelo/` de la entrega `HabitIA_TFM_2026-09-16` y en la [release del predictor](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3). El instalador comprueba los seis artefactos contra `servicio/manifiesto_v3.json`. Configura el mismo `VALORACION_TOKEN` privado en Python y Next.js, y `VALORACION_URL=http://127.0.0.1:8000` en la web. La URL es el origen, sin `/valorar`; en producción se mantiene `https://habitia-valoracion.fly.dev` y su token. Reinicia Next.js al cambiar variables.
 
 ## Cálculo y ámbito
 

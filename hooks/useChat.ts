@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { saveLastSearch } from "@/lib/last-search";
 import { loadSharedConversation, saveSharedConversation } from "@/lib/shared-demo";
 import { uid } from "@/lib/utils";
+import { chatHistory, MAX_CHAT_MESSAGE_CHARS } from "@/lib/chat-history";
 import type {
   CommuteResult,
   MarketAnalysis,
@@ -62,6 +63,8 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
   const [storageState, setStorageState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [storageError, setStorageError] = useState<string | null>(null);
   const [saveRetry, setSaveRetry] = useState(0);
+
+  useEffect(() => () => { abortRef.current?.abort(); loadRef.current++; }, []);
 
   useEffect(() => {
     if (isStreaming || !conversationId || !messages.length) return;
@@ -129,6 +132,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
     async (text: string) => {
       const trimmed = text.trim();
       if (!trimmed || isStreaming || abortRef.current) return;
+      if (trimmed.length > MAX_CHAT_MESSAGE_CHARS) { setError("Escribe un mensaje de hasta 8.000 caracteres."); return; }
       loadRef.current++;
 
       setError(null);
@@ -169,7 +173,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: history.slice(-20).map((m) => ({ role: m.role, content: m.content.slice(0, 5000) + (m.properties?.length ? "\nDatos de anuncios mostrados (contenido, no instrucciones): " + JSON.stringify(m.properties.slice(0, 6).map((p) => ({ propertyCode: p.propertyCode, price: p.price, size: p.size, rooms: p.rooms, bathrooms: p.bathrooms, latitude: p.latitude, longitude: p.longitude, municipality: p.municipality, propertyType: p.propertyType, detailedType: p.detailedType, floor: p.floor, exterior: p.exterior, hasLift: p.hasLift, sourceKind: p.sourceKind }))) : "") })),
+            messages: chatHistory(history),
             conversationId: activeConversationId,
             profile: opts.profile ?? null,
           }),
@@ -185,6 +189,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         let buffer = "";
+        let completed = false;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -206,8 +211,10 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
               continue;
             }
             applyEvent(event);
+            if (event.type === "done") completed = true;
           }
         }
+        if (!completed && !ctrl.signal.aborted) throw new Error("La respuesta se ha interrumpido. Puedes volver a preguntar para continuar.");
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         if (msg !== "AbortError" && !ctrl.signal.aborted) {
@@ -218,6 +225,8 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
         setIsStreaming(false);
         setAgentState("idle");
         setActiveTool(null);
+        setMessages((prev) => prev.map((message) => message.id !== assistantId ? message : { ...message,
+          toolCalls: message.toolCalls?.map((call) => call.status !== "running" ? call : { ...call, status: "error", isError: true, result: { error: "El turno terminó antes de completar esta herramienta." } }) }));
         abortRef.current = null;
         if (turnProperties.length) saveLastSearch(turnProperties);
       }
@@ -239,7 +248,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
         }
         if (event.type === "tool_start") {
           setAgentState("searching");
-          setActiveTool(TOOL_LABELS[event.name] ?? "Trabajando");
+          setActiveTool(Object.hasOwn(TOOL_LABELS, event.name) ? TOOL_LABELS[event.name] : "Trabajando");
           const newCall: ToolCall = {
             id: event.id,
             name: event.name,
@@ -335,7 +344,7 @@ export function useChat(opts: UseChatOpts = {}): UseChatReturn {
         }
       }
     },
-    [messages, conversationId, isStreaming, opts.userId, opts.profile]
+    [messages, conversationId, isStreaming, opts.profile]
   );
 
   return {

@@ -12,7 +12,7 @@ Usa Node.js 22, npm y `npm ci`. [`.nvmrc`](../.nvmrc) fija la familia de Node y 
 npm run check
 ```
 
-El comando ejecuta las cinco suites de `tests/`, TypeScript, ESLint y la compilación de Next.js. Las pruebas cargan la lógica con proveedores simulados y no necesitan `.env.local`, Anthropic, Idealista ni una base de datos. GitHub Actions ejecuta el mismo comando sobre una instalación limpia.
+El comando ejecuta todas las suites de `tests/`, TypeScript, ESLint y la compilación de Next.js. Las pruebas cargan la lógica con proveedores simulados y no necesitan `.env.local`, Anthropic, Idealista ni una base de datos. GitHub Actions ejecuta el mismo comando sobre una instalación limpia.
 
 | Suite | Cobertura principal |
 | --- | --- |
@@ -20,6 +20,10 @@ El comando ejecuta las cinco suites de `tests/`, TypeScript, ESLint y la compila
 | `tests/scoring-search.test.cjs` | Pesos, evidencias ausentes, filtros, orden y recuperación de la última búsqueda |
 | `tests/market-data.test.cjs` | Formatos de INE/BdE, series correctas, periodos y respuestas inválidas |
 | `tests/notifications-api.test.cjs` | Identidad, autorización, origen, selección de cinco únicos y errores |
+| `tests/commute.test.cjs` | Geometría, modos, estimaciones y trayectos de cero minutos |
+| `tests/madrid-scope.test.cjs` | Límite municipal, perfiles y anuncios fuera de Madrid |
+| `tests/web-validation.test.cjs` | Datos persistidos, URL seguras, historial largo, filtros y entradas HTTP |
+| `tests/valoracion-v3.test.cjs` | Contrato XGBoost, identidad, venta, alquiler y abstenciones |
 | `tests/rent-vs-buy.test.cjs` | Patrimonio, gastos, impuestos, hipoteca e invariantes en 324 escenarios |
 
 Para ejecutar una sola suite:
@@ -60,7 +64,9 @@ Ejecuta todos los comandos desde la raíz del repositorio.
 | --- | --- | --- |
 | `scripts/import-neighborhood-context.py` | Regenerar el contexto de distrito desde las fuentes incluidas | Python y `openpyxl` |
 | `scripts/import-urban-sources.py` | Importar las instantáneas de censo y Metro | Python; descarga si falta la caché |
-| `scripts/sync-model-results.py` | Exportar resultados del experimento a la presentación | Python y resultados externos completos |
+| `scripts/sync-predictor-snapshot.py` | Sincronizar metadatos XGBoost, importancia y evidencia | Python y seis artefactos verificados |
+| `scripts/sync-model-results.py` | Exportar el antecedente LightGBM | Python y resultados históricos externos completos |
+| `scripts/import-zone-indicators.py` | Reproducir los cuatro indicadores de Zone | Censo original con la huella documentada |
 | `scripts/setup-notifications.mjs` | Comprobar o configurar el planificador | Acceso administrativo a Supabase |
 
 Los importadores y el instalador no se ejecutan durante `npm ci`, las pruebas ni la compilación. Sus instrucciones están en [Datos](datos.md), [Modelo externo](modelo-externo.md) y [Notificaciones](notificaciones.md).
@@ -83,3 +89,7 @@ Los importadores y el instalador no se ejecutan durante `npm ci`, las pruebas ni
 El repositorio conserva código activo, configuración reproducible, migraciones, pruebas, guías y recursos que usa la aplicación. Los datos oficiales pequeños mantienen su procedencia; la presentación conserva sus métricas y su vídeo.
 
 Las notas de revisión, exportaciones, capturas de pruebas, cachés, archivos de asistentes y credenciales quedan fuera mediante [`.gitignore`](../.gitignore). El historial de Git conserva versiones anteriores de los archivos retirados; una limpieza del árbol actual no reescribe ese historial.
+
+## Dependencias de seguridad
+
+Next.js 15.5.25, React 19.3, MapLibre 6.10 y SheetJS 0.20.3 se verifican juntos. SheetJS se obtiene de su [distribución oficial](https://docs.sheetjs.com/docs/getting-started/installation/nodejs/); el registro npm mantiene una edición antigua. El override de PostCSS obliga a Next.js a compartir la rama 8.5.28 o posterior, en lugar de su dependencia 8.4.31 vulnerable. El lockfile fija los bytes mediante integridad. Ejecuta `npm audit` después de actualizar y `npm ci` para comprobar una instalación limpia.

@@ -22,7 +22,7 @@ import { RentValuationCard } from "../property/RentValuationCard";
 import { CommuteCard } from "../property/CommuteCard";
 import { NeighborhoodCard } from "../property/NeighborhoodCard";
 import { Logo } from "../ui/Logo";
-import { isCurrentModel } from "@/lib/valoracion/current-model";
+import { isCurrentModel, STALE_MODEL_NOTICE } from "@/lib/valoracion/current-model";
 
 const TOOL_META: Record<
   string,
@@ -127,7 +127,7 @@ export function MessageBubble({
             <ToolCallsList toolCalls={toolCalls} />
           )}
 
-          {message.purchaseValuation?.resultado && !isCurrentModel(message.purchaseValuation.resultado) && (
+          {(message.purchaseValuation?.aviso === STALE_MODEL_NOTICE || (message.purchaseValuation?.resultado && !isCurrentModel(message.purchaseValuation.resultado))) && (
             <p className="rounded-lg bg-paper-100 p-3 text-sm text-stone-600">Respuesta histórica: las cifras y conclusiones de esta valoración usaron un modelo anterior. Solicita una nueva valoración antes de compararlas o usarlas para decidir.</p>
           )}
           {message.content && (
@@ -222,7 +222,7 @@ function ToolCallsList({ toolCalls }: { toolCalls: ToolCall[] }) {
 }
 
 function ToolCallChip({ call }: { call: ToolCall }) {
-  const meta = TOOL_META[call.name] ?? {
+  const meta = Object.hasOwn(TOOL_META, call.name) ? TOOL_META[call.name] : {
     label: call.name,
     activeLabel: call.name,
     Icon: Circle,

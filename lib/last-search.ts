@@ -1,5 +1,6 @@
 import type { Property, PropertyRecommendation, SearchFilters } from "@/types";
 import { withoutStaleValuation, STALE_MODEL_NOTICE } from "@/lib/valoracion/current-model";
+import { validDisplayProperty } from "@/lib/api-validation";
 
 const KEY = "habitia:lastSearch:v1";
 const LEGACY_KEY = "agente-inmobiliario:lastSearch:v1";
@@ -37,14 +38,14 @@ export function readLastSearch(): LastSearch {
       if (!raw) continue;
       const parsed = JSON.parse(raw) as Partial<LastSearch>;
       if (!parsed || !Array.isArray(parsed.properties)) continue;
-      const properties = parsed.properties.filter((p) => p && typeof p.propertyCode === "string" && typeof p.title === "string" && Number.isFinite(p.price) && Number.isFinite(p.size));
+      const properties = parsed.properties.filter(validDisplayProperty);
       const search: LastSearch = {
         properties,
         savedAt: typeof parsed.savedAt === "string" && Number.isFinite(Date.parse(parsed.savedAt)) ? parsed.savedAt : null,
         source: parsed.source === "dashboard" ? "dashboard" : "chat",
         filters: parsed.filters && typeof parsed.filters.zona === "string" && ["alquiler", "venta"].includes(parsed.filters.operacion) ? parsed.filters : null,
         recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations
-          .filter((r) => r?.property && properties.some((p) => p.propertyCode === r.property.propertyCode) && r.enrichment && Number.isFinite(r.score))
+          .filter((r) => validDisplayProperty(r?.property) && properties.some((p) => p.propertyCode === r.property.propertyCode) && r.enrichment && Number.isFinite(r.score))
           .map((r) => {
             const valuation = withoutStaleValuation(r.enrichment.valuation);
             return valuation === r.enrichment.valuation ? r : { ...r,

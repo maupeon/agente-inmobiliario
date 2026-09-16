@@ -28,7 +28,7 @@ export function PricingMethod() {
       <h3 className={styles.methodHeading}>01 <span>Modelo de valoración</span></h3>
       <div className={styles.pricingFlow}>
         <article><span className={styles.methodLabel}>Inputs</span><h4>Dataset de {predictor.ano_base}</h4><p>Anuncios de Madrid de Idealista.</p><p>Top 5 por importancia: superficie, baños, alquiler mediano por m² del barrio, vulnerabilidad y ascensor.</p><small>De {predictor.columnas.length} variables · importancia por ganancia media (gain)</small></article>
-        <article><span className={styles.methodLabel}>Modelo</span><h4>XGBoost</h4><p>Capta relaciones no lineales e interacciones entre características de la vivienda y su entorno.</p><p>Fiabilidad en el test: {modelMetric("pct_dentro_del_20pct", 2, "%")} de los anuncios con error ≤20%.</p></article>
+        <article><span className={styles.methodLabel}>Modelo</span><h4>XGBoost</h4><p>Capta relaciones no lineales e interacciones entre características de la vivienda y su entorno.</p><p>Test declarado: {modelMetric("pct_dentro_del_20pct", 2, "%")} de los anuncios con error ≤20%.</p></article>
         <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra de {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>R² (log)</dt><dd>{modelMetric("r2_log", 4)}</dd></div></dl><small>Estimación del precio anunciado · métricas del test de {predictor.ano_base}</small></article>
       </div>
     </section>
@@ -43,6 +43,7 @@ export function PricingMethod() {
         </Equation></div></article>
       </div>
       <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {predictor.ano_precio} · f renta: ratio mensual renta/precio de {predictor.ano_precio}.</p>
+      <p className={styles.equationKey}>Estimaciones de oferta. 2026 es una proyección; últimas fuentes observadas: venta 2025 y alquiler 2024. Sin validación actual ni propia de alquiler.</p>
     </section>
   </div>;
 }
@@ -70,6 +71,7 @@ export function PredictorDetails() {
 
 export function ScoreMethod() {
   return <div className={styles.scoreMethod}>
+    <p className={styles.methodWeights}><strong>Diseño propuesto · pendiente de implementación</strong></p>
     <div className={styles.scoreSummary}><ScoreEquation /></div>
     <p className={styles.methodWeights}>Tú eliges los pesos: α, β, γ, δ entre 0 y 100 · α + β + γ + δ = 100</p>
     <dl className={styles.scoreMethodRows}>
@@ -78,7 +80,7 @@ export function ScoreMethod() {
         <p className={styles.percentileEquation}>Fair Score (%) = Percentil(Fair Gap normalizado respecto a la distribución de referencia)</p>
       </dd></div>
       <div><dt>Opportunity<small>¿Es una oportunidad de inversión?</small></dt><dd>
-        <Equation label="Opportunity Gap en porcentaje igual a la revalorización del inmueble menos la revalorización de la ciudad, por cien">Opportunity Gap (%) = (Revalorización inmueble − Revalorización ciudad) · 100</Equation>
+        <Equation label="Opportunity Gap en puntos porcentuales igual a la variación del distrito menos la variación de la ciudad">Opportunity Gap (p.p.) = Variación distrito − Variación ciudad</Equation>
         <p className={styles.percentileEquation}>Opportunity Score (%) = Percentil(Opportunity Gap normalizado respecto a la distribución de referencia)</p>
       </dd></div>
       <div><dt>Zone<small>¿Está en buena zona?</small></dt><dd>
@@ -89,6 +91,7 @@ export function ScoreMethod() {
         <p className={styles.percentileEquation}>Lifestyle Score (%) = Percentil(−Tiempo al trabajo normalizado respecto a la distribución de pisos que pasan tus filtros)</p>
       </dd></div>
     </dl>
+    <p className={styles.equationKey}>La aplicación actual usa escalas lineales provisionales para Fair y Opportunity y una función por minutos para Lifestyle. Zone ya usa percentiles de recuentos por distrito. Las ausencias reducen la cobertura y no redistribuyen pesos.</p>
   </div>;
 }
 

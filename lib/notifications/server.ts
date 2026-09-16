@@ -10,12 +10,12 @@ import type { NotificationState } from "./types";
 const COOKIE = "habitia_notifications";
 const TOKEN = /^[a-f0-9]{64}$/;
 export const PRIVATE_HEADERS = { "Cache-Control": "private, no-store, max-age=0", Vary: "Cookie" };
-export function notificationIdentity(create = false): { hash: string; token: string; fresh: boolean } | null {
-  const existing = cookies().get(COOKIE)?.value;
+export async function notificationIdentity(create = false): Promise<{ hash: string; token: string; fresh: boolean } | null> {
+  const existing = (await cookies()).get(COOKIE)?.value;
   const token = existing && TOKEN.test(existing) ? existing : create ? randomBytes(32).toString("hex") : null;
   return token ? { token, hash: createHash("sha256").update(token).digest("hex"), fresh: token !== existing } : null;
 }
-export function notificationResponse(value: unknown, identity?: ReturnType<typeof notificationIdentity>) {
+export function notificationResponse(value: unknown, identity?: Awaited<ReturnType<typeof notificationIdentity>>) {
   const response = NextResponse.json(value, { headers: PRIVATE_HEADERS });
   if (identity?.fresh) response.cookies.set(COOKIE, identity.token, {
     httpOnly: true, sameSite: "strict", secure: process.env.NODE_ENV === "production",
