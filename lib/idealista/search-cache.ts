@@ -6,7 +6,8 @@ const TTL = 24 * 60 * 60_000;
 const memory = new Map<string, { until: number; properties: Property[] }>();
 const pending = new Map<string, Promise<Property[]>>();
 export async function cachedSearch(params: string, load: () => Promise<Property[]>): Promise<Property[]> {
-  const key = createHash("sha256").update(params).digest("hex");
+  // Incluye la versión del normalizador: entradas antiguas omitían newDevelopment.
+  const key = createHash("sha256").update(`observed-fields-v2:${params}`).digest("hex");
   const cached = memory.get(key);
   if (cached && cached.until > Date.now()) return cached.properties;
   if (pending.has(key)) return pending.get(key)!;

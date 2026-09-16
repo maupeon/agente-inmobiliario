@@ -6,3 +6,4 @@
 *.xlsx binary
 # Preserve source bytes: provenance hashes include original line endings.
 data/madrid/sources/** -text
+app/presentacion/predictor-metadata.json -text whitespace=cr-at-eol

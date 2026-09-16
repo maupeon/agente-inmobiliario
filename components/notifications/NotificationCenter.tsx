@@ -9,6 +9,7 @@ import { DEFAULT_NOTIFICATION_TIME, DEFAULT_NOTIFICATION_ZONE } from "@/lib/noti
 import type { NotificationState } from "@/lib/notifications/types";
 import { digestTitle } from "@/lib/notifications/presentation";
 import { formatEUR } from "@/lib/utils";
+import { isCurrentValuation } from "@/lib/valoracion/current-model";
 
 const BROWSER_KEY = "habitia:browser-notifications";
 const SEEN_KEY = "habitia:last-notified-digest";
@@ -139,14 +140,16 @@ export function NotificationCenter() {
             <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">{digestTitle(digest)}</h3>{!digest.read_at && <button type="button" onClick={() => markRead(digest.id)} className="min-h-11 text-sm font-medium text-forest-700">Marcar como leída</button>}</div>
             {digest.items.length === 0 ? <p className="mt-4 leading-relaxed text-stone-600">Hoy no encontramos viviendas que cumplan tus filtros. Puedes ampliar la zona o ajustar tu presupuesto y guardar de nuevo tu perfil.</p> : <>
               <p className="mt-1 text-sm text-stone-500">{digest.items.length === 5 ? "Las cinco con mayor encaje entre las candidatas encontradas." : `Encontramos ${digest.items.length} ${digest.items.length === 1 ? "vivienda compatible" : "viviendas compatibles"}. Mostramos solo las disponibles.`}</p>
-              <ol className="mt-5 divide-y divide-hairline">{digest.items.map((item) => <li key={item.property.propertyCode} className="py-5 first:pt-0 last:pb-0">
-                <div className="flex items-start justify-between gap-4"><div className="min-w-0"><h4 className="break-words font-semibold leading-snug">{item.property.title || item.property.address || "Vivienda"}</h4><p className="mt-1 text-sm text-stone-500">{[item.property.district, item.property.municipality, item.property.province].filter(Boolean).filter((s, i, a) => a.indexOf(s) === i).join(" · ") || "Ubicación no indicada"}</p></div><span className="shrink-0 rounded-lg bg-forest-50 px-2 py-1 text-sm font-semibold text-forest-800">{item.score}/100</span></div>
+              <ol className="mt-5 divide-y divide-hairline">{digest.items.map((item) => {
+                const stale = item.enrichment?.valuation?.nivel === "modelo" && !isCurrentValuation(item.enrichment.valuation);
+                return <li key={item.property.propertyCode} className="py-5 first:pt-0 last:pb-0">
+                <div className="flex items-start justify-between gap-4"><div className="min-w-0"><h4 className="break-words font-semibold leading-snug">{item.property.title || item.property.address || "Vivienda"}</h4><p className="mt-1 text-sm text-stone-500">{[item.property.district, item.property.municipality, item.property.province].filter(Boolean).filter((s, i, a) => a.indexOf(s) === i).join(" · ") || "Ubicación no indicada"}</p></div><span className="shrink-0 rounded-lg bg-forest-50 px-2 py-1 text-sm font-semibold text-forest-800">{stale ? "Score pendiente" : `${item.score}/100`}</span></div>
                 <p className="mt-3 text-xl font-semibold tabular-nums">{formatEUR(item.property.price)}{item.property.operation === "rent" && <span className="text-sm font-normal text-stone-500"> / mes</span>}</p>
                 <p className="mt-1 text-sm text-stone-500">{item.property.size} m²{item.property.rooms != null ? ` · ${item.property.rooms} hab.` : ""}{item.property.sourceKind === "demo" ? " · Ejemplo de demostración" : ""}</p>
-                <p className="mt-3 text-sm leading-relaxed text-stone-600">{item.rationale}</p>
-                {item.scoring && <p className="mt-2 text-xs leading-relaxed text-stone-500">Cobertura del score: {item.scoring.coveragePercent} %. Los criterios sin datos no reciben puntos.</p>}
+                <p className="mt-3 text-sm leading-relaxed text-stone-600">{stale ? "Selección histórica con un modelo anterior. Consulta la vivienda en el buscador para actualizar su valoración y su score." : item.rationale}</p>
+                {!stale && item.scoring && <p className="mt-2 text-xs leading-relaxed text-stone-500">Cobertura del score: {item.scoring.coveragePercent} %. Los criterios sin datos no reciben puntos.</p>}
                 {item.property.sourceKind !== "demo" && /^https:\/\/(?:www\.)?idealista\.(?:com|pt|it)\//i.test(item.property.url) && <a href={item.property.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-forest-700">Ver anuncio <ArrowRight aria-hidden size={16} /></a>}
-              </li>)}</ol>
+              </li>; })}</ol>
               <p className="mt-5 border-t border-hairline pt-4 text-xs leading-relaxed text-stone-500">Selección preparada a partir de anuncios consultados o en caché. Comprueba su disponibilidad y precio en el anuncio; el score expresa encaje con el perfil, no una tasación.</p>
             </>}
           </article>)}</div>

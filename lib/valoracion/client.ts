@@ -1,49 +1,41 @@
 import "server-only";
 import type { Property } from "@/types";
 import { isRecord } from "@/lib/api-validation";
-import type { AnuncioParaValorar, RespuestaValoracion, ValoracionModelo, ValoracionModeloV2, ValoracionModeloV3 } from "./types";
+import type { AnuncioParaValorar, RespuestaValoracion, ValoracionModelo, ValoracionModeloV3 } from "./types";
 import { operacionValoracion } from "./types";
+import { CURRENT_MODEL_ID, CURRENT_MODEL_VERSION, CURRENT_SALE_YEAR, CURRENT_RENT_YEAR, isCurrentModel } from "./current-model";
 const URL_BASE = process.env.VALORACION_URL;
 const TOKEN = process.env.VALORACION_TOKEN;
 const TIMEOUT_MS = Math.min(20_000, Math.max(1000, Number(process.env.VALORACION_TIMEOUT_MS) || 10_000));
 export const MAX_VALORACION_BATCH = 24;
-const EXPECTED_MODEL_ID = "habitIA-oferta-2018-v2";
-const isVersion2 = (value: unknown): value is string => typeof value === "string" && /^2\.\d+\.\d+$/.test(value);
-const isVersion3 = (value: unknown): value is string => typeof value === "string" && /^3\.\d+\.\d+$/.test(value);
 const finitePositive = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value > 0;
-const validYear = (value: unknown): value is number => typeof value === "number" && Number.isInteger(value) && value >= 2018 && value <= 2099;
-/** El servicio heredado puede responder 200: su contrato no acredita el modelo revisado. */
-function validResultV2(value: unknown, codes: Set<string>): value is ValoracionModeloV2 {
-  if (!isRecord(value) || typeof value.propertyCode !== "string" || !codes.has(value.propertyCode)
-    || value.estado !== "ok" || !isVersion2(value.model_version) || value.model_id !== EXPECTED_MODEL_ID
-    || value.objetivo !== "precio_anunciado" || value.periodo_entrenamiento !== "2018"
-    || value.extrapolacion_temporal !== true || value.precision_actual_validada !== false
-    || value.clasificacion_validada !== false || !finitePositive(value.factor_escenario)
-    || typeof value.nivel_precios !== "string" || !/^20\d{2}T[1-4]$/.test(value.nivel_precios)
-    || !finitePositive(value.precio_justo) || !Array.isArray(value.intervalo) || value.intervalo.length !== 2
-    || !value.intervalo.every(finitePositive) || value.intervalo[0] > value.precio_justo || value.precio_justo > value.intervalo[1]
-    || (value.brecha_pct !== null && (typeof value.brecha_pct !== "number" || !Number.isFinite(value.brecha_pct)))
-    || ![null, "barato", "ajustado", "en_linea", "caro", "muy_caro"].includes(value.banda as string | null)
-    || typeof value.oportunidad !== "boolean" || typeof value.sobrevalorado !== "boolean"
-    || !Array.isArray(value.advertencias) || !value.advertencias.every((warning: unknown) => typeof warning === "string")) return false;
-  if (value.explicacion != null) {
-    const explanation = value.explicacion;
-    if (!isRecord(explanation) || explanation.no_causal !== true || explanation.escala !== "log_euros_2018"
-      || typeof explanation.metodo !== "string" || typeof explanation.advertencia !== "string"
-      || !Array.isArray(explanation.factores) || !explanation.factores.every((factor: unknown) => isRecord(factor)
-        && typeof factor.variable === "string" && typeof factor.contribucion_log_euros === "number"
-        && Number.isFinite(factor.contribucion_log_euros) && ["aumenta", "disminuye"].includes(String(factor.sentido)))) return false;
-  }
-  return true;
+const ABSTENTION_REASONS: Record<string, string> = {
+  a_reformar: "la descripción indica que está a reformar o para actualizar",
+  ocupada: "la descripción indica que está ocupada, alquilada o sin plena posesión",
+  fuera_de_madrid: "está fuera del ámbito de Madrid capital",
+  tipologia_casa: "su tipología de casa o chalet no está admitida",
+  superficie_fuera_de_dominio: "supera la superficie máxima de 367 m²",
+  operacion_no_admitida: "la operación no está admitida",
+  sin_coordenadas: "faltan coordenadas válidas",
+  sin_superficie: "falta una superficie válida",
+  sin_habitaciones: "falta el número de habitaciones observado",
+  sin_banos: "falta el número de baños observado",
+};
+/** Traduce únicamente códigos conocidos; conserva los mensajes y errores nuevos. */
+function abstentionMessage(detail: unknown): string {
+  if (typeof detail !== "string") return "Datos insuficientes para valorar.";
+  const reasons = detail.split(";").map(reason => reason.trim());
+  return reasons.every(reason => Object.hasOwn(ABSTENTION_REASONS, reason))
+    ? `El modelo no estima esta vivienda porque ${reasons.map(reason => ABSTENTION_REASONS[reason]).join("; además, ")}.`
+    : detail;
 }
-
 function validResultV3(value: unknown, codes: Set<string>): value is ValoracionModeloV3 {
   if (!isRecord(value) || typeof value.propertyCode !== "string" || !codes.has(value.propertyCode)
-    || value.estado !== "ok" || !isVersion3(value.model_version) || value.model_id !== "habitIA-xgboost-2018-v3"
+    || value.estado !== "ok" || !isCurrentModel(value)
     || value.modelo !== "arboles_desplegable_ajustado" || typeof value.modelo_sha256 !== "string" || !/^[a-f0-9]{64}$/.test(value.modelo_sha256)
     || value.objetivo !== "precio_anunciado" || value.periodo_entrenamiento !== "2018"
     || value.extrapolacion_temporal !== true || value.precision_actual_validada !== false || value.clasificacion_validada !== false
-    || !validYear(value.ano_precio) || !validYear(value.ano_renta) || value.nivel_precios !== String(value.ano_precio) || value.ano_base !== 2018
+    || value.ano_precio !== CURRENT_SALE_YEAR || value.ano_renta !== CURRENT_RENT_YEAR || value.nivel_precios !== String(CURRENT_SALE_YEAR) || value.ano_base !== 2018
     || !finitePositive(value.precio_estimado) || !finitePositive(value.precio_estimado_base) || !finitePositive(value.factor_escenario)
     || value.intervalo !== null || value.banda !== null || value.oportunidad !== false || value.sobrevalorado !== false
     || value.explicacion != null || value.alquiler_validado !== false || value.metodo_renta !== `ratio_distrital_${value.ano_renta}`
@@ -53,14 +45,11 @@ function validResultV3(value: unknown, codes: Set<string>): value is ValoracionM
     || (value.precio_anunciado !== null && !finitePositive(value.precio_anunciado))
     || (value.brecha_pct !== null && (typeof value.brecha_pct !== "number" || !Number.isFinite(value.brecha_pct)))
     || !Array.isArray(value.advertencias) || !value.advertencias.every((v: unknown) => typeof v === "string")
-    || !isRecord(value.calidad) || !["sin_descripcion", "planta_imputada", "ascensor_desde_descripcion", "barrio_rescatado"].every((key) => isRecord(value.calidad) && typeof value.calidad[key] === "boolean")
+    || !isRecord(value.calidad) || !["sin_descripcion", "planta_imputada", "ascensor_desde_descripcion", "barrio_rescatado", "obra_nueva"].every((key) => isRecord(value.calidad) && typeof value.calidad[key] === "boolean")
     || (value.calidad.fuera_de_rango !== null && typeof value.calidad.fuera_de_rango !== "string")) return false;
   const close = (a: number, b: number) => Math.abs(a - b) <= Math.max(0.01, Math.abs(b) * 1e-6);
-  const legacySale = /^3\.0\./.test(value.model_version);
   const reference = value.operation === "rent" ? value.renta_mensual_estimada : value.precio_estimado;
-  if (legacySale) {
-    if (value.operation != null || value.precio_comparacion != null || value.unidad_comparacion != null) return false;
-  } else if (!["sale", "rent"].includes(String(value.operation)) || !finitePositive(value.precio_comparacion)
+  if (!["sale", "rent"].includes(String(value.operation)) || !finitePositive(value.precio_comparacion)
     || value.unidad_comparacion !== (value.operation === "rent" ? "EUR/mes" : "EUR")
     || !close(value.precio_comparacion, reference)) return false;
   return close(value.precio_estimado, value.precio_estimado_base * value.factor_escenario)
@@ -70,7 +59,7 @@ function validResultV3(value: unknown, codes: Set<string>): value is ValoracionM
 }
 
 function validResult(value: unknown, codes: Set<string>): value is ValoracionModelo {
-  return validResultV2(value, codes) || validResultV3(value, codes);
+  return validResultV3(value, codes);
 }
 export function valoracionDisponible(): boolean { return Boolean(URL_BASE); }
 export function esValorable(p: Property): boolean {
@@ -78,7 +67,7 @@ export function esValorable(p: Property): boolean {
   return ["sale", "rent"].includes(p.operation) && p.municipality?.trim().toLowerCase() === "madrid"
     && Number.isFinite(p.latitude) && Number.isFinite(p.longitude)
     && p.latitude! >= 40.30 && p.latitude! <= 40.55 && p.longitude! >= -3.90 && p.longitude! <= -3.50
-    && p.size >= 20 && p.size <= 1000
+    && p.size >= 20 && p.size <= 367
     && (["flat", "penthouse", "duplex", "studio"].includes(type) || (type === "homes" && p.detailedType?.typology === "flat"));
 }
 export function aAnuncio(p: Property): AnuncioParaValorar {
@@ -86,7 +75,7 @@ export function aAnuncio(p: Property): AnuncioParaValorar {
     bathrooms: p.bathrooms, floor: p.floor, hasLift: p.hasLift, exterior: p.exterior,
     latitude: p.latitude!, longitude: p.longitude!, propertyType: p.propertyType,
     detailedType: p.detailedType, municipality: p.municipality, operation: p.operation,
-    description: p.description, parkingSpace: p.parkingSpace };
+    description: p.description, parkingSpace: p.parkingSpace, newDevelopment: p.newDevelopment };
 }
 export interface EstadoValoracion { estado: "ok" | "fuera_ambito" | "datos_insuficientes" | "no_disponible"; motivo: string }
 export interface LoteValoracion { resultados: Map<string, ValoracionModelo>; estados: Map<string, EstadoValoracion> }
@@ -105,6 +94,7 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
   if (!candidates.length) return { resultados, estados };
   const candidateCodes = new Set(candidates.map((p) => p.propertyCode));
   const candidateOperations = new Map(candidates.map((p) => [p.propertyCode, p.operation]));
+  const candidatePrices = new Map(candidates.map((p) => [p.propertyCode, p.price]));
   if (!URL_BASE) return fail("El servicio del modelo no está configurado.");
   if (candidates.length > MAX_VALORACION_BATCH) return fail("El lote supera el máximo de 24 anuncios.");
   try {
@@ -118,17 +108,18 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
     const errors = raw?.errores ?? raw?.detail?.errores;
     if (Array.isArray(errors)) for (const e of errors) {
       const code = e.propertyCode ?? candidates[e.indice]?.propertyCode;
-      if (typeof code === "string" && candidateCodes.has(code)) estados.set(code, { estado: e.estado === "fuera_ambito" ? "fuera_ambito" : e.estado === "no_disponible" ? "no_disponible" : "datos_insuficientes", motivo: String(e.detalle ?? "Datos insuficientes para valorar.") });
+      if (typeof code === "string" && candidateCodes.has(code)) estados.set(code, { estado: e.estado === "fuera_ambito" ? "fuera_ambito" : e.estado === "no_disponible" ? "no_disponible" : "datos_insuficientes", motivo: abstentionMessage(e.detalle) });
     }
     if (!res.ok || !Array.isArray(raw?.resultados)) return fail(res.status === 422 ? "El servicio rechazó las entradas; revisa los datos y el ámbito." : "El modelo no está disponible. No hay una valoración individual para este anuncio.");
-    if ((!isVersion2(raw.model_version) && !(isVersion3(raw.model_version) && raw.model_id === "habitIA-xgboost-2018-v3")) || raw.objetivo !== "precio_anunciado"
+    if (raw.model_version !== CURRENT_MODEL_VERSION || raw.model_id !== CURRENT_MODEL_ID || raw.objetivo !== "precio_anunciado"
       || raw.extrapolacion_temporal !== true || raw.precision_actual_validada !== false) {
-      return fail("El servicio no cumple un contrato de modelo compatible (v2 o XGBoost v3). No se utiliza su estimación.");
+      return fail("El servicio no devuelve el modelo vigente (XGBoost 3.2.0). No se utiliza una estimación anterior.");
     }
     const data = raw as RespuestaValoracion;
     for (const v of data.resultados) {
-      if (!validResult(v, candidateCodes) || v.model_version !== data.model_version || v.nivel_precios !== data.nivel_precios
+      if (!validResult(v, candidateCodes) || estados.has(v.propertyCode) || v.model_version !== data.model_version || v.nivel_precios !== data.nivel_precios
         || operacionValoracion(v) !== candidateOperations.get(v.propertyCode)
+        || v.precio_anunciado !== candidatePrices.get(v.propertyCode)
         || (data.model_id != null && v.model_id !== data.model_id)
         || data.resultados.filter((row) => row?.propertyCode === v.propertyCode).length !== 1) continue;
       resultados.set(v.propertyCode, v);

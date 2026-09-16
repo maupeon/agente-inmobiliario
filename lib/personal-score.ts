@@ -1,6 +1,7 @@
 import type { Imprescindible, PersonalScoring, Property, PropertyEnrichment, ScoreComponent, ScoreWeights, UserProfile } from "@/types";
 import { fairForProperty, opportunityForProperty } from "@/lib/scoring/price-scores";
 import { zoneForProperty } from "@/lib/neighborhood/zone-score";
+import { isCurrentValuation } from "@/lib/valoracion/current-model";
 
 export const DEFAULT_SCORE_WEIGHTS: ScoreWeights = { alpha: 25, beta: 25, gamma: 25, delta: 25 };
 export const SCORE_LABELS = { alpha: "α Fair · precio", beta: "β Opportunity · inversión", gamma: "γ Zone · calidad de vida", delta: "δ Lifestyle · tiempo al trabajo" } as const;
@@ -19,7 +20,7 @@ const round = (n: number) => Math.round(n * 10) / 10;
 export function usableModel(e: PropertyEnrichment): boolean {
   const v = e.valuation;
   return !!v && v.nivel === "modelo" && v.estadoModelo === "ok" && !v.fromFallback
-    && Number.isFinite(v.diferenciaPorcentual) && !!v.modeloVersion;
+    && Number.isFinite(v.diferenciaPorcentual) && isCurrentValuation(v);
 }
 
 /** Indicios explícitos del anuncio; la ausencia de una característica no significa que no exista. */
@@ -55,7 +56,7 @@ export function personalScore(p: Property, e: PropertyEnrichment, profile: UserP
   const components = [
     component("fair", "Fair · precio", weights.alpha, fair, fairScoring
       ? `Regla provisional: Fair = limitar(50 − 2,5 × desviación %, 0, 100). Desviación del anuncio frente a la estimación: ${round(fairScoring.gapPercent)}%. Coincidencia = 50; 20% por debajo = 100; 20% por encima = 0. ${p.operation === "rent" ? `Compara mensualidades; renta derivada de venta a nivel de ${e.valuation?.nivelPrecios ?? "periodo no informado"} y ratios de ${e.valuation?.rentaEscenario?.ano ?? "periodo no informado"}, sin validación independiente de alquiler.` : "Estimación indexada desde oferta de 2018; precisión actual no validada."} No expresa confianza del modelo ni una tasación.`
-      : "Sin estimación individual válida y comparable con el anuncio. Una media territorial no sustituye al modelo."),
+      : `${e.valuation?.avisoModelo ? `${e.valuation.avisoModelo} ` : ""}Sin estimación individual válida y comparable con el anuncio, Fair queda sin dato; su peso no se redistribuye. Una media territorial no sustituye al modelo.`),
     component("opportunity", "Opportunity · inversión", weights.beta, opportunity, opportunityScoring
       ? `Distrito ${opportunityScoring.district}: variación anual ${opportunityScoring.districtGrowthPercent}% frente al ${opportunityScoring.cityGrowthPercent}% de Madrid; diferencia ${round(opportunityScoring.gapPercentagePoints)} puntos porcentuales. Regla provisional: limitar(50 + 2,5 × diferencia, 0, 100). Mismo crecimiento = 50. ${opportunityScoring.period}. Evolución histórica de precios de oferta de venta; no predice rentabilidad ni revalorización de esta vivienda.${p.operation === "rent" ? " En alquiler se usa el mismo indicador de venta de la zona; no mide la subida de la renta." : ""}`
       : "Sin distrito de Madrid identificado con una variación anual comparable. No se sustituye por el margen del precio frente al modelo."),

@@ -144,14 +144,15 @@ async function main() {
     assert(!model.esValorable({...base,municipality:'Rozas de Madrid, Las'}));assert(!model.esValorable({...base,latitude:41.38,longitude:2.17}));assert(!model.esValorable({...base,propertyType:'chalet'}));
   });
   let posted;
-  const contract={model_version:'2.0.0',objetivo:'precio_anunciado',extrapolacion_temporal:true,precision_actual_validada:false,nivel_precios:'2026T1'};
-  const validValuation={...contract,propertyCode:'a',estado:'ok',model_id:'habitIA-oferta-2018-v2',periodo_entrenamiento:'2018',factor_escenario:1.5534,clasificacion_validada:false,advertencias:['Escenario histórico indexado'],precio_justo:250000,intervalo:[200000,300000],brecha_pct:20,banda:'muy_caro',oportunidad:false,sobrevalorado:false};
+  const fixture=require('./fixtures/valoracion-v3.json').respuesta;
+  const contract={...fixture,resultados:undefined,errores:undefined};
+  const validValuation={...fixture.resultados[0],propertyCode:'a',precio_anunciado:base.price,brecha_pct:(base.price/fixture.resultados[0].precio_estimado-1)*100};
   const online=loader({}, {process:{env:{VALORACION_URL:'http://model.invalid'}},fetch:async(_url,opts)=>{posted=JSON.parse(opts.body);return Response.json({...contract,resultados:[validValuation],errores:[{indice:1,propertyCode:'b',estado:'fuera_ambito',detalle:'Fuera del soporte'}]});}})('lib/valoracion/client.ts');
   const batch=await online.valorarLoteConEstado([base,{...base,propertyCode:'b'}]);
   check('mixed valuation result/abstention survives',()=>{assert.equal(batch.resultados.size,1);assert.equal(batch.estados.get('b').estado,'fuera_ambito');assert.equal(posted.renivelar,true);});
   for (const change of [{model_version:'1.0.0'},{model_version:undefined},{model_id:'old-model'},{periodo_entrenamiento:'2026'},
     {extrapolacion_temporal:false},{precision_actual_validada:true},{clasificacion_validada:true},{factor_escenario:0},
-    {propertyCode:'unsolicited'},{precio_justo:350000},{intervalo:[300000,200000]},{brecha_pct:'20'},
+    {propertyCode:'unsolicited'},{precio_estimado:350000},{intervalo:[300000,200000]},{brecha_pct:'20'},
     {explicacion:{factores:'wrong',no_causal:true,escala:'log_euros_2018'}}]) {
     const invalid=loader({}, {process:{env:{VALORACION_URL:'http://model.invalid'}},fetch:async()=>Response.json({...contract,resultados:[{...validValuation,...change}]})})('lib/valoracion/client.ts');
     const result=await invalid.valorarLoteConEstado([base]);assert.equal(result.resultados.size,0);assert.equal(result.estados.get('a').estado,'no_disponible');passed++;
@@ -202,7 +203,7 @@ async function main() {
   const onlyModel=await modelAndFixture.enrichProperties([base]);
   check('successful model plus market fixture never shows territorial comparison or false source',()=>{
     assert.equal(onlyModel[0].valuation.nivel,'modelo');assert.equal(onlyModel[0].valuation.comparativa,undefined);
-    assert.equal(onlyModel[0].valuation.referenciaEurM2,3125);assert.equal(onlyModel[0].valuation.modeloVersion,'2.0.0');
+    assert.equal(onlyModel[0].valuation.referenciaEurM2,Math.round(validValuation.precio_estimado/base.size*10)/10);assert.equal(onlyModel[0].valuation.modeloVersion,'3.2.0');
   });
   let callsBlocked=0;
   const paused=loader({'./auth':{getAccessToken:async()=>'test'},'./usage':{reserveIdealistaRequest:async()=>{throw new Error('quota paused');}},'./search-cache':{cachedSearch:async(_,run)=>run()}},{fetch:async()=>{callsBlocked++;throw new Error('must not fetch');}})('lib/idealista/search.ts');

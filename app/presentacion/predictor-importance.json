@@ -1,113 +1,113 @@
 {
-  "source": "habitia_predictor/DATOS/modelos/paquete_produccion/modelo.json",
-  "sha256": "5d29cd26889cc0777196f592aa9828b18cc7d71ccd1a05ee61a95f0a44741a04",
-  "method": "gain: mean loss_changes over non-leaf splits using each feature, across all 401 trees",
+  "source": "nuevo_modelo/data/models/paquete_produccion/modelo.json",
+  "sha256": "e5526aca6001741f24eb976dbd9607df131b3822b5b5a01b66c6c92af2a9d748",
+  "method": "gain: mean loss_changes over non-leaf splits using each feature, across all 410 trees",
   "reference": "https://xgboost.readthedocs.io/en/stable/python/python_api.html#xgboost.Booster.get_score",
   "features": [
     {
       "feature": "CONSTRUCTEDAREA",
-      "gain": 3.072297400929571,
-      "splits": 32325
+      "gain": 2.917736895153076,
+      "splits": 34128
     },
     {
       "feature": "BATHNUMBER",
-      "gain": 1.9191292484048628,
-      "splits": 5623
+      "gain": 1.8278534017165844,
+      "splits": 5858
     },
     {
       "feature": "alq_mediana_eur_m2_barrio",
-      "gain": 1.7369705043747943,
-      "splits": 17319
+      "gain": 1.7947237267610774,
+      "splits": 17821
     },
     {
       "feature": "indice_vulnerabilidad",
-      "gain": 1.6560715138262412,
-      "splits": 15443
+      "gain": 1.6351818782643717,
+      "splits": 13636
     },
     {
       "feature": "HASLIFT",
-      "gain": 1.3296958192353094,
-      "splits": 4108
+      "gain": 1.3306890302791599,
+      "splits": 4161
     },
     {
       "feature": "ISSTUDIO",
-      "gain": 0.6711666229388549,
-      "splits": 664
+      "gain": 0.7098792406679804,
+      "splits": 629
     },
     {
       "feature": "HASSWIMMINGPOOL",
-      "gain": 0.499805869563334,
-      "splits": 1881
+      "gain": 0.47151392490421135,
+      "splits": 2044
     },
     {
       "feature": "HASBOXROOM",
-      "gain": 0.4806912742920518,
-      "splits": 3928
+      "gain": 0.4350714207201799,
+      "splits": 4334
     },
     {
       "feature": "HASGARDEN",
-      "gain": 0.3912057287606256,
-      "splits": 2795
+      "gain": 0.34636180935058924,
+      "splits": 3150
     },
     {
       "feature": "ROOMNUMBER",
-      "gain": 0.25695806288134765,
-      "splits": 10295
+      "gain": 0.26439164099631013,
+      "splits": 10707
     },
     {
       "feature": "HASPARKINGSPACE",
-      "gain": 0.24098697459954166,
-      "splits": 3205
+      "gain": 0.22321809661147043,
+      "splits": 3395
     },
     {
       "feature": "HASDOORMAN",
-      "gain": 0.21295657063419587,
-      "splits": 3960
+      "gain": 0.20344399778050584,
+      "splits": 4242
     },
     {
       "feature": "delitos_per_10k_barrio",
-      "gain": 0.16678404661130763,
-      "splits": 17064
+      "gain": 0.17516650684142634,
+      "splits": 17977
     },
     {
       "feature": "FLOORCLEAN",
-      "gain": 0.14739617822349313,
-      "splits": 20040
+      "gain": 0.14371277004432662,
+      "splits": 20667
     },
     {
       "feature": "DISTANCE_TO_CASTELLANA",
-      "gain": 0.12645170290492638,
-      "splits": 34245
+      "gain": 0.12869722642679263,
+      "splits": 36316
     },
     {
       "feature": "ISDUPLEX",
-      "gain": 0.11424527707087699,
-      "splits": 935
+      "gain": 0.11232509292780596,
+      "splits": 980
     },
     {
       "feature": "HASTERRACE",
-      "gain": 0.10909836654235222,
-      "splits": 5969
-    },
-    {
-      "feature": "HASAIRCONDITIONING",
-      "gain": 0.10870951901410104,
-      "splits": 5884
+      "gain": 0.11153910657351516,
+      "splits": 6022
     },
     {
       "feature": "DISTANCE_TO_CITY_CENTER",
-      "gain": 0.10466352669447442,
-      "splits": 35063
+      "gain": 0.10534347836428112,
+      "splits": 36778
+    },
+    {
+      "feature": "HASAIRCONDITIONING",
+      "gain": 0.1033649768811579,
+      "splits": 6321
     },
     {
       "feature": "HASWARDROBE",
-      "gain": 0.10048366755777755,
-      "splits": 6471
+      "gain": 0.10021760170975234,
+      "splits": 6545
     },
     {
       "feature": "DISTANCE_TO_METRO",
-      "gain": 0.0557854884259862,
-      "splits": 34340
+      "gain": 0.057074517859937376,
+      "splits": 35291
     }
   ]
 }

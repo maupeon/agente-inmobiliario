@@ -31,7 +31,7 @@ flowchart TD
 | Score | `lib/personal-score.ts` | Pesos, evidencias disponibles y filtros obligatorios |
 | Agente | `lib/agent/` | Prompt, ejecución de herramientas y conversación |
 | Proveedores | `lib/idealista/`, `lib/commute/`, `lib/market/` | Adaptación, caché y procedencia de datos |
-| Modelo externo | `lib/valoracion/` | Contratos XGBoost v3 y LightGBM v2; estados por anuncio |
+| Modelo externo | `lib/valoracion/` | Contrato XGBoost 3.2.0, identidad del artefacto vigente y estados por anuncio |
 | Persistencia | `lib/supabase/`, `lib/shared-demo.ts` | API de demo compartida y cliente del navegador |
 | Finanzas | `lib/finance/` | Cálculo determinista de compra frente a alquiler |
 | Contexto estático | `data/madrid/` | Instantáneas oficiales consumidas por `/datos` y `/como-funciona` |
@@ -57,11 +57,13 @@ Los pesos son enteros, suman 100 y empiezan en 25 por componente.
 | Componente | Qué representa | Disponibilidad |
 | --- | --- | --- |
 | Fair | Desviación del anuncio frente a la estimación individual, convertida con una regla provisional a 0–100 | Venta y alquiler con valoración compatible |
-| Opportunity | Variación anual de oferta del distrito menos la de Madrid, escala provisional | Solo compra; Idealista agosto 2025–agosto 2026 |
-| Zone | Indicadores del entorno | Cinco componentes de igual peso; cuatro calculados por distrito y ruido ausente. Score parcial y cobertura interna del 80% |
+| Opportunity | Variación anual de oferta de venta del distrito menos la de Madrid, escala provisional | Compra y alquiler; Idealista agosto 2025–agosto 2026 |
+| Zone | Indicadores del entorno | Cuatro indicadores por distrito, al 25% cada uno; cobertura interna del 100% si están disponibles |
 | Lifestyle | Tiempo de trayecto al trabajo | Requiere perfil y trayecto |
 
 Cada aportación es `peso × valor / 100`. Un dato ausente aporta cero y su peso no se redistribuye. La cobertura indica cuánto de las prioridades puede evaluarse. Una referencia provincial o un recuento urbano no sustituye una valoración individual ni un índice de barrio.
+
+El paquete recibido en `nuevo_modelo` sustituye las estimaciones anteriores. Fair exige versión y hash vigentes; las abstenciones por reforma u ocupación dejan el componente ausente y el score parcial. Los resultados guardados no deben mantener aportaciones calculadas con el modelo sustituido. El aviso de obra nueva conserva la estimación y advierte de la dependencia entre anuncios de una promoción.
 
 La [metodología de Zone](datos.md#metodología-de-zone-score) documenta los percentiles, los recuentos y las ausencias. `lib/neighborhood/zone-score.ts` usa el distrito explícito del anuncio de Madrid; `personalScore` incorpora los puntos parciales y pondera la cobertura interna. Sin distrito identificado, Zone permanece en `null`.
 

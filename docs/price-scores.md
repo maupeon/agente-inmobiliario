@@ -1,6 +1,6 @@
 # Fair y Opportunity: implementación provisional
 
-Actualización: 14 de septiembre de 2026. Estas reglas de preferencia desbloquean la aplicación; no son una calibración estadística. La propuesta v12 de la presentación usa percentiles y sigue diferenciada de esta implementación lineal. No se emplea el test reservado ni se altera el predictor.
+Actualización: 16 de septiembre de 2026. Estas reglas de preferencia desbloquean la aplicación; no son una calibración estadística. La propuesta v12 de la presentación usa percentiles y sigue diferenciada de esta implementación lineal. No se emplea el test reservado ni se altera el predictor.
 
 ## Fair
 
@@ -39,3 +39,9 @@ Pruebas: límites, monotonía, cero, signos, datos inválidos, correspondencia d
 ## Revisión de alquiler en el dashboard
 
 Opportunity conserva en alquiler los mismos valores, fuente y periodo de venta que en compra; Chamberí obtiene 54,5/100. Fair compara mensualidades y mantiene la misma escala que compra. Un anuncio al menos un 20% por encima de su estimación obtiene 0/100: es un resultado calculado, no un dato ausente, y se explica junto al desglose. No se modifica el predictor ni se fuerza una puntuación positiva.
+
+## Cambio de modelo del 16 de septiembre
+
+El paquete exportado el 15/09/2026 incorpora 410 árboles y se integra mediante el contrato 3.2.0. Fair y el Fit Score global usan sus nuevas estimaciones, comprobando la versión y el hash vigentes. Las valoraciones guardadas del modelo anterior no se reutilizan para calcular Fair. Se conserva la escala lineal: esta entrega no aporta una nueva calibración de scores.
+
+Las abstenciones por descripción de vivienda a reformar u ocupada/alquilada dejan Fair ausente y reducen la cobertura ponderada; no equivalen a Fair = 0. Obra nueva conserva el cálculo con una advertencia sobre anuncios dependientes de una misma promoción. El contrato sigue comparando venta total y alquiler mensual por separado, con venta indexada a 2025 y ratios de renta de 2024.

@@ -116,6 +116,8 @@ function desdeModelo(
     nivelPrecios: v.nivel_precios,
     modeloVersion: v.model_version,
     modeloId: v.model_id,
+    modeloSha256: v.model_id === "habitIA-xgboost-2018-v3" ? v.modelo_sha256 : undefined,
+    obraNueva: v.model_id === "habitIA-xgboost-2018-v3" ? v.calidad.obra_nueva : undefined,
     precioEstimado: precioEstimado(v),
     advertencias: v.advertencias,
     rentaEscenario: v.model_id === "habitIA-xgboost-2018-v3"

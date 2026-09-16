@@ -1,4 +1,5 @@
 import type { Property, PropertyRecommendation, SearchFilters } from "@/types";
+import { withoutStaleValuation, STALE_MODEL_NOTICE } from "@/lib/valoracion/current-model";
 
 const KEY = "habitia:lastSearch:v1";
 const LEGACY_KEY = "agente-inmobiliario:lastSearch:v1";
@@ -42,7 +43,14 @@ export function readLastSearch(): LastSearch {
         savedAt: typeof parsed.savedAt === "string" && Number.isFinite(Date.parse(parsed.savedAt)) ? parsed.savedAt : null,
         source: parsed.source === "dashboard" ? "dashboard" : "chat",
         filters: parsed.filters && typeof parsed.filters.zona === "string" && ["alquiler", "venta"].includes(parsed.filters.operacion) ? parsed.filters : null,
-        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.filter((r) => r?.property && properties.some((p) => p.propertyCode === r.property.propertyCode) && r.enrichment && Number.isFinite(r.score)) : undefined,
+        recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations
+          .filter((r) => r?.property && properties.some((p) => p.propertyCode === r.property.propertyCode) && r.enrichment && Number.isFinite(r.score))
+          .map((r) => {
+            const valuation = withoutStaleValuation(r.enrichment.valuation);
+            return valuation === r.enrichment.valuation ? r : { ...r,
+              enrichment: { ...r.enrichment, valuation }, score: 0, scoring: undefined,
+              highlights: [], rationale: STALE_MODEL_NOTICE };
+          }) : undefined,
       };
       writeStoredSearch(search);
       return search;

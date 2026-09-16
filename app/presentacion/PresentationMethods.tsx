@@ -60,13 +60,13 @@ export function PredictorDetails() {
       <article><h3>Del anuncio al precio</h3>
         <p><strong>{predictor.columnas.length} variables.</strong> Superficie, habitaciones, baños y planta; equipamiento y tipología; distancias al centro, metro y Castellana; alquiler, delitos y vulnerabilidad del barrio.</p>
         <p><strong>{predictor.params.n_estimators} árboles.</strong> Profundidad máxima {predictor.params.max_depth}. Estimación del logaritmo del precio y corrección de Duan al volver a euros.</p>
-        <div className={styles.predictorEquation}><Equation label="Precio de 2018 igual a la exponencial de la predicción XGBoost por el factor de corrección 1,016823">
+        <div className={styles.predictorEquation}><Equation label={`Precio de ${predictor.ano_base} igual a la exponencial de la predicción XGBoost por el factor de corrección ${predictor.smearing.toLocaleString("es-ES", { maximumFractionDigits: 6 })}`}>
           P<sub>{predictor.ano_base}</sub> = exp(XGBoost(x)) · {predictor.smearing.toLocaleString("es-ES", { maximumFractionDigits: 6 })}
         </Equation></div>
       </article>
       <article><h3>Ámbito y límites</h3>
-        <p><strong>Madrid capital · hasta {predictor.area_max_dominio} m².</strong> Excluye casas y chalets; exige superficie, habitaciones, baños y coordenadas.</p>
-        <p>No distingue estado de conservación, áticos ni vistas. Parte del equipamiento se extrae de la descripción; lo no mencionado puede perderse.</p>
+        <p><strong>Madrid capital · hasta {predictor.area_max_dominio} m².</strong> Excluye casas, chalets y anuncios a reformar u ocupados; exige superficie, habitaciones, baños y coordenadas.</p>
+        <p>No distingue estado de conservación, áticos ni vistas. El equipamiento depende de la descripción. Obra nueva: advertencia por dependencia entre anuncios de una promoción.</p>
         <p><strong>Sin intervalos ni SHAP exportados.</strong> Actualización de venta y ratios de alquiler a {INDEX_TARGET_YEAR} pendiente de incorporar. Alquiler derivado, sin validación propia.</p>
       </article>
     </div>

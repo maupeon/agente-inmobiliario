@@ -45,7 +45,7 @@ test('real v3 HTTP fixture retains observed input and point estimate without inv
 
 test('v3 rejects forged periods, intervals, model identities, rental claims and inconsistent arithmetic', async () => {
   for (const changed of [{ model_id: 'habitIA-oferta-2018-v2' }, { nivel_precios: '2026T1' },
-    { model_version: '2.0.0' }, { intervalo: [300000, 700000] }, { banda: 'barato' },
+    { model_version: '2.0.0' }, { model_version: '3.1.0' }, { modelo_sha256: '5d29cd26889cc0777196f592aa9828b18cc7d71ccd1a05ee61a95f0a44741a04' }, { intervalo: [300000, 700000] }, { banda: 'barato' },
     { oportunidad: true }, { alquiler_validado: true }, { ano_renta: 2026 },
     { precio_estimado: 100 }, { brecha_pct: -99 }, { renta_mensual_estimada: 1 },
     { modelo_sha256: '' }, { calidad: {} }, { propertyCode: 'unsolicited' }]) {
@@ -95,16 +95,18 @@ test('Idealista normalizer and chat tool preserve description and structured par
       observed = ps[0]; return { resultados: new Map(), estados: new Map() };
     } },
   });
-  const normalized = load('lib/idealista/search.ts').normalizeProperty(anuncio, 'venta');
+  const normalized = load('lib/idealista/search.ts').normalizeProperty({ ...anuncio, newDevelopment: true }, 'venta');
   assert.equal(normalized.description, anuncio.description);
   assert.equal(normalized.parkingSpace.hasParkingSpace, true);
   await load('lib/agent/tools/valorar-vivienda.ts').runValorarVivienda(normalized);
   assert.equal(observed.description, anuncio.description);
   assert.equal(observed.parkingSpace.hasParkingSpace, true);
+  assert.equal(normalized.newDevelopment, true);
+  assert.equal(observed.newDevelopment, true);
 });
 
 const mixed = require('./fixtures/valoracion-v3-mixed.json');
-test('v3.1 compares sale totals and monthly rent in the same HTTP batch', async () => {
+test('v3.2 compares sale totals and monthly rent in the same HTTP batch', async () => {
   let posted;
   const load = loader(mixed.respuesta, {}, data => { posted = data; });
   const batch = await load('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
@@ -115,7 +117,7 @@ test('v3.1 compares sale totals and monthly rent in the same HTTP batch', async 
   assert.equal(rent.unidad_comparacion, 'EUR/mes');
   assert.equal(load('lib/valoracion/types.ts').precioEstimado(rent), rent.renta_mensual_estimada);
   assert.equal(rent.precio_estimado, mixed.respuesta.resultados[0].precio_estimado);
-  assert(Math.abs(rent.brecha_pct) < 1);
+  assert.equal(rent.brecha_pct, mixed.respuesta.resultados[1].brecha_pct);
 });
 
 test('rent rejects sale responses, incompatible units and inconsistent comparison amounts', async () => {
@@ -143,7 +145,7 @@ test('rental enrichment uses monthly rent per square metre and explicit derivati
   assert.equal(sale.valuation.operacion, 'venta');
   assert.equal(rent.valuation.operacion, 'alquiler');
   assert.equal(rent.valuation.precioEstimado, mixed.respuesta.resultados[1].renta_mensual_estimada);
-  assert.equal(rent.valuation.referenciaEurM2, 18.8);
+  assert.equal(rent.valuation.referenciaEurM2, Math.round(mixed.respuesta.resultados[1].renta_mensual_estimada / mixed.anuncios[1].size * 10) / 10);
   assert(rent.valuation.avisoModelo.includes('2024'));
   assert(rent.valuation.referencia.includes('renta derivada'));
   assert.equal(rent.valuation.banda, null);
@@ -172,26 +174,84 @@ test('chat requires the observed operation and preserves rental monthly price', 
   await assert.rejects(tool({ ...rental, operation: undefined }));
 });
 
-test('v3.1 accepts consistent 2026 index periods and carries them into status messages', async () => {
-  const response = structuredClone(mixed.respuesta);
-  response.nivel_precios = '2026';
-  for (const value of response.resultados) {
+test('v3.2 rejects invented index periods even if dates and arithmetic are internally consistent', async () => {
+  const batch = await loader(mixed.respuesta)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
+  assert.equal(batch.resultados.size, mixed.respuesta.resultados.length);
+  assert(batch.estados.get(mixed.anuncios[0].propertyCode).motivo.includes('2025'));
+  assert(batch.estados.get(mixed.anuncios[1].propertyCode).motivo.includes('2024'));
+  const invented = structuredClone(mixed.respuesta);
+  invented.nivel_precios = '2026';
+  for (const value of invented.resultados) {
     value.nivel_precios = '2026';
     value.ano_precio = 2026;
     value.ano_renta = 2026;
     value.metodo_renta = 'ratio_distrital_2026';
   }
-  const batch = await loader(response)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
-  assert.equal(batch.resultados.size, response.resultados.length);
-  for (const value of response.resultados) {
-    const message = batch.estados.get(value.propertyCode).motivo;
-    assert(message.includes('2026'));
-    assert(!/2024|2025/.test(message));
-  }
-  for (const changed of [{ ano_precio: 2025 }, { ano_renta: 2024 }, { ano_precio: '2026' }, { ano_renta: 2026.5 }]) {
-    const invalid = structuredClone(response);
-    invalid.resultados = [{ ...response.resultados[0], ...changed }];
+  assert.equal((await loader(invented)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios)).resultados.size, 0);
+  for (const changed of [{ ano_precio: 2026, nivel_precios: '2026' }, { ano_renta: 2026, metodo_renta: 'ratio_distrital_2026' }, { ano_precio: '2025' }, { ano_renta: 2024.5 }]) {
+    const invalid = structuredClone(mixed.respuesta);
+    invalid.resultados = [{ ...invalid.resultados[0], ...changed }];
     const rejected = await loader(invalid)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
     assert.equal(rejected.resultados.size, 0, JSON.stringify(changed));
+  }
+});
+
+test('v3.2 new-development flag reaches the API, is required in results and preserves warnings', async () => {
+  let posted;
+  const response = structuredClone(respuesta);
+  response.resultados[0].calidad.obra_nueva = true;
+  response.resultados[0].advertencias.push('Obra nueva: las viviendas de una promoción no son observaciones independientes.');
+  const load = loader(response, {}, data => { posted = data; });
+  const batch = await load('lib/valoracion/client.ts').valorarLoteConEstado([{ ...anuncio, newDevelopment: true }]);
+  assert.equal(posted.anuncios[0].newDevelopment, true);
+  assert.equal(batch.resultados.get(anuncio.propertyCode).calidad.obra_nueva, true);
+  assert(batch.resultados.get(anuncio.propertyCode).advertencias.some(v => v.includes('promoción')));
+  delete response.resultados[0].calidad.obra_nueva;
+  assert.equal((await loader(response)('lib/valoracion/client.ts').valorarLoteConEstado([anuncio])).resultados.size, 0);
+  for (const flag of [false, undefined]) {
+    await loader(respuesta, {}, data => { posted = data; })('lib/valoracion/client.ts').valorarLoteConEstado([{ ...anuncio, newDevelopment: flag }]);
+    assert.equal(posted.anuncios[0].newDevelopment, flag);
+  }
+});
+
+test('description abstentions keep Fair unavailable and weighted Fit Score partial', async () => {
+  for (const reason of ['a_reformar', 'ocupada', 'a_reformar;ocupada']) {
+    const response = { ...respuesta, resultados: [], errores: [{ propertyCode: anuncio.propertyCode, indice: 0, estado: 'fuera_ambito', detalle: reason }] };
+    const load = loader(response, {
+      '@/lib/market/cache': { getMarketData: async () => ({ data: { data: [] }, fromFallback: true }) },
+      '@/lib/market/match-province': { findProvincePrice: () => null },
+      '@/lib/market/rent': { findRentReference: () => null },
+    });
+    const property = { ...anuncio, district: 'Centro' };
+    const [enriched] = await load('lib/enrich.ts').enrichProperties([property]);
+    assert.equal(enriched.valuation.estadoModelo, 'fuera_ambito');
+    const message = enriched.valuation.avisoModelo;
+    assert(message.startsWith('El modelo no estima esta vivienda porque'));
+    if (reason.includes('a_reformar')) assert(message.includes('a reformar o para actualizar'));
+    if (reason.includes('ocupada')) assert(message.includes('ocupada, alquilada o sin plena posesión'));
+    assert(!message.includes('a_reformar'));
+    const score = load('lib/personal-score.ts').personalScore(property, enriched, { scoreWeights: { alpha: 75, beta: 25, gamma: 0, delta: 0 } });
+    assert.equal(score.scoring.fair, null);
+    assert.equal(score.scoring.components.find(c => c.key === 'fair').value, null);
+    assert.equal(score.scoring.coveragePercent, 25);
+    assert.equal(score.score, Math.round(score.scoring.opportunity.score * 0.25));
+    assert(score.scoring.components[0].explanation.includes(message));
+    const contradiction = { ...response, resultados: respuesta.resultados };
+    assert.equal((await loader(contradiction)('lib/valoracion/client.ts').valorarLoteConEstado([anuncio])).resultados.size, 0);
+  }
+});
+
+test('a valid response for a different advertised price cannot supply Fair', async () => {
+  const batch = await loader(respuesta)('lib/valoracion/client.ts').valorarLoteConEstado([{ ...anuncio, price: anuncio.price + 1 }]);
+  assert.equal(batch.resultados.size, 0);
+  assert.equal(batch.estados.get(anuncio.propertyCode).estado, 'no_disponible');
+});
+
+
+test('unknown abstention details remain intact instead of being guessed', async () => {
+  for (const detail of ['fuera_del_nuevo_ambito', 'a_reformar;nuevo_motivo', 'Faltan datos registrales observados.']) {
+    const response = { ...respuesta, resultados: [], errores: [{ propertyCode: anuncio.propertyCode, estado: 'fuera_ambito', detalle: detail }] };
+    const batch = await loader(response)('lib/valoracion/client.ts').valorarLoteConEstado([anuncio]);
+    assert.equal(batch.estados.get(anuncio.propertyCode).motivo, detail);
   }
 });

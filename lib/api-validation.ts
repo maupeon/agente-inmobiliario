@@ -62,5 +62,6 @@ export function validProperty(value: unknown): value is Property {
     && typeof value.propertyType === "string" && ["sale", "rent"].includes(String(value.operation))
     && Number.isFinite(value.size) && Number(value.size) > 0 && Number.isFinite(value.price) && Number(value.price) > 0
     && ["municipality", "province", "district", "address", "floor"].every((k) => value[k] == null || typeof value[k] === "string")
-    && ["latitude", "longitude", "rooms", "bathrooms"].every((k) => value[k] == null || Number.isFinite(value[k]));
+    && ["latitude", "longitude", "rooms", "bathrooms"].every((k) => value[k] == null || Number.isFinite(value[k]))
+    && (value.newDevelopment == null || typeof value.newDevelopment === "boolean");
 }

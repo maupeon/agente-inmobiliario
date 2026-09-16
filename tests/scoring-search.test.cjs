@@ -35,7 +35,7 @@ async function main() {
   const profile = { operacion: 'venta', zona: 'Madrid', createdAt: '2026-09-09', zonaLat: 40.4, zonaLon: -3.7 };
   const property = { propertyCode: 'one', title: 'Vivienda', price: 100000, size: 60, propertyType: 'flat', operation: 'sale', latitude: 40.4, longitude: -3.7 };
   const empty = { propertyCode: 'one', valuation: null, neighborhood: null, commute: null };
-  const model = { ...empty, valuation: { nivel: 'modelo', estadoModelo: 'ok', fromFallback: false, modeloVersion: 'v2', operacion: 'venta', precioEstimado: 100000 / 0.9, banda: 'barato', diferenciaPorcentual: -10, intervalo: [100000, 150000] } };
+  const model = { ...empty, valuation: { nivel: 'modelo', estadoModelo: 'ok', fromFallback: false, modeloVersion: '3.2.0', modeloId: 'habitIA-xgboost-2018-v3', modeloSha256: 'e5526aca6001741f24eb976dbd9607df131b3822b5b5a01b66c6c92af2a9d748', operacion: 'venta', precioEstimado: 100000 / 0.9, banda: 'barato', diferenciaPorcentual: -10, intervalo: [100000, 150000] } };
   const { fairFromGap, fairForProperty, opportunityFromGrowth, opportunityForProperty } = load('lib/scoring/price-scores.ts');
   check('Fair has monotonic, bounded scores independent of model bands', () => {
     for (const [gap, expected] of [[-80,100],[-20,100],[-10,75],[0,50],[10,25],[20,0],[300,0]]) assert.equal(fairFromGap(gap),expected);
@@ -43,7 +43,7 @@ async function main() {
     const e={...model,valuation:{...model.valuation,banda:null,diferenciaPorcentual:999}};
     assert.equal(Math.round(fairForProperty(property,e).score),75);
     assert.equal(Math.round(personalScore(property,e,null).scoring.components[0].value),75);
-    for(const changed of [{precioEstimado:0},{precioEstimado:NaN},{precioEstimado:undefined},{operacion:'alquiler'},{fromFallback:true},{estadoModelo:'no_disponible'},{nivel:'provincia'},{modeloVersion:undefined}]) assert.equal(fairForProperty(property,{...e,valuation:{...e.valuation,...changed}}),null);
+    for(const changed of [{precioEstimado:0},{precioEstimado:NaN},{precioEstimado:undefined},{operacion:'alquiler'},{fromFallback:true},{estadoModelo:'no_disponible'},{nivel:'provincia'},{modeloVersion:undefined},{modeloVersion:'3.1.0'},{modeloSha256:'5d29cd26889cc0777196f592aa9828b18cc7d71ccd1a05ee61a95f0a44741a04'},{modeloId:'habitIA-oferta-2018-v2'}]) assert.equal(fairForProperty(property,{...e,valuation:{...e.valuation,...changed}}),null);
     assert.equal(fairForProperty(property,{...e,propertyCode:'different'}),null);
     for(const price of [0,-1,NaN,Infinity]) assert.equal(fairForProperty({...property,price},e),null);
     const rental=fairForProperty({...property,operation:'rent',price:900},{...e,valuation:{...e.valuation,operacion:'alquiler',precioEstimado:1000}});
@@ -201,6 +201,19 @@ async function main() {
     assert.equal(chamberi.coveragePercent,100);
     assert.equal(chamberi.indicators.length,4);
   });
+  check('saved chat cards suppress old predictions and retain current monthly comparisons', () => {
+    const { renderToStaticMarkup } = req('react-dom/server');
+    const { createElement } = req('react');
+    const { PurchaseValuationCard } = load('components/property/PurchaseValuationCard.tsx');
+    const fixture=req('./tests/fixtures/valoracion-v3-mixed.json').respuesta.resultados[1];
+    const card = resultado => renderToStaticMarkup(createElement(PurchaseValuationCard, { data: { propertyCode: fixture.propertyCode, operation: 'rent', estado: 'ok', resultado, aviso: 'Resultado guardado' } }));
+    const current=card(fixture);
+    assert(current.includes('€/mes'));assert(current.includes('3.2.0'));assert(current.includes('ratios distritales de 2024'));
+    for (const change of [{model_version:'3.1.0'},{modelo_sha256:'5d29cd26889cc0777196f592aa9828b18cc7d71ccd1a05ee61a95f0a44741a04'}]) {
+      const old=card({...fixture,...change});
+      assert(old.includes('modelo anterior'));assert(!old.includes('ratios distritales'));assert(!old.includes('Estimación puntual'));
+    }
+  });
   check('Zone source snapshot counts each Metro line once per district and keeps noise absent', () => {
     const urban=req('./data/madrid/urban-sources.json');
     const rows=load('lib/neighborhood/zone-data.ts').ZONE_DISTRICTS;
@@ -265,6 +278,19 @@ async function main() {
     assert.equal(restored.properties[0].propertyCode,'one'); assert.equal(restored.filters.precioMax,200000); assert.equal(restored.recommendations.length,1);
     searches.saveLastSearch([],{source:'dashboard',filters});
     assert.equal(searches.readLastSearch().properties.length,0); assert.equal(events,2);
+  });
+  check('old model snapshot keeps properties but removes prior Fair and ranking evidence', () => {
+    const oldModel={...model,valuation:{...model.valuation,modeloVersion:'3.1.0'}};
+    searches.saveLastSearch([property],{source:'dashboard',recommendations:[{property,enrichment:oldModel,score:99,scoring:{fair:{score:100}},rationale:'Obsolete bargain',highlights:['Obsolete']} ]});
+    const restored=searches.readLastSearch();
+    assert.equal(restored.properties[0].propertyCode,'one');
+    const item=restored.recommendations[0];
+    assert.equal(item.enrichment.valuation.precioEstimado,undefined);
+    assert.equal(item.enrichment.valuation.estadoModelo,'no_disponible');
+    assert.equal(item.scoring,undefined);assert.equal(item.score,0);assert.equal(item.highlights.length,0);
+    assert.equal(personalScore(item.property,item.enrichment,null).scoring.fair,null);
+    assert(item.rationale.includes('modelo anterior'));
+    searches.saveLastSearch([]);
   });
   check('corrupt snapshot does not crash and falls back to compatible key', () => {
     store.set('habitia:lastSearch:v1','null');

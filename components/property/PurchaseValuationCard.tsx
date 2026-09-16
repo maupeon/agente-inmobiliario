@@ -1,10 +1,12 @@
 import type { PurchaseValuation } from "@/types";
 import { formatNumber } from "@/lib/utils";
 import { precioEstimado, operacionValoracion } from "@/lib/valoracion/types";
+import { isCurrentModel, STALE_MODEL_NOTICE } from "@/lib/valoracion/current-model";
 const LABELS: Record<string, string> = {
   CONSTRUCTEDAREA: "Superficie", ROOMNUMBER: "Habitaciones", BATHNUMBER: "Baños", FLOORCLEAN: "Planta", HASLIFT: "Ascensor", barrio: "Barrio aproximado", distrito: "Distrito aproximado", x_km: "Localización", y_km: "Localización", LATITUDE: "Latitud", LONGITUDE: "Longitud", DISTANCE_TO_CITY_CENTER: "Distancia al centro", DISTANCE_TO_METRO: "Distancia de referencia al metro", CADASTRALQUALITYID: "Calidad catastral de referencia", alq_mediana_eur_m2: "Referencia histórica de alquiler", m2_por_habitacion: "Superficie por habitación", antiguedad: "Antigüedad de referencia", ISSTUDIO: "Estudio", ISDUPLEX: "Dúplex", FLATLOCATIONID_cat: "Interior/exterior", ratio_planta: "Planta relativa" };
 export function PurchaseValuationCard({ data }: { data: PurchaseValuation }) {
-  const v = data.resultado;
+  const stale = !!data.resultado && !isCurrentModel(data.resultado);
+  const v = stale ? null : data.resultado;
   const rental = (v ? operacionValoracion(v) : data.operation) === "rent";
   return <section className="my-4 rounded-xl border border-hairline bg-paper-50 p-5">
     <h3 className="font-display text-xl">{rental ? "Alquiler mensual · estimación HabitIA" : "Precio de oferta · modelo HabitIA"}</h3>
@@ -24,6 +26,6 @@ export function PurchaseValuationCard({ data }: { data: PurchaseValuation }) {
       <ul className="mt-2 text-sm">{v.explicacion.factores.slice(0, 3).map((f) => <li key={f.variable}>{LABELS[f.variable] ?? f.variable}: contribución {f.sentido === "aumenta" ? "positiva" : "negativa"}</li>)}</ul>
       <p className="mt-2 text-xs text-stone-600">Atribuciones del modelo respecto a su predicción base, en escala logarítmica. Explican el cálculo; no son efectos causales ni importes en euros.</p>
     </div>}
-    <p className="mt-3 text-sm leading-relaxed text-stone-600">{data.aviso} La brecha indica una desviación del modelo; no acredita una oportunidad de inversión.</p>
+    <p className="mt-3 text-sm leading-relaxed text-stone-600">{stale ? STALE_MODEL_NOTICE : data.aviso} La brecha indica una desviación del modelo; no acredita una oportunidad de inversión.</p>
   </section>;
 }

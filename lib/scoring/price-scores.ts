@@ -1,6 +1,7 @@
 import type { FairScoring, OpportunityScoring, Property, PropertyEnrichment } from "@/types";
 import { isMadridProperty } from "@/lib/search-scope";
 import { OPPORTUNITY_DISTRICTS, OPPORTUNITY_SOURCE } from "./opportunity-data";
+import { isCurrentValuation } from "@/lib/valoracion/current-model";
 
 const positive = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n) && n > 0;
 const finite = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n);
@@ -16,7 +17,7 @@ export function fairFromGap(gapPercent: number | null): number | null {
 export function fairForProperty(p: Property, e: PropertyEnrichment): FairScoring | null {
   const v = e.valuation;
   if (e.propertyCode !== p.propertyCode || !v || v.nivel !== "modelo" || v.estadoModelo !== "ok"
-    || v.fromFallback || !v.modeloVersion || !positive(p.price) || !positive(v.precioEstimado)
+    || v.fromFallback || !isCurrentValuation(v) || !positive(p.price) || !positive(v.precioEstimado)
     || !["sale", "rent"].includes(p.operation)
     || v.operacion !== (p.operation === "rent" ? "alquiler" : "venta")) return null;
   const gapPercent = (p.price / v.precioEstimado - 1) * 100;

@@ -69,6 +69,7 @@ export interface ValoracionModeloV3 extends Omit<ValoracionModeloV2,
     planta_imputada: boolean;
     ascensor_desde_descripcion: boolean;
     barrio_rescatado: boolean;
+    obra_nueva: boolean;
     fuera_de_rango: string | null;
   };
 }
@@ -115,5 +116,6 @@ export interface AnuncioParaValorar {
   operation: "sale" | "rent";
   description?: string;
   parkingSpace?: { hasParkingSpace?: boolean };
+  newDevelopment?: boolean;
   detailedType?: { typology?: string; subTypology?: string };
 }

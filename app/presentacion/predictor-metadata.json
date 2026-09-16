@@ -34,20 +34,20 @@
   "reg_alpha": 0.0034879036214009018,
   "reg_lambda": 8.659692055247017,
   "subsample": 0.9568742693092576,
-  "n_estimators": 401
+  "n_estimators": 410
  },
- "smearing": 1.016823185598671,
+ "smearing": 1.0167794824519134,
  "metricas_test": {
-  "rmse_log": 0.18503127845156148,
-  "r2_log": 0.9402686686372956,
-  "error_abs_medio_eur": 48992.72719680626,
-  "error_abs_mediano_eur": 23648.523437499985,
-  "error_pct_medio": 13.59169478232827,
-  "error_pct_mediano": 9.286445575800467,
-  "pct_dentro_del_10pct": 53.02769312309527,
-  "pct_dentro_del_20pct": 80.2769312309527,
-  "sesgo_mediano_pct": 1.1056640519608862,
-  "rmse_log CV (06)": 0.1856845156269647
+  "rmse_log": 0.18561034937994245,
+  "r2_log": 0.9398942151731962,
+  "error_abs_medio_eur": 49220.19867631592,
+  "error_abs_mediano_eur": 23708.484375000407,
+  "error_pct_medio": 13.615120414487155,
+  "error_pct_mediano": 9.299045072574406,
+  "pct_dentro_del_10pct": 52.75606201139526,
+  "pct_dentro_del_20pct": 80.55518749171856,
+  "sesgo_mediano_pct": 1.0254336376404272,
+  "rmse_log CV (06)": 0.1857717186786336
  },
  "mediana_planta_train": 2.0,
  "rangos_train": {
@@ -132,8 +132,8 @@
    "max": 1395.23
   },
   "indice_vulnerabilidad": {
-   "min": 0.005305531,
-   "max": 0.011819176
+   "min": 0.0054,
+   "max": 0.0121
   }
  },
  "medias_train": {
@@ -157,11 +157,11 @@
   "DISTANCE_TO_CASTELLANA": 2.6368170291843764,
   "alq_mediana_eur_m2_barrio": 10.681732793811392,
   "delitos_per_10k_barrio": 126.71595345755692,
-  "indice_vulnerabilidad": 0.007711459640993789
+  "indice_vulnerabilidad": 0.007926645134575569
  },
- "entrenado": "2026-09-13T18:08:59",
+ "entrenado": "2026-09-15T20:10:09",
  "version_paquete": 3,
- "exportado": "2026-09-13T19:19:48",
+ "exportado": "2026-09-15T22:56:50",
  "ano_base": 2018,
  "ano_precio": 2025,
  "ano_renta": 2024,

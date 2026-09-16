@@ -61,6 +61,7 @@ export const TOOL_DEFINITIONS = [
         floor: { type: "string" }, hasLift: { type: "boolean" }, exterior: { type: "boolean" },
         description: { type: "string", maxLength: 12000, description: "Descripción literal observada del anuncio; el predictor extrae sus características." },
         parkingSpace: { type: "object", properties: { hasParkingSpace: { type: "boolean" } } },
+        newDevelopment: { type: "boolean", description: "Indicador de obra nueva observado en el anuncio; conserva también false." },
         sourceKind: { type: "string", enum: ["idealista", "demo"] },
         detailedType: { type: "object", properties: { typology: { type: "string" }, subTypology: { type: "string" } } },
       },

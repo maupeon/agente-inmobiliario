@@ -18,6 +18,7 @@ export async function runValorarVivienda(input: unknown): Promise<PurchaseValuat
     floor: typeof input.floor === "string" ? input.floor : undefined,
     hasLift: typeof input.hasLift === "boolean" ? input.hasLift : undefined,
     exterior: typeof input.exterior === "boolean" ? input.exterior : undefined,
+    newDevelopment: typeof input.newDevelopment === "boolean" ? input.newDevelopment : undefined,
     description: typeof input.description === "string" ? input.description.slice(0, 12000) : undefined,
     parkingSpace: isRecord(input.parkingSpace) && typeof input.parkingSpace.hasParkingSpace === "boolean"
       ? { hasParkingSpace: input.parkingSpace.hasParkingSpace } : undefined,

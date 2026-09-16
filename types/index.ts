@@ -179,6 +179,7 @@ export interface Property {
   url: string;
   description?: string;
   parkingSpace?: { hasParkingSpace?: boolean };
+  newDevelopment?: boolean;
   photos?: string[];
   features?: string[];
   hasLift?: boolean;
@@ -392,6 +393,8 @@ export interface PropertyValuation {
   nivelPrecios?: string;
   modeloVersion?: string;
   modeloId?: ValoracionModelo["model_id"];
+  modeloSha256?: string;
+  obraNueva?: boolean;
   precioEstimado?: number;
   advertencias?: string[];
   rentaEscenario?: { mensual: number; ano: number; metodo: string };
