@@ -65,7 +65,6 @@ export function PredictorDetails() {
         <p>No distingue estado de conservación, áticos ni vistas. El equipamiento depende de la descripción. Obra nueva: advertencia por dependencia entre anuncios de una promoción.</p>
       </article>
     </div>
-    <p className={styles.predictorSource}>Resultados declarados · {predictor.nombre} · paquete v{predictor.version_paquete}. La entrega no incluye particiones ni tamaño del test para auditar la evaluación.</p>
   </div>;
 }
 
