@@ -42,25 +42,21 @@ const SIGNALS = [
     t: "α · Fair · precio",
     d: "Calcula la diferencia entre el precio predicho y el precio de oferta, dividida entre el precio predicho. Fair es el percentil de esa brecha normalizada respecto a la distribución de referencia: cuanto más por debajo de la estimación esté el anuncio, mayor puntuación. En alquiler se comparan mensualidades.",
     formulas: ["Fair Gap (%) = 100 × (Precio predicho − Precio oferta) / Precio predicho", "Fair Score = Percentil(Fair Gap normalizado respecto a la distribución de referencia)"],
-    fuente: "25% por defecto · Sin estimación: no disponible",
   },
   {
     t: "β · Opportunity · inversión",
     d: "Calcula la diferencia entre la revalorización del inmueble y la de la ciudad, y transforma esa brecha normalizada en un percentil respecto a la distribución de referencia. La aplicación utiliza la variación anual de precios de oferta de venta del distrito como referencia del inmueble, tanto en compra como en alquiler. No predice rentabilidad futura.",
     formulas: ["Opportunity Gap (%) = 100 × (Revalorización inmueble − Revalorización ciudad)", "Opportunity Score = Percentil(Opportunity Gap normalizado respecto a la distribución de referencia)"],
-    fuente: "25% por defecto · Idealista · 21 distritos · Compra y alquiler",
   },
   {
     t: "γ · Zone · calidad de vida",
     d: "Promedia cuatro indicadores: zonas verdes, seguridad, transporte y servicios. El valor de cada indicador es su percentil para ese inmueble respecto a la distribución de referencia, expresado entre 0 y 1 y orientado para que un valor mayor sea más favorable. Cada indicador pesa un 25% dentro de Zone.",
     formulas: ["Zone Score = 100 × (I verde + I seguridad + I transporte + I servicios) / 4"],
-    fuente: "25% por defecto · Zone por distrito",
   },
   {
     t: "δ · Lifestyle · tiempo al trabajo",
     d: "Calcula el percentil del tiempo al trabajo con signo negativo, normalizado respecto a los pisos que pasan tus filtros. Así, un trayecto más corto obtiene una puntuación mayor. La comparación depende de ese conjunto de viviendas y de tu modo de transporte. Las aproximaciones de ruta se identifican.",
     formulas: ["Lifestyle Score = Percentil(−Tiempo al trabajo normalizado respecto a los pisos que pasan tus filtros)"],
-    fuente: "25% por defecto · Necesita trabajo y tiempo de ruta",
   },
 ];
 
@@ -157,9 +153,6 @@ export default function ComoFuncionaPage() {
                     <p key={formula} className="break-words font-mono text-xs leading-relaxed text-ink">{formula}</p>
                   ))}
                 </div>
-                <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.16em] text-saffron-700">
-                  {s.fuente}
-                </p>
               </div>
             ))}
           </div>
