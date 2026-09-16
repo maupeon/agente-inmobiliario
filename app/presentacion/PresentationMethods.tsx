@@ -51,7 +51,7 @@ export function PredictorDetails() {
   return <div className={styles.predictorDetails}>
     <dl className={styles.predictorMetrics}>
       <div><dt>Error porcentual mediano</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd><small>MdAPE · test de {predictor.ano_base}</small></div>
-      <div><dt>Error absoluto medio</dt><dd>{modelMetric("error_abs_medio_eur", 0, " €")}</dd><small>MAE · test de {predictor.ano_base}</small></div>
+      <div><dt>Error absoluto mediano</dt><dd>{modelMetric("error_abs_mediano_eur", 0, " €")}</dd><small>MdAE · test de {predictor.ano_base}</small></div>
       <div><dt>R² en logaritmos</dt><dd>{modelMetric("r2_log", 4)}</dd><small>RMSE log: {modelMetric("rmse_log", 4)}</small></div>
       <div><dt>Error dentro de ±20%</dt><dd>{modelMetric("pct_dentro_del_20pct", 2, "%")}</dd><small>Proporción observada en test</small></div>
     </dl>
