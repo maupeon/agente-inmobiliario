@@ -42,7 +42,7 @@ export function PricingMethod() {
           P<sub>alquiler {predictor.ano_precio}</sub> = P<sub>compra {predictor.ano_precio}</sub> · f<sub>renta distrito {predictor.ano_precio}</sub>
         </Equation></div></article>
       </div>
-      <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {predictor.ano_precio} · f renta: ratio mensual renta/precio de {predictor.ano_precio}. Proyección incorporada en el paquete: últimas fuentes de venta de 2025 y alquiler de 2024. La actualización no acredita por sí sola precisión actual.</p>
+      <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {predictor.ano_precio} · f renta: ratio mensual renta/precio de {predictor.ano_precio}.</p>
     </section>
   </div>;
 }
