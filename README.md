@@ -127,7 +127,7 @@ GitHub Actions ejecuta la misma verificación en los pushes a `main` y en las pu
 - Las fuentes oficiales de barrio aportan contexto. Sus recuentos no se convierten en índices de seguridad o calidad de vida.
 - La comparación de compra y alquiler calcula escenarios según los supuestos introducidos; no predice el mercado.
 
-La memoria, los anexos, los artefactos de inferencia y la API Python se encuentran en el repositorio académico privado [habitia-tfm](https://github.com/maupeon/habitia-tfm). Su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16) reúne documentos y artefactos.
+La memoria, los anexos, los artefactos de inferencia y la API Python se encuentran en el repositorio académico público [habitia-tfm](https://github.com/maupeon/habitia-tfm). Su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16) reúne documentos y artefactos de acceso público.
 
 ## 7. Documentación
 
