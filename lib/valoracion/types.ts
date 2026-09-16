@@ -1,4 +1,4 @@
-/** Contrato del servicio de valoración (FastAPI · `memoria/servicio/api.py`). */
+/** Contrato del servicio de valoración (FastAPI · `habitia-tfm/servicio/api_v3.py`). */
 
 export type BandaValoracion = "barato" | "ajustado" | "en_linea" | "caro" | "muy_caro";
 
@@ -43,6 +43,7 @@ export interface ValoracionModeloV3 extends Omit<ValoracionModeloV2,
   model_id: "habitIA-xgboost-2018-v3";
   modelo: "arboles_desplegable_ajustado";
   modelo_sha256: string;
+  paquete_sha256: string;
   /** Desde 3.1: operación y unidades de la comparación; 3.0 solo admitía venta. */
   operation?: "sale" | "rent";
   precio_comparacion?: number;
@@ -58,12 +59,16 @@ export interface ValoracionModeloV3 extends Omit<ValoracionModeloV2,
   ano_base: 2018;
   ano_precio: number;
   ano_renta: number;
+  ajuste_proyectado: true;
+  ultimo_ano_venta: number;
+  ultimo_ano_alquiler: number;
+  ano_inicio_tendencia: number;
   barrio_code: string;
   distrito_code: string;
   renta_mensual_estimada: number;
   factor_renta_mensual: number;
   alquiler_validado: false;
-  metodo_renta: `ratio_distrital_${number}`;
+  metodo_renta: `ratio_distrital_proyectado_${number}`;
   calidad: {
     sin_descripcion: boolean;
     planta_imputada: boolean;
@@ -89,6 +94,7 @@ export function precioEstimado(v: ValoracionModelo): number {
 
 export interface RespuestaValoracion {
   model_id?: ValoracionModelo["model_id"];
+  paquete_sha256: string;
   resultados: ValoracionModelo[];
   errores?: Array<{ indice: number; propertyCode?: string; estado: string; detalle: string }>;
   ms: number;

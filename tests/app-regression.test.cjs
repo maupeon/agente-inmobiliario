@@ -203,7 +203,7 @@ async function main() {
   const onlyModel=await modelAndFixture.enrichProperties([base]);
   check('successful model plus market fixture never shows territorial comparison or false source',()=>{
     assert.equal(onlyModel[0].valuation.nivel,'modelo');assert.equal(onlyModel[0].valuation.comparativa,undefined);
-    assert.equal(onlyModel[0].valuation.referenciaEurM2,Math.round(validValuation.precio_estimado/base.size*10)/10);assert.equal(onlyModel[0].valuation.modeloVersion,'3.2.0');
+    assert.equal(onlyModel[0].valuation.referenciaEurM2,Math.round(validValuation.precio_estimado/base.size*10)/10);assert.equal(onlyModel[0].valuation.modeloVersion,'3.3.0');
   });
   let callsBlocked=0;
   const paused=loader({'./auth':{getAccessToken:async()=>'test'},'./usage':{reserveIdealistaRequest:async()=>{throw new Error('quota paused');}},'./search-cache':{cachedSearch:async(_,run)=>run()}},{fetch:async()=>{callsBlocked++;throw new Error('must not fetch');}})('lib/idealista/search.ts');

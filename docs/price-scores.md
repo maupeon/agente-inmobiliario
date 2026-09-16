@@ -10,7 +10,7 @@ Actualización: 16 de septiembre de 2026. Estas reglas de preferencia desbloquea
 
 Coincidencia: 50. Un 10% por debajo: 75; un 20% o más por debajo: 100. Un 10% por encima: 25; un 20% o más por encima: 0. El centro 50 y la amplitud ±20% son decisiones provisionales de producto, no intervalos de confianza ni umbrales estimados.
 
-Se exige valoración individual válida, estado `ok`, versión, ausencia de respaldo, identidad de anuncio y operación coincidente. Los precios deben ser finitos y positivos. Se recalcula la desviación con los importes comparables, en lugar de confiar en una desviación o banda antigua. Venta compara euros totales; alquiler compara €/mes. La estimación de renta procede de venta a nivel de 2025 y ratios distritales de 2024, sin validación independiente de alquiler. Si el servicio se abstiene, no hay Fair. Las bandas y los intervalos del predictor permanecen intactos.
+Se exige valoración individual válida, estado `ok`, versión, ausencia de respaldo, identidad de anuncio y operación coincidente. Los precios deben ser finitos y positivos. Se recalcula la desviación con los importes comparables, en lugar de confiar en una desviación o banda antigua. Venta compara euros totales; alquiler compara €/mes. La estimación de renta procede de venta y ratios distritales proyectados a 2026, a partir de últimas fuentes de venta de 2025 y alquiler de 2024, sin validación independiente de alquiler. Si el servicio se abstiene, no hay Fair. Las bandas y los intervalos del predictor permanecen intactos.
 
 ## Opportunity
 
@@ -42,6 +42,6 @@ Opportunity conserva en alquiler los mismos valores, fuente y periodo de venta q
 
 ## Cambio de modelo del 16 de septiembre
 
-El paquete exportado el 15/09/2026 incorpora 410 árboles y se integra mediante el contrato 3.2.0. Fair y el Fit Score global usan sus nuevas estimaciones, comprobando la versión y el hash vigentes. Las valoraciones guardadas del modelo anterior no se reutilizan para calcular Fair. Se conserva la escala lineal: esta entrega no aporta una nueva calibración de scores.
+El paquete `habitia_predictor`, exportado el 16/09/2026 a las 11:57:54, conserva los 410 árboles y actualiza los índices distritales y las variables de alquiler de barrio a un escenario proyectado de 2026. Se integra mediante el contrato 3.3.0. Fair y el Fit Score global usan sus nuevas estimaciones, comprobando la versión y los hashes del modelo y del paquete completo. Las valoraciones guardadas del modelo anterior no se reutilizan para calcular Fair. Se conserva la escala lineal: esta actualización temporal no aporta una nueva calibración de scores.
 
-Las abstenciones por descripción de vivienda a reformar u ocupada/alquilada dejan Fair ausente y reducen la cobertura ponderada; no equivalen a Fair = 0. Obra nueva conserva el cálculo con una advertencia sobre anuncios dependientes de una misma promoción. El contrato sigue comparando venta total y alquiler mensual por separado, con venta indexada a 2025 y ratios de renta de 2024.
+Las abstenciones por descripción de vivienda a reformar u ocupada/alquilada dejan Fair ausente y reducen la cobertura ponderada; no equivalen a Fair = 0. Obra nueva conserva el cálculo con una advertencia sobre anuncios dependientes de una misma promoción. El contrato sigue comparando venta total y alquiler mensual por separado, con venta y ratios de renta proyectados a 2026. Las últimas observaciones siguen siendo venta de 2025 y alquiler de 2024; no se atribuye validación actual a la proyección.

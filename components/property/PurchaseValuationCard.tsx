@@ -15,8 +15,8 @@ export function PurchaseValuationCard({ data }: { data: PurchaseValuation }) {
       {v.intervalo ? <p className="mt-1 text-sm">Intervalo del escenario: {formatNumber(v.intervalo[0])}–{formatNumber(v.intervalo[1])} €</p>
         : <p className="mt-1 text-sm">Estimación puntual · sin intervalo calibrado</p>}
       {v.brecha_pct != null && <p className="mt-2 text-sm">Anuncio {Math.abs(v.brecha_pct).toFixed(1)} % {v.brecha_pct < 0 ? "por debajo" : "por encima"} de la estimación.</p>}
-      <p className="mt-2 text-xs text-stone-600">Modelo de venta entrenado con oferta de 2018 · venta indexada a {v.nivel_precios} · {v.model_version}</p></>}
-    {v?.model_id === "habitIA-xgboost-2018-v3" && <p className="mt-3 text-sm text-stone-600">{rental ? "Renta derivada del valor de venta" : `Escenario de renta: ${formatNumber(Math.round(v.renta_mensual_estimada))} €/mes`}, con ratios distritales de {v.ano_renta}. Alquiler no validado.</p>}
+      <p className="mt-2 text-xs text-stone-600">Modelo de venta entrenado con oferta de 2018 · venta proyectada a {v.nivel_precios} · {v.model_version}</p></>}
+    {v?.model_id === "habitIA-xgboost-2018-v3" && <p className="mt-3 text-sm text-stone-600">{rental ? "Renta derivada del valor de venta" : `Escenario de renta: ${formatNumber(Math.round(v.renta_mensual_estimada))} €/mes`}, con ratios distritales proyectados a {v.ano_renta}. Últimas fuentes: venta de {v.ultimo_ano_venta} y alquiler de {v.ultimo_ano_alquiler}. Alquiler no validado.</p>}
     {!!v?.advertencias.length && <details className="mt-3 text-xs leading-relaxed text-stone-600">
       <summary className="cursor-pointer">Datos utilizados y límites de la estimación</summary>
       <ul className="mt-2 list-disc space-y-1 pl-4">{v.advertencias.map((warning) => <li key={warning}>{warning}</li>)}</ul>

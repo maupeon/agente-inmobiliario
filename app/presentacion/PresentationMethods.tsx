@@ -1,6 +1,5 @@
 "use client";
 
-import { INDEX_TARGET_YEAR } from "@/lib/valoracion/index-update";
 import type { ReactNode } from "react";
 import predictor from "./predictor-metadata.json";
 import styles from "./presentation.module.css";
@@ -33,17 +32,17 @@ export function PricingMethod() {
         <article><span className={styles.methodLabel}>Outputs</span><h4>Precio de compra de {predictor.ano_base}</h4><dl className={styles.pricingMetrics}><div><dt>MdAPE</dt><dd>{modelMetric("error_pct_mediano", 2, "%")}</dd></div><div><dt>R² (log)</dt><dd>{modelMetric("r2_log", 4)}</dd></div></dl><small>Estimación del precio anunciado · métricas del test de {predictor.ano_base}</small></article>
       </div>
     </section>
-    <section aria-label="Actualización macroeconómica prevista a 2026">
+    <section aria-label={`Escenario macroeconómico proyectado a ${predictor.ano_precio}`}>
       <h3 className={styles.methodHeading}>02 <span>Actualización macroeconómica</span></h3>
       <div className={styles.macroFlow}>
-        <article><h4>Comprar</h4><div className={styles.macroEquation}><Equation label={`Precio de compra de ${INDEX_TARGET_YEAR} igual al precio de ${predictor.ano_base} por el factor de venta del distrito de ${predictor.ano_base} a ${INDEX_TARGET_YEAR}`}>
-          P<sub>compra {INDEX_TARGET_YEAR}</sub> = P<sub>compra {predictor.ano_base}</sub> · f<sub>venta distrito</sub>
+        <article><h4>Comprar</h4><div className={styles.macroEquation}><Equation label={`Precio de compra de ${predictor.ano_precio} igual al precio de ${predictor.ano_base} por el factor de venta del distrito de ${predictor.ano_base} a ${predictor.ano_precio}`}>
+          P<sub>compra {predictor.ano_precio}</sub> = P<sub>compra {predictor.ano_base}</sub> · f<sub>venta distrito</sub>
         </Equation></div></article>
-        <article><h4>Alquilar</h4><div className={styles.macroEquation}><Equation label={`Escenario de renta mensual igual al precio de compra de ${INDEX_TARGET_YEAR} por el factor mensual de renta del distrito de ${INDEX_TARGET_YEAR}`}>
-          P<sub>alquiler {INDEX_TARGET_YEAR}</sub> = P<sub>compra {INDEX_TARGET_YEAR}</sub> · f<sub>renta distrito {INDEX_TARGET_YEAR}</sub>
+        <article><h4>Alquilar</h4><div className={styles.macroEquation}><Equation label={`Escenario de renta mensual igual al precio de compra de ${predictor.ano_precio} por el factor mensual de renta del distrito de ${predictor.ano_precio}`}>
+          P<sub>alquiler {predictor.ano_precio}</sub> = P<sub>compra {predictor.ano_precio}</sub> · f<sub>renta distrito {predictor.ano_precio}</sub>
         </Equation></div></article>
       </div>
-      <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {INDEX_TARGET_YEAR} · f renta: ratio mensual renta/precio de {INDEX_TARGET_YEAR}. Proyección prevista: índices de {INDEX_TARGET_YEAR} pendientes de incorporar. La actualización no acredita por sí sola precisión actual.</p>
+      <p className={styles.equationKey}>f venta: factor distrital de {predictor.ano_base} a {predictor.ano_precio} · f renta: ratio mensual renta/precio de {predictor.ano_precio}. Proyección incorporada en el paquete: últimas fuentes de venta de 2025 y alquiler de 2024. La actualización no acredita por sí sola precisión actual.</p>
     </section>
   </div>;
 }

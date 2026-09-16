@@ -1,5 +1,6 @@
 # Revisión de la presentación HabitIA v8
 
+> Nota histórica: esta revisión describe el paquete y las capturas anteriores. El contrato vigente 3.3.0 incorpora la proyección a 2026; consulta [el modelo actualizado](modelo-xgboost.md).
 Se revisaron las tres páginas y las cuatro imágenes de «Dudas mauri presentacion v8.docx». Las correcciones se aplican a la presentación web vigente y al vídeo que contiene. El Word original se conserva como referencia.
 
 ## Cambios por apartado

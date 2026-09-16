@@ -108,8 +108,8 @@ function desdeModelo(
     banda,
     nivel: "modelo",
     referencia: rental && v.model_id === "habitIA-xgboost-2018-v3"
-      ? `renta derivada · venta ${v.nivel_precios} × ratios renta ${v.ano_renta}`
-      : `oferta 2018 · escenario indexado a ${v.nivel_precios}`,
+      ? `renta derivada · venta y ratios proyectados a ${v.nivel_precios}`
+      : `oferta 2018 · escenario proyectado a ${v.nivel_precios}`,
     fromFallback: false,
     intervalo: v.intervalo ?? undefined,
     oportunidad: v.oportunidad,
@@ -117,6 +117,9 @@ function desdeModelo(
     modeloVersion: v.model_version,
     modeloId: v.model_id,
     modeloSha256: v.model_id === "habitIA-xgboost-2018-v3" ? v.modelo_sha256 : undefined,
+    modeloPaqueteSha256: v.model_id === "habitIA-xgboost-2018-v3" ? v.paquete_sha256 : undefined,
+    proyeccion: v.model_id === "habitIA-xgboost-2018-v3"
+      ? { ultimaVentaObservada: v.ultimo_ano_venta, ultimoAlquilerObservado: v.ultimo_ano_alquiler } : undefined,
     obraNueva: v.model_id === "habitIA-xgboost-2018-v3" ? v.calidad.obra_nueva : undefined,
     precioEstimado: precioEstimado(v),
     advertencias: v.advertencias,

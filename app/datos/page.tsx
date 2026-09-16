@@ -55,7 +55,7 @@ export default async function DatosPage() {
         <section id="actualizacion-indices" className="mt-8 border-y border-hairline py-6">
           <h2 className="font-display text-xl text-ink">Índices de venta y alquiler · {INDEX_TARGET_YEAR}</h2>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">{INDEX_UPDATE_NOTICE}</p>
-          <p className="mt-2 text-sm leading-relaxed text-stone-600">La actualización prevista utilizará factores de venta y ratios mensuales de alquiler por distrito con referencia de {INDEX_TARGET_YEAR}. Las fechas de las fuentes históricas y la base de los índices se conservan.</p>
+          <p className="mt-2 text-sm leading-relaxed text-stone-600">El paquete incorpora factores de venta, ratios mensuales de alquiler y alquiler relativo de barrio proyectados a {INDEX_TARGET_YEAR}. Las últimas fuentes observadas son venta de 2025 y alquiler de 2024; se conservan esas fechas y la base de entrenamiento de 2018.</p>
         </section>
 
         <section id="datos-modelo" className="mt-8 overflow-hidden rounded-xl border border-hairline bg-paper-50">

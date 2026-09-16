@@ -73,7 +73,7 @@ Los importadores y el instalador no se ejecutan durante `npm ci`, las pruebas ni
 | El chat está pausado | Configura `ANTHROPIC_API_KEY` y `LLM_ENABLED=true`; reinicia el servidor |
 | No se guardan favoritos o historial | Comprueba URL, clave de servidor y tablas `demo_*`; no basta con añadir la URL |
 | La búsqueda real se bloquea | Comprueba cuota, función SQL de reserva y credenciales de Idealista |
-| No hay valoración | Comprueba `/api/valoracion`, conectividad, contrato 3.2.0 y hash del artefacto vigente; revisa también abstenciones por anuncio |
+| No hay valoración | Comprueba `/api/valoracion`, conectividad, contrato 3.3.0 y hash del artefacto vigente; revisa también abstenciones por anuncio |
 | No aparece un dato oficial | La fuente puede estar caída o carecer de una referencia verificada; la interfaz muestra procedencia y respaldo |
 | No llega una selección diaria | Comprueba suscripción, hora/zona, migraciones, Vault y planificador |
 | Cambiar `.env.local` no surte efecto | Reinicia Next.js; las variables públicas también requieren recompilar en producción |

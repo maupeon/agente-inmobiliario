@@ -1,6 +1,6 @@
 # Conectar el servicio de valoración
 
-La integración vigente es [XGBoost v3, contrato 3.2.0](modelo-xgboost.md), actualizada con `nuevo_modelo` el 16 de septiembre de 2026. El código Python, el instalador y las pruebas viven en el [repositorio académico](https://github.com/maupeon/habitia-tfm); los seis artefactos se distribuyen en su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16).
+La integración vigente es [XGBoost v3, contrato 3.3.0](modelo-xgboost.md), actualizada con `habitia_predictor` el 16 de septiembre de 2026. El código Python, el instalador y las pruebas viven en el [repositorio académico](https://github.com/maupeon/habitia-tfm); los seis artefactos se distribuyen en su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r2).
 
 [Volver al README](../README.md)
 
@@ -21,7 +21,7 @@ curl http://127.0.0.1:8000/salud
 curl http://localhost:3000/api/valoracion
 ```
 
-`/api/valoracion` distingue servicio no configurado y servicio sin respuesta. Comprueba también la versión 3.2.0 y el hash vigente; un HTTP 200 por sí solo no garantiza compatibilidad. El cliente de `lib/valoracion/client.ts` valida cada respuesta y mantiene los errores individuales de las viviendas que quedan fuera del ámbito. No inventa una valoración a partir de medias territoriales.
+`/api/valoracion` distingue servicio no configurado y servicio sin respuesta. Comprueba también la versión 3.3.0 y el hash vigente; un HTTP 200 por sí solo no garantiza compatibilidad. El cliente de `lib/valoracion/client.ts` valida cada respuesta y mantiene los errores individuales de las viviendas que quedan fuera del ámbito. No inventa una valoración a partir de medias territoriales.
 
 ## Antecedente LightGBM
 

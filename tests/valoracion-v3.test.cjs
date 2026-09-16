@@ -37,7 +37,11 @@ test('real v3 HTTP fixture retains observed input and point estimate without inv
   const value = batch.resultados.get(anuncio.propertyCode);
   assert.equal(value.intervalo, null);
   assert.equal(value.banda, null);
-  assert.equal(value.nivel_precios, '2025');
+  assert.equal(value.nivel_precios, '2026');
+  assert.equal(value.ajuste_proyectado, true);
+  assert.equal(value.ultimo_ano_venta, 2025);
+  assert.equal(value.ultimo_ano_alquiler, 2024);
+  assert.equal(posted.ano_ajuste, 2026);
   assert.equal(posted.anuncios[0].description, anuncio.description);
   assert.equal(posted.anuncios[0].parkingSpace.hasParkingSpace, true);
   assert.equal(posted.anuncios[0].operation, 'sale');
@@ -46,7 +50,7 @@ test('real v3 HTTP fixture retains observed input and point estimate without inv
 test('v3 rejects forged periods, intervals, model identities, rental claims and inconsistent arithmetic', async () => {
   for (const changed of [{ model_id: 'habitIA-oferta-2018-v2' }, { nivel_precios: '2026T1' },
     { model_version: '2.0.0' }, { model_version: '3.1.0' }, { modelo_sha256: '5d29cd26889cc0777196f592aa9828b18cc7d71ccd1a05ee61a95f0a44741a04' }, { intervalo: [300000, 700000] }, { banda: 'barato' },
-    { oportunidad: true }, { alquiler_validado: true }, { ano_renta: 2026 },
+    { oportunidad: true }, { alquiler_validado: true }, { ano_renta: 2024 }, { ajuste_proyectado: false }, { ultimo_ano_venta: 2026 }, { ultimo_ano_alquiler: 2026 }, { ano_inicio_tendencia: 2026 }, { paquete_sha256: '' },
     { precio_estimado: 100 }, { brecha_pct: -99 }, { renta_mensual_estimada: 1 },
     { modelo_sha256: '' }, { calidad: {} }, { propertyCode: 'unsolicited' }]) {
     const load = loader({ ...respuesta, resultados: [{ ...respuesta.resultados[0], ...changed }] });
@@ -62,7 +66,7 @@ test('mixed v3 results retain abstentions and reject duplicate or mismatched env
   assert.equal(batch.resultados.size, 1);
   assert.equal(batch.estados.get('large').estado, 'fuera_ambito');
   for (const body of [{ ...respuesta, resultados: [respuesta.resultados[0], respuesta.resultados[0]] },
-    { ...respuesta, model_id: 'unknown' }, { ...respuesta, nivel_precios: '2026' }]) {
+    { ...respuesta, model_id: 'unknown' }, { ...respuesta, nivel_precios: '2025' }, { ...respuesta, paquete_sha256: 'legacy-package' }]) {
     assert.equal((await loader(body)('lib/valoracion/client.ts').valorarLoteConEstado([anuncio])).resultados.size, 0);
   }
 });
@@ -78,7 +82,7 @@ test('enrichment and scoring expose a point estimate, warnings and rental scenar
   const [enriched] = await load('lib/enrich.ts').enrichProperties([anuncio]);
   assert.equal(enriched.valuation.precioEstimado, value.precio_estimado);
   assert.equal(enriched.valuation.intervalo, undefined);
-  assert.equal(enriched.valuation.rentaEscenario.ano, 2024);
+  assert.equal(enriched.valuation.rentaEscenario.ano, 2026);
   assert(enriched.valuation.advertencias.length > 0);
   const format = load('lib/dashboard-format.ts');
   assert.equal(format.priceLabel(enriched.valuation), null);
@@ -106,7 +110,7 @@ test('Idealista normalizer and chat tool preserve description and structured par
 });
 
 const mixed = require('./fixtures/valoracion-v3-mixed.json');
-test('v3.2 compares sale totals and monthly rent in the same HTTP batch', async () => {
+test('v3.3 compares sale totals and monthly rent in the same HTTP batch', async () => {
   let posted;
   const load = loader(mixed.respuesta, {}, data => { posted = data; });
   const batch = await load('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
@@ -174,21 +178,25 @@ test('chat requires the observed operation and preserves rental monthly price', 
   await assert.rejects(tool({ ...rental, operation: undefined }));
 });
 
-test('v3.2 rejects invented index periods even if dates and arithmetic are internally consistent', async () => {
+test('v3.3 requires the 2026 projection and distinguishes the 2025/2024 observed sources', async () => {
   const batch = await loader(mixed.respuesta)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
   assert.equal(batch.resultados.size, mixed.respuesta.resultados.length);
+  for (const input of mixed.anuncios) assert(batch.estados.get(input.propertyCode).motivo.includes('proyectad'));
+  assert(batch.estados.get(mixed.anuncios[0].propertyCode).motivo.includes('2026'));
   assert(batch.estados.get(mixed.anuncios[0].propertyCode).motivo.includes('2025'));
   assert(batch.estados.get(mixed.anuncios[1].propertyCode).motivo.includes('2024'));
-  const invented = structuredClone(mixed.respuesta);
-  invented.nivel_precios = '2026';
-  for (const value of invented.resultados) {
-    value.nivel_precios = '2026';
-    value.ano_precio = 2026;
-    value.ano_renta = 2026;
-    value.metodo_renta = 'ratio_distrital_2026';
+  const previous = structuredClone(mixed.respuesta);
+  previous.model_version = '3.2.0';
+  previous.nivel_precios = '2025';
+  for (const value of previous.resultados) {
+    value.model_version = '3.2.0';
+    value.nivel_precios = '2025';
+    value.ano_precio = 2025;
+    value.ano_renta = 2024;
+    value.metodo_renta = 'ratio_distrital_2024';
   }
-  assert.equal((await loader(invented)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios)).resultados.size, 0);
-  for (const changed of [{ ano_precio: 2026, nivel_precios: '2026' }, { ano_renta: 2026, metodo_renta: 'ratio_distrital_2026' }, { ano_precio: '2025' }, { ano_renta: 2024.5 }]) {
+  assert.equal((await loader(previous)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios)).resultados.size, 0);
+  for (const changed of [{ ano_precio: 2025, nivel_precios: '2025' }, { ano_renta: 2024, metodo_renta: 'ratio_distrital_2024' }, { ano_precio: '2026' }, { ano_renta: 2026.5 }, { metodo_renta: 'ratio_distrital_2026' }, { paquete_sha256: undefined }]) {
     const invalid = structuredClone(mixed.respuesta);
     invalid.resultados = [{ ...invalid.resultados[0], ...changed }];
     const rejected = await loader(invalid)('lib/valoracion/client.ts').valorarLoteConEstado(mixed.anuncios);
@@ -196,7 +204,7 @@ test('v3.2 rejects invented index periods even if dates and arithmetic are inter
   }
 });
 
-test('v3.2 new-development flag reaches the API, is required in results and preserves warnings', async () => {
+test('v3.3 new-development flag reaches the API, is required in results and preserves warnings', async () => {
   let posted;
   const response = structuredClone(respuesta);
   response.resultados[0].calidad.obra_nueva = true;

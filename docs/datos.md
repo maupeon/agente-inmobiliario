@@ -71,7 +71,7 @@ Si una fuente no puede verificarse, se muestra el respaldo o el dato ausente com
 
 ## Cómo se estima el alquiler
 
-La ficha conserva el precio mensual del anuncio. Cuando el predictor XGBoost v3 devuelve una estimación válida, la aplicación compara esa mensualidad con una renta derivada del valor de venta estimado a nivel de 2025 y ratios distritales de 2024:
+La ficha conserva el precio mensual del anuncio. Cuando el predictor XGBoost v3 devuelve una estimación válida, la aplicación compara esa mensualidad con una renta derivada del valor de venta y ratios distritales proyectados a 2026. El paquete utiliza últimas observaciones de venta de 2025 y alquiler de 2024, por lo que 2026 identifica el escenario proyectado:
 
 `renta_mensual_estimada = precio_estimado × factor_renta_mensual`
 

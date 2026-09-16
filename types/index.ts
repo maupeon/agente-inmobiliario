@@ -394,6 +394,8 @@ export interface PropertyValuation {
   modeloVersion?: string;
   modeloId?: ValoracionModelo["model_id"];
   modeloSha256?: string;
+  modeloPaqueteSha256?: string;
+  proyeccion?: { ultimaVentaObservada: number; ultimoAlquilerObservado: number };
   obraNueva?: boolean;
   precioEstimado?: number;
   advertencias?: string[];

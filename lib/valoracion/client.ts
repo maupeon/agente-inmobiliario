@@ -3,7 +3,8 @@ import type { Property } from "@/types";
 import { isRecord } from "@/lib/api-validation";
 import type { AnuncioParaValorar, RespuestaValoracion, ValoracionModelo, ValoracionModeloV3 } from "./types";
 import { operacionValoracion } from "./types";
-import { CURRENT_MODEL_ID, CURRENT_MODEL_VERSION, CURRENT_SALE_YEAR, CURRENT_RENT_YEAR, isCurrentModel } from "./current-model";
+import { CURRENT_MODEL_ID, CURRENT_MODEL_VERSION, CURRENT_PACKAGE_SHA256, CURRENT_SALE_YEAR, CURRENT_RENT_YEAR,
+  LAST_OBSERVED_SALE_YEAR, LAST_OBSERVED_RENT_YEAR, isCurrentModel } from "./current-model";
 const URL_BASE = process.env.VALORACION_URL;
 const TOKEN = process.env.VALORACION_TOKEN;
 const TIMEOUT_MS = Math.min(20_000, Math.max(1000, Number(process.env.VALORACION_TIMEOUT_MS) || 10_000));
@@ -36,9 +37,11 @@ function validResultV3(value: unknown, codes: Set<string>): value is ValoracionM
     || value.objetivo !== "precio_anunciado" || value.periodo_entrenamiento !== "2018"
     || value.extrapolacion_temporal !== true || value.precision_actual_validada !== false || value.clasificacion_validada !== false
     || value.ano_precio !== CURRENT_SALE_YEAR || value.ano_renta !== CURRENT_RENT_YEAR || value.nivel_precios !== String(CURRENT_SALE_YEAR) || value.ano_base !== 2018
+    || value.ajuste_proyectado !== true || value.ultimo_ano_venta !== LAST_OBSERVED_SALE_YEAR
+    || value.ultimo_ano_alquiler !== LAST_OBSERVED_RENT_YEAR || value.ano_inicio_tendencia !== 2018
     || !finitePositive(value.precio_estimado) || !finitePositive(value.precio_estimado_base) || !finitePositive(value.factor_escenario)
     || value.intervalo !== null || value.banda !== null || value.oportunidad !== false || value.sobrevalorado !== false
-    || value.explicacion != null || value.alquiler_validado !== false || value.metodo_renta !== `ratio_distrital_${value.ano_renta}`
+    || value.explicacion != null || value.alquiler_validado !== false || value.metodo_renta !== `ratio_distrital_proyectado_${value.ano_renta}`
     || !finitePositive(value.renta_mensual_estimada) || !finitePositive(value.factor_renta_mensual)
     || typeof value.barrio_code !== "string" || !/^\d{3}$/.test(value.barrio_code)
     || typeof value.distrito_code !== "string" || value.barrio_code.slice(0, 2) !== value.distrito_code
@@ -101,7 +104,7 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
     const res = await fetch(`${URL_BASE.replace(/\/$/, "")}/valorar`, {
       method: "POST", headers: { "content-type": "application/json", ...(TOKEN ? { authorization: `Bearer ${TOKEN}` } : {}) },
       // Comparación actual = escenario indexado explícito, no validación actual.
-      body: JSON.stringify({ anuncios: candidates.map(aAnuncio), renivelar: true, explicar: opts.explicar === true }),
+      body: JSON.stringify({ anuncios: candidates.map(aAnuncio), renivelar: true, ano_ajuste: CURRENT_SALE_YEAR, explicar: opts.explicar === true }),
       signal: AbortSignal.timeout(TIMEOUT_MS), cache: "no-store",
     });
     const raw = await res.json().catch(() => null);
@@ -112,8 +115,9 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
     }
     if (!res.ok || !Array.isArray(raw?.resultados)) return fail(res.status === 422 ? "El servicio rechazó las entradas; revisa los datos y el ámbito." : "El modelo no está disponible. No hay una valoración individual para este anuncio.");
     if (raw.model_version !== CURRENT_MODEL_VERSION || raw.model_id !== CURRENT_MODEL_ID || raw.objetivo !== "precio_anunciado"
+      || raw.paquete_sha256 !== CURRENT_PACKAGE_SHA256
       || raw.extrapolacion_temporal !== true || raw.precision_actual_validada !== false) {
-      return fail("El servicio no devuelve el modelo vigente (XGBoost 3.2.0). No se utiliza una estimación anterior.");
+      return fail(`El servicio no devuelve el modelo vigente (XGBoost ${CURRENT_MODEL_VERSION}). No se utiliza una estimación anterior.`);
     }
     const data = raw as RespuestaValoracion;
     for (const v of data.resultados) {
@@ -125,8 +129,8 @@ export async function valorarLoteConEstado(properties: Property[], opts: { expli
       resultados.set(v.propertyCode, v);
       estados.set(v.propertyCode, { estado: "ok", motivo: v.model_id === "habitIA-xgboost-2018-v3"
         ? v.operation === "rent"
-          ? `Renta mensual derivada de la venta estimada a nivel de ${v.ano_precio} y ratios distritales de ${v.ano_renta}. Alquiler no validado; sin intervalo calibrado.`
-          : `Estimación de oferta a nivel de ${v.ano_precio}. Sin intervalo calibrado; precisión actual no validada.`
+          ? `Renta mensual derivada de la venta y ratios distritales proyectados a ${v.ano_renta}. Últimas fuentes: venta de ${v.ultimo_ano_venta} y alquiler de ${v.ultimo_ano_alquiler}. Alquiler no validado; sin intervalo calibrado.`
+          : `Estimación de oferta proyectada a ${v.ano_precio}, con última fuente de venta de ${v.ultimo_ano_venta}. Sin intervalo calibrado; precisión actual no validada.`
         : "Estimación de oferta histórica indexada. No demuestra precisión en precios actuales." });
     }
     return fail("El servicio no devolvió una valoración válida de un modelo compatible para este anuncio.");
