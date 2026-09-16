@@ -40,22 +40,26 @@ const STEPS = [
 const SIGNALS = [
   {
     t: "α · Fair · precio",
-    d: "Compara el precio anunciado con la estimación individual del modelo. Escala provisional: 50 puntos si coinciden, 100 si el anuncio está un 20% o más por debajo y 0 si está un 20% o más por encima. Una media provincial no sustituye esta estimación.",
+    d: "Calcula la diferencia entre el precio predicho y el precio de oferta, dividida entre el precio predicho. Fair es el percentil de esa brecha normalizada respecto a la distribución de referencia: cuanto más por debajo de la estimación esté el anuncio, mayor puntuación. En alquiler se comparan mensualidades.",
+    formulas: ["Fair Gap (%) = 100 × (Precio predicho − Precio oferta) / Precio predicho", "Fair Score = Percentil(Fair Gap normalizado respecto a la distribución de referencia)"],
     fuente: "25% por defecto · Sin estimación: no disponible",
   },
   {
     t: "β · Opportunity · inversión",
-    d: "En compra y alquiler, compara la misma variación anual de precios de oferta de venta del distrito con la de Madrid, de agosto de 2025 a agosto de 2026. Escala provisional: 50 si coinciden; suma 2,5 puntos por cada punto porcentual de ventaja, con límites 0 y 100. No predice rentabilidad futura.",
+    d: "Calcula la diferencia entre la revalorización del inmueble y la de la ciudad, y transforma esa brecha normalizada en un percentil respecto a la distribución de referencia. La aplicación utiliza la variación anual de precios de oferta de venta del distrito como referencia del inmueble, tanto en compra como en alquiler. No predice rentabilidad futura.",
+    formulas: ["Opportunity Gap (%) = 100 × (Revalorización inmueble − Revalorización ciudad)", "Opportunity Score = Percentil(Opportunity Gap normalizado respecto a la distribución de referencia)"],
     fuente: "25% por defecto · Idealista · 21 distritos · Compra y alquiler",
   },
   {
     t: "γ · Zone · calidad de vida",
-    d: "Aplica percentiles a los m² verdes, actuaciones policiales, líneas de Metro y servicios del distrito. Zone promedia estos cuatro componentes con un peso del 25% cada uno y se expresa sobre 100.",
+    d: "Promedia cuatro indicadores: zonas verdes, seguridad, transporte y servicios. El valor de cada indicador es su percentil para ese inmueble respecto a la distribución de referencia, expresado entre 0 y 1 y orientado para que un valor mayor sea más favorable. Cada indicador pesa un 25% dentro de Zone.",
+    formulas: ["Zone Score = 100 × (I verde + I seguridad + I transporte + I servicios) / 4"],
     fuente: "25% por defecto · Zone por distrito",
   },
   {
     t: "δ · Lifestyle · tiempo al trabajo",
-    d: "Puntúa el tiempo de trayecto al trabajo en tu modo de transporte: 100 puntos hasta 10 minutos, descenso de 1,9 puntos por minuto y 5 puntos desde 60 minutos. Las aproximaciones se identifican. Presupuesto e imprescindibles se aplican como filtros.",
+    d: "Calcula el percentil del tiempo al trabajo con signo negativo, normalizado respecto a los pisos que pasan tus filtros. Así, un trayecto más corto obtiene una puntuación mayor. La comparación depende de ese conjunto de viviendas y de tu modo de transporte. Las aproximaciones de ruta se identifican.",
+    formulas: ["Lifestyle Score = Percentil(−Tiempo al trabajo normalizado respecto a los pisos que pasan tus filtros)"],
     fuente: "25% por defecto · Necesita trabajo y tiempo de ruta",
   },
 ];
@@ -125,7 +129,7 @@ export default function ComoFuncionaPage() {
         </Section>
 
         {/* Motor */}
-        <Section eyebrow="El motor" title="Cómo se eligen y ordenan">
+        <Section eyebrow="La metodología" title="Cómo se calcula el HabitIA Score">
           <p className="max-w-[68ch] text-base leading-relaxed text-ink-700">
             El <Strong>HabitIA Score</Strong> es una suma ponderada de cuatro
             componentes, cada uno de 0 a 100. Los pesos α, β, γ y δ también van
@@ -136,17 +140,46 @@ export default function ComoFuncionaPage() {
           <div className="mt-5 overflow-x-auto rounded-xl border border-hairline bg-paper-200 p-4 font-mono text-sm text-ink" aria-label="Fórmula del HabitIA Score">
             Score = (α × Fair + β × Opportunity + γ × Zone + δ × Lifestyle) / 100
           </div>
+          <p className="mt-5 max-w-[72ch] text-sm leading-relaxed text-stone-600">
+            Las fórmulas siguientes recogen la metodología de la{" "}
+            <Link href="/presentacion" className="font-medium text-saffron-700 underline underline-offset-4">presentación</Link>.
+            Un percentil expresa la posición relativa dentro de una distribución;
+            los scores se expresan de 0 a 100. En Opportunity, las revalorizaciones
+            de la fórmula se introducen como proporciones: 0,05 equivale al 5%.
+          </p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {SIGNALS.map((s) => (
               <div key={s.t} className="rounded-xl border border-hairline bg-paper-50 p-5">
                 <h4 className="font-display text-lg leading-tight text-ink">{s.t}</h4>
                 <p className="mt-2 text-sm leading-relaxed text-stone-600">{s.d}</p>
+                <div className="mt-3 space-y-2 rounded-lg bg-paper-200 p-3">
+                  {s.formulas.map((formula) => (
+                    <p key={formula} className="break-words font-mono text-xs leading-relaxed text-ink">{formula}</p>
+                  ))}
+                </div>
                 <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.16em] text-saffron-700">
                   {s.fuente}
                 </p>
               </div>
             ))}
           </div>
+          <details className="mt-5 text-sm leading-relaxed text-stone-600">
+            <summary className="min-h-11 cursor-pointer py-3 font-medium text-saffron-700 underline underline-offset-4">Estado de implementación en la demo</summary>
+            <p className="mt-2 max-w-[72ch]">
+              La transformación por percentiles de Fair, Opportunity y Lifestyle
+              está pendiente de implementación, como indican las notas de la presentación.
+              El motor actual usa escalas provisionales: Fair vale 50 cuando anuncio
+              y estimación coinciden, 100 con un precio un 20% o más inferior y 0
+              con uno un 20% o más superior. Opportunity parte de 50 y suma 2,5
+              puntos por cada punto porcentual de ventaja del distrito frente a Madrid,
+              con límites de 0 y 100. Lifestyle vale 100 hasta 10 minutos, baja 1,9
+              puntos por minuto y vale 5 desde 60 minutos. Zone ya promedia los cuatro
+              indicadores por percentiles. Para completar la metodología quedan por fijar
+              las distribuciones de referencia de Fair y Opportunity, independientes
+              del test reservado, y resolver los empates y el caso de una sola vivienda
+              en Lifestyle.
+            </p>
+          </details>
           <p className="mt-5 max-w-[72ch] text-sm leading-relaxed text-stone-600">
             <Strong>Si falta un dato, no inventamos una puntuación.</Strong>{" "}
             El componente queda sin dato, aporta cero y su peso no se reparte
@@ -230,10 +263,10 @@ export default function ComoFuncionaPage() {
         </Section>
 
         <Section id="zone-score" eyebrow="Cuatro indicadores" title="Cómo se calcula el Zone Score">
-          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">Zone combina cuatro componentes con el mismo peso: zonas verdes, actuaciones policiales, transporte y servicios. Cada índice está entre 0 y 1 según su rango percentil entre los 21 distritos. Cada componente pesa un 25% y aporta hasta 25 puntos.</p>
+          <p className="max-w-[72ch] text-sm leading-relaxed text-stone-600">Zone combina cuatro indicadores con el mismo peso: zonas verdes, seguridad, transporte y servicios. Cada indicador es su percentil respecto a la distribución de referencia, expresado entre 0 y 1. Se promedian los cuatro y se multiplica por 100. En la demo se asignan a cada inmueble los datos de su distrito y se comparan los 21 distritos de Madrid; las actuaciones policiales sirven como referencia del indicador de seguridad.</p>
           <details className="mt-4 text-sm leading-relaxed text-stone-600">
             <summary className="inline-flex min-h-11 cursor-pointer items-center font-medium text-saffron-700 underline underline-offset-4">Ver la fórmula y sus componentes</summary>
-            <p className="mt-3 break-words font-mono text-ink" aria-label="Fórmula de Zone Score">Zone = 100 × (I verde + I actuaciones + I transporte + I servicios) / 4</p>
+            <p className="mt-3 break-words font-mono text-ink" aria-label="Fórmula de Zone Score">Zone = 100 × (I verde + I seguridad + I transporte + I servicios) / 4</p>
             <ul className="mt-4 list-disc space-y-2 pl-5">
               <li><Strong>Zonas verdes:</Strong> más m² verdes totales, mayor índice. Se usa el recuento publicado, sin dividirlo por población ni superficie del distrito.</li>
               <li><Strong>Actuaciones policiales:</Strong> menos actuaciones, mayor índice. Se suman las cinco categorías publicadas por distrito; una cifra menor no acredita mayor seguridad.</li>

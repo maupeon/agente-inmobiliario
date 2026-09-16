@@ -408,7 +408,7 @@ export function Presentation() {
             <div data-build-group className={styles.scoreComponents}>
               <article><h3>Fair · precio</h3><p>Cómo de justo es el precio al comparar su valor estimado con la oferta.</p></article>
               <article><h3>Opportunity · inversión</h3><p>Revalorización de la zona frente a la media de la ciudad.</p></article>
-              <article><h3>Zone · calidad de vida</h3><p>Zonas verdes, seguridad, transporte, servicios y descanso.</p></article>
+              <article><h3>Zone · calidad de vida</h3><p>Zonas verdes, seguridad, transporte y servicios.</p></article>
               <article><h3>Lifestyle · tiempo al trabajo</h3><p>La distancia que de verdad importa al trabajo: la temporal.</p></article>
             </div>
             <p className={styles.scoreCoverage}><strong>Tú indicas cuánta importancia le das a cada métrica.</strong></p>
