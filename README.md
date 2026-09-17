@@ -131,6 +131,8 @@ GitHub Actions comprueba vulnerabilidades conocidas y ejecuta la misma verificac
 
 La [entrega del Equipo 7](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-equipo-7-final) reúne la memoria vigente con sus catorce anexos, el código y los artefactos de inferencia en `Equipo_7_HabitIA.zip`. La [memoria PDF](https://github.com/maupeon/habitia-tfm/releases/download/tfm-equipo-7-final/HabitIA_memoria.pdf) ocupa 19 páginas de contenido y menos de media página de bibliografía en la página 20. Las portadas, índices y anexos quedan fuera de ese cómputo. El [LaTeX editable](https://github.com/maupeon/agente-inmobiliario/blob/main/docs/entrega-final/HabitIA_memoria.tex), el [resumen de revisión](https://github.com/maupeon/agente-inmobiliario/blob/main/docs/entrega-final/REVISION.md) y las [condiciones de uso de los datos](https://github.com/maupeon/agente-inmobiliario/blob/main/docs/entrega-final/DERECHOS_DE_USO.md) se conservan en `docs/entrega-final/`. La API Python se documenta en [habitia-tfm](https://github.com/maupeon/habitia-tfm).
 
+Para el límite de subida de 16 MB del Campus, utiliza [Equipo_7_HabitIA_Campus.zip](https://github.com/maupeon/habitia-tfm/releases/download/tfm-equipo-7-final/Equipo_7_HabitIA_Campus.zip). Incluye la memoria íntegra y un README con enlaces públicos al código y los modelos. Se genera con `python3 scripts/build_campus_delivery.py`.
+
 ## 7. Documentación
 
 | Guía | Qué explica |

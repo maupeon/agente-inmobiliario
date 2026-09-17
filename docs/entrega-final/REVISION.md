@@ -47,3 +47,9 @@ También puede utilizarse pdfLaTeX con dos pasadas. La carpeta `figuras/` debe a
 - Incorporadas las referencias completas y las condiciones de uso de los datos al anexo 13. Se distinguen ODbL, CC BY, las condiciones del INE y las fuentes cuya autorización específica de redistribución no se ha acreditado.
 - Preparada la entrega limpia `Equipo_7_HabitIA.zip`, con una sola memoria PDF, el README de diseño Apple, el código, los artefactos, las condiciones de uso, las versiones y las huellas de los archivos. Los originales editables se conservan fuera del ZIP, en la carpeta de entrega final y en Git.
 - El generador `scripts/build_final_delivery.py` permite reconstruir el ZIP a partir de revisiones limpias de los dos repositorios y valida los artefactos. Los informes históricos incluidos en el código conservan su alcance original; no se presentan como una nueva ejecución de pruebas.
+
+## Variante para el límite de 16 MB del Campus
+
+- `Equipo_7_HabitIA_Campus.zip` contiene la memoria PDF íntegra, README Apple, condiciones de uso, versiones y huellas. Conserva la calidad y la paginación del PDF.
+- El código y los modelos permanecen accesibles mediante la entrega pública completa. El README distingue las rutas del paquete técnico de los archivos incluidos en la variante Campus.
+- `scripts/build_campus_delivery.py` genera esta variante y rechaza cualquier ZIP de 16.000.000 bytes o más. Comprueba que el PDF sea idéntico al del paquete publicado y registra el hash del ZIP completo enlazado.
