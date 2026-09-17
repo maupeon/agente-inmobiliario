@@ -12,6 +12,7 @@
 - Corregidas la persistencia global del historial y los favoritos, la separación por navegador de las notificaciones y la advertencia de obra nueva, que no impide estimar.
 - Recuperadas las figuras ausentes. La captura de conversación no estaba incluida: se ha sustituido por un diagrama del flujo implementado. Las capturas de interfaz identifican los ejemplos sintéticos.
 - Eliminadas referencias a páginas fijas; ajustados índices, enlaces y numeración de anexos.
+- Ampliado el trabajo futuro con la calibración del HabitIA Score mediante percentiles de distribuciones de referencia y su actualización con nuevas observaciones. Se distingue esta calibración de los intervalos de predicción, se reconoce que Zone ya utiliza percentiles y se exige otra muestra de evaluación si el test actual se usa para ajustar las escalas. La síntesis de conclusiones se ha compactado para conservar las 19 páginas de contenido y una de bibliografía.
 
 ## Ajuste al límite de extensión
 
