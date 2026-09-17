@@ -1,4 +1,4 @@
-import type { PersonalScoring } from "@/types";
+import type { PersonalScoring, ScoreComponent } from "@/types";
 import { evaluationLabel } from "@/lib/score-presentation";
 import { ZONE_INDICATOR_COUNT, ZONE_INDICATOR_POINTS } from "@/lib/neighborhood/zone-score";
 import styles from "./ScoreBreakdown.module.css";
@@ -12,6 +12,10 @@ const COMPONENTS = [
 
 export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: PersonalScoring }) {
   if (!scoring) return null;
+  const fair = scoring.components.find(c => c.key === "fair");
+  const opportunity = scoring.components.find(c => c.key === "opportunity");
+  const zone = scoring.components.find(c => c.key === "zone");
+  const lifestyle = scoring.components.find(c => c.key === "lifestyle");
   return (
     <section className={styles.root} aria-label="Desglose del HabitIA Score">
       <div className={styles.heading}>
@@ -36,19 +40,22 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
           </div>;
         })}
       </dl>
-      {scoring.fair?.score === 0 && <p className="mt-3 text-xs leading-relaxed text-stone-600">Fair calculado: 0/100. El anuncio supera la estimación en un {scoring.fair.gapPercent.toLocaleString("es-ES", { maximumFractionDigits: 1 })}%. La escala asigna 0 puntos a partir del 20% por encima; puedes consultar los importes en el desglose.</p>}
-      {scoring.fair && <details className={styles.details}>
+      <details className={styles.details}>
         <summary>Fair · comparación con la estimación</summary>
-        <p className="my-2 text-xs leading-relaxed text-stone-600">Anuncio: {scoring.fair.advertisedPrice.toLocaleString("es-ES", { maximumFractionDigits: 0 })} {scoring.fair.unit}. Estimación: {scoring.fair.estimatedPrice.toLocaleString("es-ES", { maximumFractionDigits: 0 })} {scoring.fair.unit} · referencia {scoring.fair.period}.</p>
-        <p className="mb-3 text-xs leading-relaxed text-stone-600">{scoring.components.find(c => c.key === "fair")?.explanation}</p>
-      </details>}
-      {scoring.opportunity && <details className={styles.details}>
-        <summary>Opportunity · distrito de {scoring.opportunity.district}</summary>
-        <p className="my-2 text-xs leading-relaxed text-stone-600">{scoring.components.find(c => c.key === "opportunity")?.explanation}</p>
-        <p className="mb-3 text-xs text-stone-600"><a href={scoring.opportunity.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{scoring.opportunity.source}</a> · consulta {scoring.opportunity.retrievedAt}. Copia de la variación anual publicada, sin actualización automática.</p>
-      </details>}
-      {scoring.zone && <details className={styles.details}>
-        <summary>Zone · distrito de {scoring.zone.district} · {scoring.zone.available}/{ZONE_INDICATOR_COUNT} indicadores</summary>
+        {scoring.fair && <p className="my-2 text-xs leading-relaxed text-stone-600">Anuncio: {scoring.fair.advertisedPrice.toLocaleString("es-ES", { maximumFractionDigits: 0 })} {scoring.fair.unit}. Estimación: {scoring.fair.estimatedPrice.toLocaleString("es-ES", { maximumFractionDigits: 0 })} {scoring.fair.unit} · referencia {scoring.fair.period}.</p>}
+        {scoring.fair?.score === 0 && <p className="my-2 text-xs leading-relaxed text-stone-600">Fair calculado: 0/100. El anuncio supera la estimación en un {scoring.fair.gapPercent.toLocaleString("es-ES", { maximumFractionDigits: 1 })}%.</p>}
+        <p className="my-2 text-xs leading-relaxed text-stone-600">{fair?.explanation}</p>
+        <Contribution component={fair} />
+      </details>
+      <details className={styles.details}>
+        <summary>Opportunity · {scoring.opportunity ? `distrito de ${scoring.opportunity.district}` : "evolución del distrito"}</summary>
+        <p className="my-2 text-xs leading-relaxed text-stone-600">{opportunity?.explanation}</p>
+        {scoring.opportunity && <p className="mb-3 text-xs text-stone-600"><a href={scoring.opportunity.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{scoring.opportunity.source}</a> · consulta {scoring.opportunity.retrievedAt}. Copia de la variación anual publicada, sin actualización automática.</p>}
+        <Contribution component={opportunity} />
+      </details>
+      <details className={styles.details}>
+        <summary>Zone · {scoring.zone ? `distrito de ${scoring.zone.district} · ${scoring.zone.available}/${ZONE_INDICATOR_COUNT} indicadores` : "entorno del distrito"}</summary>
+        {scoring.zone ? <>
         <p className="mt-2 text-xs leading-relaxed text-stone-600">Zone combina zonas verdes, actuaciones policiales, transporte y servicios. Cada indicador aporta hasta {ZONE_INDICATOR_POINTS} puntos, con el mismo peso. Son datos de distrito, no mediciones del barrio o la vivienda.</p>
         <dl className="my-3 space-y-3 text-xs leading-relaxed">
           {scoring.zone.indicators.map(indicator => <div key={indicator.key}>
@@ -61,24 +68,22 @@ export function ScoreBreakdown({ score, scoring }: { score?: number; scoring?: P
           </div>)}
         </dl>
         <p className="mb-3 text-xs leading-relaxed text-stone-600">Verde: m² totales publicados. Transporte: líneas distintas de Metro. Servicios: locales únicos de alimentación, farmacia, gimnasio u ocio. Actuaciones: suma de las cinco categorías publicadas; menos actuaciones no acredita mayor seguridad. Los periodos de las fuentes son distintos.</p>
-      </details>}
-      <details className={styles.details}>
-        <summary>Cómo se calcula y qué aporta cada factor</summary>
-        <p className="mt-2 text-xs text-stone-600">Puntos acumulados para ordenar: {score ?? 0}/100{scoring.coveragePercent < 100 ? " · evaluación incompleta" : ""}.</p>
-        <p className="mt-2 text-xs leading-relaxed text-stone-600">{scoring.explanation}</p>
-        <p className="mt-2 text-xs text-stone-600">Podemos evaluar el {scoring.coveragePercent}% de tus prioridades ponderadas. Los criterios sin datos no suman puntos y sus pesos no se reparten entre los demás.</p>
-        <dl className="mt-3 space-y-3">
-          {scoring.components.map((c) => (
-            <div key={c.key}>
-              <dt className="flex flex-wrap justify-between gap-2 font-medium">
-                <span>{c.label} · peso {c.weight}%</span>
-                <span>{c.value == null ? "Sin dato · 0 puntos aportados" : `${c.value}/100 → ${c.contribution} puntos`}</span>
-              </dt>
-              <dd className="mt-1 text-xs leading-relaxed text-stone-600">{c.explanation}</dd>
-            </div>
-          ))}
-        </dl>
+        </> : <p className="my-2 text-xs leading-relaxed text-stone-600">{zone?.explanation}</p>}
+        <Contribution component={zone} />
       </details>
+      <details className={styles.details}>
+        <summary>Lifestyle · tiempo al trabajo</summary>
+        <p className="my-2 text-xs leading-relaxed text-stone-600">{lifestyle?.explanation}</p>
+        <Contribution component={lifestyle} />
+      </details>
+      <p className="mt-3 text-xs leading-relaxed text-stone-600">El total combina las puntuaciones según sus pesos y se redondea al entero.{scoring.coveragePercent < 100 && " Los datos ausentes no suman puntos ni se redistribuye su peso."}</p>
     </section>
   );
+}
+
+function Contribution({ component }: { component?: ScoreComponent }) {
+  if (!component) return null;
+  return <p className="mb-3 text-xs font-medium leading-relaxed text-stone-600">
+    Peso en tu puntuación: {component.weight}%. Aporta {component.contribution.toLocaleString("es-ES", { maximumFractionDigits: 1 })} puntos.
+  </p>;
 }

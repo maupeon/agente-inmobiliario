@@ -40,7 +40,9 @@ export default function MapPanel({
 }: MapPanelProps) {
   const mapRef = useRef<MapRef | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -56,17 +58,24 @@ export default function MapPanel({
   );
   const selected =
     plotted.find((it) => it.property.propertyCode === selectedCode) ?? null;
-
-  const trajectory = useMemo(() => {
-    const geo = selected?.enrichment?.commute?.rutaGeo;
-    if (!geo || geo.geometria.length < 2) return null;
-    const data: GeoJSON.Feature = {
+  const selectedLon = selected?.property.longitude;
+  const selectedLat = selected?.property.latitude;
+  const workLon = work?.lon;
+  const workLat = work?.lat;
+  const routeGeo = selected?.enrichment?.commute?.rutaGeo;
+  // La puntuación puede recrear la vivienda y el enriquecimiento sin cambiar
+  // el recorrido. Solo una geometría distinta debe volver a dibujar la ruta.
+  const geometryKey = JSON.stringify(routeGeo?.geometria ?? null);
+  const trajectory = useMemo<GeoJSON.Feature<GeoJSON.LineString> | null>(() => {
+    const coordinates: GeoJSON.Position[] | null = JSON.parse(geometryKey);
+    if (!coordinates || coordinates.length < 2) return null;
+    return {
       type: "Feature",
       properties: {},
-      geometry: { type: "LineString", coordinates: geo.geometria },
+      geometry: { type: "LineString", coordinates },
     };
-    return { aprox: geo.aprox, data };
-  }, [selected]);
+  }, [geometryKey]);
+  const visibleTrajectory = showTrajectory ? trajectory : null;
 
   const initialViewState = useMemo(() => {
     const first = plotted[0]?.property;
@@ -76,7 +85,11 @@ export default function MapPanel({
     return FALLBACK_CENTER;
   }, [plotted]);
 
-  const codesKey = plotted.map((it) => it.property.propertyCode).join(",");
+  // Reordenar los resultados por puntuación no cambia el encuadre del mapa.
+  const locationsKey = plotted
+    .map((it) => `${it.property.longitude},${it.property.latitude}`)
+    .sort()
+    .join(";");
 
   function fitToData() {
     const map = mapRef.current;
@@ -114,17 +127,16 @@ export default function MapPanel({
   useEffect(() => {
     fitToData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [codesKey, work?.lat, work?.lon]);
+  }, [locationsKey, workLat, workLon]);
 
   // El encuadre incluye todo el trayecto y deja espacio para la ficha flotante.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !loaded || !selected) return;
+    if (!map || !loaded || selectedLon == null || selectedLat == null) return;
     map.stop();
-    const coords = showTrajectory && trajectory
-      ? (trajectory.data.geometry as GeoJSON.LineString).coordinates : [];
-    const points = [[selected.property.longitude!, selected.property.latitude!], ...coords];
-    if (showTrajectory && trajectory && work) points.push([work.lon, work.lat]);
+    const coords = visibleTrajectory?.geometry.coordinates ?? [];
+    const points = [[selectedLon, selectedLat], ...coords];
+    if (visibleTrajectory && workLon != null && workLat != null) points.push([workLon, workLat]);
     if (points.length > 1) {
       map.fitBounds([
         [Math.min(...points.map(p => p[0])), Math.min(...points.map(p => p[1]))],
@@ -134,7 +146,7 @@ export default function MapPanel({
       map.easeTo({ center: points[0] as [number, number], zoom: Math.max(map.getZoom(), 13),
         offset: [0, -65], duration: reduceMotion ? 0 : 450 });
     }
-  }, [selected, showTrajectory, trajectory, work, reduceMotion, loaded]);
+  }, [selectedCode, selectedLon, selectedLat, visibleTrajectory, workLon, workLat, reduceMotion, loaded]);
 
   return (
     <div className={styles.root} data-has-selection={!!selected}>
@@ -150,7 +162,7 @@ export default function MapPanel({
       <NavigationControl position="top-right" showCompass={false} />
 
       {showTrajectory && trajectory && (
-        <AnimatedRoute key={selectedCode} trajectory={trajectory} reduceMotion={reduceMotion} />
+        <AnimatedRoute key={selectedCode} trajectory={trajectory} aprox={routeGeo?.aprox ?? false} reduceMotion={reduceMotion} />
       )}
 
       {plotted.map((it) => {
@@ -208,7 +220,7 @@ export default function MapPanel({
         <div className={styles.commute}>
           <span className={styles.routeIcon} aria-hidden>↗</span>
           <div><strong>{selected.enrichment?.commute?.recomendado ? `${legMinutes(selected.enrichment.commute)} min ${MODE_LABEL[selected.enrichment.commute.recomendado]} al trabajo` : work ? "Trayecto no disponible" : "Añade tu trabajo para comparar trayectos"}</strong>
-          <p>{showTrajectory && trajectory ? trajectory.aprox ? "Referencia por carretera · no es el itinerario de transporte público" : "Recorrido al trabajo" : !showTrajectory && trajectory ? "Trayecto oculto en el mapa" : selected?.enrichment?.commute ? "Recorrido no disponible · tiempo orientativo" : "Selecciona otra vivienda para comparar"}</p></div>
+          <p>{showTrajectory && trajectory ? routeGeo?.aprox ? "Referencia por carretera · no es el itinerario de transporte público" : "Recorrido al trabajo" : !showTrajectory && trajectory ? "Trayecto oculto en el mapa" : selected?.enrichment?.commute ? "Recorrido no disponible · tiempo orientativo" : "Selecciona otra vivienda para comparar"}</p></div>
         </div>
       </section>
     ) : <div className={styles.hint}>Selecciona un precio para explorar la vivienda{work ? " y su trayecto" : ""}</div>}
@@ -217,11 +229,14 @@ export default function MapPanel({
 }
 
 /** Revelado por distancia: una ruta con pocos vértices tampoco aparece de golpe. */
-function AnimatedRoute({ trajectory, reduceMotion }: { trajectory: { aprox: boolean; data: GeoJSON.Feature }; reduceMotion: boolean }) {
-  const [data, setData] = useState(trajectory.data);
+function AnimatedRoute({ trajectory, aprox, reduceMotion }: { trajectory: GeoJSON.Feature<GeoJSON.LineString>; aprox: boolean; reduceMotion: boolean }) {
+  const [data, setData] = useState(() => reduceMotion ? trajectory : {
+    ...trajectory,
+    geometry: { type: "LineString" as const, coordinates: [trajectory.geometry.coordinates[0], trajectory.geometry.coordinates[0]] },
+  });
   useEffect(() => {
-    if (reduceMotion) { setData(trajectory.data); return; }
-    const points = (trajectory.data.geometry as GeoJSON.LineString).coordinates;
+    if (reduceMotion) { setData(trajectory); return; }
+    const points = trajectory.geometry.coordinates;
     const lengths = points.slice(1).map((p, i) => Math.hypot((p[0] - points[i][0]) * Math.cos(p[1] * Math.PI / 180), p[1] - points[i][1]));
     const total = lengths.reduce((a, b) => a + b, 0);
     let frame = 0;
@@ -235,7 +250,7 @@ function AnimatedRoute({ trajectory, reduceMotion }: { trajectory: { aprox: bool
         else { const t = lengths[i] ? remaining / lengths[i] : 1; coordinates.push(points[i].map((v, j) => v + (points[i + 1][j] - v) * t)); break; }
       }
       if (coordinates.length < 2) coordinates.push(points[0]);
-      setData({ ...trajectory.data, geometry: { type: "LineString", coordinates } });
+      setData({ ...trajectory, geometry: { type: "LineString", coordinates } });
       if (progress < 1) frame = requestAnimationFrame(tick);
     };
     tick(start);
@@ -243,7 +258,7 @@ function AnimatedRoute({ trajectory, reduceMotion }: { trajectory: { aprox: bool
   }, [trajectory, reduceMotion]);
   return <Source id="trajectory" type="geojson" data={data}>
     <Layer id="trajectory-halo" type="line" layout={{ "line-cap": "round", "line-join": "round" }} paint={{ "line-color": "#ffffff", "line-width": 9, "line-opacity": .85 }} />
-    <Layer {...(trajectory.aprox ? TRAJECTORY_DASHED : TRAJECTORY_SOLID)} />
+    <Layer {...(aprox ? TRAJECTORY_DASHED : TRAJECTORY_SOLID)} />
   </Source>;
 }
 

@@ -2,6 +2,7 @@ import type { Imprescindible, PersonalScoring, Property, PropertyEnrichment, Sco
 import { fairForProperty, opportunityForProperty } from "@/lib/scoring/price-scores";
 import { zoneForProperty } from "@/lib/neighborhood/zone-score";
 import { isCurrentValuation } from "@/lib/valoracion/current-model";
+import { MODE_LABEL } from "@/lib/dashboard-format";
 
 export const DEFAULT_SCORE_WEIGHTS: ScoreWeights = { alpha: 25, beta: 25, gamma: 25, delta: 25 };
 export const SCORE_LABELS = { alpha: "α Fair · precio", beta: "β Opportunity · inversión", gamma: "γ Zone · calidad de vida", delta: "δ Lifestyle · tiempo al trabajo" } as const;
@@ -50,6 +51,10 @@ export function personalScore(p: Property, e: PropertyEnrichment, profile: UserP
   const leg = e.commute?.modos.find((m) => m.modo === e.commute?.recomendado);
   const minutes = profile?.trabajo && leg?.minutos != null && Number.isFinite(leg.minutos) && leg.minutos >= 0 ? leg.minutos : null;
   const lifestyle = minutes == null ? null : minutes <= 10 ? 100 : minutes >= 60 ? 5 : 100 - (minutes - 10) * 1.9;
+  const lifestyleContext = minutes != null && leg
+    ? `Trayecto ${e.commute?.proveedor === "openrouteservice" ? "calculado" : "orientativo"}: ${minutes.toLocaleString("es-ES")} min ${leg.modo === "transporte" ? "en transporte público" : MODE_LABEL[leg.modo]}.`
+    : profile?.trabajo ? "No hay un tiempo de trayecto disponible para esta vivienda. Lifestyle queda sin dato."
+      : "Añade tu lugar de trabajo y el modo de transporte en Preferencias para calcular Lifestyle.";
   const component = (key: ScoreComponent["key"], label: string, weight: number, value: number | null, explanation: string): ScoreComponent => {
     const shownValue = value == null ? null : round(value);
     return { key, label, weight, value: shownValue, contribution: shownValue == null ? 0 : round(weight * shownValue / 100), explanation };
@@ -64,7 +69,8 @@ export function personalScore(p: Property, e: PropertyEnrichment, profile: UserP
     { ...component("zone", "Zone · entorno", weights.gamma, zone, zoneScoring
       ? `Distrito ${zoneScoring.district}: ${zoneScoring.available}/4 indicadores. Zone = 100 × suma de cuatro índices / 4. Cada indicador pesa un 25%. Más m² verdes, líneas y servicios suman; menos actuaciones suman. Los indicadores ausentes no aportan puntos ni se redistribuye su peso. Recuentos absolutos de distintos periodos; menos actuaciones no acredita mayor seguridad.`
       : "Sin distrito de Madrid identificado en el anuncio. No se asignan indicadores por cercanía ni a partir de la zona del perfil."), coveragePercent: zoneScoring?.coveragePercent ?? 0 },
-    component("lifestyle", "Lifestyle · tiempo al trabajo", weights.delta, lifestyle, minutes == null ? "Configura tu trabajo y un modo de transporte para calcular el trayecto. Sin tiempo disponible, no aporta puntos." : `Trayecto ${e.commute?.proveedor === "openrouteservice" ? "calculado" : "orientativo"} de ${minutes} min. 100 puntos hasta 10 min; baja 1,9 puntos por minuto hasta 5 puntos a partir de 60 min. Presupuesto e imprescindibles se aplican como filtros, no como este subscore.`),
+    component("lifestyle", "Lifestyle · tiempo al trabajo", weights.delta, lifestyle,
+      `${lifestyleContext} Hasta 10 min: 100 puntos. Entre 10 y 60 min: 100 − 1,9 × (minutos − 10). Desde 60 min: 5 puntos.`),
   ];
   return {
     score: Math.round(components.reduce((sum, c) => sum + c.weight * (c.value ?? 0) / 100, 0)),
