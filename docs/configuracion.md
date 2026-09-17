@@ -19,6 +19,7 @@ La configuración se lee desde el entorno del servidor. En local, copia [`.env.e
 | `ANTHROPIC_MODEL` | `claude-opus-4-6` | Modelo configurado para el chat |
 | `INSIGHTS_MODEL` | `claude-sonnet-4-6` | Modelo para la narración adicional |
 | `NEXT_PUBLIC_SUPABASE_URL` | Vacía | URL de tu proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vacía | Clave pública anon/publishable para el mando de la presentación por Realtime Broadcast |
 | `SUPABASE_SERVICE_ROLE_KEY` | Vacía | Acceso a datos desde el servidor; nunca exponer al cliente |
 | `VALORACION_URL` | Vacía | Origen del servicio Python; por ejemplo, `http://127.0.0.1:8000` |
 | `VALORACION_TOKEN` | Vacía | Mismo token que el servicio Python |
@@ -28,7 +29,9 @@ La configuración se lee desde el entorno del servidor. En local, copia [`.env.e
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | Origen canónico de la instalación; HTTPS en producción |
 | `CRON_SECRET` | Vacía | Protege los procesos periódicos; mínimo 24 caracteres para notificaciones |
 
-La app actual no utiliza `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Para ejecutar el script administrativo de notificaciones, configura `SUPABASE_ACCESS_TOKEN` en su entorno; esa credencial administrativa no es necesaria en el servidor web.
+El [control de la presentación desde el celular](control-presentacion.md) utiliza `NEXT_PUBLIC_SUPABASE_ANON_KEY` y la URL pública del proyecto para Realtime Broadcast, sin tablas ni migraciones adicionales. Esa clave pública se incorpora al navegador durante la compilación; reinicia el servidor local o recompila el despliegue tras configurarla. Nunca uses la clave `service_role` en una variable pública. La presentación con teclado sigue funcionando si el mando no está configurado.
+
+Para ejecutar el script administrativo de notificaciones, configura `SUPABASE_ACCESS_TOKEN` en su entorno; esa credencial administrativa no es necesaria en el servidor web.
 
 ## Supabase: instalación nueva
 
