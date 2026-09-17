@@ -43,6 +43,7 @@ El ejemplo desactiva Idealista real y Anthropic. Los mapas, la geocodificación 
 | Historial y favoritos | Persistencia no disponible; la interfaz avisa | Supabase y esquema de demo compartida |
 | Selección diaria de hasta 5 viviendas | No disponible | Supabase, migraciones y cron |
 | Presentación del TFM | Diapositivas, resultados y vídeo incluidos | Ningún backend del modelo para mostrar las cifras guardadas |
+| Control de la presentación desde el celular | Requiere conexión en tiempo real | Supabase URL + clave pública anon; [guía del mando](docs/control-presentacion.md) |
 
 **Historial y favoritos son compartidos entre todos los visitantes de la demo.** Utiliza conversaciones de ejemplo. El perfil y la última búsqueda permanecen en el navegador; la bandeja de notificaciones tiene una identidad privada por navegador. No existe un sistema de cuentas de usuario.
 
@@ -58,6 +59,7 @@ El ejemplo desactiva Idealista real y Anthropic. Los mapas, la geocodificación 
 | `/como-funciona` | Explicación del sistema y del score |
 | `/notificaciones` | Preferencias y bandeja de la selección diaria |
 | `/presentacion` | Presentación interactiva del TFM; también admite `/presentación` |
+| `/presentacion/mando` | Control desde el celular, vinculado por QR desde la presentación (tecla M) |
 
 ## 4. Estructura del repositorio
 
