@@ -1,5 +1,6 @@
 import type { Property, ZoneIndicator, ZoneScoring } from "@/types";
 import { isMadridProperty } from "@/lib/search-scope";
+import { normalizeMadridDistrict } from "@/lib/geo/madrid-district";
 import { ZONE_DISTRICTS, ZONE_SOURCES } from "./zone-data";
 
 type Key = ZoneIndicator["key"];
@@ -21,7 +22,6 @@ const INDICATORS: { key: Key; label: string; unit: string; inverse: boolean }[] 
 export const ZONE_INDICATOR_COUNT = INDICATORS.length;
 export const ZONE_INDICATOR_POINTS = 100 / ZONE_INDICATOR_COUNT;
 const observed = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value) && value >= 0;
-const normalize = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/[\s-]+/g, " ");
 
 /** Rango medio de empates: (rango - 1) / (n - 1). No acepta ausencias ni una sola observación. */
 export function percentileRank(value: number | null, reference: (number | null)[]): number | null {
@@ -52,7 +52,7 @@ export function calculateZone(code: string, districts: readonly ZoneObservation[
 /** Solo nombres/códigos explícitos del distrito; no atribuye datos por cercanía ni por el perfil. */
 export function zoneForProperty(property: Property): ZoneScoring | null {
   if (!isMadridProperty(property) || !property.district) return null;
-  const name = normalize(property.district);
-  const district = ZONE_DISTRICTS.find(d => normalize(d.district) === name || d.code === name);
+  const name = normalizeMadridDistrict(property.district);
+  const district = ZONE_DISTRICTS.find(d => normalizeMadridDistrict(d.district) === name || d.code === name);
   return district ? calculateZone(district.code) : null;
 }

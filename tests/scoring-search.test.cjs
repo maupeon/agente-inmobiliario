@@ -151,6 +151,30 @@ async function main() {
     const withoutDistrict=personalScore(property,empty,{...profile,zona:'Centro'});
     assert.equal(withoutDistrict.scoring.zone,null);
   });
+  check('Zone recognizes Idealista district aliases in listings and restores their score coverage', () => {
+    const cases = [
+      ['Barrio de Salamanca', '04', 55.625],
+      ['Fuencarral', '08', 53.125],
+      ['Moncloa', '09', 51.875],
+      ['San Blas', '20', 38.125],
+    ];
+    for (const [district, code, expected] of cases) {
+      for (const operation of ['sale', 'rent']) {
+        const p = {...madridProperty, district, operation};
+        const result = personalScore(p, empty, null);
+        assert.equal(result.scoring.zone?.districtCode, code, district);
+        assert.equal(result.scoring.zone.score, expected);
+        assert.equal(result.scoring.zone.available, 4);
+        assert.equal(result.scoring.zone.districtCode, result.scoring.opportunity.districtCode);
+        assert.equal(result.scoring.coveragePercent, 50);
+        assert.equal(zoneForProperty({...p, municipality:'Salamanca', latitude:40.97, longitude:-5.66}), null);
+      }
+    }
+    assert.equal(zoneForProperty({...madridProperty, district:'  BARRIO   DE SALAMANCA  '}).districtCode, '04');
+    for (const district of ['Vallecas', 'Moncloa centro', 'Fuencarral pueblo', 'Barrio de Salamanca centro']) {
+      assert.equal(zoneForProperty({...madridProperty, district}), null);
+    }
+  });
   check('Zone covers only its available fraction of the user weight, for sale and rental', () => {
     for(const operation of ['sale','rent']) {
       const result=personalScore({...madridProperty,operation},empty,{...profile,scoreWeights:{alpha:0,beta:0,gamma:100,delta:0}});

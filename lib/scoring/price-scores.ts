@@ -1,12 +1,12 @@
 import type { FairScoring, OpportunityScoring, Property, PropertyEnrichment } from "@/types";
 import { isMadridProperty } from "@/lib/search-scope";
+import { normalizeMadridDistrict } from "@/lib/geo/madrid-district";
 import { OPPORTUNITY_DISTRICTS, OPPORTUNITY_SOURCE } from "./opportunity-data";
 import { isCurrentValuation } from "@/lib/valoracion/current-model";
 
 const positive = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n) && n > 0;
 const finite = (n: unknown): n is number => typeof n === "number" && Number.isFinite(n);
 const clamp = (n: number) => Math.min(100, Math.max(0, n));
-const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/[\s-]+/g, " ");
 
 /** Regla provisional: ±20% frente a la estimación abarca la escala completa. */
 export function fairFromGap(gapPercent: number | null): number | null {
@@ -37,8 +37,8 @@ export function opportunityFromGrowth(district: number | null, city: number | nu
 /** Misma evolución territorial de venta para compra y alquiler; distrito explícito. */
 export function opportunityForProperty(p: Property): OpportunityScoring | null {
   if (!["sale", "rent"].includes(p.operation) || !isMadridProperty(p) || !p.district) return null;
-  const name = normalize(p.district);
-  const district = OPPORTUNITY_DISTRICTS.find(d => [d.code, d.district, d.sourceName].some(s => normalize(s) === name));
+  const name = normalizeMadridDistrict(p.district);
+  const district = OPPORTUNITY_DISTRICTS.find(d => [d.code, d.district, d.sourceName].some(s => normalizeMadridDistrict(s) === name));
   if (!district) return null;
   const score = opportunityFromGrowth(district.growthPercent, OPPORTUNITY_SOURCE.cityGrowthPercent);
   return score == null ? null : { method: "opportunity-linear-v1", score, scope: "distrito",
