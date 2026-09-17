@@ -570,59 +570,11 @@ Si existe una respuesta reciente para la misma consulta, se reutiliza desde una 
 
 \subsection{Asistente conversacional}
 
-El asistente ofrece las mismas capacidades que el buscador a través de una conversación en lenguaje natural. Utiliza un modelo de lenguaje de Anthropic (Claude Opus 4.6, configurable) mediante la API de mensajes con uso de herramientas (\emph{tool use}) y respuesta en streaming. El principio de diseño es una división estricta de funciones: el modelo de lenguaje interpreta la petición, decide qué herramientas llamar y redacta la respuesta, pero no calcula ninguna cifra. Precios, estimaciones, trayectos y simulaciones proceden siempre de herramientas deterministas, las mismas que utiliza el buscador. Esta separación reduce el riesgo de que el modelo genere un precio o un porcentaje plausible pero inventado, aunque la fidelidad del texto a los resultados requiere evaluación.
+El asistente permite buscar y comparar viviendas mediante lenguaje natural. Un modelo de lenguaje de Anthropic interpreta la petición, selecciona herramientas y redacta la respuesta; las cifras proceden de las mismas consultas y cálculos que utiliza el buscador. La interfaz muestra los resultados completos de las herramientas en tarjetas, mientras el modelo recibe un resumen para explicarlos.
 
-\begin{table}[!htb]
-\centering
-\caption{Herramientas disponibles para el asistente.}
-\label{tab:herramientas}
-\begin{tabularx}{\linewidth}{@{}l L@{}}
-\toprule
-\thead{Herramienta} & \thead{Función} \\
-\midrule
-buscar\_propiedades & Busca anuncios en Idealista dentro de Madrid capital según zona, operación, precio, superficie y habitaciones \\
-detalle\_propiedad & Recupera la información disponible de un anuncio ya mostrado \\
-valorar\_vivienda & Llama al servicio de inferencia con los datos observados del anuncio y devuelve la estimación, la comparación y las advertencias \\
-valorar\_alquiler & Consulta una referencia territorial de renta por metro cuadrado \\
-analizar\_mercado & Compara el precio por metro cuadrado con la media provincial del INE y aporta el tipo hipotecario del Banco de España \\
-calcular\_hipoteca & Calcula cuota mensual, coste total y esfuerzo sobre el salario \\
-calcular\_trayecto & Estima el tiempo desde el lugar de trabajo a pie, en bici, en coche y en transporte público \\
-comparar\_alquiler\_compra & Simula año a año el patrimonio de comprar frente a alquilar e invertir \\
-consultar\_barrio & Informa de la disponibilidad de indicadores de barrio sin clasificar zonas \\
-\bottomrule
-\end{tabularx}
-\end{table}
+Ante ``busco un piso de dos habitaciones en Chamberí para comprar, hasta 500.000 €'', puede buscar anuncios, solicitar su valoración y calcular el trayecto si el perfil incluye un lugar de trabajo. El servidor ejecuta las herramientas y devuelve sus resultados al modelo, que puede continuar o responder. Cada petición admite hasta tres llamadas al modelo y cuatro ejecuciones de herramientas, con tiempos límite. Los errores se comunican como tales, sin completar las cifras ausentes.
 
-Cada petición sigue un bucle de agente. El servidor envía al modelo la conversación, las instrucciones del sistema y la definición de las nueve herramientas de la Tabla~\ref{tab:herramientas}, descritas en español y orientadas a \emph{cuándo} conviene usar cada una. Si el modelo solicita herramientas, el servidor las ejecuta, devuelve sus resultados y vuelve a llamar al modelo, que puede encadenar nuevas llamadas o responder. Un recorrido típico ante una petición como ``busco un piso de dos habitaciones en Chamberí para comprar, hasta 500.000 €'' consiste en buscar anuncios, valorar los más relevantes con el modelo y, si el perfil incluye un lugar de trabajo, calcular el trayecto. Para acotar la latencia y el coste, cada petición admite como máximo tres llamadas al modelo y cuatro ejecuciones de herramientas, con tiempos límite de 45 segundos por llamada y 52 segundos en total. Si una herramienta falla, el error se devuelve al modelo como resultado marcado, de forma que pueda explicarlo en lugar de continuar como si tuviera datos.
-
-Cada herramienta produce dos representaciones de su resultado. El modelo recibe una versión compacta: la búsqueda, por ejemplo, le devuelve un resumen sin la lista completa de anuncios, lo que reduce el consumo de tokens. La interfaz recibe la versión completa y la muestra como tarjetas (anuncios, valoración, hipoteca, trayecto o mercado), que llegan al navegador como eventos de servidor mientras el texto se genera. Las cifras que ve la persona usuaria son, por tanto, las de la herramienta y no las de la redacción del modelo.
-
-El servidor no guarda estado entre peticiones: el navegador reenvía el historial, limitado a 20 mensajes y 32.000 caracteres. Para que el asistente pueda valorar más adelante un anuncio mostrado en un turno anterior sin inventar sus coordenadas ni sus características, los datos observados de esos anuncios se adjuntan al historial como contenido estructurado. El perfil de la persona usuaria (operación, zona, presupuesto, trabajo y pesos de la puntuación) se incorpora a las instrucciones del sistema para no volver a preguntar lo que ya se conoce.
-
-Las instrucciones del sistema fijan el comportamiento en cuatro aspectos. En la recogida de información, el asistente necesita zona, presupuesto y operación antes de buscar, y no hace más de dos preguntas por turno. En el ámbito, solo busca en Madrid capital y no ofrece asesoramiento legal ni fiscal. En el uso de la evidencia, debe indicar el periodo de la estimación, explicar las abstenciones del modelo y no inventar intervalos, puntuaciones ni valores que las herramientas no hayan devuelto. En seguridad, los campos del perfil y de los anuncios se tratan como datos y nunca como instrucciones, una defensa básica frente a la inyección de instrucciones a través del texto de un anuncio. A nivel de servidor, las peticiones se validan, se limitan por dirección IP y el asistente puede desactivarse con una variable de entorno para controlar el consumo.
-
-El buscador utiliza también un modelo de lenguaje, más rápido (Claude Sonnet 4.6), para redactar opcionalmente una frase que explique por qué encaja cada vivienda a partir de los datos ya calculados; si la llamada falla o tarda más de 15 segundos, se mantiene la explicación determinista. El comportamiento del asistente no se ha evaluado de forma sistemática, por ejemplo midiendo el acierto en la elección de herramientas o la fidelidad de las respuestas a sus resultados, y esa evaluación queda como trabajo futuro.
-
-\hfill
-
-\begin{figure}[!htb]
-\centering
-\begin{tikzpicture}[>={Stealth[]},node distance=6mm,
-  paso/.style={draw,rounded corners=2pt,align=center,text width=10.5cm,minimum height=0.9cm,fill=gray!6,font=\small}]
-\node[paso] (peticion) {Petición de la persona y datos del perfil};
-\node[paso,below=of peticion] (agente) {El asistente selecciona una herramienta y sus parámetros};
-\node[paso,below=of agente] (herramienta) {El servidor ejecuta la consulta o el cálculo};
-\node[paso,below=of herramienta] (resultado) {Resultado completo: tarjetas de la interfaz\\Resumen del resultado: contexto para el asistente};
-\node[paso,below=of resultado] (texto) {El asistente explica el resultado o solicita otra herramienta};
-\draw[->] (peticion)--(agente);
-\draw[->] (agente)--(herramienta);
-\draw[->] (herramienta)--(resultado);
-\draw[->] (resultado)--(texto);
-\end{tikzpicture}
-\caption{Flujo del asistente: la herramienta proporciona los datos de las tarjetas y el modelo de lenguaje redacta su explicación.}
-\label{fig:chat}
-\end{figure}
-
+La búsqueda se restringe a Madrid capital. Los datos del perfil y de los anuncios se tratan como datos, nunca como instrucciones; además, se validan las peticiones y se limita su frecuencia. Estas medidas reducen riesgos, pero no garantizan la fidelidad de las respuestas: la selección de herramientas y su interpretación no se han evaluado sistemáticamente. El catálogo, el flujo y los detalles de ejecución se recogen en el anexo~14.3.
 
 \subsection{Puntuación y presentación de resultados}
 
@@ -652,18 +604,14 @@ Con estas escalas, un anuncio al precio de referencia obtiene 50 puntos en Fair,
 
 La puntuación es una heurística de ordenación y no un resultado validado, y sus componentes tienen un fundamento desigual. Fair y Lifestyle dependen de la vivienda concreta y tienen una lectura directa. Opportunity y Zone, en cambio, se calculan por distrito, de modo que toman el mismo valor para todos los anuncios de una búsqueda en una misma zona y apenas alteran el orden dentro de ella. Sus definiciones son además discutibles. Opportunity premia los distritos cuyo precio de oferta más ha subido en el último año, lo que refleja inercia de precios más que oportunidad y puede entrar en tensión con Fair; como la referencia de Madrid (2,2 \%) queda por debajo de 19 de los 21 distritos, la mayoría supera los 50 puntos. Zone usa recuentos absolutos, sin normalizar por superficie ni población, lo que favorece a los distritos extensos en zonas verdes y penaliza a los céntricos, con más actividad, en actuaciones policiales. Una revisión de ambos componentes con indicadores relativos y a escala de barrio o del entorno de cada vivienda se plantea en el capítulo de conclusiones.
 
-\hfill
-
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=0.9\linewidth]{app_inicio.png}
+\includegraphics[width=0.78\linewidth]{app_inicio.png}
 \par\vspace{8pt}
-\includegraphics[width=0.9\linewidth]{app_ficha.png}
+\includegraphics[width=0.78\linewidth]{app_ficha.png}
 \caption{Pantalla de inicio (arriba) y ficha de un anuncio sintético de demostración con su puntuación (abajo). Las capturas ilustran la interfaz; no constituyen observaciones del mercado.}
 \label{fig:capturas}
 \end{figure}
-
-\hfill
 
 Los resultados se presentan como tarjetas sobre un mapa, con acceso a la ficha de cada anuncio (Figura~\ref{fig:capturas}). La ficha de cada vivienda muestra el precio anunciado frente a la referencia, las advertencias asociadas a la estimación (por ejemplo, una planta imputada o una variable fuera de rango) y un enlace al anuncio original en Idealista. La aplicación incluye además una calculadora que compara la compra y el alquiler con supuestos editables; sus resultados son independientes del modelo de precios y se presentan como tales.
 
@@ -1363,7 +1311,62 @@ El recomendador solicita hasta ocho candidatos, aplica presupuesto, habitaciones
 \refstepcounter{anexosub}\needspace{3\baselineskip}%
 \subsection*{\theanexo\hspace{0.3em}\arabic{anexosub}\hspace{0.45em}Agente conversacional}
 
-El modelo de lenguaje interpreta la petición y selecciona herramientas con parámetros estructurados. La herramienta de búsqueda obtiene anuncios, y \texttt{valorar\_vivienda} llama al adaptador del modelo con los atributos del anuncio y la operación original. Las herramientas de mercado, trayecto y comparación financiera realizan sus propias consultas o cálculos, y la referencia territorial de alquiler se presenta separada de la estimación individual. Cada resultado tiene una representación para el agente y otra para la interfaz, y la ejecución se transmite mediante eventos de servidor (texto, inicio y fin de herramienta y tarjetas). Para acotar el coste de cada conversación, el bucle se limita a tres rondas y cuatro llamadas a herramientas por petición.
+El asistente ofrece las mismas capacidades que el buscador a través de una conversación en lenguaje natural. Utiliza un modelo de lenguaje de Anthropic (Claude Opus 4.6, configurable) mediante la API de mensajes con uso de herramientas (\emph{tool use}) y respuesta en streaming. El principio de diseño es una división estricta de funciones: el modelo de lenguaje interpreta la petición, decide qué herramientas llamar y redacta la respuesta, pero no calcula ninguna cifra. Precios, estimaciones, trayectos y simulaciones proceden siempre de herramientas deterministas, las mismas que utiliza el buscador. Esta separación reduce el riesgo de que el modelo genere un precio o un porcentaje plausible pero inventado, aunque la fidelidad del texto a los resultados requiere evaluación.
+
+La herramienta \texttt{valorar\_vivienda} conserva los atributos y la operación original del anuncio; la referencia territorial de alquiler se presenta separada de la estimación individual.
+
+\begingroup
+\renewcommand{\thetable}{A1}
+\begin{center}
+\captionof{table}{Herramientas disponibles para el asistente.}
+\label{tab:herramientas}
+\begin{tabularx}{\linewidth}{@{}l L@{}}
+\toprule
+\thead{Herramienta} & \thead{Función} \\
+\midrule
+buscar\_propiedades & Busca anuncios en Idealista dentro de Madrid capital según zona, operación, precio, superficie y habitaciones \\
+detalle\_propiedad & Recupera la información disponible de un anuncio ya mostrado \\
+valorar\_vivienda & Llama al servicio de inferencia con los datos observados del anuncio y devuelve la estimación, la comparación y las advertencias \\
+valorar\_alquiler & Consulta una referencia territorial de renta por metro cuadrado \\
+analizar\_mercado & Compara el precio por metro cuadrado con la media provincial del INE y aporta el tipo hipotecario del Banco de España \\
+calcular\_hipoteca & Calcula cuota mensual, coste total y esfuerzo sobre el salario \\
+calcular\_trayecto & Estima el tiempo desde el lugar de trabajo a pie, en bici, en coche y en transporte público \\
+comparar\_alquiler\_compra & Simula año a año el patrimonio de comprar frente a alquilar e invertir \\
+consultar\_barrio & Informa de la disponibilidad de indicadores de barrio sin clasificar zonas \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\endgroup
+
+Cada petición sigue un bucle de agente. El servidor envía al modelo la conversación, las instrucciones del sistema y la definición de las nueve herramientas de la Tabla~\ref{tab:herramientas}, descritas en español y orientadas a \emph{cuándo} conviene usar cada una. Si el modelo solicita herramientas, el servidor las ejecuta, devuelve sus resultados y vuelve a llamar al modelo, que puede encadenar nuevas llamadas o responder. Un recorrido típico ante una petición como ``busco un piso de dos habitaciones en Chamberí para comprar, hasta 500.000 €'' consiste en buscar anuncios, valorar los más relevantes con el modelo y, si el perfil incluye un lugar de trabajo, calcular el trayecto. Para acotar la latencia y el coste, cada petición admite como máximo tres llamadas al modelo y cuatro ejecuciones de herramientas, con tiempos límite de 45 segundos por llamada y 52 segundos en total. Si una herramienta falla, el error se devuelve al modelo como resultado marcado, de forma que pueda explicarlo en lugar de continuar como si tuviera datos.
+
+Cada herramienta produce dos representaciones de su resultado. El modelo recibe una versión compacta: la búsqueda, por ejemplo, le devuelve un resumen sin la lista completa de anuncios, lo que reduce el consumo de tokens. La interfaz recibe la versión completa y la muestra como tarjetas (anuncios, valoración, hipoteca, trayecto o mercado), que llegan al navegador como eventos de servidor mientras el texto se genera. Las cifras que ve la persona usuaria son, por tanto, las de la herramienta y no las de la redacción del modelo.
+
+El servidor no guarda estado entre peticiones: el navegador reenvía el historial, limitado a 20 mensajes y 32.000 caracteres. Para que el asistente pueda valorar más adelante un anuncio mostrado en un turno anterior sin inventar sus coordenadas ni sus características, los datos observados de esos anuncios se adjuntan al historial como contenido estructurado. El perfil de la persona usuaria (operación, zona, presupuesto, trabajo y pesos de la puntuación) se incorpora a las instrucciones del sistema para no volver a preguntar lo que ya se conoce.
+
+Las instrucciones del sistema fijan el comportamiento en cuatro aspectos. En la recogida de información, el asistente necesita zona, presupuesto y operación antes de buscar, y no hace más de dos preguntas por turno. En el ámbito, solo busca en Madrid capital y no ofrece asesoramiento legal ni fiscal. En el uso de la evidencia, debe indicar el periodo de la estimación, explicar las abstenciones del modelo y no inventar intervalos, puntuaciones ni valores que las herramientas no hayan devuelto. En seguridad, los campos del perfil y de los anuncios se tratan como datos y nunca como instrucciones, una defensa básica frente a la inyección de instrucciones a través del texto de un anuncio. A nivel de servidor, las peticiones se validan, se limitan por dirección IP y el asistente puede desactivarse con una variable de entorno para controlar el consumo.
+
+El buscador utiliza también un modelo de lenguaje, más rápido (Claude Sonnet 4.6), para redactar opcionalmente una frase que explique por qué encaja cada vivienda a partir de los datos ya calculados; si la llamada falla o tarda más de 15 segundos, se mantiene la explicación determinista. El comportamiento del asistente no se ha evaluado de forma sistemática, por ejemplo midiendo el acierto en la elección de herramientas o la fidelidad de las respuestas a sus resultados, y esa evaluación queda como trabajo futuro.
+
+\begingroup
+\renewcommand{\thefigure}{A2}
+\begin{center}
+\begin{tikzpicture}[>={Stealth[]},node distance=6mm,
+  paso/.style={draw,rounded corners=2pt,align=center,text width=10.5cm,minimum height=0.9cm,fill=gray!6,font=\small}]
+\node[paso] (peticion) {Petición de la persona y datos del perfil};
+\node[paso,below=of peticion] (agente) {El asistente selecciona una herramienta y sus parámetros};
+\node[paso,below=of agente] (herramienta) {El servidor ejecuta la consulta o el cálculo};
+\node[paso,below=of herramienta] (resultado) {Resultado completo: tarjetas de la interfaz\\Resumen del resultado: contexto para el asistente};
+\node[paso,below=of resultado] (texto) {El asistente explica el resultado o solicita otra herramienta};
+\draw[->] (peticion)--(agente);
+\draw[->] (agente)--(herramienta);
+\draw[->] (herramienta)--(resultado);
+\draw[->] (resultado)--(texto);
+\end{tikzpicture}
+\captionof{figure}{Flujo del asistente: la herramienta proporciona los datos de las tarjetas y el modelo de lenguaje redacta su explicación.}
+\label{fig:chat}
+\end{center}
+\endgroup
 
 \refstepcounter{anexosub}\needspace{3\baselineskip}%
 \subsection*{\theanexo\hspace{0.3em}\arabic{anexosub}\hspace{0.45em}Comunicación con el servicio y tratamiento de fallos}

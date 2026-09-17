@@ -13,6 +13,13 @@
 - Recuperadas las figuras ausentes. La captura de conversación no estaba incluida: se ha sustituido por un diagrama del flujo implementado. Las capturas de interfaz identifican los ejemplos sintéticos.
 - Eliminadas referencias a páginas fijas; ajustados índices, enlaces y numeración de anexos.
 
+## Ajuste al límite de extensión
+
+- El contenido principal ocupa las páginas numeradas 1–19 y la bibliografía completa ocupa la página 20. Las portadas, los índices y los anexos quedan fuera de esas veinte páginas.
+- El capítulo de la aplicación conserva la arquitectura, el recorrido de búsqueda, una explicación del asistente, el cálculo y las limitaciones del Score y las dos capturas de interfaz.
+- El catálogo de herramientas, el diagrama del asistente y los detalles de ejecución se han trasladado al anexo 14.3. Las capturas se han reducido del 90 % al 78 % del ancho de texto y se han eliminado espacios sobrantes a su alrededor.
+- Se mantienen el cuerpo de letra de 11 puntos, los márgenes, los resultados científicos, las conclusiones y las trece referencias bibliográficas. Se han comprobado la paginación, los índices, las referencias cruzadas y la maquetación del PDF compilado.
+
 ## Procedencia de las figuras y las cifras
 
 Las seis figuras `nb*.png` se extrajeron de las salidas incluidas en los cuadernos del [repositorio del modelo](https://github.com/tomasper17/house-pricing-model-habitia), revisión `b51fdef423bf42b19427216bf06fdbeb031016d5`. No se han recreado resultados estadísticos.
