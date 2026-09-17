@@ -12,10 +12,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { MODE_LABEL, bandaColor } from "@/lib/dashboard-format";
 import styles from "./MapPanel.module.css";
 import { formatEUR } from "@/lib/utils";
+import { MAP_STYLE, MAP_WORKER_URL } from "@/lib/map-config";
 import type { CommuteResult, Property, PropertyEnrichment } from "@/types";
 
-/** Estilo vectorial gratuito de CARTO (sin clave). Tono claro, encaja con paper. */
-const MAP_STYLE = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 /** Centro de respaldo: Puerta del Sol, Madrid. */
 const FALLBACK_CENTER = { longitude: -3.7038, latitude: 40.4168, zoom: 11 };
 
@@ -143,6 +142,7 @@ export default function MapPanel({
       ref={mapRef}
       initialViewState={initialViewState}
       mapStyle={MAP_STYLE}
+      workerUrl={MAP_WORKER_URL}
       onLoad={() => { setLoaded(true); fitToData(); }}
       onClick={() => onSelect(null)}
       style={{ width: "100%", height: "100%" }}

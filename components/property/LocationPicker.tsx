@@ -4,9 +4,9 @@ import Map, { Marker, NavigationControl, type MapRef } from "react-map-gl/maplib
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MagnifyingGlass, MapPin } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { MAP_STYLE, MAP_WORKER_URL } from "@/lib/map-config";
 import { isMadridPoint, MADRID_CENTER, MADRID_SCOPE_MESSAGE } from "@/lib/search-scope";
 
-const MAP_STYLE = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 const SPAIN = { lat: 40.2, lon: -3.6, zoom: 4.7 };
 
 export interface PickedLocation {
@@ -128,6 +128,7 @@ export default function LocationPicker({
           ref={mapRef}
           initialViewState={initialViewState}
           mapStyle={MAP_STYLE}
+          workerUrl={MAP_WORKER_URL}
           onClick={(e) => resolveAt(e.lngLat.lat, e.lngLat.lng)}
           style={{ width: "100%", height: "100%" }}
         >

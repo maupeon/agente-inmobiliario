@@ -16,6 +16,9 @@
 # production
 /build
 
+# MapLibre worker assets are copied from the installed package before dev/build.
+/public/maplibre/
+
 # misc
 .DS_Store
 *.pem
