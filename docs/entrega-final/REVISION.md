@@ -13,6 +13,7 @@
 - Recuperadas las figuras ausentes. La captura de conversación no estaba incluida: se ha sustituido por un diagrama del flujo implementado. Las capturas de interfaz identifican los ejemplos sintéticos.
 - Eliminadas referencias a páginas fijas; ajustados índices, enlaces y numeración de anexos.
 - Ampliado el trabajo futuro con la calibración del HabitIA Score mediante percentiles de distribuciones de referencia y su actualización con nuevas observaciones. Se distingue esta calibración de los intervalos de predicción, se reconoce que Zone ya utiliza percentiles y se exige otra muestra de evaluación si el test actual se usa para ajustar las escalas. La síntesis de conclusiones se ha compactado para conservar las 19 páginas de contenido y una de bibliografía.
+- Precisadas las referencias por componente: desviaciones porcentuales con signo del test y contraste actual para Fair; evolución territorial para Opportunity; indicadores y referencia territorial revisados para Zone; y candidatos filtrados de cada búsqueda para Lifestyle, conservando los minutos visibles. La escala mantiene 100 como posición relativa más favorable y distingue la evaluación del nuevo Score de las métricas previas del predictor. Se conserva la paginación 19 + 1.
 
 ## Ajuste al límite de extensión
 
