@@ -28,7 +28,7 @@ La configuración se lee desde el entorno del servidor. En local, copia [`.env.e
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | Origen canónico de la instalación; HTTPS en producción |
 | `CRON_SECRET` | Vacía | Protege los procesos periódicos; mínimo 24 caracteres para notificaciones |
 
-La app actual no utiliza `NEXT_PUBLIC_SUPABASE_ANON_KEY`. El script administrativo de notificaciones admite `SUPABASE_ACCESS_TOKEN` o una sesión de Supabase CLI en macOS; esa credencial administrativa no es necesaria en el servidor web.
+La app actual no utiliza `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Para ejecutar el script administrativo de notificaciones, configura `SUPABASE_ACCESS_TOKEN` en su entorno; esa credencial administrativa no es necesaria en el servidor web.
 
 ## Supabase: instalación nueva
 

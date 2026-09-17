@@ -1,4 +1,4 @@
-/** Contrato del servicio de valoración (FastAPI · `habitia-tfm/servicio/api_v3.py`). */
+/** Tipos de datos del servicio de valoración (FastAPI · `habitia-tfm/servicio/api_v3.py`). */
 
 export type BandaValoracion = "barato" | "ajustado" | "en_linea" | "caro" | "muy_caro";
 

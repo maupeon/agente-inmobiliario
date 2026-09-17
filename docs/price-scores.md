@@ -1,6 +1,6 @@
 # Fair y Opportunity: implementación provisional
 
-Actualización: 16 de septiembre de 2026. Estas reglas de preferencia desbloquean la aplicación; no son una calibración estadística. La propuesta v12 de la presentación usa percentiles y sigue diferenciada de esta implementación lineal. No se emplea el test reservado ni se altera el predictor.
+Estas reglas de preferencia permiten ordenar los anuncios según el perfil; no son una calibración estadística. La propuesta v12 de la presentación usa percentiles y sigue diferenciada de esta implementación lineal. No se emplea el test reservado ni se altera el predictor.
 
 ## Fair
 
@@ -34,14 +34,14 @@ Se aplica a compra y alquiler con la misma referencia de evolución de venta del
 
 `lib/scoring/price-scores.ts` concentra ambos cálculos y `personalScore` los comparte entre buscador, cambios de pesos y recomendaciones. Cada ficha conserva importes/tasas, periodo, regla y procedencia en un detalle desplegable. Ausencias siguen siendo null; no se redistribuyen pesos. Zone tiene 100% de cobertura interna con sus cuatro indicadores; con pesos iguales, compra y alquiler pueden alcanzar 100% de cobertura si Fair y Lifestyle están disponibles.
 
-Pruebas: límites, monotonía, cero, signos, datos inválidos, correspondencia de anuncio/operación, ausencia de estimación, independencia entre Opportunity y precio individual, atribución territorial, cobertura ponderada y los contratos reales XGBoost de compra y alquiler.
+Pruebas: límites, monotonía, cero, signos, datos inválidos, correspondencia de anuncio/operación, ausencia de estimación, independencia entre Opportunity y precio individual, atribución territorial, cobertura ponderada y los formatos de respuesta XGBoost de compra y alquiler.
 
 ## Revisión de alquiler en el dashboard
 
 Opportunity conserva en alquiler los mismos valores, fuente y periodo de venta que en compra; Chamberí obtiene 54,5/100. Fair compara mensualidades y mantiene la misma escala que compra. Un anuncio al menos un 20% por encima de su estimación obtiene 0/100: es un resultado calculado, no un dato ausente, y se explica junto al desglose. No se modifica el predictor ni se fuerza una puntuación positiva.
 
-## Cambio de modelo del 16 de septiembre
+## Integración del predictor XGBoost
 
-El paquete `habitia_predictor`, exportado el 16/09/2026 a las 11:57:54, conserva los 410 árboles y actualiza los índices distritales y las variables de alquiler de barrio a un escenario proyectado de 2026. Se integra mediante el contrato 3.3.0. Fair y el Fit Score global usan sus nuevas estimaciones, comprobando la versión y los hashes del modelo y del paquete completo. Las valoraciones guardadas del modelo anterior no se reutilizan para calcular Fair. Se conserva la escala lineal: esta actualización temporal no aporta una nueva calibración de scores.
+El paquete `habitia_predictor` utiliza 410 árboles, con índices distritales y variables de alquiler de barrio proyectados a un escenario de 2026. Se integra mediante la API 3.3.0. Fair y el Fit Score global usan sus estimaciones, comprobando la versión y los hashes del modelo y del paquete completo. Las valoraciones guardadas del modelo anterior no se reutilizan para calcular Fair. Se conserva la escala lineal: el ajuste temporal no aporta una nueva calibración de scores.
 
-Las abstenciones por descripción de vivienda a reformar u ocupada/alquilada dejan Fair ausente y reducen la cobertura ponderada; no equivalen a Fair = 0. Obra nueva conserva el cálculo con una advertencia sobre anuncios dependientes de una misma promoción. El contrato sigue comparando venta total y alquiler mensual por separado, con venta y ratios de renta proyectados a 2026. Las últimas observaciones siguen siendo venta de 2025 y alquiler de 2024; no se atribuye validación actual a la proyección.
+Las abstenciones por descripción de vivienda a reformar u ocupada/alquilada dejan Fair ausente y reducen la cobertura ponderada; no equivalen a Fair = 0. Obra nueva conserva el cálculo con una advertencia sobre anuncios dependientes de una misma promoción. La API compara venta total y alquiler mensual por separado, con venta y ratios de renta proyectados a 2026. Las últimas observaciones siguen siendo venta de 2025 y alquiler de 2024; no se atribuye validación actual a la proyección.

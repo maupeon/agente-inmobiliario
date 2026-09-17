@@ -16,7 +16,7 @@ export function scoreWeights(value?: unknown): ScoreWeights {
 }
 const round = (n: number) => Math.round(n * 10) / 10;
 
-/** El contrato de estimación exige éxito explícito, versión y ausencia de respaldo. */
+/** La respuesta de estimación exige éxito explícito, versión y ausencia de respaldo. */
 export function usableModel(e: PropertyEnrichment): boolean {
   const v = e.valuation;
   return !!v && v.nivel === "modelo" && v.estadoModelo === "ok" && !v.fromFallback

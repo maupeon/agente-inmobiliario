@@ -39,7 +39,7 @@ El ejemplo desactiva Idealista real y Anthropic. Los mapas, la geocodificación 
 | Mapa y contexto de la zona | Recursos locales y fuentes públicas | Internet para las consultas externas |
 | Trayecto al trabajo | Aproximación identificada | OpenRouteService para los modos compatibles |
 | Chat con herramientas | Pausado | Clave de Anthropic y `LLM_ENABLED=true` |
-| Valoración individual | Estado «Valoración no disponible» | Predictor XGBoost v3, contrato 3.3.0 e identidad de paquete vigente |
+| Valoración individual | Estado «Valoración no disponible» | Predictor XGBoost v3, API 3.3.0 e identidad de paquete vigente |
 | Historial y favoritos | Persistencia no disponible; la interfaz avisa | Supabase y esquema de demo compartida |
 | Selección diaria de hasta 5 viviendas | No disponible | Supabase, migraciones y cron |
 | Presentación del TFM | Diapositivas, resultados y vídeo incluidos | Ningún backend del modelo para mostrar las cifras guardadas |
@@ -84,13 +84,13 @@ agente-inmobiliario/
 │   ├── neighborhood/           # Informes de contexto territorial
 │   ├── notifications/          # Identidad y selección diaria
 │   ├── supabase/               # Acceso a datos desde el servidor
-│   └── valoracion/             # Cliente y contrato del servicio Python
+│   └── valoracion/             # Cliente y formato de datos del servicio Python
 ├── data/madrid/                # Instantáneas oficiales y fuentes pequeñas
 ├── public/                     # Imágenes, vídeo y recursos servidos por la web
 ├── scripts/                    # Importación de datos y tareas de mantenimiento
 ├── tests/                      # Pruebas automáticas sin red ni credenciales
 ├── supabase/                   # Esquema, migraciones, cron y pruebas SQL
-├── types/                      # Contratos TypeScript compartidos
+├── types/                      # Tipos TypeScript compartidos
 ├── docs/                       # Guías técnicas y de operación
 └── .github/workflows/ci.yml     # Verificación automática en GitHub
 ```
@@ -121,13 +121,13 @@ GitHub Actions comprueba vulnerabilidades conocidas y ejecuta la misma verificac
 
 - La búsqueda, el inicio, el agente y la demo se limitan a **Madrid capital**, para compra y alquiler. Se comprueban la zona y el centro antes de consultar Idealista; también se filtran resultados de radios que crucen el límite municipal. Los orígenes de trayecto pueden estar fuera de Madrid.
 - El modelo externo estima **precios anunciados de venta de Madrid de 2018**. Su indexación temporal es un escenario; no valida la precisión en anuncios actuales ni en precios de compraventa.
-- El predictor XGBoost v3 recibido en `habitia_predictor` (exportado el 16/09/2026 a las 11:57:54, 410 árboles) conserva sus 21 variables y pesos; actualiza los índices de venta y renta y el alquiler del barrio a un escenario proyectado de 2026. No incluye intervalos calibrados ni bandas. Fair usa la desviación frente a la estimación individual en una escala provisional de 0–100. Admite anuncios de compra y alquiler (contrato 3.3.0): compara el precio total de venta o la mensualidad en €/mes. Su renta deriva del valor de venta estimado y ratios proyectados a 2026, sin validación independiente de alquiler. Las últimas fuentes observadas son venta de 2025 y alquiler de 2024. Los resultados LightGBM de la presentación siguen identificados como evaluación histórica de otro modelo.
-- Las métricas de XGBoost son las declaradas en el paquete; no se dispone de sus particiones ni predicciones de test para auditarlas. La evaluación retrospectiva agrupada por inmueble corresponde al experimento LightGBM anterior y se identifica como antecedente.
+- El predictor XGBoost v3 de `habitia_predictor` utiliza 410 árboles y 21 variables; sus índices de venta y renta y el alquiler del barrio corresponden a un escenario proyectado de 2026. No incluye intervalos calibrados ni bandas. Fair usa la desviación frente a la estimación individual en una escala provisional de 0–100. Admite anuncios de compra y alquiler mediante la API 3.3.0: compara el precio total de venta o la mensualidad en €/mes. Su renta deriva del valor de venta estimado y ratios proyectados a 2026, sin validación independiente de alquiler. Las últimas fuentes observadas son venta de 2025 y alquiler de 2024. Los resultados LightGBM de la presentación siguen identificados como evaluación histórica de otro modelo.
+- Las métricas de XGBoost son las declaradas en el paquete de inferencia, que no incorpora las particiones ni las predicciones de test para auditarlas. La memoria remite al repositorio del modelo para documentar el entrenamiento. La evaluación retrospectiva agrupada por inmueble corresponde al experimento LightGBM anterior y se identifica como antecedente.
 - El HabitIA Score combina Fair, Opportunity, Zone y Lifestyle. Los componentes sin evidencia no aportan puntos y sus pesos no se redistribuyen. Opportunity compara, en compra y alquiler, la variación anual de oferta del distrito con Madrid (Idealista, agosto 2025–agosto 2026). Zone promedia cuatro percentiles de recuentos de distrito (zonas verdes, actuaciones policiales, transporte y servicios), con un peso del 25% cada uno. Descanso queda fuera del cálculo. Con los cuatro disponibles, la cobertura interna es del 100%. El dashboard muestra el HabitIA Score numérico y señala cuando faltan datos.
 - Las fuentes oficiales de barrio aportan contexto. Sus recuentos no se convierten en índices de seguridad o calidad de vida.
 - La comparación de compra y alquiler calcula escenarios según los supuestos introducidos; no predice el mercado.
 
-La memoria, los anexos, los artefactos de inferencia y la API Python se encuentran en el repositorio académico público [habitia-tfm](https://github.com/maupeon/habitia-tfm). Su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3) reúne documentos y artefactos de acceso público.
+La [memoria final con sus anexos](docs/entrega-final/HabitIA_memoria.pdf), el [LaTeX editable](docs/entrega-final/HabitIA_memoria.tex) y el [resumen de revisión](docs/entrega-final/REVISION.md) están en `docs/entrega-final/`. La API Python y los artefactos de inferencia se documentan en [habitia-tfm](https://github.com/maupeon/habitia-tfm). Su [paquete técnico](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3) conserva los materiales y documentos de la entrega anterior.
 
 ## 7. Documentación
 
@@ -135,7 +135,7 @@ La memoria, los anexos, los artefactos de inferencia y la API Python se encuentr
 | --- | --- |
 | [Configuración y despliegue](docs/configuracion.md) | Variables, Supabase, cuotas y publicación |
 | [Arquitectura](docs/arquitectura.md) | Responsabilidades, flujo de búsqueda y API |
-| [Servicio Python externo](docs/modelo-externo.md) | Conexión, contrato, abstenciones y resultados |
+| [Servicio Python externo](docs/modelo-externo.md) | Conexión, formato de datos, abstenciones y resultados |
 | [Datos y procedencia](docs/datos.md) | Archivos conservados, fuentes y reproducción |
 | [Desarrollo y pruebas](docs/desarrollo.md) | Verificación, mantenimiento y solución de problemas |
 | [Notificaciones](docs/notificaciones.md) | Instalación, horarios, privacidad y operación del cron |

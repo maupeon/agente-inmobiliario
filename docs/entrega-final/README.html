@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HabitIA — Trabajo Fin de Máster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F8F5;
+    --surface: #FFFFFF;
+    --surface-2: #F1F4EF;
+    --border: #E3E8E3;
+    --text: #17211D;
+    --muted: #68736D;
+    --accent: #2D7C59;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #D8F0E2;
+    --shadow: 0 1px 2px rgba(23, 33, 29, .05), 0 6px 20px rgba(23, 33, 29, .06);
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono: "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121915;
+      --surface: #17211D;
+      --surface-2: #141c18;
+      --border: #2a3832;
+      --text: #EEF2EE;
+      --muted: #98A39D;
+      --accent: #83C8A4;
+      --accent-ink: #17211D;
+      --accent-soft: #1f3a2d;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  svg { flex: none; }
+
+  /* Hero */
+  .hero {
+    border-bottom: 1px solid var(--border);
+    background:
+      radial-gradient(1200px 300px at 50% -120px, var(--accent-soft), transparent 70%),
+      var(--bg);
+    padding: 64px 0 44px;
+    text-align: center;
+  }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 14px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(44px, 8vw, 64px);
+    line-height: 1;
+    margin: 0 0 18px;
+    letter-spacing: -.01em;
+  }
+  .hero h1 span { color: var(--accent); }
+  .lede {
+    max-width: 620px;
+    margin: 0 auto 10px;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+  .meta { color: var(--muted); font-size: 14px; margin: 18px 0 0; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 640px;
+    margin: 32px auto 0;
+  }
+  .stat { background: var(--surface); padding: 14px 10px; }
+  .stat b {
+    display: block;
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat small { color: var(--muted); font-size: 12.5px; line-height: 1.35; display: block; }
+
+  /* Sections */
+  main { padding: 40px 0 24px; }
+  section { margin-bottom: 40px; }
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 24px;
+    margin: 0 0 4px;
+  }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 15px; }
+
+  /* Primary PDF card */
+  .primary {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+  }
+  .primary .icon {
+    width: 52px; height: 52px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .primary h3 { margin: 0 0 4px; font-size: 17px; font-family: var(--mono); font-weight: 600; word-break: break-all; }
+  .primary p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  /* Link cards */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: border-color .15s, transform .15s;
+  }
+  a.card:hover { text-decoration: none; border-color: #83C8A4; transform: translateY(-1px); }
+  ::selection { background: #D8F0E2; color: #17211D; }
+  :focus-visible { outline: 3px solid #83C8A4; outline-offset: 3px; }
+  .card .top { display: flex; align-items: center; gap: 10px; color: var(--accent); }
+  .card .top strong { color: var(--text); font-size: 16px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+  .card .url { font-family: var(--mono); font-size: 12.5px; color: var(--accent); word-break: break-all; margin-top: auto; padding-top: 6px; }
+
+  /* Download list */
+  .list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    color: inherit;
+  }
+  .row:first-child { border-top: 0; }
+  a.row:hover { background: var(--surface-2); text-decoration: none; }
+  .row .icon { color: var(--accent); }
+  .row .body { flex: 1; min-width: 0; }
+  .row strong { display: block; font-size: 15.5px; }
+  .row code { font-family: var(--mono); font-size: 12.5px; color: var(--muted); word-break: break-all; }
+  .row .go { color: var(--muted); }
+
+  /* Guide table */
+  .guide { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .guide td { padding: 12px 20px; border-top: 1px solid var(--border); vertical-align: top; }
+  .guide tr:first-child td { border-top: 0; }
+  .guide td:first-child { width: 42%; font-weight: 600; }
+  .pill {
+    display: inline-block;
+    font-size: 12px; font-weight: 600;
+    padding: 2px 9px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent);
+    margin-right: 6px; white-space: nowrap;
+  }
+  code.inline { font-family: var(--mono); font-size: .88em; background: var(--surface-2); border: 1px solid var(--border); padding: 1px 5px; border-radius: 5px; }
+
+  .callout {
+    display: flex; gap: 12px;
+    margin-top: 14px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    font-size: 14.5px;
+  }
+  .callout svg { color: var(--accent); margin-top: 2px; }
+
+  /* Team */
+  .team { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 0; padding: 0; }
+  .team li {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 16px 6px 6px;
+    font-size: 15px;
+  }
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-ink);
+    font-size: 12px; font-weight: 700; letter-spacing: .02em;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 22px 0 40px;
+    color: var(--muted);
+    font-size: 13.5px;
+    text-align: center;
+  }
+
+  @media (max-width: 560px) {
+    .hero { padding: 44px 0 32px; }
+    .stats { grid-template-columns: 1fr; }
+    .primary { flex-direction: column; align-items: flex-start; }
+    .guide td { display: block; width: auto !important; padding: 4px 18px; border-top: 0; }
+    .guide tr { display: block; border-top: 1px solid var(--border); padding: 10px 0; }
+    .guide tr:first-child { border-top: 0; }
+  }
+  @media print {
+    body { background: #fff; }
+    .hero { background: none; padding-top: 20px; }
+    .card, .list, .primary { box-shadow: none; break-inside: avoid; }
+    a.card .url::after, a.row code::after { content: ""; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Trabajo Fin de Máster · 2025–2026</p>
+    <h1>Habit<span>IA</span></h1>
+    <p class="lede">Una aplicación que combina un modelo de estimación del precio de la vivienda con un buscador y un asistente conversacional para encontrar y comparar pisos de compra y alquiler en Madrid capital.</p>
+    <p class="meta">Universidad Complutense de Madrid · Máster en Big Data, Data Science e Inteligencia Artificial</p>
+
+    <div class="stats" aria-label="Resultados principales">
+      <div class="stat"><b>9,3 %</b><small>error porcentual mediano en test</small></div>
+      <div class="stat"><b>80,6 %</b><small>de estimaciones en ± 20 % del precio anunciado</small></div>
+      <div class="stat"><b>75.469</b><small>viviendas en el conjunto de datos</small></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <h2>Documento principal</h2>
+    <p class="sub">El punto de partida para la lectura.</p>
+    <div class="primary">
+      <div class="icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+      </div>
+      <div>
+        <h3><a href="HabitIA_memoria.pdf">Memoria y anexos HabitIA.pdf</a></h3>
+        <p>Memoria y catorce anexos en un único documento, con índices y marcadores. El índice de anexos permite acceder a cada apartado.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Aplicación</h2>
+    <p class="sub">Desplegada y accesible sin iniciar sesión.</p>
+    <div class="grid">
+      <a class="card" href="https://habitiaucm.vercel.app">
+        <div class="top">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+          <strong>Aplicación web</strong>
+        </div>
+        <p>Buscador, valoración de anuncios y asistente conversacional.</p>
+        <span class="url">habitiaucm.vercel.app</span>
+      </a>
+      <a class="card" href="https://habitiaucm.vercel.app/presentacion">
+        <div class="top">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg>
+          <strong>Presentación</strong>
+        </div>
+        <p>Presentación del proyecto para la defensa.</p>
+        <span class="url">habitiaucm.vercel.app/presentacion</span>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Código fuente</h2>
+    <p class="sub">Tres repositorios públicos, uno por cada parte del sistema.</p>
+    <div class="grid">
+      <a class="card" href="https://github.com/tomasper17/house-pricing-model-habitia">
+        <div class="top">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="M8 15l4-5 3 3 5-6"/></svg>
+          <strong>Modelo de precios</strong>
+        </div>
+        <p>Cuadernos 00–08: datos, metodología, ajuste, evaluación y exportación del modelo.</p>
+        <span class="url">tomasper17/house-pricing-model-habitia</span>
+      </a>
+      <a class="card" href="https://github.com/maupeon/habitia-tfm">
+        <div class="top">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>
+          <strong>Predictor y API</strong>
+        </div>
+        <p>Servicio de inferencia en Python que valora los anuncios para la aplicación.</p>
+        <span class="url">maupeon/habitia-tfm</span>
+      </a>
+      <a class="card" href="https://github.com/maupeon/agente-inmobiliario">
+        <div class="top">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"/></svg>
+          <strong>Aplicación web</strong>
+        </div>
+        <p>Interfaz, buscador, puntuación y asistente conversacional.</p>
+        <span class="url">maupeon/agente-inmobiliario</span>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Materiales técnicos</h2>
+    <p class="sub">Código, modelo e informes de comprobación para reproducir el sistema.</p>
+    <div class="list">
+      <a class="row" href="https://github.com/maupeon/habitia-tfm/releases/download/tfm-2026-09-16-r3/HabitIA_TFM_2026-09-16-r3.zip">
+        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <div class="body"><strong>Paquete técnico completo</strong><code>Archivo ZIP con los materiales técnicos</code></div>
+        <span class="go">↓</span>
+      </a>
+      <a class="row" href="https://github.com/maupeon/habitia-tfm/releases/download/tfm-2026-09-16-r3/habitia-modelo-v3.3.zip">
+        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+        <div class="body"><strong>Artefactos del modelo · paquete v3.3</strong><code>habitia-modelo-v3.3.zip</code></div>
+        <span class="go">↓</span>
+      </a>
+      <a class="row" href="https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3">
+        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12l-8 8-9-9V3h8z"/><path d="M7.5 7.5h.01"/></svg>
+        <div class="body"><strong>Página de descarga</strong><code>Versiones e informes de verificación</code></div>
+        <span class="go">→</span>
+      </a>
+    </div>
+    <div class="callout">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      <span>El paquete técnico conserva una memoria anterior. La versión revisada con los anexos integrados es <a href="HabitIA_memoria.pdf">el PDF de esta carpeta</a>.</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Ejecución y reproducción</h2>
+    <p class="sub">Dónde encontrar las instrucciones de cada parte.</p>
+    <div class="list">
+      <table class="guide">
+        <tr>
+          <td>Reproducir el modelo desde los datos</td>
+          <td><span class="pill">Anexo 13</span> y README del repositorio del modelo</td>
+        </tr>
+        <tr>
+          <td>Instalar y probar el servicio de inferencia</td>
+          <td><span class="pill">Anexo 12</span> y README de <code class="inline">habitia-tfm</code></td>
+        </tr>
+        <tr>
+          <td>Arquitectura e integración de la aplicación</td>
+          <td><span class="pill">Anexo 14</span> y README de <code class="inline">agente-inmobiliario</code></td>
+        </tr>
+        <tr>
+          <td>Verificar los archivos del paquete</td>
+          <td><code class="inline">VERSIONES.json</code> identifica las revisiones incluidas y <code class="inline">SHA256SUMS.txt</code> las huellas de cada archivo</td>
+        </tr>
+      </table>
+    </div>
+    <div class="callout">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <span>Las integraciones externas (API de Idealista, modelo de lenguaje, token del servicio) requieren credenciales propias, que no se incluyen en los materiales compartidos.</span>
+    </div>
+  </section>
+
+  <section>
+    <h2 style="margin-bottom:16px">Equipo</h2>
+    <ul class="team">
+      <li><span class="avatar">MP</span>Mauricio Peón García</li>
+      <li><span class="avatar">JN</span>João Paulo Nogueira Cunha</li>
+      <li><span class="avatar">MM</span>Manuel Macedo Púlido</li>
+      <li><span class="avatar">AR</span>Aldo Mauricio Ress Vilet</li>
+      <li><span class="avatar">TP</span>Tomás Perales Lara</li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">El PDF se abre desde esta carpeta. Los repositorios enlazados permiten consultar el código y los materiales del proyecto.</div>
+</footer>
+
+</body>
+</html>

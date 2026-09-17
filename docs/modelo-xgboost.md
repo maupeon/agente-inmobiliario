@@ -1,6 +1,6 @@
-# Predictor XGBoost v3 · actualización del 16 de septiembre de 2026
+# Predictor XGBoost v3
 
-El servicio Python vive en el repositorio académico `habitia-tfm`. La entrega recibida en `habitia_predictor` conserva los pesos de **410 árboles y 21 variables** y actualiza los índices distritales y el alquiler relativo del barrio a un escenario de 2026. El paquete se exportó el **16 de septiembre de 2026 a las 11:57:54**. El contrato HTTP es **3.3.0**, con identidad `habitIA-xgboost-2018-v3`. La versión del paquete de entrenamiento sigue siendo 3; no equivale a la versión de la API.
+El servicio Python vive en el repositorio académico `habitia-tfm`. El paquete `habitia_predictor` utiliza **410 árboles y 21 variables**, con índices distritales y alquiler relativo del barrio proyectados a un escenario de 2026. La versión de la API HTTP es **3.3.0**, con identidad del modelo `habitIA-xgboost-2018-v3`. La versión del paquete de entrenamiento es 3; no equivale a la versión de la API.
 
 ## Instalación
 
@@ -25,12 +25,12 @@ La aplicación conserva descripción, garaje, operación y obra nueva al prepara
 
 El paquete original admite venta. El adaptador mantiene la extensión de alquiler de HabitIA: usa las mismas características para estimar venta, deriva la mensualidad y compara importes en €/mes. No es un modelo de alquiler entrenado ni validado de forma independiente.
 
-## Contrato web y scores
+## Formato de la API y scores
 
 - `precio_estimado` siempre representa venta en euros. `operation`, `precio_comparacion` y `unidad_comparacion` identifican la comparación: venta total (`EUR`) o renta mensual (`EUR/mes`).
 - `intervalo` y `banda` son null. El predictor no produce intervalos calibrados, SHAP ni etiquetas individuales de oportunidad.
 - `calidad.obra_nueva` se añade a las advertencias de descripción ausente, planta imputada, ascensor inferido, barrio rescatado y valores fuera de rango.
-- El cliente exige contrato 3.3.0, hashes del modelo y del paquete completo, año objetivo 2026, últimas fuentes 2025/2024, `ajuste_proyectado=true`, operación, unidades y coherencia aritmética. Envía `ano_ajuste=2026`; el backend utiliza también 2026 por defecto. `metodo_renta` identifica `ratio_distrital_proyectado_2026`. Fair y el score global no reutilizan valoraciones del artefacto sustituido.
+- El cliente exige API 3.3.0, hashes del modelo y del paquete completo, año objetivo 2026, últimas fuentes 2025/2024, `ajuste_proyectado=true`, operación, unidades y coherencia aritmética. Envía `ano_ajuste=2026`; el backend utiliza también 2026 por defecto. `metodo_renta` identifica `ratio_distrital_proyectado_2026`. Fair y el score global no reutilizan valoraciones del artefacto sustituido.
 - **Fair conserva su regla provisional** `limitar(50 − 2,5 × desviación %, 0, 100)`. Cambian los importes estimados al actualizar las tablas, no la escala ni las reglas de abstención. Esta actualización temporal no aporta una calibración de Fair.
 - Sin estimación válida, Fair queda ausente, baja la cobertura del Fit Score y no se redistribuye su peso. Opportunity sigue usando evolución territorial de venta; es independiente del modelo individual.
 
@@ -50,7 +50,7 @@ Consulta [price-scores.md](price-scores.md), `lib/valoracion/client.ts`, `lib/va
 | Casos con error dentro de ±20 % | 80,5552 % |
 | RMSE log de validación cruzada declarado | 0,185772 |
 
-No se ha repetido la evaluación. El paquete no incluye particiones, predicciones ni tamaño del test, ni el código completo de entrenamiento. El porcentaje dentro de ±20 % no es un intervalo individual. Las cifras no acreditan precisión actual ni validación independiente de alquiler.
+La aplicación no repite la evaluación al cargar estas métricas. El paquete de inferencia no incluye particiones, predicciones ni tamaño del test, ni el código completo de entrenamiento. La memoria remite al [repositorio del modelo](https://github.com/tomasper17/house-pricing-model-habitia) para documentar los cuadernos de entrenamiento. El porcentaje dentro de ±20 % no es un intervalo individual. Las cifras no acreditan precisión actual ni validación independiente de alquiler.
 
 La importancia de la presentación se recalcula desde el JSON nativo, como ganancia media de los nodos de división (`gain`): superficie, baños, alquiler mediano por m² del barrio, vulnerabilidad y ascensor. No es SHAP ni causalidad. La memoria distingue esta medida de la ganancia total (`total_gain`) de sus figuras; producen órdenes diferentes.
 
@@ -71,7 +71,7 @@ Copias públicas: [metadatos](../public/model-results/predictor-metadata.json), 
 
 ## Verificación y despliegue
 
-`GET /salud` del servicio informa versión, hash y procedencia del modelo; `GET /api/valoracion` comprueba la conexión desde la web. `npm run check` verifica pruebas, tipos, lint y compilación. Desde `habitia-tfm`, `python -m unittest discover -s tests_v3 -v` comprueba contrato e inferencia con artefactos instalados y `httpx` como dependencia de pruebas.
+`GET /salud` del servicio informa versión, hash y procedencia del modelo; `GET /api/valoracion` comprueba la conexión desde la web. `npm run check` verifica pruebas, tipos, lint y compilación. Desde `habitia-tfm`, `python -m unittest discover -s tests_v3 -v` comprueba el formato de la API y la inferencia con artefactos instalados y `httpx` como dependencia de pruebas.
 
 La prueba de paridad compara el runtime con el paquete recibido en 152 casos: puntos interiores de los 131 polígonos de barrio y 21 casos límite. Las matrices y salidas nativas coinciden exactamente; la diferencia máxima al serializar el runtime es 5,82 × 10⁻¹¹ €. El informe `servicio/paridad_v3.json` registra 141 casos válidos y 11 abstenciones. Acredita conservación del cálculo, no precisión inmobiliaria. La entrega registra también las comprobaciones del despliegue.
 

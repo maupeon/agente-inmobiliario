@@ -1,6 +1,6 @@
 # Conectar el servicio de valoración
 
-La integración vigente es [XGBoost v3, contrato 3.3.0](modelo-xgboost.md), actualizada con `habitia_predictor` el 16 de septiembre de 2026. El código Python, el instalador y las pruebas viven en el [repositorio académico](https://github.com/maupeon/habitia-tfm); los seis artefactos se distribuyen en su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3).
+La integración vigente utiliza [XGBoost v3 y API 3.3.0](modelo-xgboost.md), con el paquete `habitia_predictor`. El código Python, el instalador y las pruebas viven en el [repositorio académico](https://github.com/maupeon/habitia-tfm); los seis artefactos se distribuyen en su [release de entrega](https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3).
 
 [Volver al README](../README.md)
 
@@ -25,9 +25,9 @@ curl http://localhost:3000/api/valoracion
 
 ## Antecedente LightGBM
 
-LightGBM v2 (`habitIA-oferta-2018-v2`, contrato 2.0.0) y sus resultados permanecen documentados como estudio histórico. El cliente activo exige el artefacto XGBoost vigente: restaurar v2 en el servidor requiere una reversión coordinada del cliente; no es intercambiable en producción. Sus intervalos, bandas, 25 variables y factor temporal 1,5534 no pertenecen al nuevo modelo.
+LightGBM v2 (`habitIA-oferta-2018-v2`, API 2.0.0) y sus resultados permanecen documentados como estudio histórico. El cliente activo exige el artefacto XGBoost vigente: restaurar v2 en el servidor requiere una reversión coordinada del cliente; no es intercambiable en producción. Sus intervalos, bandas, 25 variables y factor temporal 1,5534 no pertenecen al nuevo modelo.
 
-`app/presentacion/results-data.json` conserva el estudio agrupado del 8 de septiembre y `results-legacy.json` los antecedentes exploratorios. El importador de ese estudio sigue disponible:
+`app/presentacion/results-data.json` conserva el estudio retrospectivo con particiones agrupadas por inmueble y `results-legacy.json` los antecedentes exploratorios. El importador de ese estudio sigue disponible:
 
 ```bash
 python3 scripts/sync-model-results.py --source /ruta/al/experimento/resultados_revision.json

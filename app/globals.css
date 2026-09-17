@@ -183,7 +183,7 @@
     animation-delay: var(--reveal-delay, 0ms);
   }
 
-  /* Tecla física estilo macOS para shortcuts */
+  /* Tecla física para atajos de teclado */
   .kbd {
     display: inline-flex;
     align-items: center;

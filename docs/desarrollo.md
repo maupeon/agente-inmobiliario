@@ -16,14 +16,14 @@ El comando ejecuta todas las suites de `tests/`, TypeScript, ESLint y la compila
 
 | Suite | Cobertura principal |
 | --- | --- |
-| `tests/app-regression.test.cjs` | Validación de API, demo compartida, abstenciones, contrato del modelo, cuota y caché |
+| `tests/app-regression.test.cjs` | Validación de API, demo compartida, abstenciones, respuestas del modelo, cuota y caché |
 | `tests/scoring-search.test.cjs` | Pesos, evidencias ausentes, filtros, orden y recuperación de la última búsqueda |
 | `tests/market-data.test.cjs` | Formatos de INE/BdE, series correctas, periodos y respuestas inválidas |
 | `tests/notifications-api.test.cjs` | Identidad, autorización, origen, selección de cinco únicos y errores |
 | `tests/commute.test.cjs` | Geometría, modos, estimaciones y trayectos de cero minutos |
 | `tests/madrid-scope.test.cjs` | Límite municipal, perfiles y anuncios fuera de Madrid |
 | `tests/web-validation.test.cjs` | Datos persistidos, URL seguras, historial largo, filtros y entradas HTTP |
-| `tests/valoracion-v3.test.cjs` | Contrato XGBoost, identidad, venta, alquiler y abstenciones |
+| `tests/valoracion-v3.test.cjs` | API XGBoost, identidad, venta, alquiler y abstenciones |
 | `tests/rent-vs-buy.test.cjs` | Patrimonio, gastos, impuestos, hipoteca e invariantes en 324 escenarios |
 
 Para ejecutar una sola suite:
@@ -32,7 +32,7 @@ Para ejecutar una sola suite:
 node --test tests/scoring-search.test.cjs
 ```
 
-Las comprobaciones de contrato usan respuestas simuladas: no acreditan que un servicio remoto o un cron esté desplegado. El SQL se comprueba por separado.
+Las comprobaciones de compatibilidad con la API usan respuestas simuladas: no acreditan que un servicio remoto o un cron esté desplegado. El SQL se comprueba por separado.
 
 ## Pruebas SQL
 
@@ -79,7 +79,7 @@ Los importadores y el instalador no se ejecutan durante `npm ci`, las pruebas ni
 | El chat está pausado | Configura `ANTHROPIC_API_KEY` y `LLM_ENABLED=true`; reinicia el servidor |
 | No se guardan favoritos o historial | Comprueba URL, clave de servidor y tablas `demo_*`; no basta con añadir la URL |
 | La búsqueda real se bloquea | Comprueba cuota, función SQL de reserva y credenciales de Idealista |
-| No hay valoración | Comprueba `/api/valoracion`, conectividad, contrato 3.3.0 y hash del artefacto vigente; revisa también abstenciones por anuncio |
+| No hay valoración | Comprueba `/api/valoracion`, conectividad, API 3.3.0 y hash del artefacto vigente; revisa también abstenciones por anuncio |
 | No aparece un dato oficial | La fuente puede estar caída o carecer de una referencia verificada; la interfaz muestra procedencia y respaldo |
 | No llega una selección diaria | Comprueba suscripción, hora/zona, migraciones, Vault y planificador |
 | Cambiar `.env.local` no surte efecto | Reinicia Next.js; las variables públicas también requieren recompilar en producción |

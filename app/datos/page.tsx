@@ -64,7 +64,7 @@ export default async function DatosPage() {
           <header className="border-b border-hairline p-5">
             <h2 className="font-display text-xl leading-tight text-ink">Datos utilizados para el modelo de precio</h2>
             <p className="mt-1.5 text-sm text-stone-600">Idealista18 · anuncios de venta de Madrid · cuatro trimestres de 2018</p>
-            <p className="mt-2 break-words font-mono text-[10px] uppercase tracking-[0.14em] text-stone">XGBoost · {modelManifest.model_id} · contrato {modelManifest.model_version}</p>
+            <p className="mt-2 break-words font-mono text-[10px] uppercase tracking-[0.14em] text-stone">XGBoost · {modelManifest.model_id} · API {modelManifest.model_version}</p>
           </header>
           <div className="space-y-5 p-5 text-sm leading-relaxed text-stone-600">
             <p>La fuente histórica declarada es <Strong>Idealista18</Strong>, descrita por Rey-Blanco, Arbués, López y Páez (2024). El modelo aprende el <Strong>precio anunciado de venta</Strong>, no el precio de cierre. Este conjunto histórico es distinto de los anuncios que recupera la búsqueda actual.</p>
@@ -80,12 +80,12 @@ export default async function DatosPage() {
               <Row cells={["Ajuste de venta y renta", `${INDEX_TARGET_YEAR} · escenario proyectado`]} />
               <Row cells={["Últimas fuentes observadas", "Venta: 2025 · alquiler: 2024"]} />
             </Table>
-            <p><Strong>Las métricas de XGBoost son las declaradas en el paquete recibido.</Strong> No se entregan la matriz final de entrenamiento, las particiones ni las predicciones de test. El histórico permite verificar sus filas y columnas, pero no reconstruir por sí solo la evaluación del modelo vigente.</p>
+            <p><Strong>Las métricas de XGBoost son las declaradas en el paquete recibido.</Strong> El paquete de inferencia no incorpora la matriz final de entrenamiento, las particiones ni las predicciones de test. La memoria documenta la secuencia de cuadernos y remite al repositorio del modelo. El histórico permite verificar sus filas y columnas, pero no reconstruir por sí solo la evaluación del modelo vigente.</p>
             <p><Strong>{predictor.columnas.length} variables de entrada.</Strong> Características y equipamiento de la vivienda, tres distancias y alquiler, delitos y vulnerabilidad del barrio. El precio anunciado es el objetivo. Las variables de barrio incluyen fuentes posteriores a 2018: la evaluación declarada no acredita validación temporal externa ni precisión en anuncios actuales.</p>
             <p>Los precios y las coordenadas de la fuente están perturbados por anonimización. El ajuste distrital a {INDEX_TARGET_YEAR} y la renta mensual derivada son escenarios; no son precios de cierre ni una validación independiente de alquiler.</p>
             <p><a href="https://github.com/maupeon/habitia-tfm/releases/tag/tfm-2026-09-16-r3" target="_blank" rel="noopener noreferrer" className="text-saffron-700 underline underline-offset-4">Modelo, memoria, anexos y evidencia de verificación ↗</a></p>
             <Collapsible summary="Antecedente LightGBM · evaluación de otro modelo">
-            <p className="mb-3">{modelResults.model_id} · revisión del 8 de septiembre de 2026. Estos conteos y métodos describen el experimento anterior; no son las particiones de XGBoost.</p>
+            <p className="mb-3">{modelResults.model_id} · estudio retrospectivo. Estos conteos y métodos describen el experimento anterior; no son las particiones de XGBoost.</p>
             <Table head={["Etapa del experimento LightGBM", "Registros"]}>
               <Row cells={["Fichero enriquecido recibido", formatNumber(modelResults.sample.input)]} />
               <Row cells={["Tras fusionar duplicados de enriquecimiento", "94.815"]} />

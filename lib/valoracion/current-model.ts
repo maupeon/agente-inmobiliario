@@ -1,6 +1,6 @@
 import type { PropertyValuation } from "@/types";
 
-/** Identidad del artefacto recibido en habitia_predictor el 16 de septiembre de 2026. */
+/** Identidad del artefacto de inferencia de habitia_predictor. */
 export const CURRENT_MODEL_ID = "habitIA-xgboost-2018-v3";
 export const CURRENT_MODEL_VERSION = "3.3.0";
 export const CURRENT_MODEL_SHA256 = "e5526aca6001741f24eb976dbd9607df131b3822b5b5a01b66c6c92af2a9d748";

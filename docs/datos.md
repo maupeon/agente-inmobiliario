@@ -77,7 +77,7 @@ La ficha conserva el precio mensual del anuncio. Cuando el predictor XGBoost v3 
 
 `renta_mensual_estimada = precio_estimado × factor_renta_mensual`
 
-La renta derivada no tiene validación independiente de alquiler ni intervalos calibrados. Fair compara anuncio y estimación mensual en una escala provisional, sin exigir bandas. Si el servicio no está disponible o se abstiene, se indica la ausencia de estimación. [Contrato del predictor](modelo-xgboost.md).
+La renta derivada no tiene validación independiente de alquiler ni intervalos calibrados. Fair compara anuncio y estimación mensual en una escala provisional, sin exigir bandas. Si el servicio no está disponible o se abstiene, se indica la ausencia de estimación. [Funcionamiento y API del predictor](modelo-xgboost.md).
 
 ## Metodología de Zone Score
 
