@@ -17,7 +17,7 @@
 
 ## Ajuste al límite de extensión
 
-- El contenido principal ocupa las páginas numeradas 1–19 y la bibliografía completa ocupa la página 20. Las portadas, los índices y los anexos quedan fuera de esas veinte páginas.
+- El contenido principal ocupa las páginas numeradas 1–19 y la bibliografía abreviada ocupa menos de media página en la página 20. Las referencias completas se conservan en el anexo 13. Las portadas, los índices y los anexos quedan fuera de esas veinte páginas.
 - El capítulo de la aplicación conserva la arquitectura, el recorrido de búsqueda, una explicación del asistente, el cálculo y las limitaciones del Score y las dos capturas de interfaz.
 - El catálogo de herramientas, el diagrama del asistente y los detalles de ejecución se han trasladado al anexo 14.3. Las capturas se han reducido del 90 % al 78 % del ancho de texto y se han eliminado espacios sobrantes a su alrededor.
 - Se mantienen el cuerpo de letra de 11 puntos, los márgenes, los resultados científicos, las conclusiones y las trece referencias bibliográficas. Se han comprobado la paginación, los índices, las referencias cruzadas y la maquetación del PDF compilado.
@@ -39,3 +39,11 @@ tectonic HabitIA_memoria.tex
 ```
 
 También puede utilizarse pdfLaTeX con dos pasadas. La carpeta `figuras/` debe acompañar siempre al archivo LaTeX. Los auxiliares de compilación están excluidos de Git.
+
+## Adecuación a la guía de entrega
+
+- Identificado el grupo como Equipo 7 en ambas portadas y en los README.
+- Abreviadas las trece referencias mediante enlaces sobre sus títulos, manteniendo letra de 11 puntos, márgenes y numeración. El bloque de bibliografía termina antes de la mitad de la página 20.
+- Incorporadas las referencias completas y las condiciones de uso de los datos al anexo 13. Se distinguen ODbL, CC BY, las condiciones del INE y las fuentes cuya autorización específica de redistribución no se ha acreditado.
+- Preparada la entrega limpia `Equipo_7_HabitIA.zip`, con una sola memoria PDF, el README de diseño Apple, el código, los artefactos, las condiciones de uso, las versiones y las huellas de los archivos. Los originales editables se conservan fuera del ZIP, en la carpeta de entrega final y en Git.
+- El generador `scripts/build_final_delivery.py` permite reconstruir el ZIP a partir de revisiones limpias de los dos repositorios y valida los artefactos. Los informes históricos incluidos en el código conservan su alcance original; no se presentan como una nueva ejecución de pruebas.
